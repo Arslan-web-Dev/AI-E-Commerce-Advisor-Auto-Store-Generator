@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "primary-container": "#00855d", "tertiary-fixed": "#6ffbbe", "tertiary-fixed-dim": "#4edea3", "on-tertiary-container": "#f5fff6", "secondary-container": "#dae2fd", "status-critical-bg": "#fff1f2", "status-warning": "#d97706", "surface-variant": "#d3e4fe", "inverse-primary": "#68dba9", "on-primary-fixed": "#002114", "on-surface": "#0b1c30", "surface-container-highest": "#d3e4fe", "surface-container-high": "#dce9ff", "inverse-surface": "#213145", "surface-card": "#ffffff", "text-muted": "#94a3b8", "on-tertiary-fixed-variant": "#005236", "on-primary-container": "#f5fff7", "primary-fixed-dim": "#68dba9", "status-warning-bg": "#fffbeb", "text-primary": "#0f172a", "on-secondary-container": "#5c647a", "surface-container": "#e5eeff", "status-positive": "#059669", "status-positive-bg": "#ecfdf5", "on-error-container": "#93000a", "primary-fixed": "#85f8c4", "on-primary": "#ffffff", "on-background": "#0b1c30", "outline": "#6d7a72", "on-primary-fixed-variant": "#005137", "tertiary": "#006947", "error-container": "#ffdad6", "on-surface-variant": "#3d4a42", "status-critical": "#e11d48", "outline-variant": "#bccac0", "on-error": "#ffffff", "inverse-on-surface": "#eaf1ff", "on-secondary-fixed-variant": "#3f465c", "secondary": "#565e74", "surface-bright": "#f8f9ff", "surface-dim": "#cbdbf5", "on-tertiary-fixed": "#002113", "secondary-fixed-dim": "#bec6e0", "on-secondary-fixed": "#131b2e", "background": "#f8f9ff", "surface-muted": "#f1f5f9", "on-secondary": "#ffffff", "error": "#ba1a1a", "surface-tint": "#006c4a", "status-positive-border": "#a7f3d0", "border-strong": "#cbd5e1", "on-tertiary": "#ffffff", "border-subtle": "#e2e8f0", "primary": "#006948", "secondary-fixed": "#dae2fd", "surface-container-lowest": "#ffffff", "surface-container-low": "#eff4ff", "tertiary-container": "#00855b", "canvas-bg": "#f8fafc", "surface": "#f8f9ff", "text-secondary": "#475569" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "space-xl": "2.5rem", "gutter-sm": "1rem", "gutter": "1.5rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "margin-sm": "1rem", "space-sm": "0.5rem", "margin": "2rem" }, "fontFamily": { "body-sm": ["Inter"], "label-md": ["Inter"], "body-md": ["Inter"], "headline-sm": ["Plus Jakarta Sans"], "metric-val": ["Plus Jakarta Sans"], "label-sm": ["Inter"], "headline-lg-mobile": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "headline-md": ["Plus Jakarta Sans"], "display-lg": ["Plus Jakarta Sans"] }, "fontSize": { "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.005em", "fontWeight": "400" }], "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "metric-val": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.025em", "fontWeight": "700" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-tertiary-fixed selection:text-on-tertiary-fixed"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-28 w-full px-margin flex flex-col justify-between pt-space-sm"><div class="flex items-center justify-between"><div class="flex items-center gap-space-md"><img alt="Brand logo. - Primary color: #10b981
+- Font: plusJakartaSans
+- Mode: dark
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VGObyPZ_dbebBd40gRJe9O4uuzlXT6XrvuqCT4rgweSiE3Jn0iU3P3BwBP8-L5breq3XsK1z2OwKZJWizJBzcmkbd_FHJSLDJtKr96PdJ-cXxayowVZlX0JT3_qmf7CX4G4bcsfDEjCHMSvQE4x36zzkxuW-gXG4TvAfpnCm_rzwgTgk26ml-MsdwsfBm5oIMu23CT6IOnadXyatIGFLZD-DITVwc9i34XyH1iilRTgAEHGJmJf3ZjaqQG"/><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">Hunza Harvest</span><span class="font-label-sm text-label-sm uppercase bg-surface-muted text-text-secondary px-space-xs py-0.5 rounded tracking-wider">Merchant Console</span></div><div class="h-4 w-px bg-border-subtle"></div><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-status-positive animate-pulse"></span>Live / Published</span><div class="hidden xl:flex items-center gap-1.5 text-text-secondary font-label-md text-label-md"><span class="text-text-muted">Admin</span><span class="material-symbols-outlined text-text-muted text-[14px]">chevron_right</span><span>Store Settings</span></div></div><div class="flex items-center gap-space-sm"><button class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-card text-text-primary font-label-md text-label-md hover:bg-surface-muted hover:text-on-surface shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">open_in_new</span>View Live Storefront</button><button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md shadow-[0_1px_3px_0_rgba(15,23,42,0.05)] hover:bg-primary-container hover:text-on-primary transition-all" type="button"><span class="material-symbols-outlined text-[18px]">add</span>Add New Product</button><div class="relative flex items-center justify-center"><button aria-label="Notifications" class="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:bg-surface-muted hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-status-critical"></span></button></div><div class="flex items-center gap-1.5 pl-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.08)]"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="material-symbols-outlined text-text-muted text-[16px] cursor-pointer hover:text-on-surface transition-colors">keyboard_arrow_down</span></div></div></div><nav class="flex items-center gap-space-lg overflow-x-auto pt-space-xs" data-active-classes="text-text-primary font-headline-sm border-b-2 border-primary"><a class="text-on-surface-variant font-label-md text-label-md pb-2.5 whitespace-nowrap transition-colors hover:text-on-surface" data-path="hunza-harvest-store-owner-admin-overview-desktop" href="#">Overview</a><a class="text-on-surface-variant font-label-md text-label-md pb-2.5 whitespace-nowrap transition-colors hover:text-on-surface" data-path="hunza-harvest-product-and-inventory-management-desktop" href="#">Products &amp; Inventory</a><a class="text-on-surface-variant font-label-md text-label-md pb-2.5 whitespace-nowrap transition-colors hover:text-on-surface" data-path="hunza-harvest-orders-and-cash-on-delivery-cod-fulfillment-board-desktop" href="#">Orders &amp; Fulfillment</a><a class="text-on-surface-variant font-label-md text-label-md pb-2.5 whitespace-nowrap transition-colors hover:text-on-surface" data-path="customers" href="#">Customers</a><a class="text-on-surface-variant font-label-md text-label-md pb-2.5 whitespace-nowrap transition-colors hover:text-on-surface" data-path="ai-tools-and-seo" href="#">AI Tools &amp; SEO</a><a class="text-on-surface-variant font-label-md text-label-md pb-2.5 whitespace-nowrap transition-colors hover:text-on-surface" data-path="theme-configurator" href="#">Theme Configurator</a><a class="text-on-surface-variant font-label-md text-label-md pb-2.5 whitespace-nowrap transition-colors hover:text-on-surface" data-path="hunza-harvest-store-settings-desktop" href="#">Store Settings</a></nav></div></header><main class="w-full pt-28 bg-canvas-bg min-h-screen"><div class="flex flex-col w-full">
+<!-- Interactive State Controller & Toast Notification Container -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-inverse-surface text-inverse-on-surface px-5 py-3 rounded-lg shadow-xl" id="save-toast">
+<span class="material-symbols-outlined text-primary-fixed text-[20px]">check_circle</span>
+<span class="font-body-md text-body-md text-inverse-on-surface font-medium" id="toast-message">Settings synchronized with Edge DB</span>
+</div>
+<!-- Workspace Sub-Header & Executive Actions -->
+<div class="w-full bg-surface-card border-b border-border-subtle sticky top-28 z-40">
+<div class="max-w-7xl mx-auto px-margin py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Merchant Console</span>
+<span class="text-text-muted">•</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Workspace / Settings</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Store Settings &amp; Automated SEO</h1>
+<p class="font-body-md text-body-md text-text-secondary mt-0.5">Manage store metadata, custom branding, search engine visibility, and multi-tenant edge routing.</p>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<!-- Live Edge Status Pill -->
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-status-positive-bg border border-status-positive-border text-status-positive font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-status-positive animate-pulse"></span>
+<span>All systems operational</span>
+<span class="text-text-muted text-[11px] font-normal">| 14s ago</span>
+</div>
+<button class="px-4 py-2 rounded-lg bg-surface-card border border-border-strong text-text-primary font-label-md text-label-md hover:bg-surface-muted transition-colors flex items-center gap-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]" onclick="handleDiscard()" type="button">
+<span class="material-symbols-outlined text-[16px] text-text-secondary">restart_alt</span>
+          Discard Changes
+        </button>
+<button class="px-5 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-all flex items-center gap-2 shadow-[0_2px_6px_rgba(0,105,72,0.2)]" id="save-btn" onclick="handleSave()" type="button">
+<span class="material-symbols-outlined text-[18px]" id="save-icon">cloud_upload</span>
+<span class="material-symbols-outlined text-[18px] animate-spin hidden" id="save-spinner">progress_activity</span>
+<span id="save-text">Save Settings Changes</span>
+</button>
+</div>
+</div>
+<!-- Executive Horizontal Tab Navigation Strip -->
+<div class="max-w-7xl mx-auto px-margin flex items-center gap-8 overflow-x-auto scrollbar-none border-t border-border-subtle pt-1">
+<button class="tab-button relative pb-3 pt-3 flex items-center gap-2 font-label-md text-label-md text-primary font-semibold border-b-2 border-primary transition-all" id="tab-btn-general" onclick="switchTab('general')" type="button">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+<span>General &amp; Branding</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary ml-0.5"></span>
+</button>
+<button class="tab-button relative pb-3 pt-3 flex items-center gap-2 font-label-md text-label-md text-text-secondary hover:text-text-primary border-b-2 border-transparent transition-all" id="tab-btn-seo" onclick="switchTab('seo')" type="button">
+<span class="material-symbols-outlined text-[18px]">travel_explore</span>
+<span>Automated SEO &amp; Social</span>
+<span class="px-2 py-0.5 rounded-full bg-status-positive-bg border border-status-positive-border text-status-positive font-label-sm text-label-sm font-bold">94/100</span>
+</button>
+<button class="tab-button relative pb-3 pt-3 flex items-center gap-2 font-label-md text-label-md text-text-secondary hover:text-text-primary border-b-2 border-transparent transition-all" id="tab-btn-theme" onclick="switchTab('theme')" type="button">
+<span class="material-symbols-outlined text-[18px]">palette</span>
+<span>Theme &amp; Custom Domain</span>
+<span class="flex items-center gap-1 font-label-sm text-label-sm text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+          Vercel Active
+        </span>
+</button>
+<button class="tab-button relative pb-3 pt-3 flex items-center gap-2 font-label-md text-label-md text-text-secondary hover:text-status-critical border-b-2 border-transparent transition-all" id="tab-btn-danger" onclick="switchTab('danger')" type="button">
+<span class="material-symbols-outlined text-[18px] text-text-muted group-hover:text-status-critical">warning</span>
+<span>Danger Zone &amp; Lifecycle</span>
+</button>
+</div>
+</div>
+<!-- Main Viewport Content Area -->
+<div class="max-w-7xl w-full mx-auto px-margin py-8">
+<!-- ========================================== -->
+<!-- TAB 1: GENERAL STORE PROFILE & BRANDING    -->
+<!-- ========================================== -->
+<div class="tab-pane flex flex-col gap-6" id="tab-content-general">
+<!-- Top 2-Column Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left: Core Metadata Form (7 Cols) -->
+<div class="lg:col-span-7 bg-surface-card rounded-xl border border-border-subtle p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] flex flex-col gap-5">
+<div class="flex items-center justify-between border-b border-border-subtle pb-4">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-muted flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">badge</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Store Identity &amp; Contact Details</h2>
+<p class="font-body-sm text-body-sm text-text-muted">Public metadata displayed across checkout and buyer invoices.</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-surface-muted text-text-secondary uppercase">Verified Storefront</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex flex-col gap-1.5 md:col-span-2">
+<label class="font-label-md text-label-md text-text-primary font-semibold flex items-center justify-between">
+<span>Store Name <span class="text-status-critical">*</span></span>
+<span class="font-label-sm text-label-sm text-text-muted">Slug: /hunzaharvest</span>
+</label>
+<input class="w-full h-10 px-3.5 bg-surface-card border border-border-strong rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="store-name-input" type="text" value="Hunza Harvest"/>
+</div>
+<div class="flex flex-col gap-1.5 md:col-span-2">
+<label class="font-label-md text-label-md text-text-primary font-semibold">Store Tagline / Apothecary Mission</label>
+<input class="w-full h-10 px-3.5 bg-surface-card border border-border-strong rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" type="text" value="High-Altitude Karakoram Apothecary &amp; Pure Cold-Pressed Botanicals"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-semibold flex items-center gap-1">
+<span>Public Support Email</span>
+<span class="material-symbols-outlined text-[15px] text-status-positive" title="Domain verified">verified</span>
+</label>
+<div class="relative">
+<input class="w-full h-10 pl-9 pr-3.5 bg-surface-card border border-border-strong rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" type="email" value="support@hunzaharvest.pk"/>
+<span class="material-symbols-outlined text-text-muted absolute left-2.5 top-2.5 text-[18px]">mail</span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-semibold flex items-center justify-between">
+<span>WhatsApp Customer Concierge</span>
+<span class="font-label-sm text-label-sm text-status-positive flex items-center gap-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+                  Active on Checkout
+                </span>
+</label>
+<div class="relative flex items-center">
+<div class="absolute left-3 flex items-center gap-1 pointer-events-none">
+<span class="text-[14px]">🇵🇰</span>
+<span class="font-body-sm text-body-sm text-text-muted">+92</span>
+</div>
+<input class="w-full h-10 pl-16 pr-3.5 bg-surface-card border border-border-strong rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" type="tel" value="300 1234567"/>
+</div>
+</div>
+<div class="flex flex-col gap-1.5 md:col-span-2">
+<label class="font-label-md text-label-md text-text-primary font-semibold">Primary Fulfillment Hub / Registered Facility</label>
+<div class="relative">
+<input class="w-full h-10 pl-9 pr-3.5 bg-surface-card border border-border-strong rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" type="text" value="Plaza 42, Main Boulevard, Gulberg III, Lahore, Punjab, Pakistan"/>
+<span class="material-symbols-outlined text-text-muted absolute left-2.5 top-2.5 text-[18px]">location_on</span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-semibold">Store Base Currency</label>
+<select class="w-full h-10 px-3 bg-surface-card border border-border-strong rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+<option selected="">Pakistani Rupee (PKR - ₨)</option>
+<option>US Dollar (USD - $)</option>
+<option>UAE Dirham (AED - د.إ)</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-semibold">Store Timezone</label>
+<select class="w-full h-10 px-3 bg-surface-card border border-border-strong rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+<option selected="">Asia/Karachi (PKT, UTC+5)</option>
+<option>Asia/Dubai (GST, UTC+4)</option>
+<option>Europe/London (GMT, UTC+0)</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Right: Branding Assets Dropzone & Favicon (5 Cols) -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<!-- Master Logo Box -->
+<div class="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Official Storefront Logo</h3>
+<p class="font-body-sm text-body-sm text-text-muted">Header, checkout &amp; automated invoices</p>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-muted text-text-secondary">512×512 PNG</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-muted border border-border-subtle flex items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg bg-surface-card border border-border-subtle flex items-center justify-center p-2 shadow-sm">
+<img alt="Hunza Harvest Logo" class="w-full h-full object-contain" data-alt="Hunza Harvest minimal botanical brand icon representing an emerald green mountain leaf against a pure crisp background, luxury organic e-commerce brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmSG-sEAdk-6u2zyDdVNANs8ufnt1S9aFRBQdcSllekyiqXWbHlli_kWOQHTqPxA3XZAPigeaDmdx_0CcTYGAxq1rAO-Q01YCzD_AxE_ytvTGhwhqrGdZOXTXh_3GUCG3AtpMP2pTnPlIumdWvDs_YSnmRxZfPiHB8L35XvGuWrGVs3X02cnUYQQaW6cAJ9mN0pc8KlfruyjFRtymQ8cjSPJ0_UiTAcr5hHcbY3VWSRCmNy-jk6w219Q"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-semibold">hunza-logo-master.png</span>
+<span class="font-body-sm text-body-sm text-text-muted">142 KB • High DPI Ready</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<button class="p-2 rounded-lg text-text-secondary hover:bg-surface-card hover:text-primary transition-colors" title="Download master asset" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<button class="p-2 rounded-lg text-text-secondary hover:bg-status-critical-bg hover:text-status-critical transition-colors" title="Remove logo" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Upload drop area -->
+<label class="border-2 border-dashed border-border-strong hover:border-primary rounded-xl p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-surface-card hover:bg-surface-muted/50 group">
+<span class="material-symbols-outlined text-text-muted group-hover:text-primary text-[28px] mb-1 transition-colors">cloud_upload</span>
+<span class="font-label-md text-label-md text-text-primary font-semibold">Click to upload or drag &amp; drop</span>
+<span class="font-body-sm text-body-sm text-text-muted mt-0.5">SVG, PNG, or WebP (Max 2MB, Min 400x400px)</span>
+<input accept="image/*" class="hidden" type="file"/>
+</label>
+</div>
+<!-- Favicon Container & Browser Tab Simulation -->
+<div class="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Browser Favicon &amp; Tab Preview</h3>
+<p class="font-body-sm text-body-sm text-text-muted">Visible in buyer browser tabs and bookmarks</p>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-muted text-text-secondary">32×32 ICO</span>
+</div>
+<!-- Realistic Browser Tab Mockup -->
+<div class="w-full bg-surface-muted rounded-lg p-2.5 border border-border-subtle">
+<div class="max-w-[280px] bg-surface-card rounded-md shadow-sm border border-border-subtle px-3 py-1.5 flex items-center gap-2">
+<div class="w-4 h-4 rounded-sm bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[11px] text-on-primary">spa</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-primary truncate font-medium">Hunza Harvest | Pure Himalayan Sidr Honey</span>
+<span class="material-symbols-outlined text-[13px] text-text-muted ml-auto cursor-pointer">close</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-body-sm text-body-sm text-text-secondary">32x32 transparent PNG or .ico</span>
+<button class="px-3.5 py-1.5 rounded-lg border border-border-strong text-text-primary hover:bg-surface-muted font-label-md text-label-md transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[16px]">upload_file</span>
+                Update Favicon
+              </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Card: Store Operational Status & Maintenance Mode -->
+<div class="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)]">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-subtle pb-5">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-xl bg-status-positive-bg text-status-positive flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">public</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Store Operational Visibility</h3>
+<span class="px-2 py-0.5 rounded-full bg-status-positive-bg border border-status-positive-border text-status-positive font-label-sm text-label-sm uppercase font-semibold" id="visibility-badge">Live / Published</span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary mt-1">Control public access to your storefront catalog, shopping cart, and Cash on Delivery checkout pipeline.</p>
+</div>
+</div>
+<!-- Master Toggle Switch -->
+<div class="flex items-center gap-3">
+<span class="font-label-md text-label-md text-text-muted" id="toggle-label">Accepting Orders</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="store-visibility-toggle" onchange="toggleStoreVisibility(this)" type="checkbox"/>
+<div class="w-14 h-7 bg-border-strong peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-border-strong after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+<!-- Conditional Maintenance Box -->
+<div class="mt-5 p-4 rounded-xl bg-surface-muted border border-border-subtle flex flex-col gap-4" id="maintenance-panel">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-status-warning text-[20px] mt-0.5">info</span>
+<div>
+<span class="font-label-md text-label-md text-text-primary font-semibold">Customer-Facing Announcement Banner</span>
+<p class="font-body-sm text-body-sm text-text-muted">Displayed whenever the catalog is in maintenance or restocking pause mode.</p>
+</div>
+</div>
+<textarea class="w-full p-3 bg-surface-card border border-border-strong rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-y" rows="3">We are currently replenishing our autumn wild sidr honey batch from Gilgit-Baltistan. Cash on Delivery orders reopen shortly. For urgent inquiries, WhatsApp our concierge at +92 300 1234567.</textarea>
+<div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-text-secondary">Expected Catalog Resumption:</span>
+<input class="px-2.5 py-1 bg-surface-card border border-border-strong rounded text-text-primary font-label-md text-label-md focus:outline-none focus:border-primary" type="datetime-local" value="2025-11-20T10:00"/>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Estimated restock: sidr honey, shilajit, walnut oil</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- TAB 2: AUTOMATED SEO & SOCIAL SHARING CARDS-->
+<!-- ========================================== -->
+<div class="tab-pane hidden flex flex-col gap-6" id="tab-content-seo">
+<!-- AI Banner Bar -->
+<div class="bg-gradient-to-r from-primary to-primary-container text-on-primary rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-on-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed text-[24px]">auto_awesome</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline-sm text-headline-sm text-on-primary">Algorithmic SEO Engine v3.4</h3>
+<span class="px-2 py-0.5 rounded bg-on-primary/20 text-on-primary font-label-sm text-label-sm">High Rank Readiness</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-primary/80">Analyzed 48 published catalog SKUs, verified PCSIR lab reports, and nationwide COD keywords.</p>
+</div>
+</div>
+<button class="px-4 py-2.5 rounded-lg bg-on-primary text-primary font-label-md text-label-md font-semibold hover:bg-surface-bright transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap" id="ai-regen-btn" onclick="regenerateSeoWithAi()" type="button">
+<span class="material-symbols-outlined text-[18px]">magic_button</span>
+<span>✨ Re-Generate with AI (48 SKUs)</span>
+</button>
+</div>
+<!-- Real-Time Google SERP Simulator Card -->
+<div class="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] flex flex-col gap-4">
+<div class="flex items-center justify-between border-b border-border-subtle pb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">search</span>
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Live Google Search Engine Result Preview (SERP)</h3>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-text-muted">Desktop Snippet Preview</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-status-positive-bg text-status-positive font-semibold">100% Mobile Ready</span>
+</div>
+</div>
+<!-- Google SERP Visual Container -->
+<div class="p-5 rounded-xl bg-surface-bright border border-border-subtle max-w-3xl">
+<!-- Google URL/Breadcrumb -->
+<div class="flex items-center gap-2 text-[12px] font-body-sm text-[#202124] mb-1">
+<div class="w-6 h-6 rounded-full bg-surface-muted flex items-center justify-center text-primary text-[11px] font-bold">
+              HH
+            </div>
+<div class="flex flex-col">
+<span class="font-medium text-text-primary leading-tight">Hunza Harvest Pakistan</span>
+<span class="text-text-muted text-[11px]">https://hunzaharvest.pk › pure-botanicals</span>
+</div>
+<span class="material-symbols-outlined text-text-muted text-[14px] ml-auto">more_vert</span>
+</div>
+<!-- Blue Meta Title (Live updated via JS) -->
+<h4 class="text-[19px] leading-6 text-[#1a0dab] hover:underline cursor-pointer font-medium mt-1 font-['Roboto',sans-serif]" id="serp-preview-title">
+            Hunza Harvest | 100% Pure Himalayan Sidr Honey, Shilajit &amp; Cold-Pressed Oils
+          </h4>
+<!-- Rich Snippet Star Ratings -->
+<div class="flex items-center gap-1.5 text-[12px] text-[#70757a] mt-1">
+<span class="text-[#fbbc04]">★★★★★</span>
+<span class="font-semibold text-[#3c4043]">4.9</span>
+<span>(420 reviews)</span>
+<span>•</span>
+<span class="text-status-positive font-medium">In stock</span>
+<span>•</span>
+<span>Nationwide COD</span>
+</div>
+<!-- Meta Description (Live updated via JS) -->
+<p class="text-[14px] leading-5 text-[#4d5156] mt-1 font-['Roboto',sans-serif]" id="serp-preview-desc">
+            Ethically harvested single-origin wild mountain honey and cold-pressed botanicals from Gilgit-Baltistan. Certified PCSIR laboratory pure with nationwide Cash on Delivery across Pakistan.
+          </p>
+</div>
+</div>
+<!-- SEO Form Inputs (2-Column Grid) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Meta Fields (7 Cols) -->
+<div class="lg:col-span-7 bg-surface-card rounded-xl border border-border-subtle p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] flex flex-col gap-5">
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Search Meta Tag Configuration</h3>
+<!-- Meta Title Field with Real-time Count -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-text-primary font-semibold">Storefront Meta Title</label>
+<span class="font-label-sm text-label-sm text-status-positive font-medium" id="title-counter">58 / 60 characters (Optimal)</span>
+</div>
+<input class="w-full h-10 px-3.5 bg-surface-card border border-border-strong rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="meta-title-input" oninput="updateSeoPreview()" type="text" value="Hunza Harvest | 100% Pure Himalayan Sidr Honey &amp; Shilajit"/>
+<span class="font-body-sm text-body-sm text-text-muted">Target under 60 characters to avoid search truncation.</span>
+</div>
+<!-- Meta Description Field with Real-time Count -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-text-primary font-semibold">Meta Description</label>
+<span class="font-label-sm text-label-sm text-status-positive font-medium" id="desc-counter">146 / 160 characters (Optimal)</span>
+</div>
+<textarea class="w-full p-3 bg-surface-card border border-border-strong rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="meta-desc-input" oninput="updateSeoPreview()" rows="3">Ethically harvested single-origin wild mountain honey and cold-pressed botanicals from Gilgit-Baltistan. Certified PCSIR laboratory pure with nationwide Cash on Delivery.</textarea>
+<span class="font-body-sm text-body-sm text-text-muted">Appears in Google snippets &amp; WhatsApp preview descriptions.</span>
+</div>
+<!-- Focus Keyword Cloud -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-text-primary font-semibold">Active Ranking Keywords (High Volume)</label>
+<div class="flex flex-wrap gap-2 pt-1" id="keywords-container">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-muted border border-border-subtle font-body-sm text-body-sm text-text-primary">
+                Himalayan Sidr Honey
+                <button class="text-text-muted hover:text-status-critical" onclick="this.parentElement.remove()" type="button">×</button>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-muted border border-border-subtle font-body-sm text-body-sm text-text-primary">
+                Organic Shilajit Pakistan
+                <button class="text-text-muted hover:text-status-critical" onclick="this.parentElement.remove()" type="button">×</button>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-muted border border-border-subtle font-body-sm text-body-sm text-text-primary">
+                Cold-Pressed Almond Oil
+                <button class="text-text-muted hover:text-status-critical" onclick="this.parentElement.remove()" type="button">×</button>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-muted border border-border-subtle font-body-sm text-body-sm text-text-primary">
+                PCSIR Lab Certified
+                <button class="text-text-muted hover:text-status-critical" onclick="this.parentElement.remove()" type="button">×</button>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-muted border border-border-subtle font-body-sm text-body-sm text-text-primary">
+                COD Lahore Islamabad Karachi
+                <button class="text-text-muted hover:text-status-critical" onclick="this.parentElement.remove()" type="button">×</button>
+</span>
+<button class="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-dashed border-border-strong text-text-secondary hover:text-primary hover:border-primary font-body-sm text-body-sm transition-colors" onclick="addKeywordPrompt()" type="button">
+<span class="material-symbols-outlined text-[14px]">add</span>
+                Add Keyword
+              </button>
+</div>
+</div>
+</div>
+<!-- Right Column: Social Share & OpenGraph Banner Preview (5 Cols) -->
+<div class="lg:col-span-5 bg-surface-card rounded-xl border border-border-subtle p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Social OpenGraph Card (OG)</h3>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-muted text-text-secondary">1200×630 Target</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">How your store link renders when shared on WhatsApp, Facebook, LinkedIn, or iMessage.</p>
+<!-- Social Share Preview Mockup -->
+<div class="rounded-xl border border-border-subtle overflow-hidden bg-surface-muted shadow-sm">
+<div class="w-full h-44 relative overflow-hidden bg-surface-dim">
+<img alt="Hunza Harvest Social OG Image" class="w-full h-full object-cover" data-alt="High-altitude Karakoram mountain apiary landscape with wild sidr flowers and pure Himalayan honey harvesting in Gilgit-Baltistan, natural morning sunlight, luxury organic aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmLwhx0UbmoZl4RwH9lhNVDqrjdanqz70t7UejDCveJRfH1viInmaVQPMwTy9wDRzI9P-5k8wGshcLzx6nir__020ex6kOfS1ejsFf3jVeftP7tVuYURdkNNdRdBbjzJA0PhRYsBR0WKf5mbsOz1nbkDTaRNKHeL5VH0xgjm-Hsu_lSjaw6go5PW_aAPdT8FBRqAjmgeE40k1X9TCaybgsYA9FZdZAbt0h0MI0Lctn7QOQ18L1UG3KKg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex items-end p-4">
+<span class="font-label-sm text-label-sm text-on-primary bg-primary/90 px-2.5 py-1 rounded backdrop-blur-sm">Hunza Harvest Apothecary</span>
+</div>
+</div>
+<div class="p-3.5 bg-surface-card flex flex-col gap-1 border-t border-border-subtle">
+<span class="font-label-sm text-label-sm uppercase text-text-muted">hunzaharvest.pk</span>
+<span class="font-headline-sm text-headline-sm text-text-primary line-clamp-1" id="og-preview-title">Hunza Harvest - High-Altitude Karakoram Botanicals</span>
+<span class="font-body-sm text-body-sm text-text-secondary line-clamp-2" id="og-preview-desc">Pure mountain sidr honey, shilajit &amp; cold-pressed oils. Free Cash on Delivery across Pakistan.</span>
+</div>
+</div>
+<div class="flex items-center gap-2 pt-2">
+<button class="w-full py-2 px-3 rounded-lg border border-border-strong text-text-primary font-label-md text-label-md hover:bg-surface-muted transition-colors flex items-center justify-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[18px]">add_photo_alternate</span>
+              Upload Custom 1200×630 OG Image
+            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- TAB 3: THEME & CUSTOM DOMAIN SETTINGS      -->
+<!-- ========================================== -->
+<div class="tab-pane hidden flex flex-col gap-6" id="tab-content-theme">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Theme Configuration Card (6 Cols) -->
+<div class="lg:col-span-6 bg-surface-card rounded-xl border border-border-subtle p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] flex flex-col gap-5">
+<div class="flex items-center justify-between border-b border-border-subtle pb-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-muted flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">brush</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Theme &amp; Visual Design System</h3>
+<p class="font-body-sm text-body-sm text-text-muted">Current storefront palette and visual layout style</p>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold">Active</span>
+</div>
+<!-- Active Theme Preview Mini Banner -->
+<div class="p-4 rounded-xl bg-surface-muted border border-border-subtle flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-text-primary">Organic Herbalist Apothecary Theme</span>
+<p class="font-body-sm text-body-sm text-text-muted">Configured via Feasibility Advisor MCQ Engine</p>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-card text-text-secondary border border-border-subtle">v2.1</span>
+</div>
+<!-- Palette Swatches -->
+<div class="flex items-center gap-3 pt-1">
+<div class="flex items-center gap-1.5">
+<div class="w-6 h-6 rounded-md bg-[#006948] border border-border-subtle shadow-xs" title="Forest Emerald (#006948)"></div>
+<span class="font-label-sm text-label-sm text-text-secondary">Emerald</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-6 h-6 rounded-md bg-[#059669] border border-border-subtle shadow-xs" title="Sage Vibrant (#059669)"></div>
+<span class="font-label-sm text-label-sm text-text-secondary">Sage</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-6 h-6 rounded-md bg-[#0f172a] border border-border-subtle shadow-xs" title="Deep Slate (#0f172a)"></div>
+<span class="font-label-sm text-label-sm text-text-secondary">Slate</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-6 h-6 rounded-md bg-[#f8f9ff] border border-border-subtle shadow-xs" title="Cool Canvas (#f8f9ff)"></div>
+<span class="font-label-sm text-label-sm text-text-secondary">Canvas</span>
+</div>
+</div>
+</div>
+<!-- Density Switcher -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-text-primary font-semibold">Storefront Layout Density</label>
+<div class="grid grid-cols-2 gap-3">
+<label class="border-2 border-primary bg-primary/5 rounded-xl p-3.5 flex items-center gap-3 cursor-pointer">
+<input checked="" class="text-primary focus:ring-primary h-4 w-4" name="density" type="radio"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-semibold">Standard Commercial</span>
+<span class="font-body-sm text-body-sm text-text-muted">Generous spacing, card shadows</span>
+</div>
+</label>
+<label class="border border-border-strong rounded-xl p-3.5 flex items-center gap-3 cursor-pointer hover:bg-surface-muted transition-colors">
+<input class="text-primary focus:ring-primary h-4 w-4" name="density" type="radio"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-semibold">High-Density Catalogue</span>
+<span class="font-body-sm text-body-sm text-text-muted">Compact tiles, max items above fold</span>
+</div>
+</label>
+</div>
+</div>
+<div class="pt-2">
+<button class="w-full py-2.5 px-4 rounded-lg bg-surface-muted hover:bg-border-subtle text-text-primary font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+              Re-run MCQ Theme Configurator (Module 7)
+            </button>
+<span class="block text-center font-body-sm text-body-sm text-text-muted mt-2">Re-running theme wizard will not overwrite products, categories, or orders.</span>
+</div>
+</div>
+<!-- Custom Domain & Edge Routing Status (6 Cols) -->
+<div class="lg:col-span-6 bg-surface-card rounded-xl border border-border-subtle p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] flex flex-col gap-5">
+<div class="flex items-center justify-between border-b border-border-subtle pb-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-muted flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">dns</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Multi-Tenant Domain &amp; Edge DNS</h3>
+<p class="font-body-sm text-body-sm text-text-muted">Global edge CDN routing powered by Vercel</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold">
+<span class="w-2 h-2 rounded-full bg-status-positive"></span>
+              SSL Active
+            </span>
+</div>
+<!-- Primary Domain Info -->
+<div class="flex flex-col gap-3">
+<div class="p-4 rounded-xl bg-surface-bright border border-border-subtle flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-status-positive-bg text-status-positive flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-text-primary">hunzaharvest.pk</span>
+<span class="font-body-sm text-body-sm text-text-muted">Primary Apex Domain • Let's Encrypt 256-bit</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-status-positive-bg text-status-positive uppercase font-bold">Connected</span>
+</div>
+<!-- Technical Edge DNS Table -->
+<div class="border border-border-subtle rounded-xl overflow-hidden text-body-sm">
+<div class="bg-surface-muted px-4 py-2.5 border-b border-border-subtle flex items-center justify-between font-label-sm text-label-sm text-text-secondary uppercase">
+<span>DNS Record</span>
+<span>Target / Value</span>
+<span>Status</span>
+</div>
+<div class="px-4 py-3 flex items-center justify-between border-b border-border-subtle font-mono text-[12px]">
+<div class="flex items-center gap-2">
+<span class="font-bold text-text-primary">A Record</span>
+<span class="text-text-muted">@</span>
+</div>
+<span class="text-text-primary">76.76.21.21</span>
+<span class="text-status-positive font-sans font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check</span> Valid
+                </span>
+</div>
+<div class="px-4 py-3 flex items-center justify-between border-b border-border-subtle font-mono text-[12px]">
+<div class="flex items-center gap-2">
+<span class="font-bold text-text-primary">CNAME</span>
+<span class="text-text-muted">www</span>
+</div>
+<span class="text-text-primary">cname.vercel-dns.com</span>
+<span class="text-status-positive font-sans font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check</span> Valid
+                </span>
+</div>
+<div class="px-4 py-3 flex items-center justify-between font-mono text-[12px]">
+<div class="flex items-center gap-2">
+<span class="font-bold text-text-primary">Fallback Subdomain</span>
+</div>
+<span class="text-text-muted">hunzaharvest.feasibilityadvisor.com</span>
+<span class="text-text-secondary font-sans font-medium">301 Redirect</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-2">
+<button class="flex-1 py-2 px-3 rounded-lg border border-border-strong text-text-primary hover:bg-surface-muted font-label-md text-label-md transition-colors flex items-center justify-center gap-1.5" id="flush-cache-btn" onclick="flushEdgeCache()" type="button">
+<span class="material-symbols-outlined text-[16px]">cached</span>
+              Flush Edge Cache (8 Nodes)
+            </button>
+<button class="py-2 px-4 rounded-lg bg-surface-muted text-text-primary hover:bg-border-subtle font-label-md text-label-md transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+              Add Domain
+            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- TAB 4: DANGER ZONE & STORE LIFECYCLE       -->
+<!-- ========================================== -->
+<div class="tab-pane hidden flex flex-col gap-6" id="tab-content-danger">
+<div class="bg-status-critical-bg border border-red-200 rounded-xl p-6 shadow-sm flex flex-col gap-5 max-w-4xl">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-red-100 text-status-critical flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[28px]">crisis_alert</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-status-critical font-bold">Unpublish or Permanently Delete Hunza Harvest</h3>
+<p class="font-body-md text-body-md text-text-secondary mt-1">
+              Actions taken in this panel impact live customer orders, PCSIR lab purity certificates, active domain routing, and all 48 inventory items stored in the Supabase PostgreSQL Edge cluster.
+            </p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-card border border-red-100 flex flex-col gap-4">
+<div class="flex items-center justify-between border-b border-border-subtle pb-3">
+<div>
+<span class="font-headline-sm text-headline-sm text-text-primary">Temporarily Unpublish Storefront</span>
+<p class="font-body-sm text-body-sm text-text-muted">Take catalog offline immediately. Existing completed orders and customer accounts remain accessible.</p>
+</div>
+<button class="px-4 py-2 rounded-lg border border-status-warning text-status-warning hover:bg-status-warning-bg font-label-md text-label-md font-semibold transition-colors" type="button">
+              Unpublish Storefront
+            </button>
+</div>
+<div class="flex flex-col gap-3 pt-2">
+<span class="font-headline-sm text-headline-sm text-status-critical">Permanently Delete Storefront &amp; Cascade Database Records</span>
+<p class="font-body-sm text-body-sm text-text-secondary">
+              This action cannot be undone. All custom domain binds, customer COD records, product media assets, and search indexing caches will be irrevocably purged.
+            </p>
+<div class="flex flex-col gap-3 mt-2">
+<label class="flex items-start gap-2.5 cursor-pointer">
+<input class="mt-1 h-4 w-4 rounded border-border-strong text-status-critical focus:ring-status-critical" id="danger-confirm-check" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-text-primary">I understand that all 48 Hunza Harvest botanicals, Cash on Delivery courier bindings, and customer records will be deleted immediately.</span>
+</label>
+<div class="flex flex-col sm:flex-row gap-3 items-center">
+<input class="flex-1 w-full h-10 px-3.5 bg-surface-card border border-red-300 rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:border-status-critical focus:ring-2 focus:ring-status-critical/20" id="danger-password-input" placeholder="Enter merchant master password to confirm" type="password"/>
+<button class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-status-critical text-on-error font-label-md text-label-md font-semibold hover:bg-red-700 transition-colors shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap" onclick="handleDangerDelete()" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+                  Permanently Delete Store
+                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function switchTab(tabId) {
+    const tabs = ['general', 'seo', 'theme', 'danger'];
+    tabs.forEach(t => {
+      const pane = document.getElementById(`tab-content-${t}`);
+      const btn = document.getElementById(`tab-btn-${t}`);
+      if (!pane || !btn) return;
+
+      if (t === tabId) {
+        pane.classList.remove('hidden');
+        btn.classList.add('text-primary', 'font-semibold', 'border-primary');
+        btn.classList.remove('text-text-secondary', 'border-transparent');
+      } else {
+        pane.classList.add('hidden');
+        btn.classList.remove('text-primary', 'font-semibold', 'border-primary');
+        btn.classList.add('text-text-secondary', 'border-transparent');
+      }
+    });
+  }
+
+  function updateSeoPreview() {
+    const titleInput = document.getElementById('meta-title-input');
+    const descInput = document.getElementById('meta-desc-input');
+    const serpTitle = document.getElementById('serp-preview-title');
+    const serpDesc = document.getElementById('serp-preview-desc');
+    const ogTitle = document.getElementById('og-preview-title');
+    const ogDesc = document.getElementById('og-preview-desc');
+    const titleCounter = document.getElementById('title-counter');
+    const descCounter = document.getElementById('desc-counter');
+
+    if (titleInput && serpTitle) {
+      const val = titleInput.value.trim() || 'Hunza Harvest | Storefront';
+      serpTitle.textContent = val;
+      if (ogTitle) ogTitle.textContent = val;
+      
+      const len = titleInput.value.length;
+      if (titleCounter) {
+        titleCounter.textContent = `${len} / 60 characters (${len <= 60 ? 'Optimal' : 'Too Long'})`;
+        titleCounter.className = len <= 60 
+          ? 'font-label-sm text-label-sm text-status-positive font-medium' 
+          : 'font-label-sm text-label-sm text-status-warning font-medium';
+      }
+    }
+
+    if (descInput && serpDesc) {
+      const val = descInput.value.trim() || 'Organic herbal products from Hunza Valley.';
+      serpDesc.textContent = val;
+      if (ogDesc) ogDesc.textContent = val;
+
+      const len = descInput.value.length;
+      if (descCounter) {
+        descCounter.textContent = `${len} / 160 characters (${len <= 160 ? 'Optimal' : 'Too Long'})`;
+        descCounter.className = len <= 160 
+          ? 'font-label-sm text-label-sm text-status-positive font-medium' 
+          : 'font-label-sm text-label-sm text-status-warning font-medium';
+      }
+    }
+  }
+
+  function toggleStoreVisibility(checkbox) {
+    const badge = document.getElementById('visibility-badge');
+    const label = document.getElementById('toggle-label');
+    const panel = document.getElementById('maintenance-panel');
+
+    if (checkbox.checked) {
+      badge.textContent = 'Live / Published';
+      badge.className = 'px-2 py-0.5 rounded-full bg-status-positive-bg border border-status-positive-border text-status-positive font-label-sm text-label-sm uppercase font-semibold';
+      label.textContent = 'Accepting Orders';
+      showToast('Storefront is live and processing orders.');
+    } else {
+      badge.textContent = 'Maintenance Mode';
+      badge.className = 'px-2 py-0.5 rounded-full bg-status-warning-bg border border-amber-200 text-status-warning font-label-sm text-label-sm uppercase font-semibold';
+      label.textContent = 'Catalog Paused';
+      showToast('Store switched to Maintenance Mode banner.');
+    }
+  }
+
+  function handleSave() {
+    const saveBtn = document.getElementById('save-btn');
+    const saveIcon = document.getElementById('save-icon');
+    const saveSpinner = document.getElementById('save-spinner');
+    const saveText = document.getElementById('save-text');
+
+    saveIcon.classList.add('hidden');
+    saveSpinner.classList.remove('hidden');
+    saveText.textContent = 'Synchronizing...';
+    saveBtn.disabled = true;
+
+    setTimeout(() => {
+      saveIcon.classList.remove('hidden');
+      saveSpinner.classList.add('hidden');
+      saveText.textContent = 'Save Settings Changes';
+      saveBtn.disabled = false;
+      showToast('All settings successfully saved to Supabase Edge DB!');
+    }, 900);
+  }
+
+  function handleDiscard() {
+    showToast('Changes discarded. Restored last deployed snapshot.');
+  }
+
+  function regenerateSeoWithAi() {
+    const regenBtn = document.getElementById('ai-regen-btn');
+    const originalText = regenBtn.innerHTML;
+    regenBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span><span>Analyzing 48 SKUs...</span>';
+    regenBtn.disabled = true;
+
+    setTimeout(() => {
+      const titleInput = document.getElementById('meta-title-input');
+      const descInput = document.getElementById('meta-desc-input');
+      if (titleInput && descInput) {
+        titleInput.value = "Hunza Harvest | Pure Wild Sidr Honey, Salajeet & Organic Oils";
+        descInput.value = "Direct from Karakoram apiaries: 100% lab-certified raw Sidr honey, Himalayan shilajit & cold-pressed oils. Free Cash on Delivery across Pakistan.";
+        updateSeoPreview();
+      }
+      regenBtn.innerHTML = originalText;
+      regenBtn.disabled = false;
+      showToast('AI successfully synthesized optimized meta titles from product SKUs!');
+    }, 1200);
+  }
+
+  function flushEdgeCache() {
+    const btn = document.getElementById('flush-cache-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> Flushing 8 nodes...';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.disabled = false;
+      showToast('Edge cache purged globally across Karachi, Dubai & Frankfurt nodes.');
+    }, 800);
+  }
+
+  function addKeywordPrompt() {
+    const container = document.getElementById('keywords-container');
+    const keyword = prompt('Enter a new search keyword or query phrase:');
+    if (keyword && keyword.trim()) {
+      const span = document.createElement('span');
+      span.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-muted border border-border-subtle font-body-sm text-body-sm text-text-primary';
+      span.innerHTML = `${keyword.trim()} <button type="button" onclick="this.parentElement.remove()" class="text-text-muted hover:text-status-critical">×</button>`;
+      container.insertBefore(span, container.lastElementChild);
+      showToast(`Added keyword "${keyword.trim()}"`);
+    }
+  }
+
+  function handleDangerDelete() {
+    const check = document.getElementById('danger-confirm-check');
+    const pass = document.getElementById('danger-password-input');
+    if (!check.checked) {
+      alert('Please check the confirmation box acknowledging inventory removal.');
+      return;
+    }
+    if (!pass.value.trim()) {
+      alert('Please enter your merchant password to verify this action.');
+      return;
+    }
+    alert('Security verification failed: Demonstration sandbox mode prevents storefront cascade deletion.');
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('save-toast');
+    const label = document.getElementById('toast-message');
+    if (!toast || !label) return;
+    label.textContent = msg;
+    toast.classList.remove('translate-y-24', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+
+    setTimeout(() => {
+      toast.classList.add('translate-y-24', 'opacity-0');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 3200);
+  }
+</script></main><footer class="w-full bg-surface-card py-space-sm shadow-[0_-1px_6px_rgba(0,0,0,0.02)]"><div class="w-full px-margin flex flex-wrap items-center justify-between gap-space-sm font-label-sm text-label-sm text-text-secondary"><div class="flex items-center gap-space-sm"><span class="flex items-center gap-1 text-status-positive font-medium"><span class="material-symbols-outlined text-[15px]">bolt</span>Supabase Edge DB: Connected (8ms)</span><span class="text-text-muted">•</span><span>Vercel Subdomain Routing: Active (<code class="font-mono text-text-primary bg-surface-muted px-1.5 py-0.5 rounded">hunzaharvest.pk</code>)</span><span class="text-text-muted">•</span><span class="text-text-muted">Last synced 20s ago</span></div><div class="flex items-center gap-space-md text-text-muted"><span>Feasibility Advisor Multi-Tenant Engine</span><span>v3.4.2</span></div></div></footer></body></html>

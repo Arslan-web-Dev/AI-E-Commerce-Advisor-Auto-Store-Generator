@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>Hunza Harvest</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface": "#f8f9ff", "secondary-fixed": "#dae2fd", "primary": "#006948", "on-secondary-container": "#5c647a", "status-positive-bg": "#ecfdf5", "text-muted": "#94a3b8", "border-subtle": "#e2e8f0", "on-tertiary": "#ffffff", "primary-fixed-dim": "#68dba9", "outline-variant": "#bccac0", "surface-container": "#e5eeff", "surface-container-highest": "#d3e4fe", "on-tertiary-fixed-variant": "#005236", "tertiary": "#006947", "inverse-on-surface": "#eaf1ff", "on-primary": "#ffffff", "secondary-container": "#dae2fd", "on-primary-container": "#f5fff7", "status-critical": "#e11d48", "outline": "#6d7a72", "secondary-fixed-dim": "#bec6e0", "status-positive": "#059669", "on-background": "#0b1c30", "status-critical-bg": "#fff1f2", "surface-tint": "#006c4a", "secondary": "#565e74", "text-primary": "#0f172a", "canvas-bg": "#f8fafc", "surface-variant": "#d3e4fe", "on-surface": "#0b1c30", "on-surface-variant": "#3d4a42", "inverse-primary": "#68dba9", "on-tertiary-container": "#f5fff6", "error": "#ba1a1a", "status-positive-border": "#a7f3d0", "surface-container-low": "#eff4ff", "on-error-container": "#93000a", "primary-fixed": "#85f8c4", "surface-container-high": "#dce9ff", "on-secondary-fixed-variant": "#3f465c", "tertiary-fixed": "#6ffbbe", "background": "#f8f9ff", "on-secondary-fixed": "#131b2e", "surface-bright": "#f8f9ff", "surface-dim": "#cbdbf5", "surface-muted": "#f1f5f9", "on-secondary": "#ffffff", "surface-card": "#ffffff", "on-tertiary-fixed": "#002113", "surface-container-lowest": "#ffffff", "tertiary-fixed-dim": "#4edea3", "error-container": "#ffdad6", "status-warning-bg": "#fffbeb", "on-error": "#ffffff", "tertiary-container": "#00855b", "inverse-surface": "#213145", "status-warning": "#d97706", "on-primary-fixed": "#002114", "text-secondary": "#475569", "border-strong": "#cbd5e1", "on-primary-fixed-variant": "#005137", "primary-container": "#00855d" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-lg": "1.5rem", "margin": "2rem", "space-md": "1rem", "margin-sm": "1rem", "space-xl": "2.5rem", "space-xs": "0.25rem", "gutter-sm": "1rem", "space-sm": "0.5rem", "gutter": "1.5rem" }, fontFamily: { "display-lg": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"], "label-sm": ["Inter"], "headline-lg": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "body-sm": ["Inter"], "headline-md": ["Plus Jakarta Sans"], "label-md": ["Inter"], "metric-val": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "body-md": ["Inter"] }, fontSize: { "display-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.03em", fontWeight: "700" }], "display-lg-mobile": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }], "headline-sm": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" }], "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.03em", fontWeight: "600" }], "headline-lg": ["28px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "600" }], "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" }], "body-sm": ["12px", { lineHeight: "18px", letterSpacing: "0.005em", fontWeight: "400" }], "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }], "label-md": ["13px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }], "metric-val": ["30px", { lineHeight: "36px", letterSpacing: "-0.025em", fontWeight: "700" }], "body-lg": ["16px", { lineHeight: "26px", letterSpacing: "-0.005em", fontWeight: "400" }], "body-md": ["14px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-text-primary min-h-screen flex flex-col antialiased selection:bg-primary-fixed selection:text-on-primary-fixed"><header class="fixed top-0 w-full z-50 pt-safe"><div class="bg-primary text-on-primary px-margin-sm py-1 flex items-center justify-center text-center shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><p class="font-label-sm text-label-sm font-semibold truncate tracking-wider uppercase">🌿 Free Shipping over PKR 3,000 | Cash on Delivery (COD)</p></div><div class="h-16 px-gutter-sm bg-surface/90 backdrop-blur-xl flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-sm"><button aria-label="Menu" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container active:scale-95 transition-all"><span class="material-symbols-outlined text-[24px]">menu</span></button><div class="flex items-center gap-space-xs"><img alt="Brand logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VGObyPZ_dbebBd40gRJe9O4uuzlXT6XrvuqCT4rgweSiE3Jn0iU3P3BwBP8-L5breq3XsK1z2OwKZJWizJBzcmkbd_FHJSLDJtKr96PdJ-cXxayowVZlX0JT3_qmf7CX4G4bcsfDEjCHMSvQE4x36zzkxuW-gXG4TvAfpnCm_rzwgTgk26ml-MsdwsfBm5oIMu23CT6IOnadXyatIGFLZD-DITVwc9i34XyH1iilRTgAEHGJmJf3ZjaqQG"/><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-1 hidden sm:inline">Hunza Harvest</span></div></div><div class="flex items-center gap-1"><button aria-label="Search" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container active:scale-95 transition-all"><span class="material-symbols-outlined text-[22px]">search</span></button><a aria-label="Wishlist" class="relative w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container active:scale-95 transition-all" data-path="wishlist" href="#"><span class="material-symbols-outlined text-[22px]">favorite</span><span class="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full bg-status-critical text-on-primary font-label-sm text-[10px] leading-4 flex items-center justify-center font-bold">3</span></a><a aria-label="Cart" class="relative w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container active:scale-95 transition-all" data-path="cart" href="#"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full bg-primary text-on-primary font-label-sm text-[10px] leading-4 flex items-center justify-center font-bold">4</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-1 shadow-sm shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-22 pb-20 bg-surface"><div class="flex flex-col w-full pb-24">
+<!-- Top Navigation Bar & Provenance Breadcrumbs -->
+<div class="flex items-center justify-between px-gutter-sm py-2.5 bg-surface">
+<nav aria-label="Breadcrumb" class="flex items-center gap-1.5 overflow-hidden">
+<a class="font-label-sm text-label-sm text-text-muted hover:text-primary transition-colors shrink-0" href="#">Shop</a>
+<span class="material-symbols-outlined text-[14px] text-text-muted shrink-0">chevron_right</span>
+<a class="font-label-sm text-label-sm text-text-muted hover:text-primary transition-colors shrink-0" href="#">Raw Honey</a>
+<span class="material-symbols-outlined text-[14px] text-text-muted shrink-0">chevron_right</span>
+<span class="font-label-sm text-label-sm text-text-primary font-semibold truncate">Wild Sidr 500g</span>
+</nav>
+<div class="flex items-center gap-1 shrink-0">
+<button aria-label="Share product" class="w-8 h-8 rounded-full bg-surface-muted flex items-center justify-center text-text-secondary active:scale-95 transition-all" id="shareBtn">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</button>
+<button aria-label="Add to wishlist" class="w-8 h-8 rounded-full bg-surface-muted flex items-center justify-center text-status-critical active:scale-95 transition-all" id="pdpWishlistBtn">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</div>
+<!-- Edge-to-Edge Hero Image Gallery -->
+<section class="relative w-full bg-surface-container overflow-hidden">
+<!-- Visual Image Container with Carousel Snap -->
+<div class="flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar" id="galleryContainer">
+<!-- Image Slide 1 -->
+<div class="w-full shrink-0 snap-center relative aspect-square max-h-[380px]">
+<img class="w-full h-full object-cover" data-alt="Close up artisanal studio shot of Raw Karakoram Wild Sidr Honey in an embossed apothecary glass jar with golden wooden honey dipper resting beside, warm mountain morning light, rich golden amber tones, clean slate background with organic herbal accents, minimalist luxury product photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZwbt6K_kgrWm48mQR8aXdHa-4uRgRxhYe4Hlz8dfLExWNGkKp3JkKgmWUCbdeZ4UMVim_huedxyG-YWefQAPcJJyDI0Pam6tpuLAtyccDlorD6bXO9JlOBSJm28J6z8mriqVyYhX5jiMUpeusE3NSEPuibR0oizssAguzMb_TuXMPzR2w6Di4TUkmeaynNzupJTk_1VTqIA-5fMYQsaw5qpS2hTkgqYjQCPKg2QAsACSwJW0rEjzhKg"/>
+</div>
+<!-- Image Slide 2 -->
+<div class="w-full shrink-0 snap-center relative aspect-square max-h-[380px]">
+<img class="w-full h-full object-cover" data-alt="Macro photography of raw wild mountain honey drizzling slowly from a carved wooden honey spoon into a crystal bowl, golden glowing viscosity, crystal pure mountain air aesthetic, soft atmospheric light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvBtFA5nBkGSysZjZw6xeofEBGPHNLawrEgH1JO7QPHCMHagpne2CUI218hkcjGM4J1cNZQd8Sc0JYk67ryNcUQTvEaPI-LwNjIv8xJLRdhBISH4IV6c52w70czAiRfLxNA3zUUmgUNxsh2_WotVe2BFjt9qJghzfMqhvE0gbWyd6MUFi_72WLPH9EySE1TxxnUEidHERcn2mufMgVW95bNm34LTbTdefGd4g8esE134bwSRivMgbR-A"/>
+</div>
+<!-- Image Slide 3 -->
+<div class="w-full shrink-0 snap-center relative aspect-square max-h-[380px]">
+<img class="w-full h-full object-cover" data-alt="Beekeepers in Skardu Valley Gilgit-Baltistan harvesting wild raw honeycombs with dramatic Karakoram snowy peak background, crisp sunlight, artisanal heritage authentic harvest scene" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA37dLDV1o2BKd1w3yNuO1i0vb8nwgRTx8CiXy_qYK3iB2bmCxPibxe2OYL1uqV7qY1ccrXjcE_yz75lMyPfNa6ZkLqP4S4y1H8SIB575qW3eEcHbU9r-TzPE2jSdEQyE97Ix3bh89I6FPoGzgtdlzBsBieymVd5nOZ8BaAB-hdb5HRv1SRG-leLhkVn3gAKYkMSk5tiEawMBYK7lE22bFMGLgSKxC8He-9sjmXq5_XzuttP93jT9vY2Q"/>
+</div>
+</div>
+<!-- Floating Badges -->
+<div class="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
+<span class="px-2.5 py-1 rounded-full bg-status-critical text-on-primary font-label-sm text-label-sm font-bold shadow-sm">
+        Sale -15%
+      </span>
+</div>
+<div class="absolute top-3 right-3 z-10">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg text-status-positive shadow-sm backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+<span class="font-label-sm text-label-sm font-semibold tracking-wide uppercase">PCSIR Lab Certified</span>
+</div>
+</div>
+<!-- Dots Indicator -->
+<div class="absolute bottom-3 inset-x-0 flex justify-center items-center gap-1.5 z-10">
+<span class="w-5 h-1.5 rounded-full bg-primary transition-all"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-white/70 backdrop-blur-sm transition-all"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-white/70 backdrop-blur-sm transition-all"></span>
+</div>
+</section>
+<!-- High-Elevation Provenance Strip -->
+<div class="px-gutter-sm py-2 bg-status-positive-bg text-status-positive flex items-center justify-between">
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[16px] shrink-0">filter_hdr</span>
+<span class="font-label-sm text-label-sm truncate font-medium">Harvested at 3,400m altitude in Skardu Valley</span>
+</div>
+<span class="font-label-sm text-label-sm font-semibold uppercase tracking-wider shrink-0 ml-2">Single Batch</span>
+</div>
+<!-- Primary Product Info & Ratings -->
+<section class="px-gutter-sm pt-4 pb-3 flex flex-col gap-2 bg-surface">
+<div class="flex items-center gap-2">
+<div class="flex items-center text-status-warning">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-text-primary">4.9</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary">(342 certified reviews)</span>
+<span class="w-1 h-1 rounded-full bg-text-muted"></span>
+<div class="flex items-center gap-1 text-status-positive">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive animate-pulse"></span>
+<span class="font-label-sm text-label-sm font-medium">In Stock Nationwide</span>
+</div>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-text-primary font-bold tracking-tight">
+      Raw Karakoram Wild Sidr Honey
+    </h1>
+<!-- Price Section -->
+<div class="flex items-baseline gap-2.5 mt-1">
+<span class="font-metric-val text-metric-val text-primary font-bold" id="displayPrice">PKR 2,450</span>
+<span class="font-body-md text-body-md text-text-muted line-through" id="displayOriginalPrice">PKR 2,890</span>
+<span class="px-2 py-0.5 rounded-full bg-status-critical-bg text-status-critical font-label-sm text-label-sm font-semibold">
+        Save PKR 440 (15% OFF)
+      </span>
+</div>
+</section>
+<!-- Variant Selection & Customizer -->
+<section class="px-gutter-sm py-4 bg-surface-card shadow-sm flex flex-col gap-4">
+<!-- Size Selector -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-text-primary">Select Volume / Weight</span>
+<button class="font-label-sm text-label-sm text-primary underline underline-offset-2">Size Guide &amp; Dosage</button>
+</div>
+<div class="grid grid-cols-3 gap-2" id="sizeOptions">
+<button class="size-btn py-2.5 px-3 rounded-lg bg-surface-muted text-text-secondary flex flex-col items-center justify-center transition-all" data-original="1,590" data-price="1,350" data-size="250g">
+<span class="font-headline-sm text-headline-sm">250g</span>
+<span class="font-body-sm text-body-sm text-text-muted">Personal Jar</span>
+</button>
+<button class="size-btn py-2.5 px-3 rounded-lg bg-primary text-on-primary shadow-sm flex flex-col items-center justify-center transition-all" data-original="2,890" data-price="2,450" data-size="500g">
+<span class="font-headline-sm text-headline-sm font-bold">500g</span>
+<span class="font-body-sm text-body-sm text-on-primary/90">Most Popular</span>
+</button>
+<button class="size-btn py-2.5 px-3 rounded-lg bg-surface-muted text-text-secondary flex flex-col items-center justify-center transition-all" data-original="5,450" data-price="4,650" data-size="1kg">
+<span class="font-headline-sm text-headline-sm">1.0 kg</span>
+<span class="font-body-sm text-body-sm text-text-muted">Family Pack</span>
+</button>
+</div>
+</div>
+<!-- Texture / Consistency Option -->
+<div class="flex flex-col gap-2 pt-1">
+<span class="font-label-md text-label-md font-semibold text-text-primary">Artisanal Consistency</span>
+<div class="grid grid-cols-2 gap-2" id="consistencyGroup">
+<label class="consistency-card flex items-center gap-2.5 p-3 rounded-lg bg-status-positive-bg text-status-positive cursor-pointer">
+<input checked="" class="hidden" name="consistency" type="radio" value="liquid"/>
+<div class="w-4 h-4 rounded-full bg-status-positive flex items-center justify-center text-white shrink-0">
+<span class="material-symbols-outlined text-[12px]">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold">Liquid Gold</span>
+<span class="font-body-sm text-body-sm opacity-90">Smooth flowing nectar</span>
+</div>
+</label>
+<label class="consistency-card flex items-center gap-2.5 p-3 rounded-lg bg-surface-muted text-text-secondary cursor-pointer">
+<input class="hidden" name="consistency" type="radio" value="crystallized"/>
+<div class="w-4 h-4 rounded-full bg-surface-container flex items-center justify-center text-transparent shrink-0">
+<span class="material-symbols-outlined text-[12px]">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold">Winter Cream</span>
+<span class="font-body-sm text-body-sm text-text-muted">Naturally crystallized</span>
+</div>
+</label>
+</div>
+</div>
+<!-- 1-Click WhatsApp Instant Order CTA -->
+<div class="pt-2">
+<a class="w-full py-3 px-4 rounded-lg bg-[#25D366] text-white flex items-center justify-between shadow-md active:scale-[0.99] transition-all" href="https://wa.me/?text=Hi%20Hunza%20Harvest,%20I%20want%20to%20order%20Raw%20Karakoram%20Wild%20Sidr%20Honey%20(500g)%20via%20Cash%20on%20Delivery.">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[24px]">chat</span>
+<div class="flex flex-col text-left">
+<span class="font-headline-sm text-headline-sm font-bold leading-tight">Order via WhatsApp (COD)</span>
+<span class="font-label-sm text-label-sm opacity-90">No online payment required • Instant support</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</a>
+</div>
+</section>
+<!-- Assurance Horizontal Micro-Cards -->
+<section class="py-4 bg-surface">
+<div class="flex items-stretch gap-2.5 px-gutter-sm overflow-x-auto no-scrollbar">
+<div class="w-60 shrink-0 p-3 rounded-xl bg-surface-card shadow-sm flex items-start gap-2.5">
+<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[20px]">local_shipping</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-text-primary">Cash on Delivery</span>
+<span class="font-body-sm text-body-sm text-text-secondary mt-0.5">Pay at your doorstep anywhere in Pakistan</span>
+</div>
+</div>
+<div class="w-60 shrink-0 p-3 rounded-xl bg-surface-card shadow-sm flex items-start gap-2.5">
+<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-text-primary">24h Express Delivery</span>
+<span class="font-body-sm text-body-sm text-text-secondary mt-0.5">Same-day Lahore, 48h to Karachi &amp; Islamabad</span>
+</div>
+</div>
+<div class="w-60 shrink-0 p-3 rounded-xl bg-surface-card shadow-sm flex items-start gap-2.5">
+<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[20px]">workspace_premium</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-text-primary">100% Purity Guarantee</span>
+<span class="font-body-sm text-body-sm text-text-secondary mt-0.5">Full refund if lab reports show adulteration</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Accordions -->
+<section class="px-gutter-sm py-2 flex flex-col gap-2.5">
+<!-- Accordion 1: Sensory & Medicinal Benefits -->
+<div class="rounded-xl bg-surface-card shadow-sm overflow-hidden transition-all" id="acc1">
+<button class="accordion-toggle w-full p-4 flex items-center justify-between text-left" data-target="accContent1">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-primary text-[22px]">vital_signs</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-text-primary">Medicinal &amp; Bioactive Profile</span>
+</div>
+<span class="material-symbols-outlined text-text-muted transition-transform duration-200" id="icon-accContent1">expand_less</span>
+</button>
+<div class="px-4 pb-4 flex flex-col gap-3" id="accContent1">
+<p class="font-body-md text-body-md text-text-secondary">
+          Harvested from wild Sidr (Jujube) trees growing in pristine Karakoram elevations. Known for distinct therapeutic properties:
+        </p>
+<ul class="flex flex-col gap-2">
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-status-positive text-[18px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-sm text-body-sm text-text-primary"><strong class="font-semibold">Potent Gut Healing:</strong> Rich in living enzymes that support microbiome balance and acid reflux recovery.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-status-positive text-[18px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-sm text-body-sm text-text-primary"><strong class="font-semibold">Immune Defense:</strong> Contains natural bioflavonoids and exceptional antibacterial methylglyoxal (MGO) analogues.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-status-positive text-[18px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-sm text-body-sm text-text-primary"><strong class="font-semibold">Unheated &amp; Non-Irradiated:</strong> Never heated above 35°C, preserving sensitive bee propolis and wild pollen grains.</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Accordion 2: PCSIR Purity Certificate & Lab Specs -->
+<div class="rounded-xl bg-surface-card shadow-sm overflow-hidden transition-all" id="acc2">
+<button class="accordion-toggle w-full p-4 flex items-center justify-between text-left" data-target="accContent2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-primary text-[22px]">science</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-text-primary">Lab Report &amp; Purity Metrics</span>
+</div>
+<span class="material-symbols-outlined text-text-muted transition-transform duration-200" id="icon-accContent2">expand_more</span>
+</button>
+<div class="px-4 pb-4 hidden flex flex-col gap-3" id="accContent2">
+<div class="p-3 rounded-lg bg-surface-muted flex flex-col gap-2">
+<div class="flex justify-between items-center text-text-secondary">
+<span class="font-label-md text-label-md">Sucrose Level (Sugar Feed Test)</span>
+<span class="font-label-md text-label-md font-bold text-status-positive">&lt; 1.4% (Standard &lt; 5%)</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5">
+<div class="bg-status-positive h-1.5 rounded-full" style="width: 25%"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 text-text-primary">
+<div class="p-2.5 rounded-lg bg-surface-muted">
+<span class="font-label-sm text-label-sm text-text-muted block">Moisture Ratio</span>
+<span class="font-headline-sm text-headline-sm font-bold">16.8% (Dense)</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-muted">
+<span class="font-label-sm text-label-sm text-text-muted block">HMF Freshness</span>
+<span class="font-headline-sm text-headline-sm font-bold">8.2 mg/kg</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted italic">Batch tested by Pakistan Council of Scientific &amp; Industrial Research (PCSIR). Batch #HK-2024-09.</p>
+</div>
+</div>
+<!-- Accordion 3: Verified Reviews Summary -->
+<div class="rounded-xl bg-surface-card shadow-sm overflow-hidden transition-all" id="acc3">
+<button class="accordion-toggle w-full p-4 flex items-center justify-between text-left" data-target="accContent3">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-primary text-[22px]">reviews</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-text-primary">Customer Reviews (342)</span>
+</div>
+<span class="material-symbols-outlined text-text-muted transition-transform duration-200" id="icon-accContent3">expand_more</span>
+</button>
+<div class="px-4 pb-4 hidden flex flex-col gap-3" id="accContent3">
+<div class="p-3 rounded-lg bg-surface-muted flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-text-primary">Tariq M. (Islamabad)</span>
+<span class="font-label-sm text-label-sm text-text-muted">3 days ago</span>
+</div>
+<div class="flex text-status-warning">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">"The aroma when you break the seal is purely floral and wild. Nothing like supermarket processed honey. Buying a 1kg jar for my parents next."</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Curated Apothecary Pairings (Cross-sell Carousel) -->
+<section class="px-gutter-sm pt-5 pb-2 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-text-primary">Pairs Well With</h2>
+<p class="font-body-sm text-body-sm text-text-muted">Synergistic remedies from our Skardu store</p>
+</div>
+<a class="font-label-sm text-label-sm font-semibold text-primary" href="#">View Collection</a>
+</div>
+<div class="flex items-stretch gap-3 overflow-x-auto no-scrollbar pb-1">
+<!-- Cross-sell 1 -->
+<div class="w-44 shrink-0 rounded-xl bg-surface-card shadow-sm overflow-hidden flex flex-col justify-between">
+<div class="relative w-full aspect-square bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Cold pressed mountain almond oil apothecary dropper bottle on raw textured slate rock with fresh organic raw almonds, moody organic luxury aesthetic, green botanic touches" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDujxE712oORQ3dbLW_8tff5BNZbVKWXR9uLFnqw5GN_FyfkklKH3ElZXaK5ImKQbNGCZEtid-lLBt6JTV5Y7Q6K3-NAkRVFy4eB0TYqJsVznsNF7UqZeLfUFJt4xcdZPWewqZ4SbL-t2hxOMvyaQ_p3gQVKoRYFzg2YpjODrGPV2pKfelLyysJhYMv3aFUv3cjXP2K1EDWk9nqBMdznt6srQEnDg_lEEeeDUVNhumw2W4hQVCJ99dhhQ"/>
+</div>
+<div class="p-2.5 flex flex-col gap-1.5 flex-1 justify-between">
+<div>
+<h3 class="font-label-md text-label-md font-semibold text-text-primary line-clamp-1">Wild Almond Oil</h3>
+<span class="font-body-sm text-body-sm text-text-muted">Cold-pressed 120ml</span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">PKR 1,850</span>
+<button class="w-7 h-7 rounded-full bg-surface-muted text-primary flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Cross-sell 2 -->
+<div class="w-44 shrink-0 rounded-xl bg-surface-card shadow-sm overflow-hidden flex flex-col justify-between">
+<div class="relative w-full aspect-square bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Dark pure Himalayan Shilajit resin in a luxury gold foil embossed minimalist black glass jar with miniature golden measuring spoon, natural stone elements, refined organic wellness aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSTXp0poBh8IulD9yAGTlz-l3NF3z4LFoTJr7yYHj2BBXMNR6O_T461MB7n4nH1q3E8ufr9S27ZS3gQsaUnOvgOwkpa1Drk5K0ybNeIZWXcqfIMaczAP0WTr6XI_iDzOZbDrskCa0Xwi3eUOoDMBgJaZUG8Zq5A6v0rhojsDAEZqXh7RWDVk7UKFyuzU8_Lhx6NOThQXLGIUCZ-4DTdVzzk8PFOteLD4R7-n4pZJyzY6LgrvffOq9Axw"/>
+</div>
+<div class="p-2.5 flex flex-col gap-1.5 flex-1 justify-between">
+<div>
+<h3 class="font-label-md text-label-md font-semibold text-text-primary line-clamp-1">Pure Shilajit Resin</h3>
+<span class="font-body-sm text-body-sm text-text-muted">High-altitude 30g</span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">PKR 3,850</span>
+<button class="w-7 h-7 rounded-full bg-surface-muted text-primary flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Sticky Bottom Conversion Action Bar (Fixed to bottom above safe area) -->
+<div class="fixed bottom-16 inset-x-0 z-40 bg-surface-card/95 backdrop-blur-md px-gutter-sm py-2.5 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] flex items-center justify-between gap-3">
+<!-- Mini Price block -->
+<div class="flex flex-col shrink-0">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Total</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md font-bold text-primary" id="bottomPrice">PKR 2,450</span>
+</div>
+</div>
+<!-- Stepper Quantity Control -->
+<div class="flex items-center bg-surface-muted rounded-lg px-1 py-0.5">
+<button class="w-8 h-8 rounded flex items-center justify-center text-text-secondary active:bg-surface-container" id="qtyMinus">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+</button>
+<span class="w-6 text-center font-label-md text-label-md font-bold text-text-primary" id="qtyVal">1</span>
+<button class="w-8 h-8 rounded flex items-center justify-center text-text-secondary active:bg-surface-container" id="qtyPlus">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+<!-- Primary Add to Bag CTA -->
+<button class="flex-1 h-11 bg-primary text-on-primary rounded-lg flex items-center justify-center gap-2 font-headline-sm text-headline-sm font-semibold active:scale-[0.98] transition-transform shadow-md" id="mainAddToCart">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+<span>Add to Cart</span>
+</button>
+</div>
+</div>
+<script>
+  (function() {
+    // Stepper Quantity Logic
+    let quantity = 1;
+    let basePriceNum = 2450;
+    const qtyVal = document.getElementById('qtyVal');
+    const bottomPrice = document.getElementById('bottomPrice');
+
+    function updateStickyPrice() {
+      const total = basePriceNum * quantity;
+      bottomPrice.textContent = 'PKR ' + total.toLocaleString();
+    }
+
+    document.getElementById('qtyMinus').addEventListener('click', () => {
+      if (quantity > 1) {
+        quantity--;
+        qtyVal.textContent = quantity;
+        updateStickyPrice();
+      }
+    });
+
+    document.getElementById('qtyPlus').addEventListener('click', () => {
+      quantity++;
+      qtyVal.textContent = quantity;
+      updateStickyPrice();
+    });
+
+    // Variant Selection Logic
+    const sizeButtons = document.querySelectorAll('.size-btn');
+    const displayPrice = document.getElementById('displayPrice');
+    const displayOriginalPrice = document.getElementById('displayOriginalPrice');
+
+    sizeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sizeButtons.forEach(b => {
+          b.className = 'size-btn py-2.5 px-3 rounded-lg bg-surface-muted text-text-secondary flex flex-col items-center justify-center transition-all';
+          b.querySelector('span:first-child').className = 'font-headline-sm text-headline-sm';
+        });
+
+        btn.className = 'size-btn py-2.5 px-3 rounded-lg bg-primary text-on-primary shadow-sm flex flex-col items-center justify-center transition-all';
+        btn.querySelector('span:first-child').className = 'font-headline-sm text-headline-sm font-bold';
+
+        const priceStr = btn.getAttribute('data-price');
+        const origStr = btn.getAttribute('data-original');
+        basePriceNum = parseInt(priceStr.replace(/,/g, ''), 10);
+
+        displayPrice.textContent = 'PKR ' + priceStr;
+        displayOriginalPrice.textContent = 'PKR ' + origStr;
+        updateStickyPrice();
+      });
+    });
+
+    // Consistency Toggle
+    const consistencyCards = document.querySelectorAll('.consistency-card');
+    consistencyCards.forEach(card => {
+      card.addEventListener('click', () => {
+        consistencyCards.forEach(c => {
+          c.className = 'consistency-card flex items-center gap-2.5 p-3 rounded-lg bg-surface-muted text-text-secondary cursor-pointer';
+          const icon = c.querySelector('div:first-child');
+          icon.className = 'w-4 h-4 rounded-full bg-surface-container flex items-center justify-center text-transparent shrink-0';
+        });
+        card.className = 'consistency-card flex items-center gap-2.5 p-3 rounded-lg bg-status-positive-bg text-status-positive cursor-pointer';
+        const activeIcon = card.querySelector('div:first-child');
+        activeIcon.className = 'w-4 h-4 rounded-full bg-status-positive flex items-center justify-center text-white shrink-0';
+      });
+    });
+
+    // Accordions
+    const accordions = document.querySelectorAll('.accordion-toggle');
+    accordions.forEach(acc => {
+      acc.addEventListener('click', () => {
+        const targetId = acc.getAttribute('data-target');
+        const content = document.getElementById(targetId);
+        const icon = document.getElementById('icon-' + targetId);
+
+        if (content.classList.contains('hidden')) {
+          content.classList.remove('hidden');
+          icon.textContent = 'expand_less';
+        } else {
+          content.classList.add('hidden');
+          icon.textContent = 'expand_more';
+        }
+      });
+    });
+
+    // Wishlist Toggle Microinteraction
+    const wishBtn = document.getElementById('pdpWishlistBtn');
+    let isWish = true;
+    wishBtn.addEventListener('click', () => {
+      isWish = !isWish;
+      const icon = wishBtn.querySelector('.material-symbols-outlined');
+      if (isWish) {
+        icon.style.fontVariationSettings = "'FILL' 1";
+        wishBtn.classList.add('text-status-critical');
+        wishBtn.classList.remove('text-text-muted');
+      } else {
+        icon.style.fontVariationSettings = "'FILL' 0";
+        wishBtn.classList.remove('text-status-critical');
+        wishBtn.classList.add('text-text-muted');
+      }
+    });
+
+    // Add to Cart Visual Feedback
+    const cartBtn = document.getElementById('mainAddToCart');
+    cartBtn.addEventListener('click', () => {
+      const origText = cartBtn.innerHTML;
+      cartBtn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span><span>Added to Bag!</span>';
+      setTimeout(() => {
+        cartBtn.innerHTML = origText;
+      }, 1400);
+    });
+  })();
+</script></main><div class="fixed bottom-20 right-4 z-40 pb-safe"><a aria-label="WhatsApp Quick Order" class="w-13 h-13 px-4 py-2.5 rounded-full bg-[#25D366] text-white flex items-center gap-2 shadow-[0_4px_12px_rgba(37,211,102,0.35)] active:scale-95 transition-transform" href="https://wa.me/" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[22px]">chat</span><span class="font-label-sm text-label-sm font-bold tracking-wide uppercase">Quick Order</span></a></div><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-semibold"><div class="h-16 px-gutter-sm flex items-center justify-around"><a class="flex flex-col items-center justify-center min-w-[56px] h-12 gap-0.5 text-text-secondary hover:text-primary transition-colors" data-path="hunza-harvest-e-commerce-storefront-homepage-mobile" href="#"><span class="material-symbols-outlined text-[22px]">storefront</span><span class="font-label-sm text-label-sm">Home</span></a><a class="flex flex-col items-center justify-center min-w-[56px] h-12 gap-0.5 text-text-secondary hover:text-primary transition-colors" data-path="hunza-harvest-product-catalog-filtering-mobile" href="#"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="font-label-sm text-label-sm">Catalog</span></a><a class="flex flex-col items-center justify-center min-w-[56px] h-12 gap-0.5 text-text-secondary hover:text-primary transition-colors" data-path="product-search" href="#"><span class="material-symbols-outlined text-[22px]">search</span><span class="font-label-sm text-label-sm">Search</span></a><a class="relative flex flex-col items-center justify-center min-w-[56px] h-12 gap-0.5 text-text-secondary hover:text-primary transition-colors" data-path="wishlist" href="#"><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">favorite</span><span class="absolute -top-1 -right-2 min-w-[14px] h-3.5 px-0.5 rounded-full bg-status-critical text-on-primary font-label-sm text-[9px] leading-3 flex items-center justify-center font-bold">3</span></div><span class="font-label-sm text-label-sm">Wishlist</span></a><a class="relative flex flex-col items-center justify-center min-w-[56px] h-12 gap-0.5 text-text-secondary hover:text-primary transition-colors" data-path="cart" href="#"><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute -top-1 -right-2 min-w-[14px] h-3.5 px-0.5 rounded-full bg-primary text-on-primary font-label-sm text-[9px] leading-3 flex items-center justify-center font-bold">4</span></div><span class="font-label-sm text-label-sm">Cart</span></a></div></nav></body></html>

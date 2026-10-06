@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-primary-fixed-variant":"#005137","outline":"#6d7a72","on-tertiary":"#ffffff","text-muted":"#94a3b8","error-container":"#ffdad6","tertiary-fixed":"#6ffbbe","on-surface":"#0b1c30","tertiary-container":"#00855b","surface-dim":"#cbdbf5","text-secondary":"#475569","surface-container":"#e5eeff","on-error-container":"#93000a","status-warning-bg":"#fffbeb","canvas-bg":"#f8fafc","status-critical":"#e11d48","surface-container-low":"#eff4ff","status-warning":"#d97706","border-subtle":"#e2e8f0","status-critical-bg":"#fff1f2","on-secondary-fixed-variant":"#3f465c","on-error":"#ffffff","status-positive":"#059669","on-tertiary-fixed-variant":"#005236","status-positive-bg":"#ecfdf5","surface-tint":"#006c4a","primary-container":"#00855d","secondary":"#565e74","background":"#f8f9ff","surface-card":"#ffffff","on-surface-variant":"#3d4a42","inverse-surface":"#213145","surface-bright":"#f8f9ff","primary":"#006948","secondary-fixed":"#dae2fd","on-secondary-fixed":"#131b2e","primary-fixed":"#85f8c4","border-strong":"#cbd5e1","tertiary-fixed-dim":"#4edea3","status-positive-border":"#a7f3d0","on-primary-container":"#f5fff7","inverse-primary":"#68dba9","on-primary-fixed":"#002114","primary-fixed-dim":"#68dba9","surface":"#f8f9ff","surface-variant":"#d3e4fe","text-primary":"#0f172a","surface-container-lowest":"#ffffff","surface-muted":"#f1f5f9","on-background":"#0b1c30","on-tertiary-container":"#f5fff6","error":"#ba1a1a","on-secondary":"#ffffff","tertiary":"#006947","surface-container-high":"#dce9ff","surface-container-highest":"#d3e4fe","on-secondary-container":"#5c647a","secondary-fixed-dim":"#bec6e0","on-primary":"#ffffff","inverse-on-surface":"#eaf1ff","secondary-container":"#dae2fd","on-tertiary-fixed":"#002113","outline-variant":"#bccac0"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"space-sm":"0.5rem","space-xl":"2.5rem",gutter:"1.5rem","space-md":"1rem",margin:"2rem","margin-sm":"1rem","space-xs":"0.25rem","gutter-sm":"1rem","space-lg":"1.5rem"},fontFamily:{"body-lg":["Inter"],"body-md":["Inter"],"metric-val":["Plus Jakarta Sans"],"label-md":["Inter"],"display-lg":["Plus Jakarta Sans"],"label-sm":["Inter"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"display-lg-mobile":["Plus Jakarta Sans"],"body-sm":["Inter"]},fontSize:{"body-lg":["16px",{lineHeight:"26px",letterSpacing:"-0.005em",fontWeight:"400"}],"body-md":["14px",{lineHeight:"22px",letterSpacing:"0em",fontWeight:"400"}],"metric-val":["30px",{lineHeight:"36px",letterSpacing:"-0.025em",fontWeight:"700"}],"label-md":["13px",{lineHeight:"16px",letterSpacing:"0.01em",fontWeight:"500"}],"display-lg":["40px",{lineHeight:"48px",letterSpacing:"-0.03em",fontWeight:"700"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.03em",fontWeight:"600"}],"headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"headline-lg":["28px",{lineHeight:"36px",letterSpacing:"-0.02em",fontWeight:"600"}],"headline-lg-mobile":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}],"headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],"display-lg-mobile":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-sm":["12px",{lineHeight:"18px",letterSpacing:"0.005em",fontWeight:"400"}]}}}}</script></head><body class="bg-canvas-bg font-body-md text-text-primary antialiased selection:bg-primary-fixed selection:text-on-primary-fixed"><header class="fixed top-0 left-0 w-full z-50 bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 max-w-[1440px] mx-auto px-margin-sm lg:px-margin flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-sm group" href="#"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-[20px]">eco</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">Hunza Harvest</span><span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Organic &amp; Pure</span></div></a><div class="hidden md:flex items-center gap-space-xs text-text-muted"><span class="text-border-strong">/</span><a class="inline-flex items-center gap-1 font-label-md text-label-md text-text-secondary hover:text-text-primary transition-colors py-1" data-path="cart" href="#"><span class="material-symbols-outlined text-[16px]">chevron_left</span>Return to Cart</a></div></div><nav class="hidden lg:flex items-center gap-space-md" data-active-classes="text-primary font-bold"><a aria-current="page" class="transition-colors py-1 px-space-xs text-primary font-bold" data-path="information" href="#">1. Information</a><span class="material-symbols-outlined text-[16px] text-text-muted">chevron_right</span><a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors py-1 px-space-xs" data-path="shipping" href="#">2. Shipping</a><span class="material-symbols-outlined text-[16px] text-text-muted">chevron_right</span><a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors py-1 px-space-xs" data-path="payment-review" href="#">3. Payment &amp; Review</a></nav><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs py-1.5 px-space-sm rounded-lg bg-status-positive-bg text-status-positive border-0"><span class="material-symbols-outlined text-[18px]">lock</span><span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">256-Bit SSL Encrypted</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-canvas-bg min-h-screen"><div class="flex flex-col w-full">
+<!-- Minimalist Distraction-Free Stepper Sub-Bar -->
+<div class="w-full bg-surface-card shadow-sm">
+<div class="max-w-[1440px] mx-auto px-margin-sm lg:px-margin py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+<!-- Returning customer inline callout -->
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-status-positive-bg text-status-positive">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Expedited Express Checkout</span>
+<span class="text-text-muted hidden sm:inline">•</span>
+<a class="hidden sm:inline-block font-label-md text-label-md text-primary font-semibold hover:underline" href="#quick-login">Returning Customer? Log in for 1-click address</a>
+</div>
+<!-- Progressive Flow Steps -->
+<div class="flex items-center gap-2 text-text-secondary">
+<div class="flex items-center gap-1.5 text-status-positive font-medium">
+<span class="flex items-center justify-center w-5 h-5 rounded-full bg-status-positive-bg text-[12px] font-bold">
+<span class="material-symbols-outlined text-[13px]">check</span>
+</span>
+<span class="font-label-md text-label-md">1. Cart</span>
+</div>
+<span class="material-symbols-outlined text-[14px] text-text-muted">chevron_right</span>
+<div class="flex items-center gap-1.5 text-text-primary font-semibold">
+<span class="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-on-primary text-[11px] font-bold">2</span>
+<span class="font-label-md text-label-md text-primary">Shipping &amp; Info</span>
+</div>
+<span class="material-symbols-outlined text-[14px] text-text-muted">chevron_right</span>
+<div class="flex items-center gap-1.5 text-text-muted">
+<span class="flex items-center justify-center w-5 h-5 rounded-full bg-surface-muted text-[11px] font-medium text-text-secondary">3</span>
+<span class="font-label-md text-label-md">Confirmation</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Primary 2-Column Checkout Layout -->
+<div class="max-w-[1440px] mx-auto px-margin-sm lg:px-margin py-space-lg w-full">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- ================= LEFT COLUMN: FORM DETAILS (~60% desktop / 7 cols) ================= -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- SECTION 1: Contact Information -->
+<section class="bg-surface-card rounded-xl p-space-md lg:p-space-lg shadow-sm">
+<div class="flex items-center justify-between pb-space-sm mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">contact_mail</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">1. Contact Information</h2>
+</div>
+<a class="font-label-md text-label-md text-primary font-medium hover:underline flex items-center gap-1" href="#login">
+<span>Already registered? Log in</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Email Input -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-medium flex items-center justify-between" for="checkout-email">
+<span>Email Address <span class="text-status-critical">*</span></span>
+<span class="font-body-sm text-body-sm text-text-muted">For receipts &amp; dispatch</span>
+</label>
+<div class="relative">
+<input class="w-full h-10 px-3.5 bg-surface-card rounded-lg font-body-md text-body-md text-text-primary placeholder:text-text-muted focus:outline-none focus:bg-surface-container-low transition-all" id="checkout-email" placeholder="e.g. zainab.rehman@email.com" type="email" value="zainab.rehman@email.com"/>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-status-positive text-[18px]">check_circle</span>
+</div>
+</div>
+<!-- Pakistani Phone Input -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-medium flex items-center justify-between" for="checkout-phone">
+<span>Mobile Phone <span class="text-status-critical">*</span></span>
+<span class="font-body-sm text-body-sm text-text-muted">For Courier SMS / Call</span>
+</label>
+<div class="relative flex items-center">
+<div class="absolute left-0 pl-3 flex items-center gap-1.5 pointer-events-none text-text-secondary font-medium text-body-md">
+<span class="text-[14px] leading-none">🇵🇰</span>
+<span class="font-body-md text-body-md text-text-secondary">+92</span>
+<span class="text-text-muted">|</span>
+</div>
+<input class="w-full h-10 pl-20 pr-3 bg-surface-card rounded-lg font-body-md text-body-md text-text-primary placeholder:text-text-muted focus:outline-none focus:bg-surface-container-low transition-all" id="checkout-phone" placeholder="300 1234567" type="tel" value="300 8472918"/>
+</div>
+</div>
+</div>
+<!-- WhatsApp Notification Opt-in Checkbox -->
+<div class="mt-space-md pt-space-sm bg-status-positive-bg/40 p-space-sm rounded-lg flex items-start gap-3">
+<input checked="" class="mt-0.5 w-4 h-4 rounded text-primary focus:ring-0 accent-primary cursor-pointer" id="whatsapp-optin" type="checkbox"/>
+<label class="flex-1 text-left cursor-pointer select-none" for="whatsapp-optin">
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md text-text-primary font-semibold">Receive WhatsApp dispatch &amp; live courier updates</span>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-status-positive text-on-primary tracking-wide uppercase">Free</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">Real-time rider tracking links &amp; instant PDF receipts sent straight to your WhatsApp without SMS spam.</p>
+</label>
+</div>
+</section>
+<!-- SECTION 2: Delivery & Shipping Address -->
+<section class="bg-surface-card rounded-xl p-space-md lg:p-space-lg shadow-sm">
+<div class="flex items-center justify-between pb-space-sm mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">local_shipping</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">2. Shipping Destination</h2>
+</div>
+<span class="font-label-sm text-label-sm text-status-positive font-semibold uppercase bg-status-positive-bg px-2 py-0.5 rounded">Deliver to 220+ Cities</span>
+</div>
+<div class="flex flex-col gap-space-md">
+<!-- Full Name -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-medium" for="full-name">
+                Full Recipient Name <span class="text-status-critical">*</span>
+</label>
+<input class="w-full h-10 px-3.5 bg-surface-card rounded-lg font-body-md text-body-md text-text-primary placeholder:text-text-muted focus:outline-none focus:bg-surface-container-low transition-all" id="full-name" placeholder="First and Last Legal Name" type="text" value="Zainab Rehman"/>
+</div>
+<!-- Complete Street Address -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-medium" for="street-address">
+                Street Address &amp; Residence <span class="text-status-critical">*</span>
+</label>
+<input class="w-full h-10 px-3.5 bg-surface-card rounded-lg font-body-md text-body-md text-text-primary placeholder:text-text-muted focus:outline-none focus:bg-surface-container-low transition-all" id="street-address" placeholder="House / Apartment #, Building Name, Street, Block or Sector" type="text" value="House 42-B, Street 7, Block K"/>
+</div>
+<!-- Landmark / Area -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-medium flex items-center justify-between" for="landmark-area">
+<span>Prominent Landmark / Colony <span class="text-text-muted">(Recommended)</span></span>
+<span class="font-body-sm text-body-sm text-text-muted">Helps courier locate quicker</span>
+</label>
+<input class="w-full h-10 px-3.5 bg-surface-card rounded-lg font-body-md text-body-md text-text-primary placeholder:text-text-muted focus:outline-none focus:bg-surface-container-low transition-all" id="landmark-area" placeholder="e.g. Near Siddique Trade Center, Gulberg III" type="text" value="Phase 5 DHA, near Jalal Sons"/>
+</div>
+<!-- City, Province, Postal Code 3-column split -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+<!-- City Dropdown -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-medium" for="city-select">
+                  City <span class="text-status-critical">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-10 pl-3.5 pr-8 bg-surface-card rounded-lg font-body-md text-body-md text-text-primary appearance-none focus:outline-none focus:bg-surface-container-low transition-all cursor-pointer" id="city-select">
+<option selected="" value="Lahore">Lahore</option>
+<option value="Karachi">Karachi</option>
+<option value="Islamabad">Islamabad</option>
+<option value="Rawalpindi">Rawalpindi</option>
+<option value="Faisalabad">Faisalabad</option>
+<option value="Multan">Multan</option>
+<option value="Peshawar">Peshawar</option>
+<option value="Gujranwala">Gujranwala</option>
+<option value="Sialkot">Sialkot</option>
+<option value="Quetta">Quetta</option>
+<option value="Gilgit">Gilgit (Source Valley)</option>
+<option value="Skardu">Skardu</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-2.5 text-text-muted pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Province Dropdown -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-medium" for="province-select">
+                  Province <span class="text-status-critical">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-10 pl-3.5 pr-8 bg-surface-card rounded-lg font-body-md text-body-md text-text-primary appearance-none focus:outline-none focus:bg-surface-container-low transition-all cursor-pointer" id="province-select">
+<option selected="" value="Punjab">Punjab</option>
+<option value="Sindh">Sindh</option>
+<option value="Khyber Pakhtunkhwa">KPK</option>
+<option value="Islamabad Capital Territory">Islamabad (ICT)</option>
+<option value="Gilgit-Baltistan">Gilgit-Baltistan</option>
+<option value="Balochistan">Balochistan</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-2.5 text-text-muted pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Postal Code -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-medium" for="postal-code">
+                  Postal Code
+                </label>
+<input class="w-full h-10 px-3.5 bg-surface-card rounded-lg font-body-md text-body-md text-text-primary placeholder:text-text-muted focus:outline-none focus:bg-surface-container-low transition-all" id="postal-code" placeholder="54000" type="text" value="54000"/>
+</div>
+</div>
+<!-- Delivery Instructions -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-secondary font-medium flex items-center justify-between" for="delivery-notes">
+<span>Special Instructions for Rider</span>
+<span class="font-body-sm text-body-sm text-text-muted">TCS / Leopards / Trax</span>
+</label>
+<textarea class="w-full px-3.5 py-2.5 bg-surface-card rounded-lg font-body-md text-body-md text-text-primary placeholder:text-text-muted focus:outline-none focus:bg-surface-container-low transition-all resize-none" id="delivery-notes" placeholder="e.g. Please call before arrival; deliver between 10 AM to 5 PM; ring second doorbell." rows="2"></textarea>
+</div>
+<!-- Save Address Checkbox -->
+<div class="flex items-center gap-2 pt-1">
+<input checked="" class="w-4 h-4 rounded text-primary focus:ring-0 accent-primary cursor-pointer" id="save-address" type="checkbox"/>
+<label class="font-body-md text-body-md text-text-secondary cursor-pointer select-none" for="save-address">
+                Save this address in my Hunza Harvest profile for fast 1-click reorders
+              </label>
+</div>
+</div>
+</section>
+<!-- SECTION 3: Payment Method Selection -->
+<section class="bg-surface-card rounded-xl p-space-md lg:p-space-lg shadow-sm">
+<div class="flex items-center justify-between pb-space-sm mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">3. Payment Method</h2>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary">Protected by Escrow</span>
+</div>
+<!-- Radio Stack Container -->
+<div class="flex flex-col gap-3" id="payment-method-group">
+<!-- OPTION 1: Cash on Delivery (COD) - Default Active Selected -->
+<label class="relative flex items-start gap-3.5 p-space-md rounded-xl cursor-pointer transition-all bg-status-positive-bg/30">
+<input checked="" class="mt-1 w-4 h-4 text-primary accent-primary focus:ring-0 cursor-pointer" name="payment_choice" type="radio" value="cod"/>
+<div class="flex-1">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span class="font-headline-sm text-headline-sm text-text-primary font-bold">Cash on Delivery (COD)</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-primary text-on-primary font-semibold">Recommended</span>
+</div>
+<span class="font-label-md text-label-md text-status-positive font-semibold">Zero Pre-Payment Required</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-1.5">
+                  Pay securely with exact physical cash upon physical inspection when your fresh organic parcel reaches your doorstep anywhere in Pakistan.
+                </p>
+<div class="mt-2.5 flex items-center gap-2 text-text-secondary font-label-sm text-label-sm">
+<span class="inline-flex items-center gap-1 bg-surface-card px-2 py-1 rounded shadow-sm text-text-secondary">
+<span class="material-symbols-outlined text-[14px] text-status-positive">local_shipping</span> TCS Express
+                  </span>
+<span class="inline-flex items-center gap-1 bg-surface-card px-2 py-1 rounded shadow-sm text-text-secondary">
+<span class="material-symbols-outlined text-[14px] text-status-positive">inventory_2</span> Tamper-proof Harvest Seal
+                  </span>
+</div>
+</div>
+</label>
+<!-- OPTION 2: Online Payment / Mobile Wallet -->
+<label class="relative flex items-start gap-3.5 p-space-md rounded-xl cursor-pointer transition-all bg-surface-card hover:bg-surface-muted/60">
+<input class="mt-1 w-4 h-4 text-primary accent-primary focus:ring-0 cursor-pointer" name="payment_choice" type="radio" value="wallet"/>
+<div class="flex-1">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-text-secondary text-[22px]">contactless</span>
+<span class="font-headline-sm text-headline-sm text-text-primary">EasyPaisa, JazzCash &amp; Debit/Credit Card</span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container font-medium text-text-secondary">Instant OTP</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-1">
+                  Pay seamlessly through your Pakistani mobile wallet or 3D-Secure Visa/MasterCard.
+                </p>
+<div class="mt-2 flex items-center gap-2">
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-muted font-bold text-text-primary">EasyPaisa</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-muted font-bold text-text-primary">JazzCash</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-muted font-semibold text-text-secondary">Visa / Master</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-muted font-semibold text-text-secondary">UnionPay</span>
+</div>
+</div>
+</label>
+<!-- OPTION 3: Direct Bank Transfer (1Link IBFT) -->
+<label class="relative flex items-start gap-3.5 p-space-md rounded-xl cursor-pointer transition-all bg-surface-card hover:bg-surface-muted/60">
+<input class="mt-1 w-4 h-4 text-primary accent-primary focus:ring-0 cursor-pointer" name="payment_choice" type="radio" value="ibft"/>
+<div class="flex-1">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-text-secondary text-[22px]">account_balance</span>
+<span class="font-headline-sm text-headline-sm text-text-primary">Direct Bank Transfer (1Link IBFT)</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Meezan • HBL • Bank Alfalah</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-1">
+                  Transfer directly from your banking app. Account title: <strong>Hunza Harvest Organic Foods PVT LTD</strong>. Provide screenshot via WhatsApp after order confirmation.
+                </p>
+</div>
+</label>
+</div>
+</section>
+</div>
+<!-- ================= RIGHT COLUMN: STICKY ORDER SUMMARY (~40% / 5 cols) ================= -->
+<div class="lg:col-span-5 flex flex-col gap-space-md lg:sticky lg:top-24">
+<!-- Summary Card Container -->
+<div class="bg-surface-card rounded-xl p-space-md lg:p-space-lg shadow-sm">
+<!-- Header with Countdown lock -->
+<div class="flex items-center justify-between pb-space-sm mb-space-sm">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-headline-md text-text-primary">Order Summary</h3>
+<span class="font-label-sm text-label-sm bg-surface-container text-text-primary font-bold px-2 py-0.5 rounded-full">3 Items</span>
+</div>
+<!-- Inventory Hold Countdown -->
+<div class="flex items-center gap-1.5 bg-status-warning-bg px-2.5 py-1 rounded-md text-status-warning">
+<span class="material-symbols-outlined text-[15px] animate-pulse">timer</span>
+<span class="font-label-sm text-label-sm font-semibold tracking-tight" id="timer-display">Held for 14:20</span>
+</div>
+</div>
+<!-- Product Item List Preview -->
+<div class="flex flex-col gap-space-sm divide-y-0 max-h-[310px] overflow-y-auto pr-1">
+<!-- Item 1: Honey -->
+<div class="flex items-center justify-between gap-3 py-2">
+<div class="flex items-center gap-3">
+<div class="relative w-14 h-14 rounded-lg bg-surface-muted overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A luxurious hexagonal glass jar of raw amber Karakoram wild Sidr honey with wooden dipper, warm morning sunlight, crisp white studio background, organic label Hunza Harvest, high detail food product photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDu66kTzqSSxzgmrj-8bvWBn7AZbM26eQF6-eOW5Q4EVwTK2mLF1RcfZB_WISY-MctpbtvD9FPexlmnCDb90bGvZpRV_FECI5Gm3V9LrXfm8kscGvOc0f0y5NWYLJxP3_JNkqhQhx-wU24U4X32ROFeqJOO_djdHxABZi-o7Op5U4s14i3ktx39KZd4qtqtWYTbMb8CScHOh_V6D0gWue7sXPROHk_dgAHwuVPk121NtCyydpkPRFYx0A"/>
+<span class="absolute top-0.5 right-0.5 bg-surface-card/90 backdrop-blur font-label-sm text-[10px] font-bold px-1 rounded shadow-sm">1x</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h4 class="font-headline-sm text-body-md text-text-primary font-semibold truncate">Raw Karakoram Wild Sidr Honey</h4>
+<span class="font-body-sm text-body-sm text-text-muted truncate">500g Jar • Single Estate • Liquid Gold</span>
+<span class="font-label-sm text-label-sm text-status-positive flex items-center gap-0.5 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">verified</span> 100% Unfiltered Pure
+                  </span>
+</div>
+</div>
+<div class="text-right flex-shrink-0">
+<span class="font-headline-sm text-body-md font-bold text-text-primary">PKR 2,450</span>
+</div>
+</div>
+<!-- Item 2: Almond Oil -->
+<div class="flex items-center justify-between gap-3 py-2">
+<div class="flex items-center gap-3">
+<div class="relative w-14 h-14 rounded-lg bg-surface-muted overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Cold pressed golden sweet almond oil in an amber glass apothecary bottle with minimalist dropper, surrounded by whole fresh Hunza mountain almonds, clean bright commercial lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhLIsK7qShFL422pjz9dh1gKLR_5Cid0iCxkpZBHwywQLtBTE690JnAhr0zahv2spnbEsIEQz1kSUAEJ9cP0OVNaFuI_JBXZIqRpY5Q-78s7yFmFsAkrLbgk3kRa0BgswkIFh4inyNZQUlsX0Cha-gIIXVxpSaQlowfOGUBRYYhBzH3LmyYIQQNtDdGudq2vOsWMYscP9IGhHvEAsesuFIOYBIUoW5vxyFuQjqAG5YFJCKOlhVa1lVEQ"/>
+<span class="absolute top-0.5 right-0.5 bg-surface-card/90 backdrop-blur font-label-sm text-[10px] font-bold px-1 rounded shadow-sm">1x</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h4 class="font-headline-sm text-body-md text-text-primary font-semibold truncate">Cold-Pressed Sweet Almond Oil</h4>
+<span class="font-body-sm text-body-sm text-text-muted truncate">250ml Amber Glass • Extra Virgin</span>
+<span class="font-label-sm text-label-sm text-status-positive flex items-center gap-0.5 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">eco</span> First Wood Cold-Press
+                  </span>
+</div>
+</div>
+<div class="text-right flex-shrink-0">
+<span class="font-headline-sm text-body-md font-bold text-text-primary">PKR 1,850</span>
+</div>
+</div>
+<!-- Item 3: Walnut Kernels -->
+<div class="flex items-center justify-between gap-3 py-2">
+<div class="flex items-center gap-3">
+<div class="relative w-14 h-14 rounded-lg bg-surface-muted overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Premium light golden whole paper shell walnut halves from Gilgit Baltistan in an artisan kraft pouch with transparent window, high clarity, gourmet dry fruit packaging." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSdhVVM9DPiZgFFzNWJV24J9V8xu63-JggS1IgM0I6S91qIur63Em4UTfw9j4_xDtKXhiOTRJ0jsi29PHhCTUeTPq6EEU4FZtK1-kOUfOTEQSYnNUHP49KYAUdgLJi3WuOuUHdZyCN3kIij6xMepfsgLgw54EnPt5aA9GpFWtV8TTv2s42u2Xidp2iBFclklKCKBiGVL2yg6Z__SEU5Ie7qKIbINCKO63jICrl7-4aNDQuGVv9-CC7WQ"/>
+<span class="absolute top-0.5 right-0.5 bg-primary text-on-primary font-label-sm text-[10px] font-bold px-1 rounded shadow-sm">2x</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h4 class="font-headline-sm text-body-md text-text-primary font-semibold truncate">Gilgit Shelled Walnut Kernels</h4>
+<span class="font-body-sm text-body-sm text-text-muted truncate">400g Pouch • Grade AAA Paper Shell</span>
+<span class="font-body-sm text-body-sm text-text-secondary mt-0.5">PKR 2,100 each</span>
+</div>
+</div>
+<div class="text-right flex-shrink-0">
+<span class="font-headline-sm text-body-md font-bold text-text-primary">PKR 4,200</span>
+</div>
+</div>
+</div>
+<!-- Promo Code Box with Pre-applied Voucher -->
+<div class="mt-space-md pt-space-sm">
+<label class="font-label-sm text-label-sm uppercase tracking-wider text-text-secondary font-semibold block mb-1.5">
+              Promotional Discount Code
+            </label>
+<div class="flex items-center gap-2">
+<div class="relative flex-1">
+<input class="w-full h-9 pl-8 pr-3 bg-surface-container-low rounded-lg font-label-md text-label-md text-primary font-bold uppercase tracking-wider focus:outline-none" readonly="" type="text" value="HUNZAFAM10"/>
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-status-positive text-[16px]">sell</span>
+</div>
+<button class="h-9 px-3 rounded-lg bg-status-positive-bg text-status-positive font-label-md text-label-md font-bold inline-flex items-center gap-1 hover:bg-status-positive/20 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">check</span> Applied
+              </button>
+</div>
+<!-- Applied Voucher Tag with remove button -->
+<div class="mt-2 flex items-center justify-between text-body-sm font-body-sm bg-status-positive-bg/40 px-2.5 py-1.5 rounded-md">
+<span class="text-status-positive font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">high_res</span> 10% Family Harvest Discount (PKR 850 saved)
+              </span>
+<button class="text-text-muted hover:text-status-critical font-label-sm text-label-sm font-semibold" type="button">
+                Remove
+              </button>
+</div>
+</div>
+<!-- Detailed Price Breakdown Calculation -->
+<div class="mt-space-md pt-space-md flex flex-col gap-2 font-body-md text-body-md">
+<div class="flex items-center justify-between text-text-secondary">
+<span>Cart Subtotal</span>
+<span class="font-medium text-text-primary">PKR 8,500</span>
+</div>
+<div class="flex items-center justify-between text-text-secondary">
+<span class="flex items-center gap-1.5">
+<span>Nationwide Courier Shipping</span>
+<span class="material-symbols-outlined text-[14px] text-status-positive" title="Free courier unlocked for orders above PKR 3,000">info</span>
+</span>
+<div class="text-right">
+<span class="text-text-muted line-through mr-1 text-body-sm">PKR 250</span>
+<span class="font-bold text-status-positive uppercase font-label-sm text-label-sm bg-status-positive-bg px-1.5 py-0.5 rounded">FREE</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-status-positive">
+<span>Voucher Savings (HUNZAFAM10)</span>
+<span class="font-semibold">- PKR 850</span>
+</div>
+<div class="flex items-center justify-between text-text-secondary">
+<span>Sales Tax &amp; Lab Certification</span>
+<span class="font-medium text-text-primary">PKR 0 (Included)</span>
+</div>
+<!-- Total Highlight Box -->
+<div class="mt-space-sm pt-space-sm bg-surface-container-low p-space-sm rounded-lg flex items-baseline justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-text-primary font-bold block">Total Amount Due</span>
+<span class="font-body-sm text-body-sm text-text-muted">Payable via Cash on Delivery</span>
+</div>
+<div class="text-right">
+<span class="font-metric-val text-metric-val font-bold text-primary tracking-tight">PKR 7,650</span>
+</div>
+</div>
+</div>
+<!-- PRIMARY CONVERSION CTA BUTTON -->
+<div class="mt-space-md flex flex-col gap-2">
+<button class="w-full py-3.5 px-space-md rounded-lg bg-status-positive hover:bg-primary text-on-primary font-headline-sm text-headline-sm font-semibold transition-all transform active:scale-[0.99] shadow-md flex items-center justify-center gap-2 group" type="button">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110">verified</span>
+<span>Place Order (Cash on Delivery) — PKR 7,650</span>
+</button>
+<!-- Reassurance micro-copy -->
+<div class="flex items-center justify-center gap-1.5 text-center text-text-muted font-body-sm text-body-sm pt-1">
+<span class="material-symbols-outlined text-[15px] text-status-positive">shield</span>
+<span>Backed by 7-Day Organic Purity &amp; Taste Guarantee. No risk.</span>
+</div>
+</div>
+<!-- Express Guarantee Callout -->
+<div class="mt-space-md pt-space-sm p-3 rounded-lg bg-surface-muted flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[20px] mt-0.5">local_florist</span>
+<div class="flex flex-col text-left">
+<span class="font-label-md text-label-md text-text-primary font-bold">Direct Mountain Source Promise</span>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">
+                Every bottle and jar is packed in Hunza Valley under strict PCSIR food standards and dispatched in shock-absorbent thermal air cushions.
+              </p>
+</div>
+</div>
+</div>
+<!-- WhatsApp Founder Direct Helpline Card -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-status-positive-bg text-status-positive flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">support_agent</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-bold text-text-primary">Need help ordering?</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Call or WhatsApp founder support directly</span>
+</div>
+</div>
+<a class="px-3 py-1.5 rounded-lg bg-surface-muted text-primary hover:bg-status-positive hover:text-on-primary font-label-md text-label-md font-semibold transition-colors flex items-center gap-1 flex-shrink-0" href="https://wa.me/923001234567" rel="noopener noreferrer" target="_blank">
+<span>+92 300 1234567</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Reassurance & Confidence 4-Item Horizontal Strip -->
+<div class="w-full bg-surface-card shadow-sm mt-space-lg">
+<div class="max-w-[1440px] mx-auto px-margin-sm lg:px-margin py-space-md">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-gutter-sm text-left">
+<div class="flex items-center gap-3 p-2">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">rocket_launch</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-bold text-text-primary">24–48h Courier</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Air express to major Pakistani hubs</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">replay</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-bold text-text-primary">7-Day Taste Guarantee</span>
+<span class="font-body-sm text-body-sm text-text-secondary">100% refund if not totally delighted</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">handshake</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-bold text-text-primary">Cash on Delivery</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Verify package upon arrival first</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">science</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-bold text-text-primary">Lab Certified Pure</span>
+<span class="font-body-sm text-body-sm text-text-secondary">PCSIR lab tested organic origin</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Micro-interaction JS for countdown & interactive payment highlight -->
+<script>
+    (function initCheckoutFeatures() {
+      // Countdown Timer for cart reservation
+      let duration = 14 * 60 + 20; // 14 mins 20 secs
+      const timerDisplay = document.getElementById('timer-display');
+      
+      if (timerDisplay) {
+        const interval = setInterval(function () {
+          const minutes = Math.floor(duration / 60);
+          const seconds = duration % 60;
+          timerDisplay.textContent = 'Held for ' + (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+          if (--duration < 0) {
+            clearInterval(interval);
+            timerDisplay.textContent = 'Reservation Expiring!';
+          }
+        }, 1000);
+      }
+
+      // Interactive radio selection container highlights
+      const radios = document.querySelectorAll('input[name="payment_choice"]');
+      radios.forEach(radio => {
+        radio.addEventListener('change', function() {
+          radios.forEach(r => {
+            const container = r.closest('label');
+            if (r.checked) {
+              container.classList.add('bg-status-positive-bg/30');
+              container.classList.remove('bg-surface-card');
+            } else {
+              container.classList.remove('bg-status-positive-bg/30');
+              container.classList.add('bg-surface-card');
+            }
+          });
+        });
+      });
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-card shadow-[0_-1px_8px_rgba(0,0,0,0.02)] mt-auto"><div class="max-w-[1440px] mx-auto px-margin-sm lg:px-margin py-space-xl flex flex-col items-center gap-space-lg"><div class="grid grid-cols-1 md:grid-cols-3 gap-gutter w-full max-w-4xl text-center"><div class="flex items-center justify-center gap-space-sm p-space-sm rounded-xl bg-surface-muted"><span class="material-symbols-outlined text-primary text-[20px]">local_shipping</span><span class="font-label-md text-label-md text-text-secondary">Fast Nationwide Courier</span></div><div class="flex items-center justify-center gap-space-sm p-space-sm rounded-xl bg-surface-muted"><span class="material-symbols-outlined text-primary text-[20px]">published_with_changes</span><span class="font-label-md text-label-md text-text-secondary">Easy Returns &amp; Exchange</span></div><div class="flex items-center justify-center gap-space-sm p-space-sm rounded-xl bg-surface-muted"><span class="material-symbols-outlined text-primary text-[20px]">payments</span><span class="font-label-md text-label-md text-text-secondary">Cash on Delivery Guaranteed</span></div></div><div class="flex flex-col sm:flex-row items-center justify-between w-full pt-space-lg gap-space-sm"><p class="font-body-sm text-body-sm text-text-muted">© 2024 Hunza Harvest Ltd. All rights reserved. Direct-from-source premium harvest.</p><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm text-text-muted">Distraction-Free Safe Checkout</span></div></div></div></footer></body></html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;min-height:100%;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "outline-variant": "#bccac0", "background": "#f8f9ff", "secondary-fixed-dim": "#bec6e0", "surface-dim": "#cbdbf5", "surface-variant": "#d3e4fe", "text-secondary": "#475569", "surface-card": "#ffffff", "on-primary-fixed-variant": "#005137", "tertiary-fixed": "#6ffbbe", "tertiary": "#006947", "border-strong": "#cbd5e1", "text-muted": "#94a3b8", "status-critical": "#e11d48", "surface-container": "#e5eeff", "secondary-fixed": "#dae2fd", "status-warning-bg": "#fffbeb", "on-secondary-fixed": "#131b2e", "on-tertiary-fixed": "#002113", "error-container": "#ffdad6", "border-subtle": "#e2e8f0", "on-surface-variant": "#3d4a42", "surface-muted": "#f1f5f9", "on-primary-fixed": "#002114", "surface-container-high": "#dce9ff", "primary": "#006948", "secondary-container": "#dae2fd", "surface-bright": "#f8f9ff", "on-surface": "#0b1c30", "on-error-container": "#93000a", "inverse-primary": "#68dba9", "tertiary-fixed-dim": "#4edea3", "status-warning": "#d97706", "on-error": "#ffffff", "on-tertiary": "#ffffff", "on-primary-container": "#f5fff7", "surface-tint": "#006c4a", "surface-container-lowest": "#ffffff", "primary-fixed": "#85f8c4", "inverse-surface": "#213145", "primary-fixed-dim": "#68dba9", "inverse-on-surface": "#eaf1ff", "surface-container-low": "#eff4ff", "surface-container-highest": "#d3e4fe", "status-positive-border": "#a7f3d0", "canvas-bg": "#f8fafc", "on-secondary": "#ffffff", "secondary": "#565e74", "primary-container": "#00855d", "on-secondary-fixed-variant": "#3f465c", "on-tertiary-container": "#f5fff6", "surface": "#f8f9ff", "on-secondary-container": "#5c647a", "on-tertiary-fixed-variant": "#005236", "text-primary": "#0f172a", "status-positive": "#059669", "status-critical-bg": "#fff1f2", "on-background": "#0b1c30", "error": "#ba1a1a", "status-positive-bg": "#ecfdf5", "on-primary": "#ffffff", "tertiary-container": "#00855b", "outline": "#6d7a72" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-xs": "0.25rem", "gutter": "1.5rem", "margin-sm": "1rem", "space-lg": "1.5rem", "gutter-sm": "1rem", "space-md": "1rem", "space-sm": "0.5rem", "margin": "2rem", "space-xl": "2.5rem" }, fontFamily: { "body-sm": ["Inter"], "display-lg": ["Plus Jakarta Sans"], "metric-val": ["Plus Jakarta Sans"], "label-sm": ["Inter"], "display-lg-mobile": ["Plus Jakarta Sans"], "body-md": ["Inter"], "label-md": ["Inter"], "body-lg": ["Inter"], "headline-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"] }, fontSize: { "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.005em", "fontWeight": "400" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "metric-val": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.025em", "fontWeight": "700" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }], "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter-sm flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm"><button aria-label="Close and Return Home" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-muted transition-colors" onclick="history.back()" type="button"><span class="material-symbols-outlined text-[24px]">close</span></button><img alt="Hunza Harvest Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VGObyPZ_dbebBd40gRJe9O4uuzlXT6XrvuqCT4rgweSiE3Jn0iU3P3BwBP8-L5breq3XsK1z2OwKZJWizJBzcmkbd_FHJSLDJtKr96PdJ-cXxayowVZlX0JT3_qmf7CX4G4bcsfDEjCHMSvQE4x36zzkxuW-gXG4TvAfpnCm_rzwgTgk26ml-MsdwsfBm5oIMu23CT6IOnadXyatIGFLZD-DITVwc9i34XyH1iilRTgAEHGJmJf3ZjaqQG"/><div class="flex flex-col"><span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Hunza Harvest</span><h1 class="font-headline-sm text-headline-sm text-text-primary tracking-tight leading-none">Order Receipt</h1></div></div><div class="flex items-center gap-space-sm"><div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg text-status-positive"><span class="w-1.5 h-1.5 rounded-full bg-status-positive animate-pulse"></span><span class="font-label-sm text-label-sm tracking-wide font-semibold">#HH-94821</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-safe bg-surface"><div class="flex flex-col w-full px-gutter-sm pb-space-xl space-y-space-md">
+<!-- Celebratory Status Card -->
+<div class="w-full bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col items-center text-center relative overflow-hidden">
+<!-- Ambient organic backdrop highlight -->
+<div class="absolute -top-12 -right-12 w-40 h-40 bg-status-positive-bg rounded-full blur-2xl pointer-events-none"></div>
+<div class="absolute -bottom-10 -left-10 w-36 h-36 bg-surface-container rounded-full blur-xl pointer-events-none"></div>
+<!-- Glowing Animated Checkmark Badge -->
+<div class="relative flex items-center justify-center my-space-sm">
+<div class="absolute w-20 h-20 rounded-full bg-status-positive-bg animate-ping opacity-75"></div>
+<div class="relative w-16 h-16 rounded-full bg-status-positive text-on-primary flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[34px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<!-- Headline & Subtitle -->
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-text-primary tracking-tight mt-space-sm">Order Confirmed!</h2>
+<p class="font-body-md text-body-md text-text-secondary mt-1.5 max-w-xs leading-relaxed">
+      Thank you, Zainab! We’ve received your order and our artisan team is packing your fresh Himalayan harvest.
+    </p>
+<!-- Order Pill with Copy Microinteraction -->
+<div class="mt-space-md inline-flex items-center gap-2 bg-surface-muted px-3.5 py-1.5 rounded-full">
+<span class="font-label-md text-label-md text-text-primary font-medium tracking-wide">ID: <span id="orderIdText">#ORD-98421</span> • Oct 24, 2:45 PM</span>
+<button aria-label="Copy Order ID" class="flex items-center justify-center text-text-muted hover:text-text-primary transition-colors focus:outline-none" id="copyOrderBtn" type="button">
+<span class="material-symbols-outlined text-[17px]" id="copyIcon">content_copy</span>
+</button>
+</div>
+<!-- SMS / Notification Confirmation Notice -->
+<div class="mt-3 flex items-center gap-1.5 bg-status-positive-bg px-3 py-1.5 rounded-lg text-status-positive">
+<span class="material-symbols-outlined text-[16px]">chat_bubble</span>
+<span class="font-body-sm text-body-sm font-medium">Confirmation dispatched to +92 300 8472918</span>
+</div>
+</div>
+<!-- Step Order Progress Tracker -->
+<div class="w-full bg-surface-card rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]">local_shipping</span>
+<span class="font-headline-sm text-headline-sm text-text-primary">Fulfillment Progress</span>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container-high px-2 py-0.5 rounded text-text-primary font-semibold">24–48h Delivery</span>
+</div>
+<!-- Timeline Steps -->
+<div class="mt-3 space-y-3 relative">
+<!-- Item 1: Placed -->
+<div class="flex items-start gap-3">
+<div class="flex flex-col items-center">
+<div class="w-7 h-7 rounded-full bg-status-positive text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div class="w-0.5 h-6 bg-status-positive mt-1"></div>
+</div>
+<div class="pt-0.5 min-w-0 flex-1">
+<p class="font-label-md text-label-md text-text-primary font-semibold">Order Placed &amp; Verified</p>
+<p class="font-body-sm text-body-sm text-text-muted">Today at 2:45 PM • Automated system match</p>
+</div>
+</div>
+<!-- Item 2: Apothecary Packing (Active) -->
+<div class="flex items-start gap-3">
+<div class="flex flex-col items-center">
+<div class="w-7 h-7 rounded-full bg-status-positive-bg text-status-positive flex items-center justify-center shrink-0 relative">
+<span class="w-2.5 h-2.5 rounded-full bg-status-positive animate-pulse"></span>
+</div>
+<div class="w-0.5 h-6 bg-border-subtle mt-1"></div>
+</div>
+<div class="pt-0.5 min-w-0 flex-1">
+<div class="flex items-center gap-2">
+<p class="font-label-md text-label-md text-text-primary font-semibold">Apothecary QC &amp; Packing</p>
+<span class="font-label-sm text-label-sm px-1.5 py-0.2 bg-status-positive-bg text-status-positive rounded uppercase tracking-wider">In Progress</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">Direct from organic storehouse batch #H82</p>
+</div>
+</div>
+<!-- Item 3: TCS Dispatch (Upcoming) -->
+<div class="flex items-start gap-3">
+<div class="flex flex-col items-center">
+<div class="w-7 h-7 rounded-full bg-surface-muted text-text-muted flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">flight_takeoff</span>
+</div>
+<div class="w-0.5 h-6 bg-border-subtle mt-1"></div>
+</div>
+<div class="pt-0.5 min-w-0 flex-1">
+<p class="font-label-md text-label-md text-text-secondary font-medium">TCS Air Express Dispatch</p>
+<p class="font-body-sm text-body-sm text-text-muted">Estimated departure Oct 25, 08:30 AM</p>
+</div>
+</div>
+<!-- Item 4: Doorstep Handover (Upcoming) -->
+<div class="flex items-start gap-3">
+<div class="flex flex-col items-center">
+<div class="w-7 h-7 rounded-full bg-surface-muted text-text-muted flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">home_pin</span>
+</div>
+</div>
+<div class="pt-0.5 min-w-0 flex-1">
+<p class="font-label-md text-label-md text-text-secondary font-medium">Doorstep Handover (COD)</p>
+<p class="font-body-sm text-body-sm text-text-muted">Expected Oct 26 – 27 • Cash on Delivery</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Delivery & Payment Summary Card -->
+<div class="w-full bg-surface-card rounded-xl p-space-md shadow-sm space-y-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">location_on</span>
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Delivery &amp; Payment Details</h3>
+</div>
+<!-- Recipient & Address Grid -->
+<div class="bg-surface-muted rounded-lg p-3.5 space-y-2">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wide text-text-muted">Recipient</span>
+<span class="font-label-md text-label-md text-text-primary font-semibold">Zainab Rehman</span>
+</div>
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wide text-text-muted shrink-0 mt-0.5">Shipping Address</span>
+<span class="font-body-sm text-body-sm text-text-secondary text-right max-w-[210px] leading-snug">
+          House 42-B, Street 7, Block K, Phase 5 DHA, Lahore
+        </span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wide text-text-muted">Contact</span>
+<span class="font-body-sm text-body-sm text-text-secondary">+92 300 8472918</span>
+</div>
+</div>
+<!-- Method Badges -->
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-muted p-3 rounded-lg flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-text-primary">
+<span class="material-symbols-outlined text-[18px] text-primary">payments</span>
+<span class="font-label-sm text-label-sm font-semibold">Payment Mode</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Cash on Delivery (COD)</p>
+<span class="font-label-sm text-label-sm text-status-positive font-medium">Zero advance needed</span>
+</div>
+<div class="bg-surface-muted p-3 rounded-lg flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-text-primary">
+<span class="material-symbols-outlined text-[18px] text-primary">verified_user</span>
+<span class="font-label-sm text-label-sm font-semibold">Logistics Carrier</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">TCS Air Express</p>
+<span class="font-label-sm text-label-sm text-text-muted">Insured Fragile Packaging</span>
+</div>
+</div>
+</div>
+<!-- Purchased Items Receipt List -->
+<div class="w-full bg-surface-card rounded-xl p-space-md shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">shopping_bag</span>
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Items in Harvest Package</h3>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container px-2 py-0.5 rounded text-on-surface">3 Products</span>
+</div>
+<!-- Items Stack -->
+<div class="space-y-3">
+<!-- Item 1 -->
+<div class="flex items-center gap-3 p-2 rounded-lg bg-canvas-bg">
+<img alt="Wild Sidr Honey" class="w-14 h-14 rounded-lg object-cover bg-surface-muted shrink-0" data-alt="A premium glass apothecary jar of golden raw Karakoram wild Sidr honey with clean Hunza Harvest label, organic natural amber glow, studio lighting, top-down view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoniKaFVCyuGFg2tguHuIwCPeDgYyaz4udh9E58v96OyyUWbArkSfbSc9Y_ed6fJDGUv2dYLQMBBGESBHWAHmwf8pz6YL3ctGZJ2TZf8UUjFriJ2W_LeVEn1dRa1tvlWuUFcixA5JqBvYgzsQdPX1Ww3te0-qUp91MUxwAhTyKoqn2KY0lReyDiY2HaM-rN2X2zeJQpCIldI7xcDFwN0-rddeb0G9iC8jMAamNf6goBY5rl-7zdZur-A"/>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline-sm text-headline-sm text-text-primary truncate leading-snug">Raw Karakoram Wild Sidr Honey</h4>
+<p class="font-body-sm text-body-sm text-text-muted">500g Glass Pot • Qty: 1</p>
+</div>
+<div class="text-right shrink-0">
+<p class="font-label-md text-label-md text-text-primary font-semibold">PKR 2,450</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center gap-3 p-2 rounded-lg bg-canvas-bg">
+<img alt="Sweet Almond Oil" class="w-14 h-14 rounded-lg object-cover bg-surface-muted shrink-0" data-alt="Dark amber glass dropper bottle containing pure cold-pressed sweet almond oil, minimalist alpine botanical label, natural morning sunbeams on wooden surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmoiGHNy33EBptbFRBiCplHMr1EhJaBhz5Ehqih5toigQlOuST2lWAwEvdNop5gQ8VKMVd7LaDoaXvRxsbjRlX9Erp8_uvNoYu7Jbnq7birtHIb6J9YgMYI5UNC2Y19yUF_AFqbdrRjk_t_5jBjvXdrrJNUT8OR2VSQIMq_GD7-uTyTSeITuiIOISLgWROazXIYsYe8n2Mw2vkycL2MyxfZ1jXsljUwUs00OPkQHYJfyjJbYieTAwQtg"/>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline-sm text-headline-sm text-text-primary truncate leading-snug">Cold-Pressed Sweet Almond Oil</h4>
+<p class="font-body-sm text-body-sm text-text-muted">250ml Amber Bottle • Qty: 1</p>
+</div>
+<div class="text-right shrink-0">
+<p class="font-label-md text-label-md text-text-primary font-semibold">PKR 1,850</p>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center gap-3 p-2 rounded-lg bg-canvas-bg">
+<img alt="Gilgit Shelled Walnuts" class="w-14 h-14 rounded-lg object-cover bg-surface-muted shrink-0" data-alt="Eco-friendly craft paper pouch with clear window displaying premium whole Gilgit valley shelled walnut kernels, crisp alpine aesthetic, high clarity macro photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5449IoWj3lnAmN0u-JTg4H4-c3FvcI9-1Af73eDT0o0kA0vgcBsK8jidW_embQ2UvsEHLIwnqjB8-XuXWvYqOQdiuQVwjksfgSHL-CwlhFfTEzSTb-XBMFLsD9pWJaFh3WcI6ehEngq2SQUu4rbixLfZ2CcB4ecQ-HLs5U2puc4-Zq8Yw5d5ewcr9doV8wsVHNpIFl9TJbedlmR3vgzheozIz-ouXp9vJ6dfedNX-poZlp-UV3_c-fw"/>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline-sm text-headline-sm text-text-primary truncate leading-snug">Gilgit Shelled Walnut Kernels</h4>
+<p class="font-body-sm text-body-sm text-text-muted">400g Foil Seal • Qty: 2</p>
+</div>
+<div class="text-right shrink-0">
+<p class="font-label-md text-label-md text-text-primary font-semibold">PKR 4,200</p>
+</div>
+</div>
+</div>
+<!-- Order Ledger Breakdown -->
+<div class="space-y-2 pt-2">
+<div class="flex justify-between font-body-sm text-body-sm text-text-secondary">
+<span>Order Subtotal</span>
+<span class="text-text-primary font-medium">PKR 8,500</span>
+</div>
+<div class="flex justify-between font-body-sm text-body-sm text-text-secondary">
+<span>Nationwide Insured Courier</span>
+<span class="text-status-positive font-semibold">FREE</span>
+</div>
+<div class="flex justify-between font-body-sm text-body-sm text-text-secondary items-center">
+<span class="flex items-center gap-1">
+          Voucher Code <span class="bg-status-positive-bg text-status-positive font-label-sm text-label-sm px-1.5 py-0.2 rounded font-semibold uppercase">HUNZAFAM10</span>
+</span>
+<span class="text-status-positive font-semibold">-PKR 850</span>
+</div>
+<!-- Grand Total COD Container -->
+<div class="mt-space-sm bg-status-positive-bg p-space-md rounded-xl flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-status-positive uppercase font-bold tracking-wider">Net Amount Due (COD)</span>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">Pay exact cash upon parcel delivery</p>
+</div>
+<div class="text-right">
+<span class="font-metric-val text-metric-val text-primary tracking-tight">PKR 7,650</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Primary Interactive Touch Actions -->
+<div class="w-full space-y-space-sm pt-space-xs">
+<!-- Download Invoice Button -->
+<button class="w-full h-12 bg-primary text-on-primary rounded-lg font-label-md text-label-md font-semibold flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] transition-transform" id="downloadReceiptBtn" type="button">
+<span class="material-symbols-outlined text-[20px]">download</span>
+<span>Download Official Receipt (PDF)</span>
+</button>
+<!-- WhatsApp Support Direct Link -->
+<a class="w-full h-12 bg-surface-card text-text-primary rounded-lg font-label-md text-label-md font-semibold flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] transition-transform" href="https://wa.me/923001234567?text=Hello%20Hunza%20Harvest,%20I%20have%20an%20inquiry%20regarding%20my%20Order%20ORD-98421" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[20px] text-status-positive">chat</span>
+<span>WhatsApp Order Concierge</span>
+</a>
+<!-- Return to Storefront -->
+<button class="w-full h-11 bg-transparent text-text-secondary hover:text-text-primary rounded-lg font-label-md text-label-md font-medium flex items-center justify-center gap-1.5 transition-colors" onclick="history.back()" type="button">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span>Back to Storefront</span>
+</button>
+</div>
+<!-- Trust, Guarantee & Compliance Footer -->
+<div class="w-full bg-surface-card rounded-xl p-space-md text-center shadow-sm space-y-2">
+<div class="flex items-center justify-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[20px]">workspace_premium</span>
+<span class="font-label-md text-label-md font-semibold text-text-primary">100% Purity &amp; Harvest Guarantee</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary leading-relaxed max-w-sm mx-auto">
+      All products verified by PCSIR Lab analysis. Enjoy our zero-risk 7-Day Organic Taste Guarantee on every container opened.
+    </p>
+<div class="pt-1 flex items-center justify-center gap-4 text-text-muted font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">call</span>
+        +92 300 1234567
+      </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+        orders@hunzaharvest.pk
+      </span>
+</div>
+</div>
+</div>
+<script>
+  // Micro-interaction for Order ID copy feedback
+  const copyBtn = document.getElementById('copyOrderBtn');
+  const copyIcon = document.getElementById('copyIcon');
+
+  if (copyBtn && copyIcon) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText('#ORD-98421').then(() => {
+        copyIcon.textContent = 'check';
+        copyIcon.classList.add('text-status-positive');
+        setTimeout(() => {
+          copyIcon.textContent = 'content_copy';
+          copyIcon.classList.remove('text-status-positive');
+        }, 2000);
+      });
+    });
+  }
+
+  // Visual simulation for receipt download feedback
+  const downloadBtn = document.getElementById('downloadReceiptBtn');
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => {
+      const origContent = downloadBtn.innerHTML;
+      downloadBtn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span><span>Preparing PDF...</span>';
+      setTimeout(() => {
+        downloadBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">check_circle</span><span>Receipt Saved</span>';
+        setTimeout(() => {
+          downloadBtn.innerHTML = origContent;
+        }, 2500);
+      }, 1000);
+    });
+  }
+</script></main></body></html>

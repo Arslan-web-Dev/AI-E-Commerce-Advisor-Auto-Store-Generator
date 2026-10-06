@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-tertiary": "#ffffff", "status-positive-bg": "#ecfdf5", "on-primary-fixed-variant": "#005137", "canvas-bg": "#f8fafc", "outline": "#6d7a72", "primary-container": "#00855d", "outline-variant": "#bccac0", "tertiary-container": "#00855b", "surface-container-high": "#dce9ff", "border-strong": "#cbd5e1", "surface-container-highest": "#d3e4fe", "surface-container-lowest": "#ffffff", "status-warning-bg": "#fffbeb", "on-primary-fixed": "#002114", "background": "#f8f9ff", "text-primary": "#0f172a", "surface-container-low": "#eff4ff", "secondary": "#565e74", "text-muted": "#94a3b8", "surface-card": "#ffffff", "surface-variant": "#d3e4fe", "on-tertiary-container": "#f5fff6", "on-secondary-fixed-variant": "#3f465c", "status-positive-border": "#a7f3d0", "on-primary": "#ffffff", "on-background": "#0b1c30", "on-tertiary-fixed-variant": "#005236", "surface-tint": "#006c4a", "surface-dim": "#cbdbf5", "secondary-fixed": "#dae2fd", "status-warning": "#d97706", "tertiary": "#006947", "inverse-on-surface": "#eaf1ff", "primary": "#006948", "surface": "#f8f9ff", "status-critical-bg": "#fff1f2", "on-secondary-fixed": "#131b2e", "status-critical": "#e11d48", "on-error": "#ffffff", "secondary-fixed-dim": "#bec6e0", "on-primary-container": "#f5fff7", "inverse-primary": "#68dba9", "on-secondary": "#ffffff", "error": "#ba1a1a", "surface-muted": "#f1f5f9", "text-secondary": "#475569", "inverse-surface": "#213145", "secondary-container": "#dae2fd", "on-error-container": "#93000a", "on-secondary-container": "#5c647a", "primary-fixed": "#85f8c4", "primary-fixed-dim": "#68dba9", "error-container": "#ffdad6", "status-positive": "#059669", "tertiary-fixed-dim": "#4edea3", "on-surface-variant": "#3d4a42", "on-tertiary-fixed": "#002113", "surface-container": "#e5eeff", "border-subtle": "#e2e8f0", "surface-bright": "#f8f9ff", "on-surface": "#0b1c30", "tertiary-fixed": "#6ffbbe" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "margin": "2rem", "space-xs": "0.25rem", "space-xl": "2.5rem", "margin-sm": "1rem", "gutter-sm": "1rem", "space-lg": "1.5rem", "space-sm": "0.5rem", "space-md": "1rem", "gutter": "1.5rem" }, "fontFamily": { "headline-lg-mobile": [ "Plus Jakarta Sans" ], "display-lg-mobile": [ "Plus Jakarta Sans" ], "label-md": [ "Inter" ], "body-lg": [ "Inter" ], "metric-val": [ "Plus Jakarta Sans" ], "body-md": [ "Inter" ], "display-lg": [ "Plus Jakarta Sans" ], "headline-sm": [ "Plus Jakarta Sans" ], "headline-md": [ "Plus Jakarta Sans" ], "headline-lg": [ "Plus Jakarta Sans" ], "label-sm": [ "Inter" ], "body-sm": [ "Inter" ] }, "fontSize": { "headline-lg-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "display-lg-mobile": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-md": [ "13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "body-lg": [ "16px", { "lineHeight": "26px", "letterSpacing": "-0.005em", "fontWeight": "400" } ], "metric-val": [ "30px", { "lineHeight": "36px", "letterSpacing": "-0.025em", "fontWeight": "700" } ], "body-md": [ "14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" } ], "display-lg": [ "40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" } ], "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "headline-lg": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "label-sm": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" } ], "body-sm": [ "12px", { "lineHeight": "18px", "letterSpacing": "0.005em", "fontWeight": "400" } ] } } } };</script></head><body class="bg-canvas-bg font-body-md text-text-primary antialiased min-h-screen flex flex-col"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-[1440px] mx-auto px-margin flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-xl"><div class="flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #10b981
+- Font: plusJakartaSans
+- Mode: dark
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VGObyPZ_dbebBd40gRJe9O4uuzlXT6XrvuqCT4rgweSiE3Jn0iU3P3BwBP8-L5breq3XsK1z2OwKZJWizJBzcmkbd_FHJSLDJtKr96PdJ-cXxayowVZlX0JT3_qmf7CX4G4bcsfDEjCHMSvQE4x36zzkxuW-gXG4TvAfpnCm_rzwgTgk26ml-MsdwsfBm5oIMu23CT6IOnadXyatIGFLZD-DITVwc9i34XyH1iilRTgAEHGJmJf3ZjaqQG"/><span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">Feasibility Advisor</span></div><nav class="hidden lg:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-headline-sm text-headline-sm rounded-lg shadow-sm"><a class="px-space-md py-space-sm font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted rounded-lg transition-all" data-path="dashboard" href="#">Dashboard</a><a class="px-space-md py-space-sm font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted rounded-lg transition-all" data-path="feasibility-studies" href="#">Feasibility Studies</a><a class="px-space-md py-space-sm font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted rounded-lg transition-all" data-path="my-stores" href="#">My Stores</a><a class="px-space-md py-space-sm font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted rounded-lg transition-all" data-path="market-intelligence" href="#">Market Intelligence</a><a aria-current="page" class="px-space-md py-space-sm transition-all bg-primary-container text-on-primary-container font-headline-sm text-headline-sm rounded-lg shadow-sm" data-path="settings" href="#">Settings</a></nav></div><div class="flex items-center gap-space-md"><div class="hidden sm:inline-flex items-center gap-space-xs px-space-md py-1 bg-status-positive-bg rounded-full"><span class="w-2 h-2 rounded-full bg-status-positive animate-pulse"></span><span class="font-label-sm text-label-sm uppercase text-status-positive tracking-wider">Advisor Engine Active</span></div><div class="h-6 w-px bg-border-subtle hidden sm:block"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="flex flex-col text-right hidden md:block"><span class="font-label-md text-label-md text-text-primary leading-none">Zainab Rehman</span><span class="font-label-sm text-label-sm text-text-muted mt-0.5">Managing Director</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-16 flex-1 bg-canvas-bg"><div class="max-w-[1440px] mx-auto px-margin py-space-lg"><div class="flex flex-col w-full">
+<!-- BREADCRUMBS & EXECUTIVE HEADER -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-space-md mb-space-lg">
+<div>
+<nav aria-label="Breadcrumb" class="flex items-center gap-space-xs text-text-muted font-label-sm text-label-sm mb-space-xs">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[15px]">dashboard</span>
+<span>Dashboard</span>
+</a>
+<span class="material-symbols-outlined text-[14px] text-text-muted">chevron_right</span>
+<span class="text-text-primary font-medium">Account Settings</span>
+</nav>
+<div class="flex items-center gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Account &amp; Security Profile</h1>
+</div>
+<p class="font-body-md text-body-md text-text-secondary mt-0.5">
+        Manage your personal credentials, connected authentication providers, and subscription data.
+      </p>
+</div>
+<!-- TIER BADGE PILL -->
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-status-positive-bg shadow-sm">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-positive opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-status-positive"></span>
+</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-status-positive">Tier: Startup SME</span>
+<span class="w-1 h-1 rounded-full bg-status-positive opacity-40"></span>
+<span class="font-label-sm text-label-sm text-text-secondary font-medium">Active</span>
+</div>
+</div>
+</div>
+<!-- 2-COLUMN MAIN WORKSPACE -->
+<div class="grid grid-cols-12 gap-gutter items-start">
+<!-- LEFT COLUMN: Profile & Fast Nav & Plan -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-space-lg">
+<!-- Profile Summary Card -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm relative overflow-hidden">
+<!-- Visual top accent strip -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-fixed to-primary"></div>
+<div class="flex flex-col items-center text-center">
+<div class="relative group">
+<div class="w-20 h-20 rounded-full bg-surface-container flex items-center justify-center text-primary font-headline-md text-headline-md tracking-wider shadow-inner">
+              ZR
+            </div>
+<button aria-label="Upload photo" class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md hover:bg-primary-container transition-transform hover:scale-105" title="Change Profile Photo" type="button">
+<span class="material-symbols-outlined text-[15px]">photo_camera</span>
+</button>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary mt-space-sm">Zainab Rehman</h2>
+<p class="font-body-sm text-body-sm text-text-muted">zainab@rehmanfoods.pk</p>
+<div class="mt-space-sm flex flex-wrap justify-center gap-space-xs">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+              Store Owner / Entrepreneur
+            </span>
+</div>
+<div class="mt-space-sm w-full bg-canvas-bg rounded-lg p-space-xs flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-text-muted text-[16px]">storefront</span>
+<span class="font-label-sm text-label-sm text-text-secondary truncate">Organic Essentials PK (Gulberg III)</span>
+</div>
+</div>
+<div class="h-px bg-surface-muted my-space-md"></div>
+<!-- In-page Navigation Tabs -->
+<div class="flex flex-col gap-1" id="section-nav">
+<a class="flex items-center gap-3 px-space-md py-2.5 rounded-lg font-label-md text-label-md bg-status-positive-bg text-status-positive shadow-sm transition-colors" href="#personal-info">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="font-medium flex-1">Personal Info</span>
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+</a>
+<a class="flex items-center gap-3 px-space-md py-2.5 rounded-lg font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors" href="#security-section">
+<span class="material-symbols-outlined text-[18px]">shield</span>
+<span class="flex-1">Security &amp; Password</span>
+</a>
+<a class="flex items-center gap-3 px-space-md py-2.5 rounded-lg font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors" href="#oauth-providers">
+<span class="material-symbols-outlined text-[18px]">hub</span>
+<span class="flex-1">Connected Accounts</span>
+</a>
+<a class="flex items-center gap-3 px-space-md py-2.5 rounded-lg font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors" href="#usage-quotas">
+<span class="material-symbols-outlined text-[18px]">bar_chart</span>
+<span class="flex-1">System Usage &amp; Quotas</span>
+</a>
+<a class="flex items-center gap-3 px-space-md py-2.5 rounded-lg font-label-md text-label-md text-status-critical hover:bg-status-critical-bg transition-colors mt-2" href="#danger-zone">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+<span class="flex-1">Danger Zone</span>
+</a>
+</div>
+</div>
+<!-- Quick Summary Plan Card -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Subscription Model</span>
+<h3 class="font-headline-sm text-headline-sm text-text-primary mt-0.5">Startup Tier (Free)</h3>
+</div>
+<div class="w-9 h-9 rounded-lg bg-surface-muted flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+</div>
+</div>
+<div class="bg-canvas-bg rounded-lg p-space-md my-space-md flex flex-col gap-1">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-text-secondary">Renewal Cost</span>
+<span class="font-medium text-text-primary">Rs. 0 / mo</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-text-secondary">Renewal Schedule</span>
+<span class="text-status-positive font-medium">Never (Free Forever for SMEs)</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-text-secondary">Active Region Hubs</span>
+<span class="font-medium text-text-primary">Lahore, KHI, ISB</span>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary py-2.5 px-space-md rounded-lg font-label-md text-label-md hover:bg-primary-container shadow-sm transition-all" type="button">
+<span>Upgrade to Enterprise Hub</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<!-- Location Hub Mini Card -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">location_on</span>
+</div>
+<div class="min-w-0">
+<p class="font-label-sm text-label-sm text-text-muted uppercase tracking-wide">Primary Store Location</p>
+<p class="font-label-md text-label-md text-text-primary truncate font-semibold">Gulberg III, Main Boulevard</p>
+<p class="font-body-sm text-body-sm text-text-secondary truncate">Lahore, Punjab, Pakistan</p>
+</div>
+</div>
+</div>
+<!-- RIGHT MAIN CONTENT AREA -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-space-lg">
+<!-- CARD 1: Personal Information -->
+<section class="bg-surface-card rounded-xl p-space-lg shadow-sm" id="personal-info">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-space-md gap-space-xs">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Personal Information</h2>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">
+              Update your primary founder details and communication preferences.
+            </p>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted flex items-center gap-1 self-start sm:self-center">
+<span class="material-symbols-outlined text-[14px] text-status-positive">chevron_forward</span>
+<span>Draft auto-saved 2m ago</span>
+</span>
+</div>
+<form class="mt-space-md flex flex-col gap-space-md" onsubmit="event.preventDefault();">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Full Name -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="fullName">Full Legal Name</label>
+<div class="relative">
+<input class="w-full h-10 px-3 bg-surface-card rounded-lg text-text-primary font-body-md text-body-md shadow-inner focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" id="fullName" type="text" value="Zainab Rehman"/>
+</div>
+</div>
+<!-- Email Address (Read-only + Verified) -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="userEmail">Email Address</label>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-status-positive-bg text-status-positive font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px]">check_circle</span>
+<span>Verified</span>
+</span>
+</div>
+<div class="relative">
+<input class="w-full h-10 px-3 bg-surface-muted rounded-lg text-text-secondary font-body-md text-body-md cursor-not-allowed select-none" id="userEmail" readonly="" type="email" value="zainab@rehmanfoods.pk"/>
+<span class="absolute right-3 top-2.5 text-text-muted text-[16px] material-symbols-outlined">lock</span>
+</div>
+</div>
+<!-- Phone Number -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="phoneNumber">Official Contact Number</label>
+<div class="flex gap-2">
+<span class="h-10 px-3 bg-canvas-bg rounded-lg flex items-center gap-1.5 text-text-secondary font-label-md text-label-md">
+<span class="font-bold text-text-primary">🇵🇰 +92</span>
+</span>
+<input class="flex-1 h-10 px-3 bg-surface-card rounded-lg text-text-primary font-body-md text-body-md shadow-inner focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" id="phoneNumber" type="tel" value="300 1234567"/>
+</div>
+</div>
+<!-- Organization Name -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="orgName">Registered Business Entity</label>
+<input class="w-full h-10 px-3 bg-surface-card rounded-lg text-text-primary font-body-md text-body-md shadow-inner focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" id="orgName" type="text" value="Rehman Specialty Foods / Organic Essentials PK"/>
+</div>
+</div>
+<!-- Timezone & Locale settings -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md pt-space-xs">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="timezone">Default Operating Timezone</label>
+<select class="w-full h-10 px-3 bg-surface-card rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20" id="timezone">
+<option selected="">(UTC+05:00) Islamabad, Karachi, Tashkent</option>
+<option>(UTC+04:00) Dubai, Abu Dhabi, Muscat</option>
+<option>(UTC+00:00) London, Dublin, Lisbon</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="currency">Reporting Currency Baseline</label>
+<select class="w-full h-10 px-3 bg-surface-card rounded-lg text-text-primary font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20" id="currency">
+<option selected="">PKR - Pakistani Rupee (Rs.)</option>
+<option>USD - United States Dollar ($)</option>
+<option>AED - UAE Dirham (د.إ)</option>
+</select>
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-sm pt-space-md mt-space-sm">
+<button class="px-space-md py-2 text-text-secondary hover:text-text-primary hover:bg-surface-muted rounded-lg font-label-md text-label-md transition-colors" type="button">
+              Reset Changes
+            </button>
+<button class="px-space-lg py-2.5 bg-primary hover:bg-primary-container text-on-primary rounded-lg font-label-md text-label-md shadow-sm transition-all flex items-center gap-1.5" id="save-personal-btn" type="submit">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>Save Changes</span>
+</button>
+</div>
+</form>
+</section>
+<!-- CARD 2: Security & Authentication -->
+<section class="bg-surface-card rounded-xl p-space-lg shadow-sm" id="security-section">
+<div class="flex items-center gap-space-sm pb-space-md">
+<div class="w-8 h-8 rounded-lg bg-surface-muted flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">lock_reset</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Security &amp; Password</h2>
+<p class="font-body-sm text-body-sm text-text-secondary">Maintain cryptographic integrity and multi-channel session tokens.</p>
+</div>
+</div>
+<!-- Password Change Form -->
+<form class="mt-space-sm flex flex-col gap-space-md" onsubmit="event.preventDefault();">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="currPass">Current Password</label>
+<div class="relative">
+<input class="w-full h-10 px-3 pr-9 bg-surface-card rounded-lg text-text-primary font-body-md text-body-md shadow-inner focus:outline-none focus:ring-2 focus:ring-primary/20" id="currPass" type="password" value="••••••••••••"/>
+<button aria-label="Toggle password view" class="absolute right-2.5 top-2.5 text-text-muted hover:text-text-primary" onclick="togglePassVisibility('currPass', this)" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="newPass">New Password</label>
+<div class="relative">
+<input class="w-full h-10 px-3 pr-9 bg-surface-card rounded-lg text-text-primary font-body-md text-body-md shadow-inner focus:outline-none focus:ring-2 focus:ring-primary/20" id="newPass" placeholder="Min 10 characters" type="password" value="SecuReKh@n2025!"/>
+<button aria-label="Toggle password view" class="absolute right-2.5 top-2.5 text-text-muted hover:text-text-primary" onclick="togglePassVisibility('newPass', this)" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="confirmPass">Confirm Password</label>
+<div class="relative">
+<input class="w-full h-10 px-3 pr-9 bg-surface-card rounded-lg text-text-primary font-body-md text-body-md shadow-inner focus:outline-none focus:ring-2 focus:ring-primary/20" id="confirmPass" placeholder="Repeat new password" type="password" value="SecuReKh@n2025!"/>
+<button aria-label="Toggle password view" class="absolute right-2.5 top-2.5 text-text-muted hover:text-text-primary" onclick="togglePassVisibility('confirmPass', this)" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Password Strength Indicator -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs bg-canvas-bg rounded-lg p-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-text-secondary">Password Security Rating:</span>
+<div class="flex items-center gap-1.5">
+<span class="h-2 w-8 rounded-full bg-status-positive"></span>
+<span class="h-2 w-8 rounded-full bg-status-positive"></span>
+<span class="h-2 w-8 rounded-full bg-status-positive"></span>
+<span class="font-label-sm text-label-sm text-status-positive font-semibold">Strong</span>
+</div>
+</div>
+<span class="font-body-sm text-body-sm text-text-muted">Contains 1 uppercase, 1 numeral, 1 special character</span>
+</div>
+<div class="flex justify-end">
+<button class="px-space-md py-2 bg-surface-card hover:bg-canvas-bg text-text-primary rounded-lg font-label-md text-label-md shadow-sm transition-all" type="button">
+              Update Credential
+            </button>
+</div>
+</form>
+<div class="h-px bg-surface-muted my-space-lg"></div>
+<!-- Connected OAuth Providers Section -->
+<div class="flex flex-col gap-space-md" id="oauth-providers">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Connected OAuth Providers</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Fast authentication with zero stored passwords.</p>
+</div>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Google Workspace OAuth -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-space-md rounded-lg bg-surface-card shadow-sm gap-space-sm">
+<div class="flex items-center gap-space-md">
+<!-- Google SVG Logo -->
+<div class="w-10 h-10 rounded-lg bg-canvas-bg flex items-center justify-center flex-shrink-0">
+<svg aria-hidden="true" class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.15z" fill="#4285F4"></path>
+<path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z" fill="#34A853"></path>
+<path d="M5.28 14.27a7.18 7.18 0 0 1 0-4.54V6.58H1.25a11.96 11.96 0 0 0 0 10.84l4.03-3.15z" fill="#FBBC05"></path>
+<path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" fill="#EA4335"></path>
+</svg>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-text-primary font-semibold">Google Workspace</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+                      Connected
+                    </span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">Primary Founder Login: <span class="text-text-primary">zainab@rehmanfoods.pk</span></p>
+</div>
+</div>
+<button class="text-text-muted hover:text-status-critical font-label-sm text-label-sm transition-colors self-end sm:self-center" type="button">
+                Disconnect
+              </button>
+</div>
+<!-- GitHub Developer OAuth -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-space-md rounded-lg bg-surface-card shadow-sm gap-space-sm">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-canvas-bg flex items-center justify-center flex-shrink-0 text-text-primary">
+<svg aria-hidden="true" class="w-5 h-5 fill-current" viewbox="0 0 24 24">
+<path clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-text-primary font-semibold">GitHub Integration</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-muted text-text-secondary font-label-sm text-label-sm">
+                      Inactive
+                    </span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted mt-0.5">For custom webhook pipelines &amp; spatial dataset imports</p>
+</div>
+</div>
+<button class="px-space-md py-1.5 bg-canvas-bg hover:bg-surface-muted text-text-primary rounded-lg font-label-sm text-label-sm shadow-sm transition-colors self-end sm:self-center" type="button">
+                Connect Account
+              </button>
+</div>
+</div>
+<!-- Two Factor Authentication (2FA) -->
+<div class="p-space-md rounded-lg bg-surface-card shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mt-space-xs">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-status-positive-bg flex items-center justify-center flex-shrink-0 text-status-positive">
+<span class="material-symbols-outlined text-[20px]">smartphone</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-text-primary font-semibold">2FA Authentication via TOTP / Authenticator App</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Enforces secure 6-digit cryptographic verification on every new sign-in.</p>
+</div>
+</div>
+<!-- Custom Toggle -->
+<label class="relative inline-flex items-center cursor-pointer self-end sm:self-center">
+<input checked="" class="sr-only peer" id="toggle-2fa" type="checkbox"/>
+<div class="w-11 h-6 bg-border-strong peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-strong after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- CARD 3: Platform Quotas & Free-Tier Usage Tracker -->
+<section class="bg-surface-card rounded-xl p-space-lg shadow-sm" id="usage-quotas">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-space-md gap-space-xs">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Platform Quotas &amp; Free-Tier Usage Tracker</h2>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">
+              Live consumption against allocated regional SME limits.
+            </p>
+</div>
+<div class="px-2.5 py-1 rounded bg-canvas-bg font-label-sm text-label-sm text-text-muted flex items-center gap-1 self-start sm:self-center">
+<span class="material-symbols-outlined text-[14px]">calendar_month</span>
+<span>Window: May 1 – May 31, 2025</span>
+</div>
+</div>
+<div class="mt-space-md flex flex-col gap-space-lg">
+<!-- ITEM 1: Feasibility Reports Generated -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-baseline">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">assessment</span>
+<span class="font-label-md text-label-md text-text-primary font-semibold">Feasibility Reports Generated</span>
+</div>
+<span class="font-label-md text-label-md text-text-primary font-bold">
+                3 / 10 <span class="text-text-muted font-normal">(30%)</span>
+</span>
+</div>
+<!-- Progress Track -->
+<div class="w-full h-2 rounded-full bg-surface-muted overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 30%;"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-text-secondary">
+<span>7 reports remaining this month across Lahore, Karachi &amp; Islamabad commercial hubs.</span>
+<span class="font-label-sm text-label-sm text-status-positive font-medium">Optimal Headroom</span>
+</div>
+</div>
+<!-- ITEM 2: AI Multi-LLM Calls -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-baseline">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">neurology</span>
+<span class="font-label-md text-label-md text-text-primary font-semibold">AI Advisory Inquiries &amp; Multi-LLM Calls</span>
+</div>
+<span class="font-label-md text-label-md text-text-primary font-bold">
+                14 / 50 <span class="text-text-muted font-normal">(28%)</span>
+</span>
+</div>
+<!-- Progress Track -->
+<div class="w-full h-2 rounded-full bg-surface-muted overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 28%;"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-text-secondary">
+<span>Powered by Groq Llama-3, OpenAI GPT-4o, and Gemini 1.5 Pro failover.</span>
+<span class="font-label-sm text-label-sm text-text-muted">Resets in 19 days</span>
+</div>
+</div>
+<!-- ITEM 3: Spatial Storage Space -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-baseline">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">cloud</span>
+<span class="font-label-md text-label-md text-text-primary font-semibold">Spatial Geo-Data &amp; Storefront Assets</span>
+</div>
+<span class="font-label-md text-label-md text-text-primary font-bold">
+                4.2 MB / 50 MB <span class="text-text-muted font-normal">(8.4%)</span>
+</span>
+</div>
+<!-- Progress Track -->
+<div class="w-full h-2 rounded-full bg-surface-muted overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 8.4%;"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-text-secondary">
+<span>Cloud storage for store logos, catalogue photos, and spatial shapefiles.</span>
+<span class="font-label-sm text-label-sm text-text-muted">45.8 MB Free</span>
+</div>
+</div>
+</div>
+<!-- Metric Sparkline Bar Summary -->
+<div class="mt-space-lg p-space-md rounded-lg bg-canvas-bg flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-[20px]">speed</span>
+</div>
+<div>
+<span class="font-label-md text-label-md text-text-primary font-semibold">Need increased execution throughput?</span>
+<p class="font-body-sm text-body-sm text-text-secondary">Enterprise unlocks unlimited Monte Carlo scenarios, custom foot-traffic GIS API, and multi-tenant teams.</p>
+</div>
+</div>
+<button class="whitespace-nowrap px-space-md py-2 bg-surface-card hover:bg-surface-muted text-primary rounded-lg font-label-md text-label-md shadow-sm transition-all" type="button">
+            Compare Tiers
+          </button>
+</div>
+</section>
+<!-- CARD 4: Danger Zone -->
+<section class="bg-status-critical-bg rounded-xl p-space-lg shadow-sm" id="danger-zone">
+<div class="flex items-start gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-status-critical/10 flex items-center justify-center text-status-critical flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">warning</span>
+</div>
+<div class="flex-1">
+<h2 class="font-headline-sm text-headline-sm text-status-critical font-semibold">
+              Danger Zone: Delete Account &amp; Cascade Owned Stores
+            </h2>
+<p class="font-body-sm text-body-sm text-text-secondary mt-1">
+              Permanently removes your account, feasibility reports, stores, subdomains (e.g. <code class="px-1 py-0.5 bg-status-critical/10 rounded font-mono text-[12px] text-status-critical">organic-essentials.feasibility.store</code>), and product catalogs from our Supabase PostgreSQL cluster. This action cannot be reversed.
+            </p>
+<div class="mt-space-md flex flex-wrap items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex items-center gap-1.5 text-text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[15px] text-status-critical">info</span>
+<span>Active multi-store sessions will immediately terminate.</span>
+</div>
+<button class="px-space-md py-2 rounded-lg bg-surface-card hover:bg-status-critical hover:text-on-primary text-status-critical font-label-md text-label-md shadow-sm transition-all flex items-center gap-1.5" onclick="promptDeleteConfirmation()" type="button">
+<span class="material-symbols-outlined text-[16px]">delete_forever</span>
+<span>Delete My Account</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- INLINE NOTIFICATION TOAST (Hidden by default) -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300 ease-out" id="toast-notification">
+<div class="bg-surface-card text-text-primary px-space-md py-3 rounded-lg shadow-xl flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-status-positive text-[20px]">check_circle</span>
+<span class="font-label-md text-label-md font-medium" id="toast-text">Profile changes saved successfully.</span>
+</div>
+</div>
+</div>
+<script>
+  function togglePassVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('.material-symbols-outlined');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = 'visibility_off';
+    } else {
+      input.type = 'password';
+      icon.textContent = 'visibility';
+    }
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast-notification');
+    const toastText = document.getElementById('toast-text');
+    toastText.textContent = message;
+    toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    setTimeout(() => {
+      toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 3200);
+  }
+
+  document.getElementById('save-personal-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    showToast('Founder profile details saved successfully.');
+  });
+
+  function promptDeleteConfirmation() {
+    const confirmed = window.confirm(
+      'CRITICAL WARNING: Are you strictly certain you wish to initiate complete workspace termination? All Gulberg III store geo-datasets will be permanently dropped.'
+    );
+    if (confirmed) {
+      alert('Termination request submitted. Please check zainab@rehmanfoods.pk for identity verification challenge.');
+    }
+  }
+
+  // Smooth scroll & active navigation highlights
+  document.querySelectorAll('#section-nav a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const targetId = this.getAttribute('href');
+      if (targetId.startsWith('#')) {
+        e.preventDefault();
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  });
+</script></div></main><footer class="w-full bg-surface-card shadow-[0_-1px_8px_rgba(0,0,0,0.02)] py-space-md"><div class="max-w-[1440px] mx-auto px-margin flex flex-col sm:flex-row items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs text-text-muted font-body-sm text-body-sm"><span>© 2025 Feasibility Advisor Inc.</span><span class="hidden sm:inline">•</span><span class="hidden sm:inline">Institutional Financial &amp; Location Modeling</span></div><div class="flex items-center gap-space-md font-label-sm text-label-sm text-text-muted"><span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Telemetry v4.2.8</span><a class="hover:text-text-primary transition-colors" href="#">Security Status</a><a class="hover:text-text-primary transition-colors" href="#">Legal Compliance</a></div></div></footer></body></html>

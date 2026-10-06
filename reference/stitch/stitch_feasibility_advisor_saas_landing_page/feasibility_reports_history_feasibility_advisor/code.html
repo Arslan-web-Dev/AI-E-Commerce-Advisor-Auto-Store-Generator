@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "border-subtle": "#e2e8f0", "secondary-fixed-dim": "#bec6e0", "tertiary-fixed-dim": "#4edea3", "status-critical": "#e11d48", "on-tertiary": "#ffffff", "on-error": "#ffffff", "on-tertiary-container": "#f5fff6", "secondary-fixed": "#dae2fd", "on-primary-fixed-variant": "#005137", "canvas-bg": "#f8fafc", "on-primary": "#ffffff", "outline": "#6d7a72", "surface-bright": "#f8f9ff", "primary-fixed-dim": "#68dba9", "surface-container-high": "#dce9ff", "secondary": "#565e74", "on-background": "#0b1c30", "status-positive-border": "#a7f3d0", "tertiary-fixed": "#6ffbbe", "on-primary-fixed": "#002114", "on-surface-variant": "#3d4a42", "secondary-container": "#dae2fd", "status-warning-bg": "#fffbeb", "on-secondary": "#ffffff", "surface-container-low": "#eff4ff", "surface-dim": "#cbdbf5", "surface-container": "#e5eeff", "on-primary-container": "#f5fff7", "background": "#f8f9ff", "on-error-container": "#93000a", "surface-tint": "#006c4a", "surface-container-highest": "#d3e4fe", "status-positive-bg": "#ecfdf5", "surface-container-lowest": "#ffffff", "inverse-surface": "#213145", "surface-variant": "#d3e4fe", "surface-muted": "#f1f5f9", "primary-container": "#00855d", "surface": "#f8f9ff", "error": "#ba1a1a", "on-secondary-container": "#5c647a", "error-container": "#ffdad6", "on-secondary-fixed-variant": "#3f465c", "inverse-on-surface": "#eaf1ff", "on-surface": "#0b1c30", "surface-card": "#ffffff", "on-tertiary-fixed": "#002113", "border-strong": "#cbd5e1", "text-secondary": "#475569", "on-secondary-fixed": "#131b2e", "primary-fixed": "#85f8c4", "status-critical-bg": "#fff1f2", "status-warning": "#d97706", "primary": "#006948", "status-positive": "#059669", "tertiary-container": "#00855b", "outline-variant": "#bccac0", "on-tertiary-fixed-variant": "#005236", "text-muted": "#94a3b8", "tertiary": "#006947", "inverse-primary": "#68dba9", "text-primary": "#0f172a" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xl": "2.5rem", "margin": "2rem", "space-xs": "0.25rem", "gutter-sm": "1rem", "gutter": "1.5rem", "space-lg": "1.5rem", "space-sm": "0.5rem", "space-md": "1rem", "margin-sm": "1rem" }, "fontFamily": { "headline-lg-mobile": [ "Plus Jakarta Sans" ], "body-lg": [ "Inter" ], "label-sm": [ "Inter" ], "display-lg": [ "Plus Jakarta Sans" ], "headline-md": [ "Plus Jakarta Sans" ], "body-sm": [ "Inter" ], "display-lg-mobile": [ "Plus Jakarta Sans" ], "metric-val": [ "Plus Jakarta Sans" ], "headline-lg": [ "Plus Jakarta Sans" ], "label-md": [ "Inter" ], "headline-sm": [ "Plus Jakarta Sans" ], "body-md": [ "Inter" ] }, "fontSize": { "headline-lg-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "body-lg": [ "16px", { "lineHeight": "26px", "letterSpacing": "-0.005em", "fontWeight": "400" } ], "label-sm": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" } ], "display-lg": [ "40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" } ], "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-sm": [ "12px", { "lineHeight": "18px", "letterSpacing": "0.005em", "fontWeight": "400" } ], "display-lg-mobile": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "metric-val": [ "30px", { "lineHeight": "36px", "letterSpacing": "-0.025em", "fontWeight": "700" } ], "headline-lg": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "label-md": [ "13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" } ], "body-md": [ "14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" } ] } } } };</script></head><body class="bg-canvas-bg font-body-md text-text-primary antialiased min-h-screen"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-card/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full px-gutter flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-xl"><div class="flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #10b981
+- Font: plusJakartaSans
+- Mode: dark
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VGObyPZ_dbebBd40gRJe9O4uuzlXT6XrvuqCT4rgweSiE3Jn0iU3P3BwBP8-L5breq3XsK1z2OwKZJWizJBzcmkbd_FHJSLDJtKr96PdJ-cXxayowVZlX0JT3_qmf7CX4G4bcsfDEjCHMSvQE4x36zzkxuW-gXG4TvAfpnCm_rzwgTgk26ml-MsdwsfBm5oIMu23CT6IOnadXyatIGFLZD-DITVwc9i34XyH1iilRTgAEHGJmJf3ZjaqQG"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-text-primary leading-none">Feasibility</span><span class="font-label-sm text-label-sm text-text-secondary uppercase tracking-widest leading-none mt-1">Advisor</span></div></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-status-positive-bg text-status-positive font-headline-sm"><a class="px-space-md py-space-sm rounded-lg font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors" data-path="dashboard" href="#">Dashboard</a><a aria-current="page" class="px-space-md py-space-sm rounded-lg transition-colors bg-status-positive-bg text-status-positive font-headline-sm" data-path="feasibility-studies" href="#">Feasibility Studies</a><a class="px-space-md py-space-sm rounded-lg font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors" data-path="my-stores" href="#">My Stores</a><a class="px-space-md py-space-sm rounded-lg font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors" data-path="market-intelligence" href="#">Market Intelligence</a><a class="px-space-md py-space-sm rounded-lg font-label-md text-label-md text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors" data-path="settings" href="#">Settings</a></nav></div><div class="flex items-center gap-space-md"><div class="hidden sm:flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-status-positive-bg"><span class="w-2 h-2 rounded-full bg-status-positive animate-pulse"></span><span class="font-label-sm text-label-sm uppercase text-status-positive">Advisor Engine Active</span></div><div class="flex items-center gap-space-sm pl-space-sm"><div class="hidden md:flex flex-col text-right"><span class="font-label-md text-label-md text-text-primary">Zainab Rehman</span><span class="font-body-sm text-body-sm text-text-secondary">Managing Director</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-16 bg-canvas-bg min-h-[calc(100vh-4rem)]"><div class="flex flex-col w-full">
+<!-- Interactive Top Action & Executive Header -->
+<div class="w-full px-gutter py-space-lg flex flex-col gap-space-lg">
+<!-- Breadcrumb & Status Alert Ribbon -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<nav class="flex items-center gap-space-xs text-text-secondary font-label-md text-label-md">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">domain</span>
+<span>Dashboard</span>
+</a>
+<span class="text-text-muted">/</span>
+<span class="text-text-primary font-headline-sm text-headline-sm">Feasibility Studies</span>
+</nav>
+<div class="flex items-center gap-space-sm text-label-sm font-label-sm">
+<span class="px-space-sm py-space-xs rounded-full bg-status-positive-bg text-status-positive flex items-center gap-1.5 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+          GIS Hub: Punjab &amp; Sindh Active
+        </span>
+<span class="px-space-sm py-space-xs rounded-full bg-surface-card text-text-secondary shadow-sm">
+          Scrape Engine: v3.4.1
+        </span>
+</div>
+</div>
+<!-- Title, High-Density Stats Strip & New Study CTA -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg bg-surface-card p-space-lg rounded-xl shadow-sm">
+<div class="flex flex-col max-w-2xl">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<span class="p-1.5 rounded-lg bg-status-positive-bg text-status-positive flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-secondary">Commercial Portfolio</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">My Feasibility Reports</h1>
+<p class="font-body-md text-body-md text-text-secondary mt-1">
+          View, compare, or re-run past location and footfall viability models across key Pakistani retail corridors.
+        </p>
+<!-- Executive Micro Stats Band -->
+<div class="grid grid-cols-3 gap-space-md mt-space-md pt-space-md bg-canvas-bg rounded-lg p-space-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-text-muted">Total Run Reports</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md text-text-primary font-bold">12</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Studies</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-status-positive">High Conviction</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md text-status-positive font-bold">8</span>
+<span class="font-body-sm text-body-sm text-status-positive">&gt;0.80 Score</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-text-muted">Avg. Break-Even</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md text-text-primary font-bold">4.1</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Months</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Actions Stack -->
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<button class="px-space-md py-space-sm h-10 rounded-lg bg-surface-card text-text-primary font-headline-sm text-headline-sm hover:bg-canvas-bg transition-colors flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">tune</span>
+<span>Matrix Compare</span>
+</button>
+<a class="px-space-lg py-space-sm h-10 rounded-lg bg-status-positive hover:bg-primary text-on-primary font-headline-sm text-headline-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2" href="#/wizard">
+<span class="material-symbols-outlined text-[20px]">add_location_alt</span>
+<span>+ Create New Feasibility Analysis</span>
+</a>
+</div>
+</div>
+<!-- Multifactor Filter & Quick Search Bar -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-space-md">
+<!-- Search Input -->
+<div class="relative flex-1 min-w-[280px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[20px]">search</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-lg bg-canvas-bg text-text-primary font-body-md text-body-md placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary-container shadow-inner" placeholder="Search reports by City (e.g. Gulberg, Clifton), Area, or Business Concept..." type="text"/>
+</div>
+<!-- Filter Selects -->
+<div class="flex flex-wrap items-center gap-space-xs">
+<!-- Category -->
+<div class="relative">
+<select class="h-10 pl-3 pr-8 rounded-lg bg-canvas-bg text-text-secondary font-label-md text-label-md appearance-none focus:outline-none focus:ring-2 focus:ring-primary-container cursor-pointer shadow-sm">
+<option>Category: All Sectors</option>
+<option>Apparel &amp; Fashion</option>
+<option>Grocery &amp; Gourmet</option>
+<option>Cosmetics &amp; Skincare</option>
+<option>Consumer Electronics</option>
+<option>Artisan Coffee &amp; Cafe</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none text-[18px]">expand_more</span>
+</div>
+<!-- Risk Tier -->
+<div class="relative">
+<select class="h-10 pl-3 pr-8 rounded-lg bg-canvas-bg text-text-secondary font-label-md text-label-md appearance-none focus:outline-none focus:ring-2 focus:ring-primary-container cursor-pointer shadow-sm">
+<option>Viability: All Scores</option>
+<option>Low Risk (0.80+)</option>
+<option>Moderate Risk (0.60 - 0.79)</option>
+<option>High Rent Risk (&lt;0.60)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none text-[18px]">expand_more</span>
+</div>
+<!-- City -->
+<div class="relative">
+<select class="h-10 pl-3 pr-8 rounded-lg bg-canvas-bg text-text-secondary font-label-md text-label-md appearance-none focus:outline-none focus:ring-2 focus:ring-primary-container cursor-pointer shadow-sm">
+<option>City: All Locations</option>
+<option>Lahore</option>
+<option>Karachi</option>
+<option>Islamabad</option>
+<option>Rawalpindi</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none text-[18px]">expand_more</span>
+</div>
+<!-- Status -->
+<div class="relative">
+<select class="h-10 pl-3 pr-8 rounded-lg bg-canvas-bg text-text-secondary font-label-md text-label-md appearance-none focus:outline-none focus:ring-2 focus:ring-primary-container cursor-pointer shadow-sm">
+<option>Status: All States</option>
+<option>Complete</option>
+<option>Processing</option>
+<option>Pending Scrape</option>
+<option>Failed / Timeout</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none text-[18px]">expand_more</span>
+</div>
+<!-- View toggles & Export -->
+<div class="flex items-center gap-1 pl-space-sm ml-auto">
+<button class="h-10 px-3 rounded-lg bg-surface-card hover:bg-canvas-bg text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1.5 shadow-sm text-label-md font-label-md" title="Export Table as CSV">
+<span class="material-symbols-outlined text-[18px]">ios_share</span>
+<span class="hidden sm:inline">Export CSV</span>
+</button>
+<div class="flex items-center bg-canvas-bg p-1 rounded-lg shadow-inner">
+<button class="p-1.5 rounded bg-surface-card text-text-primary shadow-sm" title="Dense Table View">
+<span class="material-symbols-outlined text-[18px]">table_rows</span>
+</button>
+<button class="p-1.5 rounded text-text-muted hover:text-text-primary transition-colors" title="Bento Card Grid">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Filters Tag Strip -->
+<div class="flex flex-wrap items-center gap-2 pt-2 text-label-sm font-label-sm">
+<span class="text-text-muted">Applied Filters:</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-muted text-text-secondary flex items-center gap-1">
+          Cluster: Pakistan Top 4 Metros
+          <button class="hover:text-status-critical"><span class="material-symbols-outlined text-[12px]">close</span></button>
+</span>
+<span class="px-2 py-0.5 rounded-full bg-status-positive-bg text-status-positive flex items-center gap-1">
+          Footfall Buffer: ≥10 KM
+          <button class="hover:text-status-critical"><span class="material-symbols-outlined text-[12px]">close</span></button>
+</span>
+<button class="text-text-muted hover:text-status-critical transition-colors underline decoration-dotted ml-2">Reset All Filters</button>
+</div>
+</div>
+<!-- Main High-Density Data Table Card -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-muted text-text-secondary font-label-md text-label-md tracking-wide uppercase select-none">
+<th class="py-space-md px-space-md min-w-[280px]" scope="col">Business Idea &amp; Concept</th>
+<th class="py-space-md px-space-md min-w-[220px]" scope="col">Location &amp; Spatial Buffer</th>
+<th class="py-space-md px-space-md min-w-[160px]" scope="col">Allocated Capital</th>
+<th class="py-space-md px-space-md min-w-[180px]" scope="col">Feasibility &amp; Risk</th>
+<th class="py-space-md px-space-md min-w-[170px]" scope="col">Process Status</th>
+<th class="py-space-md px-space-md min-w-[120px]" scope="col">Analyzed</th>
+<th class="py-space-md px-space-md text-right min-w-[130px]" scope="col">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-text-primary font-body-md text-body-md">
+<!-- ROW 1: Organic Honey (High Conviction Low Risk) -->
+<tr class="hover:bg-canvas-bg transition-colors group">
+<!-- Idea & Category -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-muted text-text-secondary">
+                      Grocery &amp; Gourmet
+                    </span>
+<span class="font-label-sm text-label-sm text-text-muted">ID: #FEA-9041</span>
+</div>
+<a class="font-headline-sm text-headline-sm text-text-primary hover:text-primary transition-colors font-semibold" href="#view-report-1">
+                    Organic Honey &amp; Cold-Pressed Oils
+                  </a>
+<p class="font-body-sm text-body-sm text-text-secondary line-clamp-1">
+                    Hunza Valley direct single-source apothecary storefront for high-net-worth households.
+                  </p>
+</div>
+</td>
+<!-- Location & Buffer -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-text-primary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
+<span>Lahore • Gulberg III</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary pl-6">Main Blvd Commercial Hub</span>
+<div class="pl-6 pt-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-text-secondary">
+<span class="material-symbols-outlined text-[13px]">radar</span>
+                      12.5 KM Radius Buffer
+                    </span>
+</div>
+</div>
+</td>
+<!-- Budget & Runway -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold text-text-primary">PKR 1,250,000</span>
+<span class="font-body-sm text-body-sm text-status-positive flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">hourglass_top</span>
+                    6.2 Mo Runway Est.
+                  </span>
+<span class="font-label-sm text-label-sm text-text-muted">Capex: PKR 620k</span>
+</div>
+</td>
+<!-- Viability Score & Risk -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-status-positive-bg flex items-center justify-center text-status-positive font-headline-sm text-headline-sm font-bold shadow-sm">
+                      88
+                    </div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-bold text-text-primary">Viability 0.88</span>
+<span class="font-label-sm text-label-sm text-text-muted">High Margin Tier</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+                    Low Risk • High Conviction
+                  </span>
+</div>
+</td>
+<!-- Status -->
+<td class="py-space-md px-space-md align-top">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg text-status-positive font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                  Complete
+                </span>
+<div class="font-body-sm text-body-sm text-text-muted mt-1">12 Footfall Nodes</div>
+</td>
+<!-- Date -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-medium">2 hours ago</span>
+<span class="font-body-sm text-body-sm text-text-muted">14:20 PKT</span>
+</div>
+</td>
+<!-- Action Menu (Standard link + dropdown anchor) -->
+<td class="py-space-md px-space-md align-top text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-card hover:bg-surface-muted text-primary font-label-md text-label-md transition-colors shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span>View</span>
+</button>
+<button class="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-canvas-bg transition-colors" title="More Options">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 2: Modest Pret Ready to Wear (Active Row showing Dropdown open for Context) -->
+<tr class="bg-surface-bright transition-colors group relative">
+<!-- Idea & Category -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-muted text-text-secondary">
+                      Apparel &amp; Fashion
+                    </span>
+<span class="font-label-sm text-label-sm text-text-muted">ID: #FEA-9038</span>
+</div>
+<a class="font-headline-sm text-headline-sm text-text-primary hover:text-primary transition-colors font-semibold" href="#view-report-2">
+                    Modest Ready-to-Wear Pret
+                  </a>
+<p class="font-body-sm text-body-sm text-text-secondary line-clamp-1">
+                    Fast fashion boutique targeting Gen-Z &amp; university youth near seaside commercial zones.
+                  </p>
+</div>
+</td>
+<!-- Location & Buffer -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-text-primary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
+<span>Karachi • Clifton</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary pl-6">Block 4 &amp; 5 Ocean Mall Strip</span>
+<div class="pl-6 pt-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-text-secondary">
+<span class="material-symbols-outlined text-[13px]">radar</span>
+                      10.0 KM Radius Buffer
+                    </span>
+</div>
+</div>
+</td>
+<!-- Budget & Runway -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold text-text-primary">PKR 850,000</span>
+<span class="font-body-sm text-body-sm text-status-warning flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">timelapse</span>
+                    4.5 Mo Runway Est.
+                  </span>
+<span class="font-label-sm text-label-sm text-text-muted">Capex: PKR 480k</span>
+</div>
+</td>
+<!-- Viability Score & Risk -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-status-warning-bg flex items-center justify-center text-status-warning font-headline-sm text-headline-sm font-bold shadow-sm">
+                      74
+                    </div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-bold text-text-primary">Viability 0.74</span>
+<span class="font-label-sm text-label-sm text-text-muted">Moderate Margin</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-warning-bg text-status-warning font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-warning"></span>
+                    Moderate Footfall Risk
+                  </span>
+</div>
+</td>
+<!-- Status -->
+<td class="py-space-md px-space-md align-top">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg text-status-positive font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                  Complete
+                </span>
+<div class="font-body-sm text-body-sm text-text-muted mt-1">Ready for Re-sim</div>
+</td>
+<!-- Date -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-medium">Yesterday</span>
+<span class="font-body-sm text-body-sm text-text-muted">May 18, 2025</span>
+</div>
+</td>
+<!-- Active Dropdown Menu Exposed for User Verification -->
+<td class="py-space-md px-space-md align-top text-right relative">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-card hover:bg-surface-muted text-primary font-label-md text-label-md transition-colors shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span>View</span>
+</button>
+<button class="p-1.5 rounded-lg bg-text-primary text-on-primary shadow-sm" title="Close Context Menu">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<!-- Rich Executive Action Flyout Dropdown -->
+<div class="absolute right-4 top-14 w-60 bg-surface-card rounded-xl shadow-xl z-30 p-1.5 flex flex-col gap-0.5 text-left text-body-sm font-body-sm">
+<div class="px-3 py-1.5 text-label-sm font-label-sm uppercase tracking-wider text-text-muted border-b border-border-subtle/50">
+                    Analysis Actions
+                  </div>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-canvas-bg text-text-primary transition-colors font-medium" href="#full-analysis">
+<span class="material-symbols-outlined text-[18px] text-primary">assessment</span>
+<span>View Full Analysis</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-canvas-bg text-text-primary transition-colors" href="#re-simulate">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">rebase_edit</span>
+<span>Re-simulate Budget &amp; Rent</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-canvas-bg text-text-primary transition-colors" href="#turnkey-storefront">
+<span class="material-symbols-outlined text-[18px] text-tertiary">storefront</span>
+<span>Generate Turnkey Storefront</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-canvas-bg text-text-primary transition-colors" href="#export-pdf">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">picture_as_pdf</span>
+<span>Export Executive PDF</span>
+</a>
+<div class="h-px bg-border-subtle my-1"></div>
+<button class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-status-critical-bg text-status-critical transition-colors w-full text-left font-medium">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+<span>Delete Report</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 3: Organic Botanical Skincare (Critical Rent Risk) -->
+<tr class="hover:bg-canvas-bg transition-colors group">
+<!-- Idea & Category -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-muted text-text-secondary">
+                      Cosmetics &amp; Skincare
+                    </span>
+<span class="font-label-sm text-label-sm text-text-muted">ID: #FEA-9012</span>
+</div>
+<a class="font-headline-sm text-headline-sm text-text-primary hover:text-primary transition-colors font-semibold" href="#view-report-3">
+                    Organic Botanical Skincare Lab
+                  </a>
+<p class="font-body-sm text-body-sm text-text-secondary line-clamp-1">
+                    Ayurvedic cold-pressed serums and SPF sunscreens with experiential testing vanity.
+                  </p>
+</div>
+</td>
+<!-- Location & Buffer -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-text-primary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-status-critical text-[18px]">warning</span>
+<span>Islamabad • Blue Area</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary pl-6">Sector F-6/F-7 Commercial Sector</span>
+<div class="pl-6 pt-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-text-secondary">
+<span class="material-symbols-outlined text-[13px]">radar</span>
+                      8.0 KM Radius Buffer
+                    </span>
+</div>
+</div>
+</td>
+<!-- Budget & Runway -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold text-text-primary">PKR 450,000</span>
+<span class="font-body-sm text-body-sm text-status-critical flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">trending_down</span>
+                    2.1 Mo Runway (Insufficient)
+                  </span>
+<span class="font-label-sm text-label-sm text-text-muted">Capex: PKR 380k</span>
+</div>
+</td>
+<!-- Viability Score & Risk -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-status-critical-bg flex items-center justify-center text-status-critical font-headline-sm text-headline-sm font-bold shadow-sm">
+                      52
+                    </div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-bold text-text-primary">Viability 0.52</span>
+<span class="font-label-sm text-label-sm text-status-critical">Underfunded</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-critical-bg text-status-critical font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-critical"></span>
+                    Critical Rent Overhang
+                  </span>
+</div>
+</td>
+<!-- Status -->
+<td class="py-space-md px-space-md align-top">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg text-status-positive font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                  Complete
+                </span>
+<div class="font-body-sm text-body-sm text-text-muted mt-1">High Rent Alert</div>
+</td>
+<!-- Date -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-medium">May 12, 2025</span>
+<span class="font-body-sm text-body-sm text-text-muted">Archive</span>
+</div>
+</td>
+<!-- Action Menu -->
+<td class="py-space-md px-space-md align-top text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-card hover:bg-surface-muted text-primary font-label-md text-label-md transition-colors shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span>View</span>
+</button>
+<button class="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-canvas-bg transition-colors" title="More Options">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 4: Smart Home IoT & Wireless (Processing State) -->
+<tr class="hover:bg-canvas-bg transition-colors group">
+<!-- Idea & Category -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-muted text-text-secondary">
+                      Consumer Electronics
+                    </span>
+<span class="font-label-sm text-label-sm text-text-muted">ID: #FEA-9080</span>
+</div>
+<a class="font-headline-sm text-headline-sm text-text-primary hover:text-primary transition-colors font-semibold" href="#view-report-4">
+                    Smart Home IoT &amp; Wireless Gear
+                  </a>
+<p class="font-body-sm text-body-sm text-text-secondary line-clamp-1">
+                    Hubs, automated relays, smart surveillance, and solar inverters demonstration center.
+                  </p>
+</div>
+</td>
+<!-- Location & Buffer -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-text-primary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
+<span>Lahore • DHA Phase 5</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary pl-6">Bank Square Commercial</span>
+<div class="pl-6 pt-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-text-secondary">
+<span class="material-symbols-outlined text-[13px]">radar</span>
+                      15.0 KM Radius Buffer
+                    </span>
+</div>
+</div>
+</td>
+<!-- Budget & Runway -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold text-text-primary">PKR 3,200,000</span>
+<span class="font-body-sm text-body-sm text-status-positive flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                    9.0 Mo Runway Est.
+                  </span>
+<span class="font-label-sm text-label-sm text-text-muted">Capex: PKR 1.8M</span>
+</div>
+</td>
+<!-- Viability Score & Risk (Computing) -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-muted flex items-center justify-center text-text-muted font-headline-sm text-headline-sm animate-pulse shadow-sm">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-bold text-text-primary">Estimating...</span>
+<span class="font-label-sm text-label-sm text-text-muted">Footfall Sync</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-muted text-text-secondary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>
+                    Synthesizing GeoData
+                  </span>
+</div>
+</td>
+<!-- Status: ML Scrape Active -->
+<td class="py-space-md px-space-md align-top">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-md text-label-md font-medium">
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+                  ML Scrape Active (84%)
+                </span>
+<div class="w-32 bg-surface-muted h-1.5 rounded-full mt-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-500" style="width: 84%;"></div>
+</div>
+</td>
+<!-- Date -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-medium">8 mins ago</span>
+<span class="font-body-sm text-body-sm text-status-positive">Active Job</span>
+</div>
+</td>
+<!-- Action Menu -->
+<td class="py-space-md px-space-md align-top text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-card hover:bg-surface-muted text-text-secondary font-label-md text-label-md transition-colors shadow-sm flex items-center gap-1 cursor-wait">
+<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span>
+<span>Syncing</span>
+</button>
+<button class="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-canvas-bg transition-colors" title="More Options">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 5: Artisan Coffee Roastery & Micro-Bakery (High Viability 0.91) -->
+<tr class="hover:bg-canvas-bg transition-colors group">
+<!-- Idea & Category -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-muted text-text-secondary">
+                      Food &amp; Beverage
+                    </span>
+<span class="font-label-sm text-label-sm text-text-muted">ID: #FEA-8994</span>
+</div>
+<a class="font-headline-sm text-headline-sm text-text-primary hover:text-primary transition-colors font-semibold" href="#view-report-5">
+                    Artisan Coffee Roastery &amp; Bakery
+                  </a>
+<p class="font-body-sm text-body-sm text-text-secondary line-clamp-1">
+                    Specialty Ethiopian drip bar &amp; sourdough croissant workshop catering to tech workers.
+                  </p>
+</div>
+</td>
+<!-- Location & Buffer -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-text-primary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
+<span>Rawalpindi • Saddar</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-secondary pl-6">Bank Road Commercial Corridor</span>
+<div class="pl-6 pt-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-text-secondary">
+<span class="material-symbols-outlined text-[13px]">radar</span>
+                      10.0 KM Radius Buffer
+                    </span>
+</div>
+</div>
+</td>
+<!-- Budget & Runway -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold text-text-primary">PKR 650,000</span>
+<span class="font-body-sm text-body-sm text-status-positive flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">hourglass_top</span>
+                    5.8 Mo Runway Est.
+                  </span>
+<span class="font-label-sm text-label-sm text-text-muted">Capex: PKR 310k</span>
+</div>
+</td>
+<!-- Viability Score & Risk -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-status-positive-bg flex items-center justify-center text-status-positive font-headline-sm text-headline-sm font-bold shadow-sm">
+                      91
+                    </div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-bold text-text-primary">Viability 0.91</span>
+<span class="font-label-sm text-label-sm text-status-positive font-medium">Prime Opportunity</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+                    Low Risk • Top Quartile
+                  </span>
+</div>
+</td>
+<!-- Status -->
+<td class="py-space-md px-space-md align-top">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg text-status-positive font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                  Complete
+                </span>
+<div class="font-body-sm text-body-sm text-text-muted mt-1">Ready for PDF Export</div>
+</td>
+<!-- Date -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-medium">May 10, 2025</span>
+<span class="font-body-sm text-body-sm text-text-muted">Validated</span>
+</div>
+</td>
+<!-- Action Menu -->
+<td class="py-space-md px-space-md align-top text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-card hover:bg-surface-muted text-primary font-label-md text-label-md transition-colors shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span>View</span>
+</button>
+<button class="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-canvas-bg transition-colors" title="More Options">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination & Regional Fleet Metrics Footer -->
+<div class="px-space-lg py-space-md bg-canvas-bg flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<span class="font-body-sm text-body-sm text-text-secondary">
+            Showing <strong class="text-text-primary font-semibold">1 to 5</strong> of <strong class="text-text-primary font-semibold">12</strong> feasibility reports across 4 metro regions
+          </span>
+<div class="hidden lg:flex items-center gap-2 border-l border-border-subtle pl-space-md">
+<span class="font-label-sm text-label-sm text-text-muted">Rows per page:</span>
+<select class="h-8 px-2 rounded-lg bg-surface-card text-text-primary font-label-md text-label-md focus:outline-none shadow-sm cursor-pointer">
+<option>10</option>
+<option>25</option>
+<option>50</option>
+</select>
+</div>
+</div>
+<!-- Clean Segmented Number Controls -->
+<div class="flex items-center gap-1">
+<button class="p-2 rounded-lg bg-surface-card hover:bg-surface-muted text-text-secondary hover:text-text-primary transition-colors disabled:opacity-40 disabled:pointer-events-none shadow-sm flex items-center justify-center" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-status-positive text-on-primary font-headline-sm text-headline-sm font-semibold flex items-center justify-center shadow-sm">
+            1
+          </button>
+<button class="w-8 h-8 rounded-lg bg-surface-card hover:bg-surface-muted text-text-secondary font-headline-sm text-headline-sm font-medium flex items-center justify-center transition-colors shadow-sm">
+            2
+          </button>
+<button class="w-8 h-8 rounded-lg bg-surface-card hover:bg-surface-muted text-text-secondary font-headline-sm text-headline-sm font-medium flex items-center justify-center transition-colors shadow-sm">
+            3
+          </button>
+<button class="p-2 rounded-lg bg-surface-card hover:bg-surface-muted text-text-secondary hover:text-text-primary transition-colors shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Secondary Collapsible Drawer / Empty State Pattern Demonstration Card -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">System Pattern: Zero-State Experience Preview</h2>
+</div>
+<span class="font-label-sm text-label-sm uppercase px-2 py-0.5 rounded bg-surface-muted text-text-muted">
+          Design Preview Node
+        </span>
+</div>
+<div class="bg-canvas-bg rounded-xl p-space-xl flex flex-col items-center justify-center text-center max-w-xl mx-auto shadow-inner">
+<div class="w-16 h-16 rounded-2xl bg-surface-card flex items-center justify-center text-primary mb-space-md shadow-md">
+<span class="material-symbols-outlined text-[36px]">travel_explore</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-text-primary font-bold">No feasibility reports generated yet</h3>
+<p class="font-body-md text-body-md text-text-secondary mt-2 mb-space-lg">
+          Run your first spatial market analysis to evaluate competitor density, commercial rental risk, and break-even recovery windows across Pakistani city corridors.
+        </p>
+<div class="flex flex-wrap items-center justify-center gap-space-sm">
+<a class="px-space-lg py-space-sm h-10 rounded-lg bg-status-positive hover:bg-primary text-on-primary font-headline-sm text-headline-sm transition-all shadow-md flex items-center gap-2" href="#/wizard">
+<span>Start First Analysis</span>
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+</a>
+<button class="px-space-md py-space-sm h-10 rounded-lg bg-surface-card hover:bg-surface-muted text-text-secondary font-headline-sm text-headline-sm transition-colors shadow-sm">
+            Load Sample Dataset (Lahore Gulberg)
+          </button>
+</div>
+</div>
+</div>
+</div>
+</div></main><footer class="w-full bg-surface-card shadow-[0_-1px_6px_rgba(0,0,0,0.02)]"><div class="w-full px-gutter py-space-md flex flex-col md:flex-row items-center justify-between gap-space-sm text-text-secondary"><div class="flex items-center gap-space-md"><span class="font-body-sm text-body-sm">© 2025 Feasibility Advisor SaaS. All rights reserved.</span></div><div class="flex items-center gap-space-lg font-body-sm text-body-sm"><a class="hover:text-text-primary transition-colors" href="#">Privacy Policy</a><a class="hover:text-text-primary transition-colors" href="#">Terms of Service</a><a class="hover:text-text-primary transition-colors" href="#">System Status</a></div></div></footer></body></html>

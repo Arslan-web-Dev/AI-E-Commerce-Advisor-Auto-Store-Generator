@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"tertiary-container":"#00855b","secondary-container":"#dae2fd","status-positive-border":"#a7f3d0","on-primary-container":"#f5fff7","on-tertiary-container":"#f5fff6","on-primary":"#ffffff","on-background":"#0b1c30","status-warning":"#d97706","secondary-fixed":"#dae2fd","on-surface-variant":"#3d4a42","surface-container-high":"#dce9ff","primary-fixed-dim":"#68dba9","on-tertiary-fixed-variant":"#005236","on-surface":"#0b1c30","text-secondary":"#475569","secondary":"#565e74","on-secondary-container":"#5c647a","surface-container-lowest":"#ffffff","surface-tint":"#006c4a","secondary-fixed-dim":"#bec6e0","on-tertiary":"#ffffff","tertiary-fixed-dim":"#4edea3","status-warning-bg":"#fffbeb","background":"#f8f9ff","status-positive-bg":"#ecfdf5","primary":"#006948","surface-dim":"#cbdbf5","inverse-on-surface":"#eaf1ff","inverse-primary":"#68dba9","surface-variant":"#d3e4fe","surface-container-low":"#eff4ff","outline":"#6d7a72","tertiary":"#006947","status-critical-bg":"#fff1f2","tertiary-fixed":"#6ffbbe","error-container":"#ffdad6","on-secondary-fixed-variant":"#3f465c","primary-container":"#00855d","canvas-bg":"#f8fafc","on-primary-fixed-variant":"#005137","on-tertiary-fixed":"#002113","border-subtle":"#e2e8f0","outline-variant":"#bccac0","inverse-surface":"#213145","surface-container":"#e5eeff","on-primary-fixed":"#002114","surface-muted":"#f1f5f9","surface-card":"#ffffff","surface":"#f8f9ff","status-positive":"#059669","on-secondary-fixed":"#131b2e","surface-container-highest":"#d3e4fe","primary-fixed":"#85f8c4","text-muted":"#94a3b8","on-error-container":"#93000a","text-primary":"#0f172a","status-critical":"#e11d48","border-strong":"#cbd5e1","error":"#ba1a1a","surface-bright":"#f8f9ff","on-error":"#ffffff","on-secondary":"#ffffff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xs":"0.25rem","gutter":"1.5rem","space-sm":"0.5rem","space-xl":"2.5rem","space-md":"1rem","margin":"2rem","space-lg":"1.5rem","margin-sm":"1rem","gutter-sm":"1rem"},"fontFamily":{"headline-sm":["Plus Jakarta Sans"],"body-md":["Inter"],"headline-md":["Plus Jakarta Sans"],"label-sm":["Inter"],"display-lg-mobile":["Plus Jakarta Sans"],"body-lg":["Inter"],"label-md":["Inter"],"headline-lg-mobile":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"body-sm":["Inter"],"headline-lg":["Plus Jakarta Sans"],"metric-val":["Plus Jakarta Sans"]},"fontSize":{"headline-sm":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"22px","letterSpacing":"0em","fontWeight":"400"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}],"display-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"26px","letterSpacing":"-0.005em","fontWeight":"400"}],"label-md":["13px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"display-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"700"}],"body-sm":["12px",{"lineHeight":"18px","letterSpacing":"0.005em","fontWeight":"400"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"600"}],"metric-val":["30px",{"lineHeight":"36px","letterSpacing":"-0.025em","fontWeight":"700"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col"><header class="fixed top-0 left-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full px-margin flex items-center justify-between"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #10b981
+- Font: plusJakartaSans
+- Mode: dark
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VGObyPZ_dbebBd40gRJe9O4uuzlXT6XrvuqCT4rgweSiE3Jn0iU3P3BwBP8-L5breq3XsK1z2OwKZJWizJBzcmkbd_FHJSLDJtKr96PdJ-cXxayowVZlX0JT3_qmf7CX4G4bcsfDEjCHMSvQE4x36zzkxuW-gXG4TvAfpnCm_rzwgTgk26ml-MsdwsfBm5oIMu23CT6IOnadXyatIGFLZD-DITVwc9i34XyH1iilRTgAEHGJmJf3ZjaqQG"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">Feasibility Advisor</span><span class="font-label-sm text-label-sm text-text-secondary">Module 07 · Theme Studio</span></div></div><div class="h-6 w-px bg-border-subtle hidden lg:block"></div><div class="hidden lg:flex items-center gap-space-xs px-2.5 py-1 bg-status-positive-bg rounded-full"><span class="w-2 h-2 rounded-full bg-status-positive animate-pulse"></span><span class="font-label-sm text-label-sm uppercase tracking-wider text-status-positive">THEME STUDIO ENGINE ACTIVE</span></div></div><nav class="hidden xl:flex items-center gap-space-xs p-1 bg-surface-container-low rounded-xl" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm"><a aria-current="page" class="px-3 py-1.5 transition-all bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm" data-path="theme-configurator" href="#">Theme Configurator</a><a class="px-3 py-1.5 rounded-lg text-on-surface-variant font-label-md text-label-md transition-all hover:bg-surface-container-high hover:text-on-surface" data-path="store-templates" href="#">Store Templates</a><a class="px-3 py-1.5 rounded-lg text-on-surface-variant font-label-md text-label-md transition-all hover:bg-surface-container-high hover:text-on-surface" data-path="token-palette-matrix" href="#">Token Palette Matrix</a><a class="px-3 py-1.5 rounded-lg text-on-surface-variant font-label-md text-label-md transition-all hover:bg-surface-container-high hover:text-on-surface" data-path="export-audit" href="#">Export &amp; Audit</a></nav><div class="flex items-center gap-space-md"><div class="hidden md:flex flex-col text-right"><span class="font-label-md text-label-md text-text-primary font-semibold">Zainab Rehman</span><span class="font-label-sm text-label-sm text-text-secondary">Managing Director</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 flex-1 bg-canvas-bg"><div class="flex flex-col w-full">
+<!-- TOP SUB-HEADER BAR -->
+<div class="w-full bg-surface-container-lowest px-margin py-space-sm shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-space-sm z-30">
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-space-xs text-text-secondary font-label-sm text-label-sm">
+<a class="hover:text-text-primary transition-colors" href="#">Dashboard</a>
+<span>›</span>
+<a class="hover:text-text-primary transition-colors" href="#">Feasibility Studies</a>
+<span>›</span>
+<span class="text-text-muted">#FEA-9041: Organic Honey &amp; Cold-Pressed Oils</span>
+<span>›</span>
+<span class="text-status-positive font-semibold">Module 7: Storefront Theme Studio</span>
+</div>
+<div class="flex items-center gap-space-sm mt-0.5">
+<h1 class="font-headline-md text-headline-md text-text-primary tracking-tight">Code-Free Store Theme Configurator</h1>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-positive-bg text-status-positive text-[11px] font-semibold tracking-wide uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive animate-ping"></span>
+          Groq AI Assisted
+        </span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Customize your storefront layout, brand tokens, and e-commerce visual structure via interactive visual MCQs.</p>
+</div>
+<!-- Right Telemetry & Header CTAs -->
+<div class="flex items-center gap-space-sm flex-wrap">
+<div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-surface-muted rounded-lg">
+<span class="w-2 h-2 rounded-full bg-status-positive"></span>
+<span class="font-label-sm text-label-sm text-text-secondary">Groq Schema Compiler: <strong class="text-text-primary">v2.4 Active</strong></span>
+</div>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest text-text-primary hover:bg-surface-muted font-label-md text-label-md rounded-lg shadow-sm transition-all" id="btnOpenSchema" type="button">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">code</span>
+<span>View JSON Schema</span>
+</button>
+<button class="inline-flex items-center gap-2 px-4 py-2 bg-status-positive hover:bg-emerald-700 text-on-primary font-label-md text-label-md rounded-lg shadow-sm transition-all shadow-[0_2px_10px_rgba(5,150,105,0.25)]" type="button">
+<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+<span>Save &amp; Generate Storefront</span>
+</button>
+</div>
+</div>
+<!-- STUDIO 2-COLUMN SPLIT-SCREEN WORKSPACE -->
+<div class="w-full px-margin py-space-md grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT COLUMN: 4-Step MCQ Configuration Wizard (xl:col-span-6) -->
+<div class="xl:col-span-6 flex flex-col gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+<!-- Step Stepper Tabs -->
+<div class="flex items-center justify-between pb-space-sm overflow-x-auto no-scrollbar gap-2">
+<button class="step-nav-btn active flex items-center gap-2 px-3 py-2 rounded-lg bg-status-positive-bg text-status-positive text-left transition-all" data-step="1" type="button">
+<span class="w-6 h-6 rounded-full bg-status-positive text-on-primary text-xs flex items-center justify-center font-bold">1</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold whitespace-nowrap">Palette &amp; Brand</span>
+<span class="text-[10px] text-text-secondary hidden sm:inline">Color System</span>
+</div>
+</button>
+<span class="text-text-muted select-none">•••</span>
+<button class="step-nav-btn flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary hover:bg-surface-muted text-left transition-all" data-step="2" type="button">
+<span class="w-6 h-6 rounded-full bg-surface-muted text-text-secondary text-xs flex items-center justify-center font-bold">2</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold whitespace-nowrap">Header &amp; Nav</span>
+<span class="text-[10px] text-text-muted hidden sm:inline">Top Bar UX</span>
+</div>
+</button>
+<span class="text-text-muted select-none">•••</span>
+<button class="step-nav-btn flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary hover:bg-surface-muted text-left transition-all" data-step="3" type="button">
+<span class="w-6 h-6 rounded-full bg-surface-muted text-text-secondary text-xs flex items-center justify-center font-bold">3</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold whitespace-nowrap">Hero Banner</span>
+<span class="text-[10px] text-text-muted hidden sm:inline">Conversion Stage</span>
+</div>
+</button>
+<span class="text-text-muted select-none">•••</span>
+<button class="step-nav-btn flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary hover:bg-surface-muted text-left transition-all" data-step="4" type="button">
+<span class="w-6 h-6 rounded-full bg-surface-muted text-text-secondary text-xs flex items-center justify-center font-bold">4</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold whitespace-nowrap">Product Cards</span>
+<span class="text-[10px] text-text-muted hidden sm:inline">Catalog UX</span>
+</div>
+</button>
+</div>
+<!-- STEP 1 CONTENT: Color Palette & Brand Identity -->
+<div class="step-panel flex flex-col gap-space-md" id="step-panel-1">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Step 1: Color Palette &amp; Brand Tokens</h2>
+<p class="font-body-sm text-body-sm text-text-secondary">Synthesized from Organic Honey &amp; Cold-Pressed Oils customer profile.</p>
+</div>
+<span class="px-2.5 py-1 rounded bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold">1 of 4</span>
+</div>
+<!-- Predefined MCQ Palette Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm" id="palette-options">
+<!-- Card 1 (Default active: Modern Emerald) -->
+<div class="palette-card active cursor-pointer p-space-sm rounded-xl bg-surface-container-low transition-all relative flex flex-col gap-2 shadow-sm" data-palette="emerald">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-text-primary">1. Modern Emerald</span>
+<span class="material-symbols-outlined text-status-positive text-[20px] check-icon">check_circle</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-status-positive uppercase tracking-wider bg-status-positive-bg px-1.5 py-0.5 rounded w-max">
+<span class="material-symbols-outlined text-[12px]">psychology</span> Recommended by Groq Llama-3
+            </span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="w-6 h-6 rounded-full bg-[#059669] shadow-inner" title="#059669"></span>
+<span class="w-6 h-6 rounded-full bg-[#0f172a] shadow-inner" title="#0f172a"></span>
+<span class="w-6 h-6 rounded-full bg-[#ecfdf5] shadow-inner" title="#ecfdf5"></span>
+<span class="w-6 h-6 rounded-full bg-[#d97706] shadow-inner" title="#d97706"></span>
+<span class="font-body-sm text-body-sm text-text-secondary ml-auto text-xs font-mono">Organic Agro</span>
+</div>
+</div>
+<!-- Card 2: Luxury Dark Slate -->
+<div class="palette-card cursor-pointer p-space-sm rounded-xl bg-surface-muted hover:bg-surface-container-low transition-all relative flex flex-col gap-2" data-palette="slate">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-text-primary">2. Luxury Dark Slate</span>
+<span class="material-symbols-outlined text-text-muted text-[20px] check-icon">radio_button_unchecked</span>
+</div>
+<span class="text-[10px] text-text-secondary">High-margin gourmet apothecary vibe</span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="w-6 h-6 rounded-full bg-[#0f172a] shadow-inner"></span>
+<span class="w-6 h-6 rounded-full bg-[#d97706] shadow-inner"></span>
+<span class="w-6 h-6 rounded-full bg-[#1e293b] shadow-inner"></span>
+<span class="w-6 h-6 rounded-full bg-[#ffffff] shadow-inner"></span>
+<span class="font-body-sm text-body-sm text-text-secondary ml-auto text-xs font-mono">Artisanal</span>
+</div>
+</div>
+<!-- Card 3: Pastel Minimalist -->
+<div class="palette-card cursor-pointer p-space-sm rounded-xl bg-surface-muted hover:bg-surface-container-low transition-all relative flex flex-col gap-2" data-palette="pastel">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-text-primary">3. Pastel Herbal</span>
+<span class="material-symbols-outlined text-text-muted text-[20px] check-icon">radio_button_unchecked</span>
+</div>
+<span class="text-[10px] text-text-secondary">Soft botanical wellness tone</span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="w-6 h-6 rounded-full bg-[#00855d] shadow-inner"></span>
+<span class="w-6 h-6 rounded-full bg-[#f43f5e] shadow-inner"></span>
+<span class="w-6 h-6 rounded-full bg-[#eff4ff] shadow-inner"></span>
+<span class="w-6 h-6 rounded-full bg-[#475569] shadow-inner"></span>
+<span class="font-body-sm text-body-sm text-text-secondary ml-auto text-xs font-mono">Botanical</span>
+</div>
+</div>
+<!-- Card 4: Vibrant Commercial -->
+<div class="palette-card cursor-pointer p-space-sm rounded-xl bg-surface-muted hover:bg-surface-container-low transition-all relative flex flex-col gap-2" data-palette="vibrant">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-text-primary">4. Warm Honey Harvest</span>
+<span class="material-symbols-outlined text-text-muted text-[20px] check-icon">radio_button_unchecked</span>
+</div>
+<span class="text-[10px] text-text-secondary">Golden amber &amp; cold-press focus</span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="w-6 h-6 rounded-full bg-[#d97706] shadow-inner"></span>
+<span class="w-6 h-6 rounded-full bg-[#059669] shadow-inner"></span>
+<span class="w-6 h-6 rounded-full bg-[#fffbeb] shadow-inner"></span>
+<span class="w-6 h-6 rounded-full bg-[#0b1c30] shadow-inner"></span>
+<span class="font-body-sm text-body-sm text-text-secondary ml-auto text-xs font-mono">Harvest</span>
+</div>
+</div>
+</div>
+<!-- Custom Brand Token Controls -->
+<div class="p-space-md rounded-xl bg-surface-muted flex flex-col gap-space-sm">
+<span class="font-label-md text-label-md text-text-primary font-semibold">Fine-Tune Color Tokens</span>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
+<div>
+<label class="font-label-sm text-label-sm text-text-secondary block mb-1">Primary Brand</label>
+<div class="flex items-center gap-2 bg-surface-container-lowest px-2 py-1.5 rounded-lg shadow-sm">
+<input class="w-6 h-6 rounded border-0 cursor-pointer bg-transparent" id="inputPrimaryColor" type="color" value="#059669"/>
+<input class="font-mono text-xs text-text-primary bg-transparent w-full focus:outline-none uppercase font-semibold" id="hexPrimaryColor" type="text" value="#059669"/>
+</div>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-text-secondary block mb-1">Secondary Accent</label>
+<div class="flex items-center gap-2 bg-surface-container-lowest px-2 py-1.5 rounded-lg shadow-sm">
+<input class="w-6 h-6 rounded border-0 cursor-pointer bg-transparent" id="inputSecondaryColor" type="color" value="#0f172a"/>
+<input class="font-mono text-xs text-text-primary bg-transparent w-full focus:outline-none uppercase font-semibold" id="hexSecondaryColor" type="text" value="#0F172A"/>
+</div>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-text-secondary block mb-1">Canvas / Tint</label>
+<div class="flex items-center gap-2 bg-surface-container-lowest px-2 py-1.5 rounded-lg shadow-sm">
+<input class="w-6 h-6 rounded border-0 cursor-pointer bg-transparent" id="inputSurfaceColor" type="color" value="#f8fafc"/>
+<input class="font-mono text-xs text-text-primary bg-transparent w-full focus:outline-none uppercase font-semibold" id="hexSurfaceColor" type="text" value="#F8FAFC"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Typography Pairing -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-text-primary font-semibold">Font Hierarchy Pairings</label>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<label class="font-pair-card flex items-center justify-between p-3 rounded-lg bg-surface-container-low cursor-pointer shadow-sm">
+<div class="flex items-center gap-2">
+<input checked="" class="text-status-positive accent-[#059669]" name="fontPair" type="radio" value="modern"/>
+<div>
+<div class="font-label-md text-label-md font-semibold text-text-primary">Plus Jakarta Sans &amp; Inter</div>
+<div class="font-body-sm text-body-sm text-text-secondary text-xs">High Legibility Commercial Sans</div>
+</div>
+</div>
+<span class="text-xs px-2 py-0.5 rounded bg-surface-muted text-text-secondary">Default</span>
+</label>
+<label class="font-pair-card flex items-center justify-between p-3 rounded-lg bg-surface-muted cursor-pointer hover:bg-surface-container-low">
+<div class="flex items-center gap-2">
+<input class="text-status-positive accent-[#059669]" name="fontPair" type="radio" value="artisanal"/>
+<div>
+<div class="font-label-md text-label-md font-semibold text-text-primary">Plus Jakarta &amp; Editorial</div>
+<div class="font-body-sm text-body-sm text-text-secondary text-xs">Artisanal Honey &amp; Apothecary</div>
+</div>
+</div>
+<span class="text-xs px-2 py-0.5 rounded bg-surface-container-lowest text-text-secondary">Organic</span>
+</label>
+</div>
+</div>
+<!-- Wizard Nav Next -->
+<div class="flex items-center justify-between pt-space-sm">
+<span class="font-label-sm text-label-sm text-text-muted">Auto-saves to groq_theme_config.json</span>
+<button class="goto-next-btn inline-flex items-center gap-1.5 px-4 py-2 bg-text-primary hover:bg-slate-800 text-on-primary font-label-md text-label-md rounded-lg shadow-sm transition-all" data-goto="2" type="button">
+<span>Next: Header &amp; Navigation</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- STEP 2 CONTENT: Header & Navigation Style -->
+<div class="step-panel hidden flex flex-col gap-space-md" id="step-panel-2">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Step 2: Header &amp; Navigation UX</h2>
+<p class="font-body-sm text-body-sm text-text-secondary">Choose the top-of-funnel orientation for Pakistani e-commerce conversion.</p>
+</div>
+<span class="px-2.5 py-1 rounded bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold">2 of 4</span>
+</div>
+<!-- Header MCQ options -->
+<div class="grid grid-cols-1 gap-space-sm" id="header-options">
+<!-- Choice 1: Split Nav with Search -->
+<div class="header-card active cursor-pointer p-space-sm rounded-xl bg-surface-container-low transition-all flex flex-col gap-2 shadow-sm" data-header="split_search">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-status-positive text-[20px] check-icon">check_circle</span>
+<span class="font-label-md text-label-md font-semibold text-text-primary">A. Split Nav with Expanded Search Bar</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-status-positive-bg text-status-positive text-[10px] font-semibold uppercase">High Conversion</span>
+</div>
+<!-- Miniature Wireframe -->
+<div class="p-2 rounded bg-surface-container-lowest flex items-center justify-between gap-2 shadow-sm">
+<span class="h-4 w-16 bg-[#059669] rounded flex items-center justify-center text-[8px] text-white font-bold">HUNZA</span>
+<div class="flex-1 h-5 bg-surface-muted rounded px-2 flex items-center justify-between text-[8px] text-text-muted">
+<span>Search Sidr honey, almond oils...</span>
+<span class="material-symbols-outlined text-[10px]">search</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="h-4 w-8 bg-surface-muted rounded text-[7px] flex items-center justify-center">Nav</span>
+<span class="h-5 w-5 bg-status-positive-bg text-status-positive rounded-full flex items-center justify-center text-[9px] font-bold">🛒 2</span>
+</div>
+</div>
+</div>
+<!-- Choice 2: Sticky Centered Logo -->
+<div class="header-card cursor-pointer p-space-sm rounded-xl bg-surface-muted hover:bg-surface-container-low transition-all flex flex-col gap-2" data-header="centered_logo">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-text-muted text-[20px] check-icon">radio_button_unchecked</span>
+<span class="font-label-md text-label-md font-semibold text-text-primary">B. Sticky Centered Luxury Logo</span>
+</div>
+<span class="text-text-secondary text-[11px]">Boutique Brand</span>
+</div>
+<!-- Miniature Wireframe -->
+<div class="p-2 rounded bg-surface-container-lowest flex items-center justify-between gap-2 shadow-sm">
+<div class="flex gap-1 text-[8px] text-text-secondary">
+<span>Shop</span>
+<span>•</span>
+<span>Story</span>
+</div>
+<span class="h-4 px-2 bg-text-primary rounded text-[8px] text-white font-bold">HUNZA HARVEST</span>
+<div class="flex gap-1.5 text-[8px] items-center">
+<span>Account</span>
+<span class="h-5 w-5 bg-surface-muted rounded-full flex items-center justify-center text-[9px]">🛒</span>
+</div>
+</div>
+</div>
+<!-- Choice 3: Minimalist Compact -->
+<div class="header-card cursor-pointer p-space-sm rounded-xl bg-surface-muted hover:bg-surface-container-low transition-all flex flex-col gap-2" data-header="minimal_compact">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-text-muted text-[20px] check-icon">radio_button_unchecked</span>
+<span class="font-label-md text-label-md font-semibold text-text-primary">C. Minimalist Compact Slim</span>
+</div>
+<span class="text-text-secondary text-[11px]">Clean Modern</span>
+</div>
+<!-- Miniature Wireframe -->
+<div class="p-2 rounded bg-surface-container-lowest flex items-center justify-between gap-2 shadow-sm">
+<span class="h-4 w-12 bg-text-primary rounded text-[8px] text-white flex items-center justify-center">LOGO</span>
+<div class="flex gap-2 text-[8px] text-text-secondary">
+<span>Raw Honey</span>
+<span>Cold Oils</span>
+<span>Hampers</span>
+</div>
+<span class="h-5 w-5 bg-surface-muted rounded-full flex items-center justify-center text-[9px]">🛒</span>
+</div>
+</div>
+</div>
+<!-- Header Feature Toggles -->
+<div class="p-space-md rounded-xl bg-surface-muted flex flex-col gap-3">
+<span class="font-label-md text-label-md text-text-primary font-semibold">Localized Conversion Add-ons</span>
+<!-- Announcement Bar Toggle -->
+<label class="flex items-center justify-between cursor-pointer">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary">Show Top Announcement Bar</span>
+<span class="text-[11px] text-text-secondary">"Free 24hr delivery across Lahore on orders over PKR 2,500"</span>
+</div>
+<input checked="" class="toggle-checkbox w-5 h-5 accent-[#059669] cursor-pointer" id="toggleAnnouncement" type="checkbox"/>
+</label>
+<div class="h-px bg-border-subtle w-full"></div>
+<!-- WhatsApp Quick CTA -->
+<label class="flex items-center justify-between cursor-pointer">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary flex items-center gap-1.5">
+<span>WhatsApp Instant Order Pill</span>
+<span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">+92 Ready</span>
+</span>
+<span class="text-[11px] text-text-secondary">Triggers direct checkout chat via prefilled SKU link</span>
+</div>
+<input checked="" class="toggle-checkbox w-5 h-5 accent-[#059669] cursor-pointer" id="toggleWhatsapp" type="checkbox"/>
+</label>
+<div class="h-px bg-border-subtle w-full"></div>
+<!-- Trust & Purity Badges -->
+<label class="flex items-center justify-between cursor-pointer">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary">Display Trust &amp; Lab-Tested Purity Badges</span>
+<span class="text-[11px] text-text-secondary">PCO Lab Tested, 100% Raw &amp; Unheated guarantee markers</span>
+</div>
+<input checked="" class="toggle-checkbox w-5 h-5 accent-[#059669] cursor-pointer" id="toggleTrust" type="checkbox"/>
+</label>
+</div>
+<div class="flex items-center justify-between pt-space-sm">
+<button class="goto-prev-btn inline-flex items-center gap-1 text-text-secondary hover:text-text-primary font-label-md text-label-md" data-goto="1" type="button">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span>Back to Palette</span>
+</button>
+<button class="goto-next-btn inline-flex items-center gap-1.5 px-4 py-2 bg-text-primary hover:bg-slate-800 text-on-primary font-label-md text-label-md rounded-lg shadow-sm transition-all" data-goto="3" type="button">
+<span>Next: Hero Banner</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- STEP 3 CONTENT: Hero Banner Layout -->
+<div class="step-panel hidden flex flex-col gap-space-md" id="step-panel-3">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Step 3: Hero Banner Layout &amp; Copy</h2>
+<p class="font-body-sm text-body-sm text-text-secondary">Define primary above-the-fold storytelling and initial CTA push.</p>
+</div>
+<span class="px-2.5 py-1 rounded bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold">3 of 4</span>
+</div>
+<!-- Visual Hero MCQ Options -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm" id="hero-options">
+<!-- Choice 1: Split Banner (Default) -->
+<div class="hero-card active cursor-pointer p-space-sm rounded-xl bg-surface-container-low transition-all flex flex-col gap-2 shadow-sm" data-hero="split">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-text-primary">1. 50/50 Split Showcase</span>
+<span class="material-symbols-outlined text-status-positive text-[18px] check-icon">check_circle</span>
+</div>
+<div class="h-16 rounded bg-surface-container-lowest p-1.5 flex gap-1 shadow-sm overflow-hidden">
+<div class="w-1/2 flex flex-col justify-center gap-1">
+<div class="h-2 w-3/4 bg-text-primary rounded"></div>
+<div class="h-1.5 w-1/2 bg-text-muted rounded"></div>
+<div class="h-2.5 w-10 bg-status-positive rounded mt-1"></div>
+</div>
+<div class="w-1/2 bg-status-positive-bg rounded flex items-center justify-center text-[10px] text-status-positive font-bold">
+                🏺 Product
+              </div>
+</div>
+<span class="text-[10px] text-text-secondary leading-tight">Recommended for physical food &amp; honey jars</span>
+</div>
+<!-- Choice 2: Full-Width Slider -->
+<div class="hero-card cursor-pointer p-space-sm rounded-xl bg-surface-muted hover:bg-surface-container-low transition-all flex flex-col gap-2" data-hero="slider">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-text-primary">2. Full-Width Visual</span>
+<span class="material-symbols-outlined text-text-muted text-[18px] check-icon">radio_button_unchecked</span>
+</div>
+<div class="h-16 rounded bg-slate-800 p-2 flex flex-col justify-center items-center text-center gap-1 shadow-sm text-white">
+<div class="h-2 w-16 bg-white/80 rounded"></div>
+<div class="h-1.5 w-12 bg-white/40 rounded"></div>
+<div class="h-2.5 w-8 bg-status-positive rounded mt-0.5"></div>
+</div>
+<span class="text-[10px] text-text-secondary leading-tight">Editorial landscape photography focus</span>
+</div>
+<!-- Choice 3: Minimalist Harvest Grid -->
+<div class="hero-card cursor-pointer p-space-sm rounded-xl bg-surface-muted hover:bg-surface-container-low transition-all flex flex-col gap-2" data-hero="minimal_grid">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-text-primary">3. Harvest Badge Grid</span>
+<span class="material-symbols-outlined text-text-muted text-[18px] check-icon">radio_button_unchecked</span>
+</div>
+<div class="h-16 rounded bg-surface-container-lowest p-1.5 grid grid-cols-3 gap-1 shadow-sm">
+<div class="bg-amber-100 rounded flex items-center justify-center text-[7px] text-amber-900 font-bold">Honey</div>
+<div class="bg-emerald-100 rounded flex items-center justify-center text-[7px] text-emerald-900 font-bold">Oils</div>
+<div class="bg-indigo-100 rounded flex items-center justify-center text-[7px] text-indigo-900 font-bold">Nuts</div>
+</div>
+<span class="text-[10px] text-text-secondary leading-tight">Fast-scanning category entrypoints</span>
+</div>
+</div>
+<!-- Headline & CTA Copy Inputs -->
+<div class="p-space-md rounded-xl bg-surface-muted flex flex-col gap-space-sm">
+<span class="font-label-md text-label-md text-text-primary font-semibold">Storefront Copywriting Engine</span>
+<div>
+<label class="font-label-sm text-label-sm text-text-secondary block mb-1">Primary Hero Headline</label>
+<input class="w-full px-3 py-2 bg-surface-container-lowest rounded-lg font-headline-sm text-headline-sm text-text-primary shadow-sm focus:outline-none" id="inputHeadline" type="text" value="Hunza Valley Wild Mountain Honey &amp; Pure Cold-Pressed Oils"/>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<div>
+<label class="font-label-sm text-label-sm text-text-secondary block mb-1">Sub-headline Value Tag</label>
+<input class="w-full px-3 py-2 bg-surface-container-lowest rounded-lg font-body-sm text-body-sm text-text-primary shadow-sm focus:outline-none" id="inputSubheadline" type="text" value="Direct from Karakoram beekeepers. 100% unfiltered, zero adulteration."/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-text-secondary block mb-1">Hero Button CTA</label>
+<input class="w-full px-3 py-2 bg-surface-container-lowest rounded-lg font-label-md text-label-md text-text-primary shadow-sm focus:outline-none" id="inputCtaText" type="text" value="Explore Fresh Harvest"/>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-sm">
+<button class="goto-prev-btn inline-flex items-center gap-1 text-text-secondary hover:text-text-primary font-label-md text-label-md" data-goto="2" type="button">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span>Back to Header</span>
+</button>
+<button class="goto-next-btn inline-flex items-center gap-1.5 px-4 py-2 bg-text-primary hover:bg-slate-800 text-on-primary font-label-md text-label-md rounded-lg shadow-sm transition-all" data-goto="4" type="button">
+<span>Next: Product Grid</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- STEP 4 CONTENT: Product Grid & Card Style -->
+<div class="step-panel hidden flex flex-col gap-space-md" id="step-panel-4">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Step 4: Product Grid &amp; Card Architecture</h2>
+<p class="font-body-sm text-body-sm text-text-secondary">Configure high-velocity Pakistani grocery &amp; wellness shopping micro-interactions.</p>
+</div>
+<span class="px-2.5 py-1 rounded bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold">4 of 4</span>
+</div>
+<!-- Product Grid Card Options -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm" id="grid-options">
+<!-- Option 1: 4-Column Modern Zoom -->
+<div class="grid-card active cursor-pointer p-space-sm rounded-xl bg-surface-container-low transition-all flex flex-col gap-2 shadow-sm" data-grid="4col">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-text-primary">4-Column Hover Cards</span>
+<span class="material-symbols-outlined text-status-positive text-[18px] check-icon">check_circle</span>
+</div>
+<div class="p-1.5 rounded bg-surface-container-lowest grid grid-cols-4 gap-1 shadow-sm">
+<div class="h-10 bg-surface-muted rounded"></div>
+<div class="h-10 bg-surface-muted rounded"></div>
+<div class="h-10 bg-surface-muted rounded"></div>
+<div class="h-10 bg-surface-muted rounded"></div>
+</div>
+<span class="text-[10px] text-text-secondary leading-tight">Recommended desktop density for catalog scanning</span>
+</div>
+<!-- Option 2: 3-Column Detailed Direct Add -->
+<div class="grid-card cursor-pointer p-space-sm rounded-xl bg-surface-muted hover:bg-surface-container-low transition-all flex flex-col gap-2" data-grid="3col">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-text-primary">3-Col Detailed Stepper</span>
+<span class="material-symbols-outlined text-text-muted text-[18px] check-icon">radio_button_unchecked</span>
+</div>
+<div class="p-1.5 rounded bg-surface-container-lowest grid grid-cols-3 gap-1 shadow-sm">
+<div class="h-10 bg-surface-muted rounded"></div>
+<div class="h-10 bg-surface-muted rounded"></div>
+<div class="h-10 bg-surface-muted rounded"></div>
+</div>
+<span class="text-[10px] text-text-secondary leading-tight">Prominent photography with direct +/- quantity inputs</span>
+</div>
+<!-- Option 3: Modern Compact List -->
+<div class="grid-card cursor-pointer p-space-sm rounded-xl bg-surface-muted hover:bg-surface-container-low transition-all flex flex-col gap-2" data-grid="2col">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-text-primary">2-Col Large Editorial</span>
+<span class="material-symbols-outlined text-text-muted text-[18px] check-icon">radio_button_unchecked</span>
+</div>
+<div class="p-1.5 rounded bg-surface-container-lowest grid grid-cols-2 gap-1.5 shadow-sm">
+<div class="h-10 bg-surface-muted rounded"></div>
+<div class="h-10 bg-surface-muted rounded"></div>
+</div>
+<span class="text-[10px] text-text-secondary leading-tight">Artisanal luxury magazine showcase style</span>
+</div>
+</div>
+<!-- Product Card Feature Checkboxes -->
+<div class="p-space-md rounded-xl bg-surface-muted flex flex-col gap-2.5">
+<span class="font-label-md text-label-md text-text-primary font-semibold">Storefront E-Commerce Badges</span>
+<label class="flex items-center gap-2.5 cursor-pointer">
+<input checked="" class="w-4 h-4 accent-[#059669]" id="chkReviews" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-text-primary">Enable Star Ratings &amp; Verified Reviews (★ 4.9 · 128 Reviews)</span>
+</label>
+<label class="flex items-center gap-2.5 cursor-pointer">
+<input checked="" class="w-4 h-4 accent-[#059669]" id="chkDiscounts" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-text-primary">Show Fresh Harvest &amp; Launch Promo Badges ("15% Off Launch Batch")</span>
+</label>
+<label class="flex items-center gap-2.5 cursor-pointer">
+<input checked="" class="w-4 h-4 accent-[#059669]" id="chkStock" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-text-primary">Display Cold-Chain Inventory Pills ("Only 14 Jars in Stock")</span>
+</label>
+<label class="flex items-center gap-2.5 cursor-pointer">
+<input class="w-4 h-4 accent-[#059669]" id="chkQuickView" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-text-primary">Enable Quick-View Laboratory Certificate Modal Overlay</span>
+</label>
+</div>
+<div class="flex items-center justify-between pt-space-sm">
+<button class="goto-prev-btn inline-flex items-center gap-1 text-text-secondary hover:text-text-primary font-label-md text-label-md" data-goto="3" type="button">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span>Back to Hero</span>
+</button>
+<button class="inline-flex items-center gap-2 px-5 py-2.5 bg-status-positive hover:bg-emerald-700 text-on-primary font-label-md text-label-md rounded-lg shadow-sm transition-all" id="btnFinishSteps" type="button">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Ready to Compile Theme</span>
+</button>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Live 1:1 Interactive Responsive Storefront Canvas (xl:col-span-6) -->
+<div class="xl:col-span-6 flex flex-col gap-space-sm sticky top-20">
+<!-- Viewport Device Switcher Toolbar -->
+<div class="bg-surface-container-lowest p-2 rounded-xl shadow-sm flex items-center justify-between gap-space-sm flex-wrap">
+<div class="flex items-center gap-1 bg-surface-muted p-1 rounded-lg">
+<button class="viewport-btn active px-3 py-1 rounded bg-surface-container-lowest text-text-primary shadow-xs font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-all" id="viewDesktop" type="button">
+<span class="material-symbols-outlined text-[16px]">desktop_windows</span>
+<span class="hidden sm:inline">Desktop</span>
+</button>
+<button class="viewport-btn px-3 py-1 rounded text-text-secondary hover:text-text-primary font-label-sm text-label-sm font-medium flex items-center gap-1 transition-all" id="viewTablet" type="button">
+<span class="material-symbols-outlined text-[16px]">tablet</span>
+<span class="hidden sm:inline">Tablet (768px)</span>
+</button>
+<button class="viewport-btn px-3 py-1 rounded text-text-secondary hover:text-text-primary font-label-sm text-label-sm font-medium flex items-center gap-1 transition-all" id="viewMobile" type="button">
+<span class="material-symbols-outlined text-[16px]">phone_iphone</span>
+<span class="hidden sm:inline">Mobile (375px)</span>
+</button>
+</div>
+<div class="flex items-center gap-2 text-text-secondary font-label-sm text-label-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-status-positive-bg text-status-positive text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+            Auto-syncing: 0ms
+          </span>
+<button class="p-1 hover:bg-surface-muted rounded text-text-secondary hover:text-text-primary" id="btnResetPreview" title="Refresh Mockup" type="button">
+<span class="material-symbols-outlined text-[18px]">cached</span>
+</button>
+</div>
+</div>
+<!-- Live Mockup Viewport Container -->
+<div class="w-full flex justify-center bg-surface-container-low p-2 sm:p-4 rounded-xl shadow-inner min-h-[720px] transition-all overflow-hidden" id="viewportOuter">
+<div class="w-full bg-white rounded-xl shadow-lg transition-all duration-300 flex flex-col overflow-hidden max-h-[820px] overflow-y-auto border border-border-subtle" id="mockupFrame">
+<!-- 1. Mockup Announcement Bar -->
+<div class="w-full bg-[#059669] text-white py-1.5 px-4 text-center font-label-sm text-label-sm flex items-center justify-center gap-2 transition-all" id="mockupAnnouncement">
+<span>🌿 100% Pure Raw Honey from Gilgit-Baltistan • Free Shipping in Lahore over PKR 2,500</span>
+<span class="hidden md:inline text-white/80">•</span>
+<a class="hidden md:inline font-bold underline hover:text-white/90" href="#">Order via WhatsApp: +92 300 1234567</a>
+</div>
+<!-- 2. Mockup Storefront Header -->
+<div class="w-full bg-white px-4 py-3 shadow-xs flex items-center justify-between gap-3 sticky top-0 z-10 transition-all" id="mockupHeader">
+<!-- Brand Logo -->
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-lg bg-[#059669] text-white flex items-center justify-center font-headline-sm text-headline-sm font-bold shadow-xs logo-badge">H</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-text-primary tracking-tight font-bold leading-tight">Hunza Harvest</span>
+<span class="text-[9px] uppercase tracking-wider text-text-secondary">Pure Organic Apothecary</span>
+</div>
+</div>
+<!-- Dynamic Search Bar (Split Nav Layout) -->
+<div class="hidden md:flex flex-1 max-w-xs items-center gap-2 bg-surface-muted px-3 py-1.5 rounded-lg text-text-secondary" id="mockupHeaderSearch">
+<span class="material-symbols-outlined text-[16px] text-text-muted">search</span>
+<span class="font-body-sm text-body-sm text-text-muted text-xs truncate">Search Sidr honey, almond oils...</span>
+</div>
+<!-- Header Nav Links & Cart -->
+<div class="flex items-center gap-3">
+<nav class="hidden lg:flex items-center gap-2.5 font-label-md text-label-md text-text-primary">
+<a class="hover:text-status-positive transition-colors font-semibold" href="#">Raw Honey</a>
+<a class="hover:text-status-positive transition-colors" href="#">Cold Oils</a>
+<a class="hover:text-status-positive transition-colors" href="#">Mountain Nuts</a>
+<a class="hover:text-status-positive transition-colors" href="#">Lab Reports</a>
+</nav>
+<!-- WhatsApp Direct Order Pill -->
+<a class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-full font-label-sm text-label-sm font-semibold transition-all" href="#" id="mockupWhatsappBtn">
+<span class="material-symbols-outlined text-[15px] text-emerald-600">chat</span>
+<span class="hidden sm:inline">WhatsApp Order</span>
+</a>
+<!-- Cart Button -->
+<button class="relative p-1.5 rounded-lg bg-surface-muted text-text-primary hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+<span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#059669] text-white text-[10px] font-bold flex items-center justify-center">2</span>
+</button>
+</div>
+</div>
+<!-- Trust Badges Strip -->
+<div class="w-full bg-[#f8fafc] px-4 py-1.5 flex items-center justify-between text-text-secondary font-label-sm text-label-sm border-b border-border-subtle overflow-x-auto gap-3" id="mockupTrustStrip">
+<span class="flex items-center gap-1 whitespace-nowrap"><span class="material-symbols-outlined text-[15px] text-status-positive">verified_user</span> 100% Raw Certified</span>
+<span class="flex items-center gap-1 whitespace-nowrap"><span class="material-symbols-outlined text-[15px] text-status-positive">biotech</span> PCSIR Lab Tested</span>
+<span class="flex items-center gap-1 whitespace-nowrap"><span class="material-symbols-outlined text-[15px] text-status-positive">ac_unit</span> Cold-Pressed &lt;38°C</span>
+<span class="flex items-center gap-1 whitespace-nowrap"><span class="material-symbols-outlined text-[15px] text-status-positive">local_shipping</span> 24h Lahore Delivery</span>
+</div>
+<!-- 3. Mockup Hero Banner -->
+<div class="w-full bg-gradient-to-br from-emerald-50 via-surface to-amber-50/40 p-4 sm:p-6 transition-all" id="mockupHero">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<div class="md:col-span-7 flex flex-col gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold w-max uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-[#059669]"></span>
+                  2025 Autumn Harvest Now Available
+                </span>
+<h3 class="font-headline-lg text-headline-lg text-text-primary tracking-tight font-bold leading-tight" id="mockupHeadline">
+                  Hunza Valley Wild Mountain Honey &amp; Pure Cold-Pressed Oils
+                </h3>
+<p class="font-body-md text-body-md text-text-secondary text-sm" id="mockupSubheadline">
+                  Direct from Karakoram beekeepers. 100% unfiltered, zero adulteration. Verified via NMR spectroscopy.
+                </p>
+<div class="flex items-center gap-3 pt-2">
+<button class="px-4 py-2 bg-[#059669] hover:bg-emerald-700 text-white rounded-lg font-label-md text-label-md font-semibold shadow-sm transition-all flex items-center gap-2" id="mockupCtaBtn" type="button">
+<span id="mockupCtaText">Explore Fresh Harvest</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+<span class="font-label-sm text-label-sm text-text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-amber-500 text-[18px]">grade</span>
+<strong>4.9/5</strong> (340+ Reviews)
+                  </span>
+</div>
+</div>
+<!-- Hero Visual / Product Image -->
+<div class="md:col-span-5 flex justify-center">
+<div class="relative w-full max-w-[280px] h-[210px] rounded-xl overflow-hidden shadow-md bg-white">
+<img class="w-full h-full object-cover" data-alt="Artisanal glass jar of pure amber raw mountain honey with wooden honey dipper beside small bottle of cold-pressed almond oil on clean stone surface with soft botanical herbs and soft daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAArnCSYeRfyEyiI9GxOzPWEpvLhTLZss1S5SUUQ6AwHWeP5ovoKdoE31Ls6tFfuuupMVAi9KaGhOU8QnvJeRQIoEc7MqXHWxZq0H242C5CKJdGkBm2d2s-VwFhzgoUlpNJbHGZ88eqL83wZHwKdRV8yu7XP3HM9OYkQra3YsOv_4oESv0XoWopZ-ASXYWMCyPMXUDWneQpjPB_GDNr93_wdg4YPlMIKQksS7JthWyetheN7nlJgx1U3Q"/>
+<div class="absolute bottom-2 left-2 bg-text-primary/85 backdrop-blur-md px-2.5 py-1 rounded text-white text-[11px] font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-emerald-400">workspace_premium</span>
+                    Single-Origin Hunza
+                  </div>
+</div>
+</div>
+</div>
+</div>
+<!-- 4. Mockup Product Grid Section -->
+<div class="w-full p-4 sm:p-5 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="font-headline-sm text-headline-sm text-text-primary font-bold">Featured Harvest Selection</h4>
+<p class="font-body-sm text-body-sm text-text-secondary">Limited small-batch cold-chain allocations</p>
+</div>
+<a class="font-label-sm text-label-sm text-status-positive font-semibold hover:underline" href="#">View All (18 Products) →</a>
+</div>
+<!-- Product Grid -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 transition-all" id="mockupProductGrid">
+<!-- Product 1 -->
+<div class="product-item bg-white p-2.5 rounded-xl shadow-sm flex flex-col gap-1.5 relative group hover:shadow-md transition-all">
+<span class="badge-discount absolute top-2 left-2 px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold z-10">15% OFF</span>
+<div class="w-full h-32 rounded-lg bg-surface-muted overflow-hidden relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Premium square glass jar filled with golden Sidr mountain honey with raw honeycomb inside and minimalist white label in warm morning kitchen setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_--G0o9JLxt9GfcvgJhNG6KBquwoDLKqbch8tcCOnFH66jq7S9KMOSTaCJ3Pr7KUX_VbPZbkb7c9q-ceogHfcbUsWKhMdGeCtYp_Q0OzB9Uxf0IFjgOKQIEXNDr-e5JFT2vwAd1iW701NTFAmDBon666YG4KLccfWYBayVFL6PmWUn-iPZbIKL7JHTZUUEHGCsw6bSMD9rLQ-4QZd4UIjZXGkF0jphW9koo8WX20nvMfGmtNrpkyM-w"/>
+</div>
+<div class="flex items-center justify-between text-[11px] text-text-secondary mt-0.5 badge-reviews">
+<span class="text-amber-500 font-semibold flex items-center">★ 4.9 <span class="text-text-muted font-normal ml-0.5">(128)</span></span>
+<span class="text-status-positive font-semibold">Fresh Harvest</span>
+</div>
+<h5 class="font-label-md text-label-md font-semibold text-text-primary line-clamp-1">Sidr Mountain Honey (500g)</h5>
+<div class="flex items-baseline gap-1.5">
+<span class="font-label-md text-label-md font-bold text-text-primary">PKR 2,450</span>
+<span class="font-body-sm text-body-sm text-text-muted line-through text-xs">PKR 2,850</span>
+</div>
+<span class="badge-stock text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-medium w-max">Only 14 Jars in Stock</span>
+<button class="w-full mt-1 py-1.5 bg-[#059669] hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center justify-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add
+                </button>
+</div>
+<!-- Product 2 -->
+<div class="product-item bg-white p-2.5 rounded-xl shadow-sm flex flex-col gap-1.5 relative group hover:shadow-md transition-all">
+<span class="badge-discount absolute top-2 left-2 px-1.5 py-0.5 rounded bg-[#059669] text-white text-[10px] font-bold z-10">BESTSELLER</span>
+<div class="w-full h-32 rounded-lg bg-surface-muted overflow-hidden relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Dark amber apothecary glass dropper bottle of pure cold-pressed sweet almond oil with fresh almonds scattered on slate slab" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUChojMlIxKYhouEuOBOv0ixiaISSrljF0U3NyCNHBL3Mp0PzmiGaprSbTQLesR9WS-30ah5ItLml-IbIslvBl3Dfbpz4YZQrIVptz05YFE5c-mYC3dTaq_BP_kihElfHdJ1nNjx6cAvI5biZ8E73zO-4cn4I0WD51ev-IXTF3fhEzAQkRPDOaOfZT0OvII0YDLrnT68fE6OC9STxrsjbdZhnDNcHb2xGl1uZQZw-IOH_ng9TjnuxYhA"/>
+</div>
+<div class="flex items-center justify-between text-[11px] text-text-secondary mt-0.5 badge-reviews">
+<span class="text-amber-500 font-semibold flex items-center">★ 4.8 <span class="text-text-muted font-normal ml-0.5">(84)</span></span>
+<span class="text-emerald-700 font-semibold">Cold Pressed</span>
+</div>
+<h5 class="font-label-md text-label-md font-semibold text-text-primary line-clamp-1">Almond Oil (250ml)</h5>
+<div class="flex items-baseline gap-1.5">
+<span class="font-label-md text-label-md font-bold text-text-primary">PKR 1,850</span>
+</div>
+<span class="badge-stock text-[10px] text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded font-medium w-max">Fresh Press · Nov Batch</span>
+<button class="w-full mt-1 py-1.5 bg-[#059669] hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center justify-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add
+                </button>
+</div>
+<!-- Product 3 -->
+<div class="product-item bg-white p-2.5 rounded-xl shadow-sm flex flex-col gap-1.5 relative group hover:shadow-md transition-all">
+<div class="w-full h-32 rounded-lg bg-surface-muted overflow-hidden relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Traditional glass bottle of rich pungent organic cold-pressed mustard oil with yellow mustard flowers in soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmfwkVcsCX6SWtGP5i9ZH2iw3ufcb1c6hw035J7Q2xi9X1RBKZuQvRU_wr-dtO4HOd2mQF1Pvo_Ph1Zi8Yi1LqtwbIE4GHhphmRd2BJRDDcljP5y82bQBTbQf1frA71oprKtUVc807h_6q6TGNE2DGv9zrREMW1Ex-vwBWc6dqfJEgMChttwJhPtveSvyeIqWJFazh_8C73lB6ZV_zNXxnV-_dLv4DWuVBsFl-XosNJke2Gz9NLO2xtg"/>
+</div>
+<div class="flex items-center justify-between text-[11px] text-text-secondary mt-0.5 badge-reviews">
+<span class="text-amber-500 font-semibold flex items-center">★ 4.9 <span class="text-text-muted font-normal ml-0.5">(62)</span></span>
+<span class="text-text-muted font-normal">Unrefined</span>
+</div>
+<h5 class="font-label-md text-label-md font-semibold text-text-primary line-clamp-1">Kachi Ghani Mustard Oil (500ml)</h5>
+<div class="flex items-baseline gap-1.5">
+<span class="font-label-md text-label-md font-bold text-text-primary">PKR 1,200</span>
+</div>
+<span class="badge-stock text-[10px] text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded font-medium w-max">Stone Crushed</span>
+<button class="w-full mt-1 py-1.5 bg-[#059669] hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center justify-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add
+                </button>
+</div>
+<!-- Product 4 -->
+<div class="product-item bg-white p-2.5 rounded-xl shadow-sm flex flex-col gap-1.5 relative group hover:shadow-md transition-all">
+<span class="badge-discount absolute top-2 left-2 px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-bold z-10">ORGANIC</span>
+<div class="w-full h-32 rounded-lg bg-surface-muted overflow-hidden relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Artisanal kraft paper gift box filled with fresh golden walnut halves from Gilgit mountain orchards tied with natural jute string" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgVWB2wJBVw4dmgELBxikZwo0bNcFXWjsHVtqIBc3fpRAwx5Z4dd8M5Ceh5YEyuHACK4HezuPAUWYFj6v_mbFrTEHlJJ1bFW2p712dWssbWvKQWvcxE3HXF5ZEeWvXVcNqh8Zk7ci53kgC62n1u_VVRs_vuvOc6WeIT97A-StgvXo68usY5DXHzDuAw8--UkK2_AKp0fRSg1d5gcZ9Xe4gP5usRJczrD0qOFH3pJs0BTHWS9PFgqTmXQ"/>
+</div>
+<div class="flex items-center justify-between text-[11px] text-text-secondary mt-0.5 badge-reviews">
+<span class="text-amber-500 font-semibold flex items-center">★ 5.0 <span class="text-text-muted font-normal ml-0.5">(49)</span></span>
+<span class="text-amber-700 font-semibold">Karakoram</span>
+</div>
+<h5 class="font-label-md text-label-md font-semibold text-text-primary line-clamp-1">Walnut Kernel Gift Box (400g)</h5>
+<div class="flex items-baseline gap-1.5">
+<span class="font-label-md text-label-md font-bold text-text-primary">PKR 2,900</span>
+</div>
+<span class="badge-stock text-[10px] text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded font-medium w-max">High Omega-3</span>
+<button class="w-full mt-1 py-1.5 bg-[#059669] hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center justify-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add
+                </button>
+</div>
+</div>
+</div>
+<!-- Mockup Footer Value Strip -->
+<div class="w-full bg-[#0f172a] text-white p-4 mt-auto">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center sm:text-left">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-status-positive text-[20px]">eco</span>
+<div class="flex flex-col">
+<span class="text-xs font-bold">100% Unadulterated</span>
+<span class="text-[10px] text-slate-400">Zero sugar syrup added</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-status-positive text-[20px]">science</span>
+<div class="flex flex-col">
+<span class="text-xs font-bold">Batch Lab Reports</span>
+<span class="text-[10px] text-slate-400">Download PCSIR Certificates</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-status-positive text-[20px]">local_shipping</span>
+<div class="flex flex-col">
+<span class="text-xs font-bold">Cold-Chain Delivery</span>
+<span class="text-[10px] text-slate-400">Thermal packaging guaranteed</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- FLOATING STICKY ACTION BAR -->
+<div class="sticky bottom-0 w-full bg-surface-container-lowest/95 backdrop-blur-md px-margin py-3 border-t border-border-subtle shadow-lg flex flex-col md:flex-row items-center justify-between gap-space-sm z-40">
+<div class="flex items-center gap-2">
+<button class="inline-flex items-center gap-1 text-text-secondary hover:text-status-positive font-label-md text-label-md transition-colors" id="btnResetAI" type="button">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+<span>Reset to AI Recommendation</span>
+</button>
+</div>
+<div class="hidden lg:flex items-center gap-2 text-text-secondary font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-status-positive"></span>
+<span>Generated from Feasibility Study: <strong>#FEA-9041 (Lahore Gulberg III Footfall Model)</strong></span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-4 py-2 bg-surface-container-lowest hover:bg-surface-muted text-text-primary font-label-md text-label-md rounded-lg shadow-sm transition-all border border-border-subtle" id="btnPreviewNewTab" type="button">
+        Preview Storefront
+      </button>
+<button class="px-5 py-2 bg-status-positive hover:bg-emerald-700 text-on-primary font-label-md text-label-md rounded-lg shadow-md transition-all flex items-center gap-2 font-semibold" type="button">
+<span>Confirm Theme &amp; Launch Store</span>
+<span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+</button>
+</div>
+</div>
+<!-- SLIDE-OVER DRAWER: View JSON Schema -->
+<div class="fixed inset-0 z-50 pointer-events-none transition-all duration-300 opacity-0" id="schemaDrawer">
+<!-- Backdrop wash -->
+<div class="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-xs transition-opacity cursor-pointer" id="drawerBackdrop"></div>
+<!-- Drawer container -->
+<div class="absolute top-0 right-0 h-full w-full max-w-xl bg-surface-container-lowest shadow-2xl flex flex-col pointer-events-auto transform translate-x-full transition-transform duration-300 ease-in-out border-l border-border-subtle" id="drawerPanel">
+<!-- Drawer Header -->
+<div class="p-space-md bg-surface-container-lowest flex items-center justify-between border-b border-border-subtle">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-status-positive text-[22px]">data_object</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Groq Theme Schema (theme.json)</h3>
+<span class="font-label-sm text-label-sm text-text-secondary">Directly consumable by Storefront Module &amp; Headless API</span>
+</div>
+</div>
+<button class="p-1 rounded-lg hover:bg-surface-muted text-text-secondary hover:text-text-primary" id="btnCloseDrawer" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Drawer Code Body with Line Numbers -->
+<div class="flex-1 p-space-md bg-[#0f172a] text-slate-200 overflow-y-auto font-mono text-xs leading-relaxed selection:bg-status-positive selection:text-white">
+<pre class="whitespace-pre-wrap"><code id="jsonSchemaCode">{
+  <span class="text-emerald-400">"theme_id"</span>: <span class="text-amber-300">"theme_groq_organic_sme_v1"</span>,
+  <span class="text-emerald-400">"store_id"</span>: <span class="text-amber-300">"FEA-9041"</span>,
+  <span class="text-emerald-400">"meta"</span>: {
+    <span class="text-emerald-400">"business_name"</span>: <span class="text-amber-300">"Hunza Harvest Organics"</span>,
+    <span class="text-emerald-400">"category"</span>: <span class="text-amber-300">"Organic Honey &amp; Cold-Pressed Oils"</span>,
+    <span class="text-emerald-400">"target_market"</span>: <span class="text-amber-300">"Lahore, Pakistan (Gulberg &amp; DHA)"</span>,
+    <span class="text-emerald-400">"compiled_by"</span>: <span class="text-amber-300">"Groq Llama-3 70B Engine"</span>
+  },
+  <span class="text-emerald-400">"color_tokens"</span>: {
+    <span class="text-emerald-400">"primary"</span>: <span class="text-amber-300" id="schemaPrimary">"#059669"</span>,
+    <span class="text-emerald-400">"secondary"</span>: <span class="text-amber-300" id="schemaSecondary">"#0F172A"</span>,
+    <span class="text-emerald-400">"surface_tint"</span>: <span class="text-amber-300" id="schemaSurface">"#F8FAFC"</span>,
+    <span class="text-emerald-400">"accent_badge"</span>: <span class="text-amber-300">"#10B981"</span>
+  },
+  <span class="text-emerald-400">"typography"</span>: {
+    <span class="text-emerald-400">"headings"</span>: <span class="text-amber-300">"Plus Jakarta Sans"</span>,
+    <span class="text-emerald-400">"body"</span>: <span class="text-amber-300">"Inter"</span>
+  },
+  <span class="text-emerald-400">"header"</span>: {
+    <span class="text-emerald-400">"layout"</span>: <span class="text-amber-300" id="schemaHeaderLayout">"split_search"</span>,
+    <span class="text-emerald-400">"announcement_bar"</span>: <span class="text-cyan-400" id="schemaAnnouncement">true</span>,
+    <span class="text-emerald-400">"whatsapp_quick_order"</span>: <span class="text-cyan-400" id="schemaWhatsapp">true</span>,
+    <span class="text-emerald-400">"trust_badges_strip"</span>: <span class="text-cyan-400" id="schemaTrust">true</span>
+  },
+  <span class="text-emerald-400">"hero"</span>: {
+    <span class="text-emerald-400">"layout"</span>: <span class="text-amber-300" id="schemaHeroLayout">"split"</span>,
+    <span class="text-emerald-400">"headline"</span>: <span class="text-amber-300" id="schemaHeadline">"Hunza Valley Wild Mountain Honey &amp; Pure Cold-Pressed Oils"</span>,
+    <span class="text-emerald-400">"cta_text"</span>: <span class="text-amber-300" id="schemaCtaText">"Explore Fresh Harvest"</span>
+  },
+  <span class="text-emerald-400">"product_catalog"</span>: {
+    <span class="text-emerald-400">"grid_columns"</span>: <span class="text-purple-300" id="schemaGrid">4</span>,
+    <span class="text-emerald-400">"enable_reviews"</span>: <span class="text-cyan-400" id="schemaReviews">true</span>,
+    <span class="text-emerald-400">"show_discounts"</span>: <span class="text-cyan-400" id="schemaDiscounts">true</span>,
+    <span class="text-emerald-400">"show_stock_pills"</span>: <span class="text-cyan-400" id="schemaStock">true</span>,
+    <span class="text-emerald-400">"quick_view_modal"</span>: <span class="text-cyan-400" id="schemaQuickView">false</span>
+  },
+  <span class="text-emerald-400">"status"</span>: <span class="text-emerald-400">"ready_to_mount"</span>,
+  <span class="text-emerald-400">"audit_timestamp"</span>: <span class="text-slate-400">"2025-05-18T10:45:00Z"</span>
+}</code></pre>
+</div>
+<!-- Drawer Footer Controls -->
+<div class="p-space-md bg-surface-container-lowest border-t border-border-subtle flex items-center justify-between gap-space-sm">
+<span class="font-label-sm text-label-sm text-status-positive opacity-0 transition-opacity" id="copyToast">✓ Copied to clipboard!</span>
+<div class="flex items-center gap-space-sm ml-auto">
+<button class="px-3.5 py-1.5 bg-surface-muted hover:bg-surface-container-high text-text-primary rounded-lg font-label-md text-label-md flex items-center gap-1.5 transition-colors" id="btnCopySchema" type="button">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span>Copy Schema</span>
+</button>
+<button class="px-4 py-1.5 bg-status-positive hover:bg-emerald-700 text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-1.5 transition-colors font-semibold" id="btnDownloadJson" type="button">
+<span class="material-symbols-outlined text-[16px]">download</span>
+<span>Download theme.json</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- CLIENT-SIDE INTERACTIVITY SCRIPT -->
+<script>
+  (function initThemeConfigurator() {
+    // State Store
+    const state = {
+      currentStep: 1,
+      palette: 'emerald',
+      primaryColor: '#059669',
+      secondaryColor: '#0F172A',
+      surfaceColor: '#F8FAFC',
+      headerLayout: 'split_search',
+      showAnnouncement: true,
+      showWhatsapp: true,
+      showTrustBadges: true,
+      heroLayout: 'split',
+      headline: 'Hunza Valley Wild Mountain Honey & Pure Cold-Pressed Oils',
+      subheadline: 'Direct from Karakoram beekeepers. 100% unfiltered, zero adulteration.',
+      ctaText: 'Explore Fresh Harvest',
+      gridCol: '4col',
+      showReviews: true,
+      showDiscounts: true,
+      showStock: true,
+      quickView: false,
+      viewport: 'desktop'
+    };
+
+    // DOM Elements
+    const stepButtons = document.querySelectorAll('.step-nav-btn');
+    const stepPanels = document.querySelectorAll('.step-panel');
+    const nextButtons = document.querySelectorAll('.goto-next-btn');
+    const prevButtons = document.querySelectorAll('.goto-prev-btn');
+
+    // Drawer Elements
+    const btnOpenSchema = document.getElementById('btnOpenSchema');
+    const btnCloseDrawer = document.getElementById('btnCloseDrawer');
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const schemaDrawer = document.getElementById('schemaDrawer');
+    const drawerPanel = document.getElementById('drawerPanel');
+    const btnCopySchema = document.getElementById('btnCopySchema');
+    const copyToast = document.getElementById('copyToast');
+
+    // Inputs
+    const inputPrimaryColor = document.getElementById('inputPrimaryColor');
+    const hexPrimaryColor = document.getElementById('hexPrimaryColor');
+    const inputSecondaryColor = document.getElementById('inputSecondaryColor');
+    const hexSecondaryColor = document.getElementById('hexSecondaryColor');
+    const inputSurfaceColor = document.getElementById('inputSurfaceColor');
+    const hexSurfaceColor = document.getElementById('hexSurfaceColor');
+
+    const toggleAnnouncement = document.getElementById('toggleAnnouncement');
+    const toggleWhatsapp = document.getElementById('toggleWhatsapp');
+    const toggleTrust = document.getElementById('toggleTrust');
+
+    const inputHeadline = document.getElementById('inputHeadline');
+    const inputSubheadline = document.getElementById('inputSubheadline');
+    const inputCtaText = document.getElementById('inputCtaText');
+
+    const chkReviews = document.getElementById('chkReviews');
+    const chkDiscounts = document.getElementById('chkDiscounts');
+    const chkStock = document.getElementById('chkStock');
+    const chkQuickView = document.getElementById('chkQuickView');
+
+    // Mockup elements
+    const mockupAnnouncement = document.getElementById('mockupAnnouncement');
+    const mockupHeaderSearch = document.getElementById('mockupHeaderSearch');
+    const mockupWhatsappBtn = document.getElementById('mockupWhatsappBtn');
+    const mockupTrustStrip = document.getElementById('mockupTrustStrip');
+    const mockupHeadline = document.getElementById('mockupHeadline');
+    const mockupSubheadline = document.getElementById('mockupSubheadline');
+    const mockupCtaText = document.getElementById('mockupCtaText');
+    const mockupCtaBtn = document.getElementById('mockupCtaBtn');
+    const mockupProductGrid = document.getElementById('mockupProductGrid');
+    const mockupFrame = document.getElementById('mockupFrame');
+
+    // Viewport buttons
+    const viewDesktop = document.getElementById('viewDesktop');
+    const viewTablet = document.getElementById('viewTablet');
+    const viewMobile = document.getElementById('viewMobile');
+
+    // 1. STEP NAVIGATION
+    function switchStep(targetStep) {
+      state.currentStep = parseInt(targetStep);
+
+      stepPanels.forEach(panel => {
+        panel.classList.add('hidden');
+      });
+      const activePanel = document.getElementById('step-panel-' + state.currentStep);
+      if (activePanel) activePanel.classList.remove('hidden');
+
+      stepButtons.forEach(btn => {
+        const stepNum = parseInt(btn.getAttribute('data-step'));
+        const badge = btn.querySelector('span');
+
+        if (stepNum === state.currentStep) {
+          btn.className = 'step-nav-btn active flex items-center gap-2 px-3 py-2 rounded-lg bg-status-positive-bg text-status-positive text-left transition-all';
+          if (badge) badge.className = 'w-6 h-6 rounded-full bg-status-positive text-on-primary text-xs flex items-center justify-center font-bold';
+        } else if (stepNum < state.currentStep) {
+          btn.className = 'step-nav-btn flex items-center gap-2 px-3 py-2 rounded-lg text-text-primary text-left transition-all';
+          if (badge) badge.className = 'w-6 h-6 rounded-full bg-emerald-100 text-status-positive text-xs flex items-center justify-center font-bold';
+        } else {
+          btn.className = 'step-nav-btn flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary hover:bg-surface-muted text-left transition-all';
+          if (badge) badge.className = 'w-6 h-6 rounded-full bg-surface-muted text-text-secondary text-xs flex items-center justify-center font-bold';
+        }
+      });
+    }
+
+    stepButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchStep(btn.getAttribute('data-step'));
+      });
+    });
+
+    nextButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchStep(btn.getAttribute('data-goto'));
+      });
+    });
+
+    prevButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchStep(btn.getAttribute('data-goto'));
+      });
+    });
+
+    // 2. PALETTE MCQ SELECTION
+    const paletteCards = document.querySelectorAll('.palette-card');
+    paletteCards.forEach(card => {
+      card.addEventListener('click', () => {
+        paletteCards.forEach(c => {
+          c.classList.remove('active', 'bg-surface-container-low', 'shadow-sm');
+          c.classList.add('bg-surface-muted');
+          const icon = c.querySelector('.check-icon');
+          if (icon) {
+            icon.textContent = 'radio_button_unchecked';
+            icon.classList.remove('text-status-positive');
+            icon.classList.add('text-text-muted');
+          }
+        });
+
+        card.classList.add('active', 'bg-surface-container-low', 'shadow-sm');
+        card.classList.remove('bg-surface-muted');
+        const icon = card.querySelector('.check-icon');
+        if (icon) {
+          icon.textContent = 'check_circle';
+          icon.classList.add('text-status-positive');
+          icon.classList.remove('text-text-muted');
+        }
+
+        const pal = card.getAttribute('data-palette');
+        state.palette = pal;
+
+        if (pal === 'emerald') {
+          updateBrandColors('#059669', '#0F172A', '#F8FAFC');
+        } else if (pal === 'slate') {
+          updateBrandColors('#0F172A', '#D97706', '#FFFFFF');
+        } else if (pal === 'pastel') {
+          updateBrandColors('#00855D', '#F43F5E', '#EFF4FF');
+        } else if (pal === 'vibrant') {
+          updateBrandColors('#D97706', '#059669', '#FFFBEB');
+        }
+      });
+    });
+
+    function updateBrandColors(p, s, surf) {
+      state.primaryColor = p;
+      state.secondaryColor = s;
+      state.surfaceColor = surf;
+
+      inputPrimaryColor.value = p;
+      hexPrimaryColor.value = p.toUpperCase();
+      inputSecondaryColor.value = s;
+      hexSecondaryColor.value = s.toUpperCase();
+      inputSurfaceColor.value = surf;
+      hexSurfaceColor.value = surf.toUpperCase();
+
+      // Apply to preview elements
+      mockupAnnouncement.style.backgroundColor = p;
+      mockupCtaBtn.style.backgroundColor = p;
+      const logoBadge = document.querySelector('.logo-badge');
+      if (logoBadge) logoBadge.style.backgroundColor = p;
+
+      document.querySelectorAll('.product-item button').forEach(b => {
+        b.style.backgroundColor = p;
+      });
+
+      // Update Schema JSON preview
+      const sp = document.getElementById('schemaPrimary');
+      const ss = document.getElementById('schemaSecondary');
+      const ssurf = document.getElementById('schemaSurface');
+      if (sp) sp.textContent = `"${p}"`;
+      if (ss) ss.textContent = `"${s}"`;
+      if (ssurf) ssurf.textContent = `"${surf}"`;
+    }
+
+    // Custom Color Input Handlers
+    inputPrimaryColor.addEventListener('input', (e) => {
+      hexPrimaryColor.value = e.target.value.toUpperCase();
+      updateBrandColors(e.target.value, state.secondaryColor, state.surfaceColor);
+    });
+    hexPrimaryColor.addEventListener('change', (e) => {
+      updateBrandColors(e.target.value, state.secondaryColor, state.surfaceColor);
+    });
+
+    inputSecondaryColor.addEventListener('input', (e) => {
+      hexSecondaryColor.value = e.target.value.toUpperCase();
+      updateBrandColors(state.primaryColor, e.target.value, state.surfaceColor);
+    });
+
+    // 3. STEP 2: HEADER & NAVIGATION SELECTION
+    const headerCards = document.querySelectorAll('.header-card');
+    headerCards.forEach(card => {
+      card.addEventListener('click', () => {
+        headerCards.forEach(c => {
+          c.classList.remove('active', 'bg-surface-container-low', 'shadow-sm');
+          c.classList.add('bg-surface-muted');
+          const icon = c.querySelector('.check-icon');
+          if (icon) {
+            icon.textContent = 'radio_button_unchecked';
+            icon.classList.remove('text-status-positive');
+            icon.classList.add('text-text-muted');
+          }
+        });
+        card.classList.add('active', 'bg-surface-container-low', 'shadow-sm');
+        card.classList.remove('bg-surface-muted');
+        const icon = card.querySelector('.check-icon');
+        if (icon) {
+          icon.textContent = 'check_circle';
+          icon.classList.add('text-status-positive');
+          icon.classList.remove('text-text-muted');
+        }
+
+        const layout = card.getAttribute('data-header');
+        state.headerLayout = layout;
+
+        const schemaHeader = document.getElementById('schemaHeaderLayout');
+        if (schemaHeader) schemaHeader.textContent = `"${layout}"`;
+
+        if (layout === 'split_search') {
+          mockupHeaderSearch.classList.remove('hidden');
+        } else {
+          mockupHeaderSearch.classList.add('hidden');
+        }
+      });
+    });
+
+    toggleAnnouncement.addEventListener('change', (e) => {
+      state.showAnnouncement = e.target.checked;
+      mockupAnnouncement.style.display = e.target.checked ? 'flex' : 'none';
+      const sa = document.getElementById('schemaAnnouncement');
+      if (sa) sa.textContent = e.target.checked ? 'true' : 'false';
+    });
+
+    toggleWhatsapp.addEventListener('change', (e) => {
+      state.showWhatsapp = e.target.checked;
+      mockupWhatsappBtn.style.display = e.target.checked ? 'inline-flex' : 'none';
+      const sw = document.getElementById('schemaWhatsapp');
+      if (sw) sw.textContent = e.target.checked ? 'true' : 'false';
+    });
+
+    toggleTrust.addEventListener('change', (e) => {
+      state.showTrustBadges = e.target.checked;
+      mockupTrustStrip.style.display = e.target.checked ? 'flex' : 'none';
+      const st = document.getElementById('schemaTrust');
+      if (st) st.textContent = e.target.checked ? 'true' : 'false';
+    });
+
+    // 4. STEP 3: HERO BANNER MCQ & COPY
+    const heroCards = document.querySelectorAll('.hero-card');
+    heroCards.forEach(card => {
+      card.addEventListener('click', () => {
+        heroCards.forEach(c => {
+          c.classList.remove('active', 'bg-surface-container-low', 'shadow-sm');
+          c.classList.add('bg-surface-muted');
+          const icon = c.querySelector('.check-icon');
+          if (icon) {
+            icon.textContent = 'radio_button_unchecked';
+            icon.classList.remove('text-status-positive');
+            icon.classList.add('text-text-muted');
+          }
+        });
+        card.classList.add('active', 'bg-surface-container-low', 'shadow-sm');
+        card.classList.remove('bg-surface-muted');
+        const icon = card.querySelector('.check-icon');
+        if (icon) {
+          icon.textContent = 'check_circle';
+          icon.classList.add('text-status-positive');
+          icon.classList.remove('text-text-muted');
+        }
+
+        const htype = card.getAttribute('data-hero');
+        state.heroLayout = htype;
+        const sh = document.getElementById('schemaHeroLayout');
+        if (sh) sh.textContent = `"${htype}"`;
+      });
+    });
+
+    inputHeadline.addEventListener('input', (e) => {
+      mockupHeadline.textContent = e.target.value;
+      const sh = document.getElementById('schemaHeadline');
+      if (sh) sh.textContent = `"${e.target.value}"`;
+    });
+
+    inputSubheadline.addEventListener('input', (e) => {
+      mockupSubheadline.textContent = e.target.value;
+    });
+
+    inputCtaText.addEventListener('input', (e) => {
+      mockupCtaText.textContent = e.target.value;
+      const sc = document.getElementById('schemaCtaText');
+      if (sc) sc.textContent = `"${e.target.value}"`;
+    });
+
+    // 5. STEP 4: PRODUCT GRID & BADGES
+    const gridCards = document.querySelectorAll('.grid-card');
+    gridCards.forEach(card => {
+      card.addEventListener('click', () => {
+        gridCards.forEach(c => {
+          c.classList.remove('active', 'bg-surface-container-low', 'shadow-sm');
+          c.classList.add('bg-surface-muted');
+          const icon = c.querySelector('.check-icon');
+          if (icon) {
+            icon.textContent = 'radio_button_unchecked';
+            icon.classList.remove('text-status-positive');
+            icon.classList.add('text-text-muted');
+          }
+        });
+        card.classList.add('active', 'bg-surface-container-low', 'shadow-sm');
+        card.classList.remove('bg-surface-muted');
+        const icon = card.querySelector('.check-icon');
+        if (icon) {
+          icon.textContent = 'check_circle';
+          icon.classList.add('text-status-positive');
+          icon.classList.remove('text-text-muted');
+        }
+
+        const gtype = card.getAttribute('data-grid');
+        state.gridCol = gtype;
+
+        const sg = document.getElementById('schemaGrid');
+        if (gtype === '4col') {
+          mockupProductGrid.className = 'grid grid-cols-2 md:grid-cols-4 gap-3 transition-all';
+          if (sg) sg.textContent = '4';
+        } else if (gtype === '3col') {
+          mockupProductGrid.className = 'grid grid-cols-1 md:grid-cols-3 gap-3 transition-all';
+          if (sg) sg.textContent = '3';
+        } else if (gtype === '2col') {
+          mockupProductGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all';
+          if (sg) sg.textContent = '2';
+        }
+      });
+    });
+
+    chkReviews.addEventListener('change', (e) => {
+      const show = e.target.checked;
+      document.querySelectorAll('.badge-reviews').forEach(el => el.style.display = show ? 'flex' : 'none');
+      const sr = document.getElementById('schemaReviews');
+      if (sr) sr.textContent = show ? 'true' : 'false';
+    });
+
+    chkDiscounts.addEventListener('change', (e) => {
+      const show = e.target.checked;
+      document.querySelectorAll('.badge-discount').forEach(el => el.style.display = show ? 'block' : 'none');
+      const sd = document.getElementById('schemaDiscounts');
+      if (sd) sd.textContent = show ? 'true' : 'false';
+    });
+
+    chkStock.addEventListener('change', (e) => {
+      const show = e.target.checked;
+      document.querySelectorAll('.badge-stock').forEach(el => el.style.display = show ? 'inline-block' : 'none');
+      const ss = document.getElementById('schemaStock');
+      if (ss) ss.textContent = show ? 'true' : 'false';
+    });
+
+    chkQuickView.addEventListener('change', (e) => {
+      const sq = document.getElementById('schemaQuickView');
+      if (sq) sq.textContent = e.target.checked ? 'true' : 'false';
+    });
+
+    // 6. VIEWPORT DEVICE RESIZE
+    function setViewport(mode) {
+      state.viewport = mode;
+      viewDesktop.classList.remove('bg-surface-container-lowest', 'text-text-primary', 'shadow-xs', 'font-semibold');
+      viewDesktop.classList.add('text-text-secondary');
+      viewTablet.classList.remove('bg-surface-container-lowest', 'text-text-primary', 'shadow-xs', 'font-semibold');
+      viewTablet.classList.add('text-text-secondary');
+      viewMobile.classList.remove('bg-surface-container-lowest', 'text-text-primary', 'shadow-xs', 'font-semibold');
+      viewMobile.classList.add('text-text-secondary');
+
+      if (mode === 'desktop') {
+        viewDesktop.classList.add('bg-surface-container-lowest', 'text-text-primary', 'shadow-xs', 'font-semibold');
+        viewDesktop.classList.remove('text-text-secondary');
+        mockupFrame.style.maxWidth = '100%';
+      } else if (mode === 'tablet') {
+        viewTablet.classList.add('bg-surface-container-lowest', 'text-text-primary', 'shadow-xs', 'font-semibold');
+        viewTablet.classList.remove('text-text-secondary');
+        mockupFrame.style.maxWidth = '768px';
+      } else if (mode === 'mobile') {
+        viewMobile.classList.add('bg-surface-container-lowest', 'text-text-primary', 'shadow-xs', 'font-semibold');
+        viewMobile.classList.remove('text-text-secondary');
+        mockupFrame.style.maxWidth = '375px';
+      }
+    }
+
+    viewDesktop.addEventListener('click', () => setViewport('desktop'));
+    viewTablet.addEventListener('click', () => setViewport('tablet'));
+    viewMobile.addEventListener('click', () => setViewport('mobile'));
+
+    // 7. SCHEMA SLIDE-OVER DRAWER LOGIC
+    function openDrawer() {
+      schemaDrawer.classList.remove('pointer-events-none', 'opacity-0');
+      schemaDrawer.classList.add('opacity-100');
+      drawerPanel.classList.remove('translate-x-full');
+    }
+
+    function closeDrawer() {
+      drawerPanel.classList.add('translate-x-full');
+      schemaDrawer.classList.add('opacity-0');
+      setTimeout(() => {
+        schemaDrawer.classList.add('pointer-events-none');
+      }, 300);
+    }
+
+    btnOpenSchema.addEventListener('click', openDrawer);
+    btnCloseDrawer.addEventListener('click', closeDrawer);
+    drawerBackdrop.addEventListener('click', closeDrawer);
+
+    // Copy Schema to Clipboard
+    btnCopySchema.addEventListener('click', () => {
+      const codeText = document.getElementById('jsonSchemaCode').innerText;
+      navigator.clipboard.writeText(codeText).then(() => {
+        copyToast.classList.remove('opacity-0');
+        setTimeout(() => copyToast.classList.add('opacity-0'), 2500);
+      });
+    });
+
+    // Reset to AI Recommendation
+    document.getElementById('btnResetAI').addEventListener('click', () => {
+      const firstCard = document.querySelector('[data-palette="emerald"]');
+      if (firstCard) firstCard.click();
+      switchStep(1);
+    });
+
+    // Finished Steps CTA
+    const btnFinishSteps = document.getElementById('btnFinishSteps');
+    if (btnFinishSteps) {
+      btnFinishSteps.addEventListener('click', openDrawer);
+    }
+  })();
+</script></main><footer class="w-full bg-surface-container-lowest shadow-[0_-1px_8px_rgba(0,0,0,0.02)] py-space-md mt-auto"><div class="w-full px-margin flex flex-col md:flex-row items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm"><span class="font-label-sm text-label-sm text-text-secondary">© 2025 Feasibility Advisor Enterprise Inc. All rights reserved.</span><span class="hidden md:inline text-text-muted text-xs">•</span><span class="hidden md:inline font-label-sm text-label-sm text-text-muted">Theme Studio Engine v3.4.1</span></div><div class="flex items-center gap-space-lg"><span class="font-label-sm text-label-sm text-text-secondary hover:text-on-surface transition-colors cursor-pointer">System Documentation</span><span class="font-label-sm text-label-sm text-text-secondary hover:text-on-surface transition-colors cursor-pointer">Security Protocol</span><span class="font-label-sm text-label-sm text-text-secondary hover:text-on-surface transition-colors cursor-pointer">Executive Support</span></div></div></footer></body></html>

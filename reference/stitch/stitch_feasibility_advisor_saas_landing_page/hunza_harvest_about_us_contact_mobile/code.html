@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab_back" name="shell-type"/><title>Hunza Harvest</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface": "#f8f9ff", "secondary-fixed": "#dae2fd", "primary": "#006948", "on-secondary-container": "#5c647a", "status-positive-bg": "#ecfdf5", "text-muted": "#94a3b8", "border-subtle": "#e2e8f0", "on-tertiary": "#ffffff", "primary-fixed-dim": "#68dba9", "outline-variant": "#bccac0", "surface-container": "#e5eeff", "surface-container-highest": "#d3e4fe", "on-tertiary-fixed-variant": "#005236", "tertiary": "#006947", "inverse-on-surface": "#eaf1ff", "on-primary": "#ffffff", "secondary-container": "#dae2fd", "on-primary-container": "#f5fff7", "status-critical": "#e11d48", "outline": "#6d7a72", "secondary-fixed-dim": "#bec6e0", "status-positive": "#059669", "on-background": "#0b1c30", "status-critical-bg": "#fff1f2", "surface-tint": "#006c4a", "secondary": "#565e74", "text-primary": "#0f172a", "canvas-bg": "#f8fafc", "surface-variant": "#d3e4fe", "on-surface": "#0b1c30", "on-surface-variant": "#3d4a42", "inverse-primary": "#68dba9", "on-tertiary-container": "#f5fff6", "error": "#ba1a1a", "status-positive-border": "#a7f3d0", "surface-container-low": "#eff4ff", "on-error-container": "#93000a", "primary-fixed": "#85f8c4", "surface-container-high": "#dce9ff", "on-secondary-fixed-variant": "#3f465c", "tertiary-fixed": "#6ffbbe", "background": "#f8f9ff", "on-secondary-fixed": "#131b2e", "surface-bright": "#f8f9ff", "surface-dim": "#cbdbf5", "surface-muted": "#f1f5f9", "on-secondary": "#ffffff", "surface-card": "#ffffff", "on-tertiary-fixed": "#002113", "surface-container-lowest": "#ffffff", "tertiary-fixed-dim": "#4edea3", "error-container": "#ffdad6", "status-warning-bg": "#fffbeb", "on-error": "#ffffff", "tertiary-container": "#00855b", "inverse-surface": "#213145", "status-warning": "#d97706", "on-primary-fixed": "#002114", "text-secondary": "#475569", "border-strong": "#cbd5e1", "on-primary-fixed-variant": "#005137", "primary-container": "#00855d" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-lg": "1.5rem", "margin": "2rem", "space-md": "1rem", "margin-sm": "1rem", "space-xl": "2.5rem", "space-xs": "0.25rem", "gutter-sm": "1rem", "space-sm": "0.5rem", "gutter": "1.5rem" }, fontFamily: { "display-lg": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"], "label-sm": ["Inter"], "headline-lg": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "body-sm": ["Inter"], "headline-md": ["Plus Jakarta Sans"], "label-md": ["Inter"], "metric-val": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "body-md": ["Inter"] }, fontSize: { "display-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.03em", fontWeight: "700" }], "display-lg-mobile": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }], "headline-sm": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" }], "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.03em", fontWeight: "600" }], "headline-lg": ["28px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "600" }], "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" }], "body-sm": ["12px", { lineHeight: "18px", letterSpacing: "0.005em", fontWeight: "400" }], "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }], "label-md": ["13px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }], "metric-val": ["30px", { lineHeight: "36px", letterSpacing: "-0.025em", fontWeight: "700" }], "body-lg": ["16px", { lineHeight: "26px", letterSpacing: "-0.005em", fontWeight: "400" }], "body-md": ["14px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}body{min-height:max(884px,100dvh);}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-text-primary min-h-screen flex flex-col antialiased selection:bg-primary-fixed selection:text-on-primary-fixed"><header class="fixed top-0 w-full z-50 pt-safe"><div class="bg-primary text-on-primary px-margin-sm py-1 flex items-center justify-center text-center shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><p class="font-label-sm text-label-sm font-semibold truncate tracking-wider uppercase">🌿 Free Shipping over PKR 3,000 | Cash on Delivery (COD)</p></div><div class="h-16 px-gutter-sm bg-surface/90 backdrop-blur-xl flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-xs"><button aria-label="Go back" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container active:scale-95 transition-all -ml-1" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><a class="flex items-center gap-space-xs" data-path="hunza-harvest-e-commerce-storefront-homepage-mobile" href="#"><img alt="Hunza Harvest brand logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VGObyPZ_dbebBd40gRJe9O4uuzlXT6XrvuqCT4rgweSiE3Jn0iU3P3BwBP8-L5breq3XsK1z2OwKZJWizJBzcmkbd_FHJSLDJtKr96PdJ-cXxayowVZlX0JT3_qmf7CX4G4bcsfDEjCHMSvQE4x36zzkxuW-gXG4TvAfpnCm_rzwgTgk26ml-MsdwsfBm5oIMu23CT6IOnadXyatIGFLZD-DITVwc9i34XyH1iilRTgAEHGJmJf3ZjaqQG"/><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-1 hidden sm:inline">Hunza Harvest</span></a></div><div class="flex items-center gap-1"><a aria-label="Search" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container active:scale-95 transition-all" data-path="product-search" href="#"><span class="material-symbols-outlined text-[22px]">search</span></a><a aria-label="Wishlist" class="relative w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container active:scale-95 transition-all" data-path="wishlist" href="#"><span class="material-symbols-outlined text-[22px]">favorite</span><span class="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full bg-status-critical text-on-primary font-label-sm text-[10px] leading-4 flex items-center justify-center font-bold">3</span></a><a aria-label="Cart" class="relative w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container active:scale-95 transition-all" data-path="hunza-harvest-shopping-cart-mobile" href="#"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full bg-primary text-on-primary font-label-sm text-[10px] leading-4 flex items-center justify-center font-bold">4</span></a></div></div></header><main class="flex-1 flex flex-col relative w-full pt-22 pb-20 bg-surface"><div class="flex flex-col w-full px-margin-sm space-y-space-md">
+<!-- Breadcrumb & Header Unit -->
+<div class="flex flex-col space-y-space-xs pt-1">
+<nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-text-secondary font-label-sm text-label-sm">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">home</span>
+        Home
+      </a>
+<span class="material-symbols-outlined text-[12px] text-text-muted">chevron_right</span>
+<span class="text-text-primary font-semibold">About &amp; Contact</span>
+</nav>
+<div class="flex items-center gap-2 pt-1">
+<span class="inline-flex items-center gap-1 bg-status-positive-bg text-status-positive px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive animate-pulse"></span>
+        Direct from Karakoram
+      </span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-text-primary tracking-tight">
+      Get in Touch &amp; Our Story
+    </h1>
+<p class="font-body-sm text-body-sm text-text-secondary leading-relaxed">
+      Learn about our wild Himalayan apothecary mission or connect with our support team in Lahore and Hunza.
+    </p>
+</div>
+<!-- 1. Instant WhatsApp Quick Access Card (High-Impact Mobile Conversion) -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col space-y-3">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-full bg-status-positive-bg flex items-center justify-center shrink-0 text-[#25D366]">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">chat</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary leading-tight">Need Immediate Help?</h2>
+<p class="font-body-sm text-body-sm text-text-secondary">Direct line to our Hunza organic advisors</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 bg-surface-muted text-text-secondary px-2 py-0.5 rounded font-label-sm text-[10px] font-semibold whitespace-nowrap">
+<span class="material-symbols-outlined text-[12px] text-status-positive">schedule</span>
+        Avg reply: 5 mins
+      </span>
+</div>
+<a class="w-full h-11 px-4 rounded-lg bg-[#25D366] text-white font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-transform" href="https://wa.me/923001234567" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[20px]">send</span>
+<span>Chat on WhatsApp (+92 300 1234567)</span>
+</a>
+</div>
+<!-- 2. Brand Story & Mission Card (Authentic Mountain Heritage) -->
+<div class="bg-surface-card rounded-xl overflow-hidden shadow-sm flex flex-col">
+<div class="relative w-full h-44 bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Breathtaking wide view of the terraced apricot orchards in Hunza Valley surrounded by snowcapped Karakoram mountain peaks under pristine azure Himalayan skies. Crisp natural golden hour mountain light illuminating wild stone huts and pristine glacial streams." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwJ3qpgU12jrx_cAg-C5qncvChR_U027m_VUs0pQ52u6h_t00wRjCtaFYgNwMLo-lBJpgpbWV4aRQ3BSQ6UyZ89nQT2FnlS_6Zv9RN1OBNxB39ZbB1pIo63_p9sEw65vW_HdHkS_V0QyWCxTFImoBk4VmcocWqrIK8HLiMe2Zw_Lf9mI8CwZ7vsp4Kg7VtmVZACqzB_9JIMmtxwxJeQ9pFQj87zPBgaiaxIDjHB7tre_isNKX2_R-KQg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-text-primary/70 via-text-primary/20 to-transparent"></div>
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-on-primary">
+<span class="inline-flex items-center gap-1 bg-surface-card/90 backdrop-blur-md text-text-primary px-2.5 py-1 rounded-full font-label-sm text-label-sm font-semibold shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-status-positive">landscape</span>
+          Harvested at 3,400m altitude
+        </span>
+<span class="font-label-sm text-[11px] font-medium tracking-wider uppercase text-on-primary/90">Pure Glacial Soil</span>
+</div>
+</div>
+<div class="p-space-md flex flex-col space-y-3">
+<h2 class="font-headline-md text-headline-md text-text-primary leading-tight">
+        Pure Mountain Harvest, Zero Compromise
+      </h2>
+<p class="font-body-md text-body-md text-text-secondary leading-relaxed">
+        Hunza Harvest partners directly with indigenous farming co-operatives across Gilgit-Baltistan. From raw bitter apricot kernels and wild black salajeet to single-origin mountain honey, every batch is cold-extracted and rigorously tested by the PCSIR federal laboratories for unblemished organic purity.
+      </p>
+<!-- Trust Badges Matrix -->
+<div class="flex flex-wrap gap-2 pt-1">
+<div class="inline-flex items-center gap-1.5 bg-status-positive-bg text-status-positive px-2.5 py-1.5 rounded-lg font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+          PCSIR Certified Purity
+        </div>
+<div class="inline-flex items-center gap-1.5 bg-surface-container text-text-primary px-2.5 py-1.5 rounded-lg font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-primary">handshake</span>
+          Fair-Trade Gilgit Co-op
+        </div>
+<div class="inline-flex items-center gap-1.5 bg-surface-muted text-text-secondary px-2.5 py-1.5 rounded-lg font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-primary">local_shipping</span>
+          24–48h Fresh Dispatch
+        </div>
+</div>
+</div>
+</div>
+<!-- 3. Customer Inquiry Form Card -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col space-y-4">
+<div class="flex flex-col space-y-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Send Us a Message</h2>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Have an inquiry regarding wholesale, order tracking, or raw honey varieties?</p>
+</div>
+<form class="flex flex-col space-y-3.5" id="contact-inquiry-form" onsubmit="event.preventDefault(); showSubmitConfirmation();">
+<!-- Full Name -->
+<div class="flex flex-col space-y-1">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="cust-name">Full Name</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-text-muted text-[18px]">person</span>
+<input class="w-full h-11 pl-9 pr-3 rounded-lg bg-surface-muted text-text-primary placeholder:text-text-muted font-body-md text-body-md focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#059669] transition-all" id="cust-name" placeholder="e.g. Tariq Mehmood" required="" type="text"/>
+</div>
+</div>
+<!-- Email Address -->
+<div class="flex flex-col space-y-1">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="cust-email">Email Address</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-text-muted text-[18px]">mail</span>
+<input class="w-full h-11 pl-9 pr-3 rounded-lg bg-surface-muted text-text-primary placeholder:text-text-muted font-body-md text-body-md focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#059669] transition-all" id="cust-email" placeholder="tariq@example.pk" required="" type="email"/>
+</div>
+</div>
+<!-- WhatsApp / Phone -->
+<div class="flex flex-col space-y-1">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="cust-phone">Mobile / WhatsApp Number</label>
+<div class="relative flex items-center">
+<span class="absolute left-3 text-text-secondary font-label-md text-label-md font-semibold">+92</span>
+<input class="w-full h-11 pl-12 pr-3 rounded-lg bg-surface-muted text-text-primary placeholder:text-text-muted font-body-md text-body-md focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#059669] transition-all" id="cust-phone" placeholder="300 0000000" required="" type="tel"/>
+</div>
+</div>
+<!-- Inquiry Type Dropdown -->
+<div class="flex flex-col space-y-1">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="inquiry-type">Topic of Inquiry</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-text-muted text-[18px]">category</span>
+<select class="w-full h-11 pl-9 pr-8 rounded-lg bg-surface-muted text-text-primary font-body-md text-body-md appearance-none focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#059669] transition-all" id="inquiry-type">
+<option value="order">Order Status &amp; Dispatch Tracking</option>
+<option value="product">Himalayan Salajeet &amp; Herbs Guidance</option>
+<option value="wholesale">Wholesale &amp; Bulk Co-op Supply</option>
+<option value="press">Press &amp; Partnership Inquiries</option>
+<option value="other">General Customer Feedback</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 pointer-events-none text-text-muted text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Message Area -->
+<div class="flex flex-col space-y-1">
+<label class="font-label-md text-label-md text-text-primary font-medium" for="cust-msg">Your Message</label>
+<textarea class="w-full p-3 rounded-lg bg-surface-muted text-text-primary placeholder:text-text-muted font-body-md text-body-md focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#059669] transition-all resize-none" id="cust-msg" placeholder="Tell us how we can help you today..." required="" rows="4"></textarea>
+</div>
+<button class="w-full h-12 rounded-lg bg-primary text-on-primary font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all mt-1" id="submit-btn" type="submit">
+<span>Send Message</span>
+<span class="material-symbols-outlined text-[18px]">near_me</span>
+</button>
+</form>
+<!-- Interactive dynamic acknowledgment badge -->
+<div class="hidden flex-col items-center text-center p-4 bg-status-positive-bg rounded-lg space-y-1" id="form-success-banner">
+<div class="w-10 h-10 rounded-full bg-status-positive text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">check</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-text-primary pt-1">Message Dispatched!</p>
+<p class="font-body-sm text-body-sm text-text-secondary">Shukriya. An organic specialist will get back to you within 2 business hours.</p>
+</div>
+</div>
+<!-- 4. Contact & Fulfillment Hub Card with Styled Map -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Dispatch &amp; Experience Hub</h2>
+<p class="font-body-sm text-body-sm text-text-secondary">Lahore Central Fulfillment Centre</p>
+</div>
+<span class="material-symbols-outlined text-[28px] text-primary">store</span>
+</div>
+<!-- Quick Communication Touch Targets -->
+<div class="grid grid-cols-2 gap-2">
+<a class="h-12 px-3 rounded-lg bg-surface-container flex items-center gap-2.5 text-text-primary active:scale-95 transition-all" href="tel:+923001234567">
+<div class="w-7 h-7 rounded-full bg-surface-card flex items-center justify-center shrink-0 text-primary">
+<span class="material-symbols-outlined text-[18px]">call</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-[10px] text-text-secondary uppercase tracking-wider">Phone</span>
+<span class="font-label-md text-label-md font-semibold truncate">+92 300 1234567</span>
+</div>
+</a>
+<a class="h-12 px-3 rounded-lg bg-surface-container flex items-center gap-2.5 text-text-primary active:scale-95 transition-all" href="mailto:support@hunzaharvest.pk">
+<div class="w-7 h-7 rounded-full bg-surface-card flex items-center justify-center shrink-0 text-primary">
+<span class="material-symbols-outlined text-[18px]">email</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-[10px] text-text-secondary uppercase tracking-wider">Support</span>
+<span class="font-label-md text-label-md font-semibold truncate">Email Us</span>
+</div>
+</a>
+</div>
+<!-- Operating Hours & Location -->
+<div class="flex flex-col space-y-2.5 bg-surface-muted p-3 rounded-lg">
+<div class="flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">location_on</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-text-primary">Gulberg Experience Store</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Plaza 42, Main Boulevard, Gulberg III, Lahore, Pakistan</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5 text-text-secondary font-body-sm text-body-sm pt-1">
+<span class="material-symbols-outlined text-[18px] text-primary shrink-0">schedule</span>
+<span>Mon–Sat: 9 AM – 8 PM PKT • Sun: Closed</span>
+</div>
+</div>
+<!-- Dynamic Map Card Placeholder Container -->
+<div class="relative w-full h-36 rounded-lg overflow-hidden bg-surface-container shadow-inner">
+<div class="w-full h-full bg-cover bg-center" data-location="Plaza 42, Main Boulevard, Gulberg III, Lahore, Pakistan" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDZ9GciLoNm4vbImxVh8niGeHfp3xLMjajtIRiJGMSkIhmiObpajnd9iv_fsvoQxQNHlp1bZ_Yy65UTdUGjYgf3NjsZ7P8FsJR6aaE1CZ0yM9vTdN5lX6xf00w59F1xSc4YIUUGbXATQdPY01kEeWRkQ1RavgMzDinEehhJ2u62pIdCvIwDRs3tdH-2Mtsvz9-ZMOaBQZF2pKaqswR76q_WHP-3ZipJiI5AMVu8RslxYltKAR6P4HnI2g')"></div>
+<!-- Overlay Pin Detail -->
+<div class="absolute inset-0 bg-text-primary/10 flex items-center justify-center pointer-events-none">
+<div class="px-3 py-1.5 rounded-full bg-surface-card text-text-primary font-label-sm text-label-sm font-semibold flex items-center gap-1.5 shadow-md">
+<span class="material-symbols-outlined text-[16px] text-status-positive" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span>Hunza Harvest Hub</span>
+</div>
+</div>
+<a class="absolute bottom-2 right-2 px-2.5 py-1 rounded bg-surface-card/95 backdrop-blur text-primary font-label-sm text-[11px] font-semibold flex items-center gap-1 shadow-sm active:scale-95 transition-transform" href="https://maps.google.com/?q=Gulberg+III+Lahore" rel="noopener noreferrer" target="_blank">
+<span>Open in Google Maps</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+</div>
+</div>
+<!-- 5. Trust & Guarantee Strip (Reinforces Mobile Confidence) -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm mb-2 flex flex-col space-y-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-status-positive">security</span>
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Hunza Purity Promise</h3>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center pt-1">
+<div class="flex flex-col items-center p-2 rounded-lg bg-surface-muted">
+<span class="material-symbols-outlined text-[22px] text-primary mb-1">payments</span>
+<span class="font-label-sm text-[11px] font-bold text-text-primary leading-tight">Cash On Delivery</span>
+<span class="font-body-sm text-[10px] text-text-secondary mt-0.5">Nationwide PK</span>
+</div>
+<div class="flex flex-col items-center p-2 rounded-lg bg-surface-muted">
+<span class="material-symbols-outlined text-[22px] text-primary mb-1">verified_user</span>
+<span class="font-label-sm text-[11px] font-bold text-text-primary leading-tight">7-Day Taste Guarantee</span>
+<span class="font-body-sm text-[10px] text-text-secondary mt-0.5">100% Raw Quality</span>
+</div>
+<div class="flex flex-col items-center p-2 rounded-lg bg-surface-muted">
+<span class="material-symbols-outlined text-[22px] text-primary mb-1">biotech</span>
+<span class="font-label-sm text-[11px] font-bold text-text-primary leading-tight">PCSIR Lab Certified</span>
+<span class="font-body-sm text-[10px] text-text-secondary mt-0.5">Govt Tested</span>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function showSubmitConfirmation() {
+    const form = document.getElementById('contact-inquiry-form');
+    const banner = document.getElementById('form-success-banner');
+    if (form && banner) {
+      form.classList.add('hidden');
+      banner.classList.remove('hidden');
+      banner.classList.add('flex');
+    }
+  }
+</script></main><div class="fixed bottom-20 right-4 z-40 pb-safe"><a aria-label="WhatsApp Quick Order" class="w-13 h-13 px-4 py-2.5 rounded-full bg-[#25D366] text-white flex items-center gap-2 shadow-[0_4px_12px_rgba(37,211,102,0.35)] active:scale-95 transition-transform" href="https://wa.me/" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[22px]">chat</span><span class="font-label-sm text-label-sm font-bold tracking-wide uppercase">Quick Order</span></a></div><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-semibold"><div class="h-16 px-gutter-sm flex items-center justify-around"><a class="flex flex-col items-center justify-center min-w-[56px] h-12 gap-0.5 text-text-secondary hover:text-primary transition-colors" data-path="hunza-harvest-e-commerce-storefront-homepage-mobile" href="#"><span class="material-symbols-outlined text-[22px]">storefront</span><span class="font-label-sm text-label-sm">Home</span></a><a class="flex flex-col items-center justify-center min-w-[56px] h-12 gap-0.5 text-text-secondary hover:text-primary transition-colors" data-path="hunza-harvest-product-catalog-filtering-mobile" href="#"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="font-label-sm text-label-sm">Catalog</span></a><a class="flex flex-col items-center justify-center min-w-[56px] h-12 gap-0.5 text-text-secondary hover:text-primary transition-colors" data-path="product-search" href="#"><span class="material-symbols-outlined text-[22px]">search</span><span class="font-label-sm text-label-sm">Search</span></a><a class="relative flex flex-col items-center justify-center min-w-[56px] h-12 gap-0.5 text-text-secondary hover:text-primary transition-colors" data-path="wishlist" href="#"><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">favorite</span><span class="absolute -top-1 -right-2 min-w-[14px] h-3.5 px-0.5 rounded-full bg-status-critical text-on-primary font-label-sm text-[9px] leading-3 flex items-center justify-center font-bold">3</span></div><span class="font-label-sm text-label-sm">Wishlist</span></a><a class="relative flex flex-col items-center justify-center min-w-[56px] h-12 gap-0.5 text-text-secondary hover:text-primary transition-colors" data-path="hunza-harvest-shopping-cart-mobile" href="#"><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute -top-1 -right-2 min-w-[14px] h-3.5 px-0.5 rounded-full bg-primary text-on-primary font-label-sm text-[9px] leading-3 flex items-center justify-center font-bold">4</span></div><span class="font-label-sm text-label-sm">Cart</span></a></div></nav></body></html>

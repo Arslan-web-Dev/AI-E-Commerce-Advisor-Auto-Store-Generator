@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"on-error-container":"#93000a","on-primary":"#ffffff","surface-container-lowest":"#ffffff","text-primary":"#0f172a","surface-dim":"#cbdbf5","status-positive":"#059669","error-container":"#ffdad6","on-background":"#0b1c30","surface-muted":"#f1f5f9","on-primary-fixed-variant":"#005137","surface-container-high":"#dce9ff","on-surface-variant":"#3d4a42","secondary-fixed-dim":"#bec6e0","error":"#ba1a1a","tertiary-fixed-dim":"#4edea3","surface":"#f8f9ff","primary":"#006948","primary-fixed":"#85f8c4","inverse-surface":"#213145","secondary-container":"#dae2fd","inverse-primary":"#68dba9","status-critical":"#e11d48","surface-container-highest":"#d3e4fe","secondary-fixed":"#dae2fd","surface-container":"#e5eeff","border-subtle":"#e2e8f0","status-positive-border":"#a7f3d0","primary-fixed-dim":"#68dba9","status-critical-bg":"#fff1f2","on-secondary-fixed":"#131b2e","inverse-on-surface":"#eaf1ff","surface-card":"#ffffff","on-surface":"#0b1c30","on-tertiary-fixed":"#002113","on-secondary-fixed-variant":"#3f465c","outline":"#6d7a72","primary-container":"#00855d","on-secondary":"#ffffff","text-secondary":"#475569","on-error":"#ffffff","on-tertiary":"#ffffff","tertiary":"#006947","background":"#f8f9ff","surface-variant":"#d3e4fe","on-tertiary-container":"#f5fff6","surface-tint":"#006c4a","border-strong":"#cbd5e1","status-warning-bg":"#fffbeb","status-warning":"#d97706","on-primary-container":"#f5fff7","on-tertiary-fixed-variant":"#005236","text-muted":"#94a3b8","surface-container-low":"#eff4ff","on-secondary-container":"#5c647a","secondary":"#565e74","on-primary-fixed":"#002114","tertiary-fixed":"#6ffbbe","status-positive-bg":"#ecfdf5","surface-bright":"#f8f9ff","outline-variant":"#bccac0","tertiary-container":"#00855b","canvas-bg":"#f8fafc"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter":"1.5rem","gutter-sm":"1rem","margin-sm":"1rem","space-xs":"0.25rem","space-xl":"2.5rem","space-sm":"0.5rem","space-lg":"1.5rem","margin":"2rem","space-md":"1rem"},"fontFamily":{"headline-lg-mobile":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"body-sm":["Inter"],"label-md":["Inter"],"body-md":["Inter"],"headline-lg":["Plus Jakarta Sans"],"metric-val":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"display-lg-mobile":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"body-lg":["Inter"],"label-sm":["Inter"]},"fontSize":{"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"display-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"700"}],"body-sm":["12px",{"lineHeight":"18px","letterSpacing":"0.005em","fontWeight":"400"}],"label-md":["13px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"body-md":["14px",{"lineHeight":"22px","letterSpacing":"0em","fontWeight":"400"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"600"}],"metric-val":["30px",{"lineHeight":"36px","letterSpacing":"-0.025em","fontWeight":"700"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"display-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"26px","letterSpacing":"-0.005em","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}]}}}</script></head><body class="bg-canvas-bg font-body-md text-text-primary antialiased min-h-screen flex flex-col justify-between"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-card/95 backdrop-blur-md shadow-[0_1px_8px_rgba(15,23,42,0.06)]"><div class="h-16 w-full px-gutter flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[20px]">analytics</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-text-primary tracking-tight leading-none">Feasibility Advisor</span><div class="flex items-center gap-space-xs mt-space-xs"><span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-surface-container-high text-on-surface uppercase tracking-wider font-semibold">PLATFORM ADMIN CONSOLE</span><span class="font-label-sm text-label-sm text-text-muted hidden xl:inline">• pk-central-edge-01 • Tenancy RLS v4.8</span></div></div></div></div><nav class="hidden lg:flex items-center gap-1 shrink-0" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm"><a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-muted hover:text-on-surface px-3 py-2 rounded-lg transition-colors whitespace-nowrap" data-path="overview" href="#">Overview</a><a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-muted hover:text-on-surface px-3 py-2 rounded-lg transition-colors whitespace-nowrap" data-path="tenant-stores" href="#">Tenant Stores</a><a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-muted hover:text-on-surface px-3 py-2 rounded-lg transition-colors whitespace-nowrap" data-path="feasibility-engine" href="#">Feasibility Engine</a><a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-muted hover:text-on-surface px-3 py-2 rounded-lg transition-colors whitespace-nowrap" data-path="spatial-and-rent-data" href="#">Spatial & Rent Data</a><a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-muted hover:text-on-surface px-3 py-2 rounded-lg transition-colors whitespace-nowrap" data-path="infrastructure-and-apis" href="#">Infrastructure & APIs</a><a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-muted hover:text-on-surface px-3 py-2 rounded-lg transition-colors whitespace-nowrap" data-path="system-logs" href="#">System Logs</a><a class="font-label-md text-label-md text-on-surface-variant hover:bg-surface-muted hover:text-on-surface px-3 py-2 rounded-lg transition-colors whitespace-nowrap" data-path="security-and-rls" href="#">Security & RLS</a></nav><div class="flex items-center gap-space-sm shrink-0 ml-auto"><div class="relative hidden md:flex items-center"><span class="material-symbols-outlined absolute left-2.5 text-text-muted text-[18px]">search</span><input class="w-64 xl:w-72 h-9 pl-9 pr-3 rounded-lg bg-surface-muted text-text-primary placeholder:text-text-muted font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search tenant, cluster, geo-node... ⌘K" type="text"/></div><div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-positive-bg border border-status-positive-border"><span class="w-2 h-2 rounded-full bg-status-positive animate-pulse"></span><span class="font-label-sm text-label-sm text-primary font-semibold tracking-wide uppercase">ALL CLUSTERS OPERATIONAL</span></div><button aria-label="Notifications" class="relative p-2 rounded-lg text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-status-critical rounded-full ring-2 ring-surface-card"></span></button><div class="flex items-center gap-space-xs pl-space-xs"><div class="hidden xl:flex flex-col text-right leading-none"><span class="font-label-md text-label-md text-text-primary font-semibold">Admin Core</span><span class="font-label-sm text-label-sm text-text-muted mt-0.5">Global Root</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-16 bg-canvas-bg min-h-[calc(100vh-48px)] px-gutter"><div class="flex flex-col w-full pb-16">
+<!-- BREADCRUMB & METRIC STATUS BAR -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm py-4">
+<div class="flex items-center gap-2 font-label-md text-label-md text-text-secondary">
+<span class="hover:text-text-primary cursor-pointer transition-colors">System Admin Console</span>
+<span class="material-symbols-outlined text-[14px] text-text-muted">chevron_right</span>
+<span class="hover:text-text-primary cursor-pointer transition-colors">Geospatial & Market Intelligence</span>
+<span class="material-symbols-outlined text-[14px] text-text-muted">chevron_right</span>
+<span class="text-text-primary font-semibold">Commercial Rent Cache Manager</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-mono text-label-sm px-2.5 py-1 rounded bg-surface-container-high text-on-surface font-semibold tracking-wide flex items-center gap-1.5 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive animate-pulse"></span>
+        NODE CLUSTER: PK-SUB-EDGE-09
+      </span>
+<span class="font-label-sm text-label-sm text-text-muted">PostGIS Engine 3.4 • pg_trgm active</span>
+</div>
+</div>
+<!-- TITLE & GLOBAL ACTION BAR -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm mb-space-lg flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<div class="flex flex-col gap-1 max-w-3xl">
+<div class="flex flex-wrap items-center gap-3">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Spatial Data & Commercial Rent Cache Manager</h1>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold tracking-wide shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-positive"></span>
+          1,420 ACTIVE SPATIAL NODES
+        </span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary mt-1">
+        Monitor, override, and re-run geospatial scraping pipelines and commercial rent cache across Pakistan metro hubs. Automated telemetry feeds real-time feasibility calculations.
+      </p>
+</div>
+<!-- Top Right Action Controls -->
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<button class="h-10 px-4 rounded-lg bg-status-positive hover:bg-primary text-on-primary font-label-md text-label-md font-semibold flex items-center gap-2 shadow-sm transition-all hover:shadow" id="btnOpenScraperModal" type="button">
+<span class="material-symbols-outlined text-[18px] animate-spin" style="animation-duration: 4s;">sync</span>
+        Run Scraper Trigger
+      </button>
+<button class="h-10 px-3.5 rounded-lg bg-status-warning-bg text-status-warning hover:bg-amber-100 font-label-md text-label-md font-semibold flex items-center gap-2 transition-colors" id="btnFlushCache" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+        Flush Stale Cache
+      </button>
+<button class="h-10 px-3.5 rounded-lg bg-surface-muted hover:bg-surface-container-high text-text-primary font-label-md text-label-md font-medium flex items-center gap-2 transition-colors" id="btnExportGeoJson" type="button">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">file_download</span>
+        Export Spatial GeoJSON
+      </button>
+</div>
+</div>
+<!-- SUMMARY STATS ROW (4 HIGH-DENSITY METRIC CARDS) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-lg">
+<!-- Card 1 -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute top-0 left-0 right-0 h-0.5 bg-status-positive"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider font-semibold">Total Cached Locations</span>
+<span class="font-metric-val text-metric-val text-text-primary mt-1">1,420</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-muted flex items-center justify-center text-status-positive">
+<span class="material-symbols-outlined text-[22px]">location_on</span>
+</div>
+</div>
+<div class="mt-4 pt-3 flex flex-col gap-1 bg-surface-muted/40 -mx-space-md -mb-space-md px-space-md pb-space-md rounded-b-xl">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-text-secondary">
+<span>Rent Data Points (PK)</span>
+<span class="font-semibold text-status-positive">+84 this week</span>
+</div>
+<span class="text-body-sm font-body-sm text-text-muted truncate">48 metro hubs & commercial zones</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute top-0 left-0 right-0 h-0.5 bg-status-positive"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider font-semibold">Avg Commercial Rent</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-metric-val text-metric-val text-text-primary">PKR 250</span>
+<span class="font-label-md text-label-md text-text-muted">/ sq ft</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-muted flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">trending_up</span>
+</div>
+</div>
+<div class="mt-4 pt-3 flex flex-col gap-1.5 bg-surface-muted/40 -mx-space-md -mb-space-md px-space-md pb-space-md rounded-b-xl">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-text-muted">Index Delta MoM</span>
+<span class="text-status-positive font-semibold flex items-center">+4.8% vs last month</span>
+</div>
+<div class="flex items-center gap-1 font-mono text-[10px] text-text-secondary tracking-tight truncate">
+<span class="bg-surface-card px-1 rounded">LHE: 280</span>
+<span class="bg-surface-card px-1 rounded">KHI: 310</span>
+<span class="bg-surface-card px-1 rounded">ISB: 295</span>
+<span class="bg-surface-card px-1 rounded">RWP: 185</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute top-0 left-0 right-0 h-0.5 bg-status-positive"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider font-semibold">Cache Hit Ratio</span>
+<span class="font-metric-val text-metric-val text-text-primary mt-1">96.4%</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-muted flex items-center justify-center text-status-positive">
+<span class="material-symbols-outlined text-[22px]">bolt</span>
+</div>
+</div>
+<div class="mt-4 pt-3 flex flex-col gap-1 bg-surface-muted/40 -mx-space-md -mb-space-md px-space-md pb-space-md rounded-b-xl">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-text-secondary">
+<span>Redis In-Memory Edge</span>
+<span class="font-semibold text-text-primary">14ms p95</span>
+</div>
+<span class="text-body-sm font-body-sm text-text-muted">3.6% fallback to live cluster scraping</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute top-0 left-0 right-0 h-0.5 bg-status-positive"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider font-semibold">Last Scraper Sync</span>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-headline-md text-headline-md text-text-primary">2 Hours Ago</span>
+<span class="w-2.5 h-2.5 rounded-full bg-status-positive animate-ping"></span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-muted flex items-center justify-center text-status-positive">
+<span class="material-symbols-outlined text-[22px]">published_with_changes</span>
+</div>
+</div>
+<div class="mt-4 pt-3 flex flex-col gap-1 bg-surface-muted/40 -mx-space-md -mb-space-md px-space-md pb-space-md rounded-b-xl">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-text-secondary">
+<span>Scheduled Cron</span>
+<span class="font-semibold text-text-primary">04:00 AM PKT</span>
+</div>
+<span class="text-body-sm font-body-sm text-status-positive font-medium">0 pipeline errors logged</span>
+</div>
+</div>
+</div>
+<!-- MAIN WORKSPACE 2-COLUMN LAYOUT -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT COLUMN: RENT CACHE DATA TABLE & OVERRIDES (~60% = 7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<!-- FILTER CONTROLS BAR -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span>
+<input class="w-full h-10 pl-9 pr-16 rounded-lg bg-surface-muted text-text-primary placeholder:text-text-muted font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" id="searchInput" placeholder="Search by City, Commercial Hub, or Postal Code (Liberty Market, Blue Area, Clifton)... ⌘F" type="text"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-label-sm text-text-muted px-1.5 py-0.5 rounded bg-surface-card">⌘F</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+<!-- Category Filter -->
+<div class="relative">
+<select class="w-full h-9 pl-3 pr-8 rounded-lg bg-surface-muted text-text-primary font-body-sm text-body-sm appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+<option value="all">All Categories</option>
+<option value="high-street">Commercial High Street Shops</option>
+<option value="logistics">Warehouses & Logistics</option>
+<option value="malls">Shopping Malls</option>
+<option value="coworking">Co-working / Office Plazas</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted text-[16px] pointer-events-none">expand_more</span>
+</div>
+<!-- Cache Status Filter -->
+<div class="relative">
+<select class="w-full h-9 pl-3 pr-8 rounded-lg bg-surface-muted text-text-primary font-body-sm text-body-sm appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+<option value="all">All Cache Statuses</option>
+<option value="fresh">Fresh (<7d sync)</option>
+<option value="stale">Stale (>30d sync)</option>
+<option value="override">Manual Override Active</option>
+<option value="verification">Needs Verification</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted text-[16px] pointer-events-none">expand_more</span>
+</div>
+<!-- City Filter -->
+<div class="relative">
+<select class="w-full h-9 pl-3 pr-8 rounded-lg bg-surface-muted text-text-primary font-body-sm text-body-sm appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+<option value="all">All Cities (Pakistan)</option>
+<option value="lhe">Lahore</option>
+<option value="khi">Karachi</option>
+<option value="isb">Islamabad</option>
+<option value="rwp">Rawalpindi</option>
+<option value="pew">Peshawar</option>
+<option value="fsd">Faisalabad</option>
+<option value="mux">Multan</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted text-[16px] pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<!-- DATA TABLE CARD -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="p-space-sm bg-surface-muted flex items-center justify-between">
+<div class="flex items-center gap-2">
+<input class="w-4 h-4 rounded text-status-positive focus:ring-primary/30 cursor-pointer" id="selectAllCheckbox" type="checkbox"/>
+<span class="font-label-sm text-label-sm text-text-secondary font-medium">Select All 1,420 Nodes</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-text-muted">Batch Actions:</span>
+<button class="px-2.5 py-1 text-label-sm rounded bg-surface-card text-text-secondary hover:text-text-primary font-medium hover:shadow-xs transition-colors">Re-crawl Selected</button>
+<button class="px-2.5 py-1 text-label-sm rounded bg-surface-card text-text-secondary hover:text-status-critical font-medium hover:shadow-xs transition-colors">Purge Cache</button>
+</div>
+</div>
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-card font-label-sm text-label-sm text-text-muted uppercase tracking-wider">
+<th class="py-3 px-3 w-8"></th>
+<th class="py-3 px-3">City & Commercial Hub</th>
+<th class="py-3 px-3">Scraped Rent Range</th>
+<th class="py-3 px-3">Sq. Ft. Rate</th>
+<th class="py-3 px-3">Samples</th>
+<th class="py-3 px-3">Status</th>
+<th class="py-3 px-3 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-subtle font-body-sm text-body-sm text-text-primary">
+<!-- ROW 1 (Lahore - Liberty) -->
+<tr class="hover:bg-surface-muted/60 transition-colors group cursor-pointer" onclick="openDrawer('Lahore — Gulberg III / Liberty Market', 'GEO-LHE-042', '120,000', '450,000', '285', 'Fresh', 'Verified via Gulberg Traders Association field benchmark & tenant ground interviews (Oct 2024).')">
+<td class="py-3 px-3" onclick="event.stopPropagation()">
+<input class="w-4 h-4 rounded text-status-positive focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] font-semibold text-text-primary group-hover:text-status-positive transition-colors">Lahore — Gulberg III / Liberty Market</span>
+<span class="font-mono text-label-sm text-text-muted">#GEO-LHE-042 • Main Boulevard & Park Links</span>
+</div>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-semibold text-text-primary">PKR 120k – 450k</span>
+<span class="text-text-muted text-[11px] block">/ month (median)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-headline-sm text-[13px] font-bold text-text-primary">PKR 285</span>
+<span class="text-text-muted text-[11px]">/ sq.ft</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-text-secondary">
+<span class="material-symbols-outlined text-[14px] text-primary">analytics</span>
+                    48 Listings
+                  </div>
+<span class="text-text-muted text-[10px] block">Zameen (34), Graana (14)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-[11px] font-semibold tracking-wide">
+<span class="material-symbols-outlined text-[12px]">check_circle</span>
+                    Fresh
+                  </span>
+<span class="text-text-muted text-[10px] block mt-0.5">2h ago</span>
+</td>
+<td class="py-3 px-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-surface-muted hover:bg-surface-container-high text-text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" onclick="openDrawer('Lahore — Gulberg III / Liberty Market', 'GEO-LHE-042', '120,000', '450,000', '285', 'Fresh', 'Verified via Gulberg Traders Association field benchmark & tenant ground interviews (Oct 2024).')">
+<span class="material-symbols-outlined text-[13px]">tune</span>
+                      Override
+                    </button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="Re-scrape Node">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="More actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 2 (Karachi - Clifton) -->
+<tr class="hover:bg-surface-muted/60 transition-colors group cursor-pointer" onclick="openDrawer('Karachi — Clifton Block 4 & Zamzama', 'GEO-KHI-019', '180,000', '650,000', '340', 'Manual Override', 'Premium commercial zone locked due to high volatile off-market leases.')">
+<td class="py-3 px-3" onclick="event.stopPropagation()">
+<input class="w-4 h-4 rounded text-status-positive focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] font-semibold text-text-primary group-hover:text-status-positive transition-colors">Karachi — Clifton Block 4 & Zamzama</span>
+<span class="font-mono text-label-sm text-text-muted">#GEO-KHI-019 • Commercial High Street</span>
+</div>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-semibold text-text-primary">PKR 180k – 650k</span>
+<span class="text-text-muted text-[11px] block">/ month (median)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-headline-sm text-[13px] font-bold text-text-primary">PKR 340</span>
+<span class="text-text-muted text-[11px]">/ sq.ft</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-text-secondary">
+<span class="material-symbols-outlined text-[14px] text-primary">analytics</span>
+                    64 Listings
+                  </div>
+<span class="text-text-muted text-[10px] block">Zameen (42), Graana (22)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-label-sm text-[11px] font-semibold tracking-wide">
+<span class="material-symbols-outlined text-[12px]">lock</span>
+                    Override
+                  </span>
+<span class="text-text-muted text-[10px] block mt-0.5">Admin Locked</span>
+</td>
+<td class="py-3 px-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-surface-muted hover:bg-surface-container-high text-text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" onclick="openDrawer('Karachi — Clifton Block 4 & Zamzama', 'GEO-KHI-019', '180,000', '650,000', '340', 'Manual Override', 'Premium commercial zone locked due to high volatile off-market leases.')">
+<span class="material-symbols-outlined text-[13px]">tune</span>
+                      Override
+                    </button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="Re-scrape Node">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="More actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 3 (Islamabad - Blue Area) -->
+<tr class="hover:bg-surface-muted/60 transition-colors group cursor-pointer" onclick="openDrawer('Islamabad — Blue Area Jinnah Ave', 'GEO-ISB-008', '140,000', '520,000', '290', 'Fresh', 'Verified standard corporate plaza rates.')">
+<td class="py-3 px-3" onclick="event.stopPropagation()">
+<input class="w-4 h-4 rounded text-status-positive focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] font-semibold text-text-primary group-hover:text-status-positive transition-colors">Islamabad — Blue Area Jinnah Ave</span>
+<span class="font-mono text-label-sm text-text-muted">#GEO-ISB-008 • Sector F-6 / G-6 Central</span>
+</div>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-semibold text-text-primary">PKR 140k – 520k</span>
+<span class="text-text-muted text-[11px] block">/ month (median)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-headline-sm text-[13px] font-bold text-text-primary">PKR 290</span>
+<span class="text-text-muted text-[11px]">/ sq.ft</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-text-secondary">
+<span class="material-symbols-outlined text-[14px] text-primary">analytics</span>
+                    52 Listings
+                  </div>
+<span class="text-text-muted text-[10px] block">Zameen (38), Graana (14)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-[11px] font-semibold tracking-wide">
+<span class="material-symbols-outlined text-[12px]">check_circle</span>
+                    Fresh
+                  </span>
+<span class="text-text-muted text-[10px] block mt-0.5">12h ago</span>
+</td>
+<td class="py-3 px-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-surface-muted hover:bg-surface-container-high text-text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" onclick="openDrawer('Islamabad — Blue Area Jinnah Ave', 'GEO-ISB-008', '140,000', '520,000', '290', 'Fresh', 'Verified standard corporate plaza rates.')">
+<span class="material-symbols-outlined text-[13px]">tune</span>
+                      Override
+                    </button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="Re-scrape Node">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="More actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 4 (Rawalpindi - Saddar) -->
+<tr class="hover:bg-surface-muted/60 transition-colors group cursor-pointer" onclick="openDrawer('Rawalpindi — Saddar Commercial', 'GEO-RWP-011', '75,000', '240,000', '185', 'Stale', 'Scraper detected cloudflare protection challenge.')">
+<td class="py-3 px-3" onclick="event.stopPropagation()">
+<input class="w-4 h-4 rounded text-status-positive focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] font-semibold text-text-primary group-hover:text-status-positive transition-colors">Rawalpindi — Saddar Commercial</span>
+<span class="font-mono text-label-sm text-text-muted">#GEO-RWP-011 • Bank Road & Haider Rd</span>
+</div>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-semibold text-text-primary">PKR 75k – 240k</span>
+<span class="text-text-muted text-[11px] block">/ month (median)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-headline-sm text-[13px] font-bold text-text-primary">PKR 185</span>
+<span class="text-text-muted text-[11px]">/ sq.ft</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-text-secondary">
+<span class="material-symbols-outlined text-[14px] text-text-muted">analytics</span>
+                    29 Listings
+                  </div>
+<span class="text-text-muted text-[10px] block">Zameen (20), Graana (9)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-warning-bg text-status-warning font-label-sm text-[11px] font-semibold tracking-wide">
+<span class="material-symbols-outlined text-[12px]">schedule</span>
+                    Stale
+                  </span>
+<span class="text-text-muted text-[10px] block mt-0.5">34 days ago</span>
+</td>
+<td class="py-3 px-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-surface-muted hover:bg-surface-container-high text-text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" onclick="openDrawer('Rawalpindi — Saddar Commercial', 'GEO-RWP-011', '75,000', '240,000', '185', 'Stale', 'Scraper detected cloudflare protection challenge.')">
+<span class="material-symbols-outlined text-[13px]">tune</span>
+                      Override
+                    </button>
+<button class="p-1 rounded text-status-positive hover:bg-surface-muted transition-colors" title="Re-scrape Node">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="More actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 5 (Lahore - DHA Phase 5) -->
+<tr class="hover:bg-surface-muted/60 transition-colors group cursor-pointer" onclick="openDrawer('Lahore — DHA Phase 5 Commercial Broadway', 'GEO-LHE-093', '150,000', '580,000', '315', 'Fresh', 'Consistent prime corporate branch pricing.')">
+<td class="py-3 px-3" onclick="event.stopPropagation()">
+<input class="w-4 h-4 rounded text-status-positive focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] font-semibold text-text-primary group-hover:text-status-positive transition-colors">Lahore — DHA Phase 5 Commercial Broadway</span>
+<span class="font-mono text-label-sm text-text-muted">#GEO-LHE-093 • Sector C/G Node</span>
+</div>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-semibold text-text-primary">PKR 150k – 580k</span>
+<span class="text-text-muted text-[11px] block">/ month (median)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-headline-sm text-[13px] font-bold text-text-primary">PKR 315</span>
+<span class="text-text-muted text-[11px]">/ sq.ft</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-text-secondary">
+<span class="material-symbols-outlined text-[14px] text-primary">analytics</span>
+                    41 Listings
+                  </div>
+<span class="text-text-muted text-[10px] block">Zameen (31), Graana (10)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-[11px] font-semibold tracking-wide">
+<span class="material-symbols-outlined text-[12px]">check_circle</span>
+                    Fresh
+                  </span>
+<span class="text-text-muted text-[10px] block mt-0.5">4 days ago</span>
+</td>
+<td class="py-3 px-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-surface-muted hover:bg-surface-container-high text-text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" onclick="openDrawer('Lahore — DHA Phase 5 Commercial Broadway', 'GEO-LHE-093', '150,000', '580,000', '315', 'Fresh', 'Consistent prime corporate branch pricing.')">
+<span class="material-symbols-outlined text-[13px]">tune</span>
+                      Override
+                    </button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="Re-scrape Node">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="More actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 6 (Karachi - Tariq Road) -->
+<tr class="hover:bg-surface-muted/60 transition-colors group cursor-pointer" onclick="openDrawer('Karachi — Tariq Road Retail Corridor', 'GEO-KHI-077', '95,000', '380,000', '260', 'Fresh', 'Standardized density corridor.')">
+<td class="py-3 px-3" onclick="event.stopPropagation()">
+<input class="w-4 h-4 rounded text-status-positive focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] font-semibold text-text-primary group-hover:text-status-positive transition-colors">Karachi — Tariq Road Retail Corridor</span>
+<span class="font-mono text-label-sm text-text-muted">#GEO-KHI-077 • PECHS Block 2</span>
+</div>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-semibold text-text-primary">PKR 95k – 380k</span>
+<span class="text-text-muted text-[11px] block">/ month (median)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-headline-sm text-[13px] font-bold text-text-primary">PKR 260</span>
+<span class="text-text-muted text-[11px]">/ sq.ft</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-text-secondary">
+<span class="material-symbols-outlined text-[14px] text-primary">analytics</span>
+                    38 Listings
+                  </div>
+<span class="text-text-muted text-[10px] block">Zameen (27), Graana (11)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-[11px] font-semibold tracking-wide">
+<span class="material-symbols-outlined text-[12px]">check_circle</span>
+                    Fresh
+                  </span>
+<span class="text-text-muted text-[10px] block mt-0.5">18h ago</span>
+</td>
+<td class="py-3 px-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-surface-muted hover:bg-surface-container-high text-text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" onclick="openDrawer('Karachi — Tariq Road Retail Corridor', 'GEO-KHI-077', '95,000', '380,000', '260', 'Fresh', 'Standardized density corridor.')">
+<span class="material-symbols-outlined text-[13px]">tune</span>
+                      Override
+                    </button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="Re-scrape Node">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="More actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 7 (Peshawar - University Road) -->
+<tr class="hover:bg-surface-muted/60 transition-colors group cursor-pointer" onclick="openDrawer('Peshawar — University Road Commercial', 'GEO-PEW-004', '60,000', '210,000', '165', 'Needs Verification', 'Outlier listing detected (12,000 PKR sq ft invalid reporting).')">
+<td class="py-3 px-3" onclick="event.stopPropagation()">
+<input class="w-4 h-4 rounded text-status-positive focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] font-semibold text-text-primary group-hover:text-status-positive transition-colors">Peshawar — University Road Commercial</span>
+<span class="font-mono text-label-sm text-text-muted">#GEO-PEW-004 • Tehkal Payan Hub</span>
+</div>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-semibold text-text-primary">PKR 60k – 210k</span>
+<span class="text-text-muted text-[11px] block">/ month (median)</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="font-headline-sm text-[13px] font-bold text-text-primary">PKR 165</span>
+<span class="text-text-muted text-[11px]">/ sq.ft</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-text-secondary">
+<span class="material-symbols-outlined text-[14px] text-status-critical">warning</span>
+                    19 Listings
+                  </div>
+<span class="text-text-muted text-[10px] block">Variance > 38%</span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-critical-bg text-status-critical font-label-sm text-[11px] font-semibold tracking-wide">
+<span class="material-symbols-outlined text-[12px]">flag</span>
+                    Verify
+                  </span>
+<span class="text-text-muted text-[10px] block mt-0.5">Outlier Flag</span>
+</td>
+<td class="py-3 px-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-surface-muted hover:bg-surface-container-high text-text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" onclick="openDrawer('Peshawar — University Road Commercial', 'GEO-PEW-004', '60,000', '210,000', '165', 'Needs Verification', 'Outlier listing detected (12,000 PKR sq ft invalid reporting).')">
+<span class="material-symbols-outlined text-[13px]">tune</span>
+                      Override
+                    </button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="Re-scrape Node">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+<button class="p-1 rounded text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" title="More actions">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- TABLE PAGINATION FOOTER -->
+<div class="p-space-md bg-surface-card flex flex-wrap items-center justify-between gap-space-sm font-label-sm text-label-sm text-text-secondary">
+<div class="flex items-center gap-2">
+<span>Showing <strong class="text-text-primary font-semibold">1–7</strong> of <strong class="text-text-primary font-semibold">1,420</strong> cached zones</span>
+<span class="text-text-muted">•</span>
+<span>Rows per page:</span>
+<select class="h-7 px-2 rounded bg-surface-muted text-text-primary font-medium focus:outline-none">
+<option>7</option>
+<option>15</option>
+<option>30</option>
+<option>50</option>
+</select>
+</div>
+<div class="flex items-center gap-1">
+<span class="mr-2">Page 1 of 203</span>
+<button class="w-8 h-8 rounded bg-surface-muted flex items-center justify-center text-text-muted hover:text-text-primary disabled:opacity-40" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded bg-primary text-on-primary font-semibold flex items-center justify-center">1</button>
+<button class="w-8 h-8 rounded bg-surface-muted hover:bg-surface-container-high text-text-primary font-medium flex items-center justify-center">2</button>
+<button class="w-8 h-8 rounded bg-surface-muted hover:bg-surface-container-high text-text-primary font-medium flex items-center justify-center">3</button>
+<span class="px-1 text-text-muted">...</span>
+<button class="w-8 h-8 rounded bg-surface-muted hover:bg-surface-container-high text-text-primary font-medium flex items-center justify-center">203</button>
+<button class="w-8 h-8 rounded bg-surface-muted flex items-center justify-center text-text-secondary hover:text-text-primary">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: PIPELINE CONFIG & GEOJSON HEATMAP (~40% = 5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-lg">
+<!-- CARD 1: SCRAPER PIPELINE CONFIGURATION -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-positive"></span>
+<h2 class="font-headline-md text-headline-md text-text-primary">Spatial Overpass & Scraper Pipeline</h2>
+</div>
+<span class="font-mono text-label-sm text-text-muted bg-surface-muted px-2 py-0.5 rounded">v2.19-prod</span>
+</div>
+<!-- Scraper Sources -->
+<div class="flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider font-semibold">Active Scraper Targets & Endpoints</span>
+<label class="flex items-start gap-3 p-2.5 rounded-lg bg-surface-muted/60 hover:bg-surface-muted transition-colors cursor-pointer">
+<input checked="" class="mt-1 w-4 h-4 rounded text-status-positive focus:ring-primary/20" type="checkbox"/>
+<div class="flex flex-col flex-1 leading-tight">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-text-primary">Zameen.com Commercial Cache</span>
+<span class="font-mono text-[11px] text-status-positive font-medium">98.4% uptime</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-muted mt-0.5">Rate limit: 60 req/min • Tor pool rotators active</span>
+</div>
+</label>
+<label class="flex items-start gap-3 p-2.5 rounded-lg bg-surface-muted/60 hover:bg-surface-muted transition-colors cursor-pointer">
+<input checked="" class="mt-1 w-4 h-4 rounded text-status-positive focus:ring-primary/20" type="checkbox"/>
+<div class="flex flex-col flex-1 leading-tight">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-text-primary">Graana.com Commercial Index</span>
+<span class="font-mono text-[11px] text-status-positive font-medium">95.1% uptime</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-muted mt-0.5">Rate limit: 45 req/min • Puppeteer stealth mode</span>
+</div>
+</label>
+<label class="flex items-start gap-3 p-2.5 rounded-lg bg-surface-muted/60 hover:bg-surface-muted transition-colors cursor-pointer">
+<input checked="" class="mt-1 w-4 h-4 rounded text-status-positive focus:ring-primary/20" type="checkbox"/>
+<div class="flex flex-col flex-1 leading-tight">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-text-primary">OpenStreetMap Overpass API</span>
+<span class="font-mono text-[11px] text-text-secondary font-medium">Tag Sync Active</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-muted mt-0.5">Tags: [shop=mall, commercial, retail, building=retail]</span>
+</div>
+</label>
+</div>
+<!-- Radius & Buffer Config -->
+<div class="flex flex-col gap-2 pt-2">
+<div class="flex items-center justify-between font-label-md text-label-md">
+<span class="text-text-primary font-medium">Geofence Radius Buffer</span>
+<span class="font-mono font-bold text-status-positive" id="bufferValueDisplay">12 km</span>
+</div>
+<input class="w-full h-1.5 bg-surface-muted rounded-lg appearance-none cursor-pointer accent-status-positive" max="25" min="2" oninput="document.getElementById('bufferValueDisplay').innerText = this.value + ' km'" type="range" value="12"/>
+<span class="font-body-sm text-body-sm text-text-muted">Standard polygon radius applied around metro high streets for clustered mean rent.</span>
+</div>
+<!-- Cron Scheduler Settings -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted">Sync Interval Schedule</label>
+<div class="relative">
+<select class="w-full h-9 pl-2.5 pr-8 rounded-lg bg-surface-muted text-text-primary font-body-sm text-body-sm appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+<option>Daily at 03:00 PKT (Recommended)</option>
+<option>Every 6 Hours</option>
+<option>Weekly (Sundays)</option>
+<option>Bi-weekly</option>
+<option>Monthly Refresh</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-text-muted text-[16px] pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted">Anomaly Fallback</label>
+<div class="relative">
+<select class="w-full h-9 pl-2.5 pr-8 rounded-lg bg-surface-muted text-text-primary font-body-sm text-body-sm appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+<option>Exponential Moving Avg (EMA)</option>
+<option>30-Day Fixed Median</option>
+<option>Alert Administrator & Pause</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-text-muted text-[16px] pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<button class="w-full h-10 rounded-lg bg-surface-muted hover:bg-surface-container-high text-text-primary font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">save</span>
+          Save Pipeline Configuration
+        </button>
+</div>
+<!-- CARD 2: INTERACTIVE GEOJSON SPATIAL HEATMAP & CLUSTER PREVIEW -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">map</span>
+<h2 class="font-headline-md text-headline-md text-text-primary">Interactive Spatial Heatmap</h2>
+</div>
+<div class="flex items-center gap-1 font-label-sm text-label-sm">
+<span class="px-2 py-0.5 rounded bg-surface-muted text-text-secondary font-medium">PostGIS</span>
+<span class="px-2 py-0.5 rounded bg-status-positive-bg text-status-positive font-medium">EPSG:4326</span>
+</div>
+</div>
+<!-- SIMULATED MAP CONTAINER -->
+<div class="relative w-full h-96 rounded-xl bg-slate-900 overflow-hidden shadow-inner flex flex-col justify-between p-4" data-location="Lahore, Pakistan" style="">
+<!-- Background SVG Vector Pattern simulating high density GIS vector grid -->
+<svg class="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern height="40" id="grid" patternunits="userSpaceOnUse" width="40">
+<path d="M 40 0 L 0 0 0 40" fill="none" stroke="#68dba9" stroke-width="0.5"></path>
+</pattern>
+</defs>
+<rect fill="url(#grid)" height="100%" width="100%"></rect>
+<!-- Simulated Road Corridors -->
+<path d="M-10,120 Q120,90 280,220 T500,280" fill="none" opacity="0.4" stroke="#94a3b8" stroke-width="2"></path>
+<path d="M80,-20 Q140,160 220,380" fill="none" opacity="0.5" stroke="#94a3b8" stroke-width="3"></path>
+<path d="M220,40 L440,320" fill="none" opacity="0.4" stroke="#94a3b8" stroke-width="1.5"></path>
+</svg>
+<!-- TOP MAP HUD OVERLAY -->
+<div class="relative z-10 flex flex-wrap items-center justify-between gap-2 bg-slate-950/80 backdrop-blur-md p-2 rounded-lg text-white font-mono text-[11px]">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-status-positive animate-pulse"></span>
+<span>LHE Grid: 31.5204° N, 74.3587° E</span>
+</div>
+<span class="text-slate-400">Zoom: 12.4 • 18 Polygons Rendered</span>
+</div>
+<!-- MAP DATA HEATMAP POINTS (INTERACTIVE NODES) -->
+<div class="relative w-full h-full">
+<!-- Node 1: Liberty Market (Active Highlighted) -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 group cursor-pointer" onclick="openDrawer('Lahore — Gulberg III / Liberty Market', 'GEO-LHE-042', '120,000', '450,000', '285', 'Fresh', 'Verified via Gulberg Traders Association field benchmark & tenant ground interviews (Oct 2024).')">
+<div class="w-12 h-12 rounded-full bg-emerald-500/25 animate-ping absolute -top-3 -left-3"></div>
+<div class="w-6 h-6 rounded-full bg-emerald-500 ring-4 ring-emerald-400/40 flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined text-[14px]">storefront</span>
+</div>
+<!-- Pinned Tooltip Card -->
+<div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-64 bg-slate-950/95 backdrop-blur-md p-3 rounded-xl text-white shadow-2xl transition-all">
+<div class="flex items-center justify-between mb-1">
+<span class="font-headline-sm text-[12px] font-bold text-white">Gulberg III / Liberty</span>
+<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">FRESH</span>
+</div>
+<div class="text-[13px] font-semibold text-emerald-400">Avg PKR 285 / sq.ft</div>
+<div class="text-[11px] text-slate-300 mt-0.5">48 listings cached • Median PKR 280,000</div>
+<div class="mt-2 text-[10px] text-slate-400 border-t border-slate-800 pt-1 flex justify-between">
+<span>Radius: 12km</span>
+<span class="text-emerald-400 font-semibold cursor-pointer">Click to edit →</span>
+</div>
+</div>
+</div>
+<!-- Node 2: DHA Phase 5 (Amber Cluster) -->
+<div class="absolute top-1/3 right-1/4 z-10 group cursor-pointer" onclick="openDrawer('Lahore — DHA Phase 5 Commercial Broadway', 'GEO-LHE-093', '150,000', '580,000', '315', 'Fresh', 'Consistent prime corporate branch pricing.')">
+<div class="w-5 h-5 rounded-full bg-amber-500 ring-2 ring-amber-400/50 flex items-center justify-center text-white">
+<span class="text-[9px] font-bold">DHA</span>
+</div>
+<div class="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-950 text-white text-[11px] p-2 rounded whitespace-nowrap z-30 shadow-md">
+                DHA Phase 5: PKR 315 / sq.ft
+              </div>
+</div>
+<!-- Node 3: Johar Town Commercial (Blue Cluster) -->
+<div class="absolute bottom-1/4 left-1/4 z-10 group cursor-pointer">
+<div class="w-4 h-4 rounded-full bg-blue-500 ring-2 ring-blue-400/40 flex items-center justify-center text-white">
+<span class="text-[8px] font-bold">JT</span>
+</div>
+<div class="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-950 text-white text-[11px] p-2 rounded whitespace-nowrap z-30 shadow-md">
+                Johar Town: PKR 210 / sq.ft
+              </div>
+</div>
+<!-- Node 4: Mall Road (Violet Cluster) -->
+<div class="absolute top-1/4 left-1/3 z-10 group cursor-pointer">
+<div class="w-4 h-4 rounded-full bg-purple-500 ring-2 ring-purple-400/40 flex items-center justify-center text-white">
+<span class="text-[8px] font-bold">MR</span>
+</div>
+</div>
+</div>
+<!-- MAP BOTTOM CONTROLS & LEGEND -->
+<div class="relative z-10 flex flex-wrap items-end justify-between gap-2">
+<!-- Heatmap Legend -->
+<div class="bg-slate-950/85 backdrop-blur-md p-2 rounded-lg text-[10px] text-slate-300 font-mono flex items-center gap-3">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> PKR 150–250</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> PKR 250–350</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span> PKR 350+</span>
+</div>
+<!-- Zoom & View Tools -->
+<div class="flex items-center gap-1 bg-slate-950/85 backdrop-blur-md p-1 rounded-lg">
+<button class="w-7 h-7 rounded text-white hover:bg-slate-800 flex items-center justify-center text-[16px] font-bold" title="Zoom in">+</button>
+<button class="w-7 h-7 rounded text-white hover:bg-slate-800 flex items-center justify-center text-[16px] font-bold" title="Zoom out">-</button>
+<button class="px-2 h-7 rounded text-white hover:bg-slate-800 text-[11px] flex items-center gap-1" title="Recenter">
+<span class="material-symbols-outlined text-[14px]">my_location</span>
+                Recenter
+              </button>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-text-muted">
+<span>Layer: GeoJSON Rent Heatmap Active</span>
+<a class="text-status-positive hover:underline font-medium" href="#">Download PostGIS Boundary (.shp)</a>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE-OVER MANUAL OVERRIDE DRAWER (Right Overlay) -->
+<div class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden transition-opacity" id="overrideDrawerOverlay">
+<div class="fixed inset-y-0 right-0 max-w-lg w-full bg-surface-card shadow-2xl flex flex-col justify-between overflow-y-auto transform translate-x-0 transition-transform">
+<!-- Drawer Header -->
+<div class="p-space-lg bg-surface-card border-b border-border-subtle sticky top-0 z-10 flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+<h3 class="font-headline-md text-headline-md text-text-primary">Manual Rent Cache Override</h3>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-mono text-label-sm text-status-positive bg-status-positive-bg px-2 py-0.5 rounded font-semibold" id="drawerNodeBadge">#GEO-LHE-042</span>
+<span class="text-text-muted text-label-sm">• Admin Priority Layer</span>
+</div>
+</div>
+<button class="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors" onclick="closeDrawer()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Drawer Body -->
+<div class="p-space-lg flex flex-col gap-space-md">
+<!-- Zone Title Container -->
+<div class="p-space-md rounded-xl bg-surface-muted flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider font-semibold">Target Node Cluster</span>
+<span class="font-headline-sm text-headline-sm text-text-primary" id="drawerZoneTitle">Lahore — Gulberg III / Liberty Market</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Commercial High Street • Urban Retail Tier 1</span>
+</div>
+<!-- Warning Context Alert -->
+<div class="p-space-md rounded-xl bg-status-warning-bg/60 border border-status-warning/20 flex items-start gap-3 text-status-warning">
+<span class="material-symbols-outlined text-[20px] shrink-0 mt-0.5">verified_user</span>
+<p class="font-body-sm text-body-sm text-amber-900 leading-snug">
+<strong>Engine Lock Notice:</strong> Manual overrides immediately bypass automated scraper crawls and lock the feasibility calculation algorithm for this retail node.
+          </p>
+</div>
+<!-- FORM FIELDS -->
+<div class="flex flex-col gap-4">
+<!-- Min and Max Rent Grid -->
+<div class="grid grid-cols-2 gap-3">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-semibold text-text-primary">Min Monthly Rent</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-label-sm text-text-muted">PKR</span>
+<input class="w-full h-10 pl-12 pr-3 rounded-lg bg-surface-card border border-border-strong text-text-primary font-body-md text-body-md font-medium focus:outline-none focus:ring-2 focus:ring-primary/20" id="drawerMinRent" type="text" value="120,000"/>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-semibold text-text-primary">Max Monthly Rent</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-label-sm text-text-muted">PKR</span>
+<input class="w-full h-10 pl-12 pr-3 rounded-lg bg-surface-card border border-border-strong text-text-primary font-body-md text-body-md font-medium focus:outline-none focus:ring-2 focus:ring-primary/20" id="drawerMaxRent" type="text" value="450,000"/>
+</div>
+</div>
+</div>
+<!-- Sq. Ft Rate Input -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-semibold text-text-primary">Calculated / Verified Rate (PKR / sq ft)</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-label-sm text-text-muted">PKR</span>
+<input class="w-full h-10 pl-12 pr-16 rounded-lg bg-surface-card border border-border-strong text-text-primary font-headline-sm text-headline-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20" id="drawerSqFt" type="text" value="285"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-body-sm text-text-muted">/ sq.ft</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-muted">Used directly by Feasibility Advisor unit economics calculator.</span>
+</div>
+<!-- Commercial Floor Dropdown -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-semibold text-text-primary">Primary Benchmark Commercial Floor</label>
+<div class="relative">
+<select class="w-full h-10 pl-3 pr-8 rounded-lg bg-surface-card border border-border-strong text-text-primary font-body-md text-body-md appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer">
+<option selected="">Ground Floor Retail (Standard Benchmark)</option>
+<option>1st Floor / Mezzanine Retail</option>
+<option>Basement Commercial Space</option>
+<option>Upper Corporate Plaza Offices</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Lock Toggle Switch -->
+<div class="p-space-md rounded-xl bg-surface-muted flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-text-primary">Force Override Lock</span>
+<span class="font-body-sm text-body-sm text-text-muted">Prevent cron scraper runs from overwriting</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-status-positive"></div>
+</label>
+</div>
+<!-- Admin Justification Note -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-semibold text-text-primary">Admin Justification & Source Field Note</label>
+<textarea class="w-full p-3 rounded-lg bg-surface-card border border-border-strong text-text-primary font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20" id="drawerNote" placeholder="Specify why the automated scraper was overridden..." rows="3">Verified via Gulberg Traders Association field benchmark & tenant ground interviews (Oct 2024).</textarea>
+</div>
+</div>
+</div>
+<!-- Drawer Footer Actions -->
+<div class="p-space-lg bg-surface-card border-t border-border-subtle sticky bottom-0 z-10 flex flex-col gap-2">
+<button class="w-full h-11 rounded-lg bg-status-positive hover:bg-primary text-on-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-2 shadow-sm transition-all" onclick="saveOverrideMock()" type="button">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+          Save & Lock Cache Override
+        </button>
+<button class="w-full h-9 rounded-lg hover:bg-surface-muted text-text-secondary hover:text-text-primary font-label-md text-label-md font-medium transition-colors" onclick="closeDrawer()" type="button">
+          Reset to Scraped Values & Unlock
+        </button>
+</div>
+</div>
+</div>
+<!-- MODAL: RUN SCRAPER TRIGGER PIPELINE -->
+<div class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4" id="scraperModalOverlay">
+<div class="bg-surface-card rounded-2xl max-w-lg w-full p-space-lg shadow-2xl flex flex-col gap-space-md border border-border-subtle">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-lg bg-status-positive-bg text-status-positive flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">cloud_sync</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-text-primary">Trigger On-Demand Scraper</h3>
+<p class="font-body-sm text-body-sm text-text-muted">Initiate asynchronous crawl across portal nodes</p>
+</div>
+</div>
+<button class="p-1 rounded text-text-muted hover:text-text-primary" onclick="document.getElementById('scraperModalOverlay').classList.add('hidden')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted font-semibold">Select Target Metro Hub</label>
+<select class="w-full h-10 px-3 rounded-lg bg-surface-muted text-text-primary font-body-sm text-body-sm">
+<option>All Pakistan Metros (1,420 Nodes)</option>
+<option selected="">Lahore Metro Region (Gulberg, DHA, Johar Town, Mall Rd)</option>
+<option>Karachi Metro (Clifton, DHA, Tariq Rd, Saddar)</option>
+<option>Islamabad Capital Territory (Blue Area, F-Sectors, I-Sectors)</option>
+<option>Rawalpindi Cantonment & Hubs</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted font-semibold">Crawl Depth & Concurrency</label>
+<div class="grid grid-cols-2 gap-2">
+<div class="p-2.5 rounded-lg bg-surface-muted flex flex-col">
+<span class="font-label-sm text-label-sm text-text-secondary">Worker Threads</span>
+<span class="font-headline-sm text-headline-sm text-text-primary mt-0.5">8 Workers</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-muted flex flex-col">
+<span class="font-label-sm text-label-sm text-text-secondary">Expected Time</span>
+<span class="font-headline-sm text-headline-sm text-text-primary mt-0.5">~3.5 Mins</span>
+</div>
+</div>
+</div>
+<div class="p-3 rounded-lg bg-status-positive-bg text-status-positive font-body-sm text-body-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Proxies and Tor residential nodes verified healthy (0% failure).</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-2 pt-2 border-t border-border-subtle">
+<button class="px-4 h-10 rounded-lg hover:bg-surface-muted text-text-secondary font-label-md text-label-md" onclick="document.getElementById('scraperModalOverlay').classList.add('hidden')" type="button">
+          Cancel
+        </button>
+<button class="px-5 h-10 rounded-lg bg-status-positive hover:bg-primary text-on-primary font-label-md text-label-md font-semibold flex items-center gap-2 shadow-sm" id="btnStartPipeline" onclick="triggerScraperRun()" type="button">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+          Start Crawl Pipeline
+        </button>
+</div>
+</div>
+</div>
+<!-- INTERACTION LOGIC (INLINE JS) -->
+<script>
+    function openDrawer(title, code, min, max, sqft, status, note) {
+      document.getElementById('drawerZoneTitle').innerText = title;
+      document.getElementById('drawerNodeBadge').innerText = '#' + code;
+      document.getElementById('drawerMinRent').value = min;
+      document.getElementById('drawerMaxRent').value = max;
+      document.getElementById('drawerSqFt').value = sqft;
+      document.getElementById('drawerNote').value = note || '';
+      document.getElementById('overrideDrawerOverlay').classList.remove('hidden');
+    }
+
+    function closeDrawer() {
+      document.getElementById('overrideDrawerOverlay').classList.add('hidden');
+    }
+
+    function saveOverrideMock() {
+      const btn = event.currentTarget;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> Locking Node...`;
+      setTimeout(() => {
+        btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">check</span> Saved to PostGIS Cache`;
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          closeDrawer();
+        }, 800);
+      }, 700);
+    }
+
+    // Modal Trigger
+    const btnOpenScraper = document.getElementById('btnOpenScraperModal');
+    if (btnOpenScraper) {
+      btnOpenScraper.addEventListener('click', () => {
+        document.getElementById('scraperModalOverlay').classList.remove('hidden');
+      });
+    }
+
+    function triggerScraperRun() {
+      const btn = document.getElementById('btnStartPipeline');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> Crawling 48 Clusters...`;
+      setTimeout(() => {
+        btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">check_circle</span> Dispatched Job #8942`;
+        setTimeout(() => {
+          document.getElementById('scraperModalOverlay').classList.add('hidden');
+          btn.disabled = false;
+          btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">play_arrow</span> Start Crawl Pipeline`;
+        }, 1200);
+      }, 1500);
+    }
+
+    // Flush Cache Mock
+    const btnFlush = document.getElementById('btnFlushCache');
+    if (btnFlush) {
+      btnFlush.addEventListener('click', () => {
+        if (confirm('Flush all stale cache entries older than 30 days across 48 metro nodes?')) {
+          btnFlush.innerText = 'Flushed 142 Stale Nodes';
+          setTimeout(() => {
+            btnFlush.innerHTML = '<span class="material-symbols-outlined text-[18px]">delete_sweep</span> Flush Stale Cache';
+          }, 2000);
+        }
+      });
+    }
+
+    // GeoJSON Export Mock
+    const btnExport = document.getElementById('btnExportGeoJson');
+    if (btnExport) {
+      btnExport.addEventListener('click', () => {
+        const dummyGeoJson = {
+          type: "FeatureCollection",
+          features: [
+            {
+              type: "Feature",
+              properties: { name: "Liberty Market", rent_sqft: 285, city: "Lahore" },
+              geometry: { type: "Point", coordinates: [74.3587, 31.5204] }
+            }
+          ]
+        };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dummyGeoJson, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "pakistan_commercial_rent_cache.geojson");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+      });
+    }
+
+    // Select All Checkbox Handler
+    const selectAll = document.getElementById('selectAllCheckbox');
+    if (selectAll) {
+      selectAll.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      });
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-card py-3 shadow-[0_-1px_6px_rgba(15,23,42,0.03)]"><div class="w-full px-gutter flex flex-wrap items-center justify-between gap-space-sm font-label-sm text-label-sm text-text-secondary"><div class="flex flex-wrap items-center gap-space-md"><span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span><strong class="text-text-primary font-semibold">Supabase RLS:</strong> Active</span><span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span><strong class="text-text-primary font-semibold">Routing:</strong> Multi-Tenant Dynamic</span><span class="hidden md:inline text-text-muted">|</span><span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-text-muted">dns</span><strong class="text-text-primary font-semibold">GeoSpatial Cache:</strong> pk-isb-edge-01 (Islamabad)</span><span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-text-muted">speed</span><strong class="text-text-primary font-semibold">p99 Edge Latency:</strong> 12ms</span></div><div class="flex items-center gap-space-md"><a class="text-text-secondary hover:text-text-primary transition-colors" href="#">API Spec (v2.4)</a><a class="text-text-secondary hover:text-text-primary transition-colors" href="#">Admin Runbook</a><span class="font-mono px-2 py-0.5 rounded bg-surface-muted text-text-primary font-medium">Build v4.19.8-prod</span></div></div></footer></body></html>

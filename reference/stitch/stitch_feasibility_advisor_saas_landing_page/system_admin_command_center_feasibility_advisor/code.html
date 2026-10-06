@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"on-tertiary-container":"#f5fff6","status-critical":"#e11d48","status-critical-bg":"#fff1f2","status-positive":"#059669","surface-muted":"#f1f5f9","surface-container-highest":"#d3e4fe","surface-container-high":"#dce9ff","tertiary-fixed":"#6ffbbe","surface-container-low":"#eff4ff","on-tertiary-fixed-variant":"#005236","on-error":"#ffffff","on-secondary-container":"#5c647a","on-secondary":"#ffffff","status-warning":"#d97706","on-secondary-fixed-variant":"#3f465c","on-surface":"#0b1c30","secondary":"#565e74","surface-card":"#ffffff","primary-container":"#00855d","inverse-on-surface":"#eaf1ff","secondary-fixed":"#dae2fd","border-subtle":"#e2e8f0","surface-variant":"#d3e4fe","outline":"#6d7a72","tertiary-fixed-dim":"#4edea3","status-positive-border":"#a7f3d0","on-tertiary":"#ffffff","surface-container-lowest":"#ffffff","status-warning-bg":"#fffbeb","surface-container":"#e5eeff","canvas-bg":"#f8fafc","on-primary-container":"#f5fff7","surface":"#f8f9ff","primary-fixed":"#85f8c4","on-surface-variant":"#3d4a42","border-strong":"#cbd5e1","primary":"#006948","error-container":"#ffdad6","surface-dim":"#cbdbf5","text-muted":"#94a3b8","secondary-fixed-dim":"#bec6e0","on-primary":"#ffffff","text-secondary":"#475569","on-secondary-fixed":"#131b2e","inverse-surface":"#213145","on-primary-fixed-variant":"#005137","on-background":"#0b1c30","status-positive-bg":"#ecfdf5","on-primary-fixed":"#002114","on-tertiary-fixed":"#002113","surface-tint":"#006c4a","text-primary":"#0f172a","surface-bright":"#f8f9ff","tertiary-container":"#00855b","outline-variant":"#bccac0","background":"#f8f9ff","inverse-primary":"#68dba9","secondary-container":"#dae2fd","tertiary":"#006947","error":"#ba1a1a","on-error-container":"#93000a","primary-fixed-dim":"#68dba9"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"margin":"2rem","space-sm":"0.5rem","space-xs":"0.25rem","space-md":"1rem","margin-sm":"1rem","space-xl":"2.5rem","gutter-sm":"1rem","gutter":"1.5rem","space-lg":"1.5rem"},"fontFamily":{"headline-lg":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"metric-val":["Plus Jakarta Sans"],"display-lg-mobile":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"body-lg":["Inter"],"body-sm":["Inter"],"label-md":["Inter"],"body-md":["Inter"],"label-sm":["Inter"]},"fontSize":{"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-sm":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"metric-val":["30px",{"lineHeight":"36px","letterSpacing":"-0.025em","fontWeight":"700"}],"display-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"display-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"26px","letterSpacing":"-0.005em","fontWeight":"400"}],"body-sm":["12px",{"lineHeight":"18px","letterSpacing":"0.005em","fontWeight":"400"}],"label-md":["13px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"body-md":["14px",{"lineHeight":"22px","letterSpacing":"0em","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}]}}}};</script></head><body class="bg-surface font-body-md text-text-primary antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col justify-between"><header class="fixed top-0 left-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full px-gutter flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-lg flex-shrink-0"><div class="flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #10b981
+- Font: plusJakartaSans
+- Mode: dark
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VGObyPZ_dbebBd40gRJe9O4uuzlXT6XrvuqCT4rgweSiE3Jn0iU3P3BwBP8-L5breq3XsK1z2OwKZJWizJBzcmkbd_FHJSLDJtKr96PdJ-cXxayowVZlX0JT3_qmf7CX4G4bcsfDEjCHMSvQE4x36zzkxuW-gXG4TvAfpnCm_rzwgTgk26ml-MsdwsfBm5oIMu23CT6IOnadXyatIGFLZD-DITVwc9i34XyH1iilRTgAEHGJmJf3ZjaqQG"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-text-primary tracking-tight leading-none">Feasibility Advisor</span><span class="font-label-sm text-[10px] tracking-wider uppercase text-secondary font-semibold">Advisory Infrastructure</span></div></div><span class="inline-flex items-center px-space-sm py-0.5 rounded bg-secondary-container text-on-secondary-fixed text-[10px] font-semibold tracking-wider uppercase font-label-sm">PLATFORM ADMIN CONSOLE</span></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container rounded-lg font-semibold"><a aria-current="page" class="px-space-md py-space-xs transition-colors bg-primary-container text-on-primary-container rounded-lg font-semibold" data-path="overview" href="#">Overview</a><a class="px-space-md py-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="tenant-stores" href="#">Tenant Stores</a><a class="px-space-md py-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="feasibility-engine" href="#">Feasibility Engine</a><a class="px-space-md py-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="infrastructure-and-apis" href="#">Infrastructure &amp; APIs</a><a class="px-space-md py-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="system-logs" href="#">System Logs</a><a class="px-space-md py-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="security-and-rls" href="#">Security &amp; RLS</a></nav><div class="flex items-center gap-space-md flex-shrink-0"><div class="relative hidden lg:block w-56"><span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span><input class="w-full h-8 pl-8 pr- space-sm bg-surface-card rounded-lg text-text-primary placeholder:text-text-muted font-body-sm text-body-sm shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] focus:outline-none" placeholder="Search tenant slug, store ID..." type="text"/></div><div class="hidden md:inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-status-positive animate-pulse"></span>All Clusters Operational</div><div class="hidden 2xl:flex items-center gap-space-xs text-text-secondary font-label-sm text-[11px] px-space-xs py-1 rounded bg-surface-muted"><span class="font-medium text-text-primary">14:28:02 UTC</span><span class="text-text-muted">|</span><span class="text-text-secondary">19:28 PKT</span></div><button class="relative p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-status-critical"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="hidden sm:flex flex-col text-left"><span class="font-label-sm text-label-sm text-text-primary font-semibold leading-tight">Superadmin</span><span class="font-label-sm text-[10px] text-text-muted leading-tight">Global Operations</span></div></div></div></div></header><main class="w-full pt-16 bg-surface flex-1"><div class="flex flex-col w-full">
+<!-- Command Header & Synchronized Platform Telemetry -->
+<div class="w-full px-gutter pt-space-md pb-space-lg flex flex-col gap-space-lg">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded bg-surface-muted text-text-secondary font-label-sm text-label-sm font-semibold tracking-wider uppercase">
+<span class="w-2 h-2 rounded-full bg-status-positive animate-pulse"></span>
+            Global Cluster Control
+          </span>
+<span class="text-text-muted text-body-sm font-mono">pk-central-edge-01</span>
+<span class="px-space-xs py-0.5 rounded bg-surface-container text-on-secondary-fixed text-label-sm font-semibold">TENANCY RLS v4.8</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">System Admin Command Center</h1>
+<p class="font-body-md text-text-secondary">Global multi-tenant platform metrics, store provisioning telemetry, and edge advisory infrastructure.</p>
+</div>
+<!-- Controls & Live Clocks -->
+<div class="flex items-center gap-space-sm flex-wrap">
+<div class="flex flex-col items-end gap-1 px-space-md py-space-xs rounded-xl bg-surface-card shadow-sm">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-status-positive animate-ping"></span>
+<span class="font-label-sm text-label-sm font-semibold text-text-secondary">Auto-refresh (30s)</span>
+</div>
+<div class="font-mono font-label-sm text-label-sm text-text-primary flex items-center gap-2">
+<span id="utc-clock">16:42:10 UTC</span>
+<span class="text-text-muted">/</span>
+<span class="text-primary font-semibold" id="pkt-clock">21:42:10 PKT</span>
+</div>
+</div>
+<button class="inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-lg bg-surface-card text-text-primary font-label-md text-label-md font-semibold hover:bg-surface-muted shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">monitor_heart</span>
+<span>Health Diagnostics</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-lg py-2.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container shadow-md transition-all group" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Provision New Tenant</span>
+<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-on-primary/20 text-on-primary group-hover:bg-on-primary/30">⌘K</span>
+</button>
+</div>
+</div>
+<!-- 4 High-Density Global Metric Nodes -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-gutter">
+<!-- KPI 1 -->
+<div class="relative overflow-hidden rounded-xl bg-surface-card p-space-lg shadow-sm flex flex-col justify-between gap-space-md group hover:shadow-md transition-all">
+<div class="absolute top-0 left-0 right-0 h-0.5 bg-status-positive"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-secondary font-semibold">Platform Tenants</span>
+<span class="font-metric-val text-metric-val text-text-primary">142 Stores</span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-status-positive-bg text-status-positive flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">storefront</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-status-positive font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+9.2% WoW (+12 this week)</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">8 in sandbox setup • 134 live in prod</p>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="relative overflow-hidden rounded-xl bg-surface-card p-space-lg shadow-sm flex flex-col justify-between gap-space-md group hover:shadow-md transition-all">
+<div class="absolute top-0 left-0 right-0 h-0.5 bg-status-positive"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-secondary font-semibold">Combined GMV</span>
+<span class="font-metric-val text-metric-val text-text-primary">PKR 14.8M</span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-surface-muted text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">payments</span>
+</div>
+</div>
+<div class="flex items-end justify-between gap-2">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1 text-status-positive font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">north_east</span>
+<span>+22% MoM COD Volume</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">PKR 486.2k avg / merchant</p>
+</div>
+<!-- Sparkline Mini Visual -->
+<svg class="w-20 h-8 text-status-positive flex-shrink-0" fill="none" viewbox="0 0 80 32">
+<path d="M2 28 C12 24, 20 27, 30 18 C40 10, 50 16, 60 8 C70 2, 75 6, 78 4" stroke="currentColor" stroke-linecap="round" stroke-width="2.5"></path>
+<path d="M2 28 C12 24, 20 27, 30 18 C40 10, 50 16, 60 8 C70 2, 75 6, 78 4 V32 H2 Z" fill="currentColor" fill-opacity="0.12"></path>
+</svg>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="relative overflow-hidden rounded-xl bg-surface-card p-space-lg shadow-sm flex flex-col justify-between gap-space-md group hover:shadow-md transition-all">
+<div class="absolute top-0 left-0 right-0 h-0.5 bg-primary"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-secondary font-semibold">Feasibility Reports</span>
+<span class="font-metric-val text-metric-val text-text-primary">1,280 Total</span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-surface-muted text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">psychology</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-text-primary font-label-sm text-label-sm font-semibold">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-status-positive-bg text-status-positive text-[10px] font-semibold">84 Today</span>
+<span class="text-text-secondary">across 18 commercial retail hubs</span>
+</div>
+<div class="flex items-center justify-between text-body-sm text-text-muted mt-0.5">
+<span>Avg Latency: 1.4s</span>
+<span class="font-mono text-[10px] text-primary font-medium">Groq / Gemini / OAI</span>
+</div>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="relative overflow-hidden rounded-xl bg-surface-card p-space-lg shadow-sm flex flex-col justify-between gap-space-md group hover:shadow-md transition-all">
+<div class="absolute top-0 left-0 right-0 h-0.5 bg-status-positive"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-secondary font-semibold">System Health &amp; RLS</span>
+<span class="font-metric-val text-metric-val text-text-primary">100% Active</span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-status-positive-bg text-status-positive flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">verified_user</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-status-positive font-label-sm text-label-sm font-semibold">
+<span class="w-2 h-2 rounded-full bg-status-positive"></span>
+<span>42ms Supabase / Groq Edge</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">Postgres 16 Synced • 0 RLS Violations</p>
+</div>
+</div>
+</div>
+<!-- MAIN TWO-COLUMN DASHBOARD GRID -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- LEFT COLUMN: Analytics & Leaderboard (~62% = 7 cols xl:8) -->
+<div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-gutter">
+<!-- Platform Growth & Store Launch Area Graph -->
+<div class="rounded-xl bg-surface-card p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-xs">
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md text-text-primary">Platform Conversion &amp; Launch Trend</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Feasibility generation demand mapped directly to provisioned tenant stores</span>
+</div>
+<!-- Timeframe Filter -->
+<div class="inline-flex p-1 rounded-lg bg-surface-muted gap-1 text-label-sm">
+<button class="px-space-sm py-1 rounded text-text-secondary hover:text-text-primary">7D</button>
+<button class="px-space-sm py-1 rounded bg-surface-card text-text-primary font-semibold shadow-sm">30D</button>
+<button class="px-space-sm py-1 rounded text-text-secondary hover:text-text-primary">90D</button>
+<button class="px-space-sm py-1 rounded text-text-secondary hover:text-text-primary">All Time</button>
+</div>
+</div>
+<!-- Micro Stat Callouts -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm p-space-sm rounded-lg bg-surface-muted">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-secondary uppercase">Analysis-to-Store Ratio</span>
+<span class="font-headline-sm text-headline-sm text-status-positive font-bold">31.4%</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-secondary uppercase">Peak Intake Window</span>
+<span class="font-headline-sm text-headline-sm text-text-primary">Oct 22 <span class="font-body-sm text-text-muted font-normal">(94 reports)</span></span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-secondary uppercase">Provisioned in Wave</span>
+<span class="font-headline-sm text-headline-sm text-primary">6 Stores</span>
+</div>
+</div>
+<!-- SVG Dual-Path Area Graph -->
+<div class="relative w-full h-64 mt-2">
+<svg class="w-full h-full" fill="none" preserveaspectratio="none" viewbox="0 0 720 220">
+<defs>
+<lineargradient id="gradientReports" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#006948" stop-opacity="0.22"></stop>
+<stop offset="100%" stop-color="#006948" stop-opacity="0.0"></stop>
+</lineargradient>
+<lineargradient id="gradientStores" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#059669" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#059669" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Subtle horizontal grid lines -->
+<line stroke="#f1f5f9" stroke-width="1.5" x1="0" x2="720" y1="40" y2="40"></line>
+<line stroke="#f1f5f9" stroke-width="1.5" x1="0" x2="720" y1="95" y2="95"></line>
+<line stroke="#f1f5f9" stroke-width="1.5" x1="0" x2="720" y1="150" y2="150"></line>
+<line stroke="#e2e8f0" stroke-width="1.5" x1="0" x2="720" y1="200" y2="200"></line>
+<!-- Feasibility Area (Reports Generated) -->
+<path d="M 0,180 Q 80,165 140,140 T 260,110 T 360,70 T 480,95 T 580,50 T 720,30 L 720,200 L 0,200 Z" fill="url(#gradientReports)"></path>
+<path d="M 0,180 Q 80,165 140,140 T 260,110 T 360,70 T 480,95 T 580,50 T 720,30" stroke="#006948" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Stores Launched Line -->
+<path d="M 0,195 Q 85,190 140,175 T 260,160 T 360,130 T 480,140 T 580,110 T 720,85 L 720,200 L 0,200 Z" fill="url(#gradientStores)"></path>
+<path d="M 0,195 Q 85,190 140,175 T 260,160 T 360,130 T 480,140 T 580,110 T 720,85" stroke="#059669" stroke-linecap="round" stroke-width="3"></path>
+<!-- Interactive Node Highlights -->
+<circle class="animate-pulse" cx="580" cy="50" fill="#006948" r="5"></circle>
+<circle cx="580" cy="110" fill="#059669" r="5"></circle>
+</svg>
+<!-- Chart Legends -->
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-border-subtle font-label-sm text-label-sm text-text-secondary">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-status-positive"></span>
+<span class="text-text-primary font-medium">Active Stores Launched</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-text-primary font-medium">Feasibility Inquiries</span>
+</div>
+</div>
+<span class="font-mono text-text-muted">Edge Telemetry Cluster Sync: OK</span>
+</div>
+</div>
+</div>
+<!-- Top Performing Tenant Stores Leaderboard Table -->
+<div class="rounded-xl bg-surface-card p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div>
+<h2 class="font-headline-md text-headline-md text-text-primary">Top Performing Tenant Stores</h2>
+<p class="font-body-sm text-body-sm text-text-secondary">Live order volumes, merchant GMV, and Vercel edge subdomain routing metrics.</p>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<div class="relative w-48">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted text-[16px]">filter_list</span>
+<input class="w-full h-9 pl-8 pr-2 bg-surface-muted rounded-lg font-body-sm text-body-sm text-text-primary placeholder:text-text-muted focus:outline-none" placeholder="Filter slug or category..." type="text"/>
+</div>
+<button class="h-9 px-space-sm bg-surface-muted rounded-lg font-label-sm text-label-sm text-text-primary flex items-center gap-1 hover:bg-surface-container transition-colors">
+<span>Export CSV</span>
+<span class="material-symbols-outlined text-[16px]">download</span>
+</button>
+</div>
+</div>
+<!-- Table Container -->
+<div class="overflow-x-auto -mx-space-lg px-space-lg">
+<table class="w-full text-left font-body-md text-body-md">
+<thead>
+<tr class="text-text-secondary font-label-sm text-label-sm uppercase tracking-wider bg-surface-muted/60">
+<th class="py-space-sm px-space-sm rounded-l-lg">Merchant / Store</th>
+<th class="py-space-sm px-space-sm">Subdomain</th>
+<th class="py-space-sm px-space-sm">Category</th>
+<th class="py-space-sm px-space-sm">Orders</th>
+<th class="py-space-sm px-space-sm">Monthly GMV</th>
+<th class="py-space-sm px-space-sm">Edge POP</th>
+<th class="py-space-sm px-space-sm text-right rounded-r-lg">Manage</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-muted text-text-primary font-body-sm text-body-sm">
+<!-- Tenant 1 -->
+<tr class="hover:bg-surface-muted/30 transition-colors">
+<td class="py-space-md px-space-sm">
+<div class="flex items-center gap-space-sm">
+<img class="w-9 h-9 rounded-lg object-cover shadow-sm" data-alt="Modern organic apothecary logo badge with mountain and botanical herbal leaf accents, deep green on clean white ground" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArrBs4u8kUUUddvmlBrpEsmOAClJ68FP9lJmMSVH1frE9fuhQntBexhSu7YpqnGkA-MLDLmnezG8cSbUDzIURLc5gJ87IVC3Kwgu3LZUl3Z80GdtRvsoxh9EZRmvFKeicvNS4cHA3hwV-dKkXUSqH2LgIZEJrsLLmgmaUpC7wauwE4VpjYe7X9Q1ekRofbSPc63CQApVwOfRErrdDY19B9dh2j6kJpI5pXo5mU4sMeIDjol6Vo70ENdw"/>
+<div class="flex flex-col">
+<span class="font-headline-sm text-[14px] font-semibold text-text-primary flex items-center gap-1">
+                          Hunza Harvest
+                          <span class="material-symbols-outlined text-status-positive text-[15px]" title="Verified Merchant">verified</span>
+</span>
+<span class="text-text-muted text-[11px]">Gilgit &amp; Islamabad Hub</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-sm">
+<span class="font-mono text-[12px] px-2 py-0.5 rounded bg-surface-muted text-text-primary font-medium">hunzaharvest.pk</span>
+</td>
+<td class="py-space-md px-space-sm">
+<span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container text-on-secondary-fixed">Organic Apothecary</span>
+</td>
+<td class="py-space-md px-space-sm font-semibold">1,420</td>
+<td class="py-space-md px-space-sm font-mono font-semibold text-text-primary">PKR 4,862,500</td>
+<td class="py-space-md px-space-sm">
+<span class="inline-flex items-center gap-1 text-[11px] text-status-positive font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+                      ISB (14ms)
+                    </span>
+</td>
+<td class="py-space-md px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded hover:bg-surface-muted text-text-secondary hover:text-text-primary" title="Impersonate Merchant Admin">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-muted text-text-secondary hover:text-text-primary" title="Tenant Options">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Tenant 2 -->
+<tr class="hover:bg-surface-muted/30 transition-colors">
+<td class="py-space-md px-space-sm">
+<div class="flex items-center gap-space-sm">
+<img class="w-9 h-9 rounded-lg object-cover shadow-sm" data-alt="Contemporary streetwear and sneaker retail shop emblem with sharp geometric typography, slate gray and neon emerald backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDv_05uMDfPOozQotnLn_OHpG0J-hHhb0GGeRTNrHmSIrHDEpqQX48NYvJqecpBRbuJHflnZcXjOUNwRIBKiheGVmr6BVQxscFKj36Fmy-aoZjM56LEs-cfJ2u1TI9tzguEX6DGE_zNBIV1DEgZLfr2ihFzC6_QYtDY5cpz1GLuYm8KYXCqWIIf5JKXFiWfCFGvMrTkqJftTAptwxrFnWFrTWQObzmFA6wHAJ5QADLJH-4wrSK_8vLsAQ"/>
+<div class="flex flex-col">
+<span class="font-headline-sm text-[14px] font-semibold text-text-primary flex items-center gap-1">
+                          Karachi Kicks
+                          <span class="material-symbols-outlined text-status-positive text-[15px]" title="Verified Merchant">verified</span>
+</span>
+<span class="text-text-muted text-[11px]">Zamzama Retail Outlet</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-sm">
+<span class="font-mono text-[12px] px-2 py-0.5 rounded bg-surface-muted text-text-primary font-medium">karachikicks.store</span>
+</td>
+<td class="py-space-md px-space-sm">
+<span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container text-on-secondary-fixed">Footwear &amp; Apparel</span>
+</td>
+<td class="py-space-md px-space-sm font-semibold">890</td>
+<td class="py-space-md px-space-sm font-mono font-semibold text-text-primary">PKR 3,210,000</td>
+<td class="py-space-md px-space-sm">
+<span class="inline-flex items-center gap-1 text-status-positive font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+                      KHI (9ms)
+                    </span>
+</td>
+<td class="py-space-md px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded hover:bg-surface-muted text-text-secondary hover:text-text-primary" title="Impersonate Merchant Admin">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-muted text-text-secondary hover:text-text-primary" title="Tenant Options">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Tenant 3 -->
+<tr class="hover:bg-surface-muted/30 transition-colors">
+<td class="py-space-md px-space-sm">
+<div class="flex items-center gap-space-sm">
+<img class="w-9 h-9 rounded-lg object-cover shadow-sm" data-alt="Traditional artisan craft ceramic and brass logo monogram, artisanal terracotta and slate minimalist composition" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrCWzjspAIxVYSA1TOQg1-zJfX0gvojyE3T1s9NT5oO54oxO6OgSvDrRRpjfz2Nj-GjmJSbXcDpBNUEiUv1qBzJvxIXQGQYGL4bXU5rTr2AIDCrPEk0lG5vZg9jkNBp5tgMFaS8oyUXR0wD2AJzwhQiQ4Gx7tPEd7qalbjzODidf0VOfTWS4QWeiPS5mJqbE3AitDDwecy4YYZZ9anJzbLRHvkDXOQ115QE37H6Fovfv63YAb3om60ag"/>
+<div class="flex flex-col">
+<span class="font-headline-sm text-[14px] font-semibold text-text-primary flex items-center gap-1">
+                          Lahore Crafts Co.
+                          <span class="material-symbols-outlined text-status-positive text-[15px]" title="Verified Merchant">verified</span>
+</span>
+<span class="text-text-muted text-[11px]">Gulberg Emporium</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-sm">
+<span class="font-mono text-[12px] px-2 py-0.5 rounded bg-surface-muted text-text-primary font-medium">lahorecrafts.co</span>
+</td>
+<td class="py-space-md px-space-sm">
+<span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container text-on-secondary-fixed">Handmade Goods</span>
+</td>
+<td class="py-space-md px-space-sm font-semibold">645</td>
+<td class="py-space-md px-space-sm font-mono font-semibold text-text-primary">PKR 2,450,000</td>
+<td class="py-space-md px-space-sm">
+<span class="inline-flex items-center gap-1 text-status-positive font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+                      LHE (12ms)
+                    </span>
+</td>
+<td class="py-space-md px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded hover:bg-surface-muted text-text-secondary hover:text-text-primary" title="Impersonate Merchant Admin">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-muted text-text-secondary hover:text-text-primary" title="Tenant Options">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Tenant 4 -->
+<tr class="hover:bg-surface-muted/30 transition-colors">
+<td class="py-space-md px-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-muted flex items-center justify-center text-primary font-bold text-sm">GO</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-[14px] font-semibold text-text-primary">Glow Organic</span>
+<span class="text-text-muted text-[11px]">DHA Phase 6 Node</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-sm">
+<span class="font-mono text-[12px] px-2 py-0.5 rounded bg-surface-muted text-text-primary font-medium">gloworganic.pk</span>
+</td>
+<td class="py-space-md px-space-sm">
+<span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container text-on-secondary-fixed">Beauty &amp; Skincare</span>
+</td>
+<td class="py-space-md px-space-sm font-semibold">512</td>
+<td class="py-space-md px-space-sm font-mono font-semibold text-text-primary">PKR 1,980,000</td>
+<td class="py-space-md px-space-sm">
+<span class="inline-flex items-center gap-1 text-status-positive font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+                      KHI (11ms)
+                    </span>
+</td>
+<td class="py-space-md px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded hover:bg-surface-muted text-text-secondary hover:text-text-primary" title="Impersonate Merchant Admin">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-muted text-text-secondary hover:text-text-primary" title="Tenant Options">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex items-center justify-between pt-space-xs text-body-sm text-text-secondary">
+<span>Showing top 4 of 142 total operational stores</span>
+<a class="font-label-md text-label-md text-primary font-semibold hover:underline inline-flex items-center gap-1" href="#">
+<span>View All Tenants in Directory</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Real-Time Terminal & Infrastructure Quotas (~38% = 5 cols xl:4) -->
+<div class="lg:col-span-5 xl:col-span-4 flex flex-col gap-gutter">
+<!-- Live Terminal Stream Card -->
+<div class="rounded-xl bg-surface-card p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-positive animate-ping"></span>
+<h2 class="font-headline-md text-[17px] font-semibold text-text-primary">Real-Time Event Stream</h2>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-2 py-0.5 text-[11px] font-mono rounded bg-surface-muted text-text-secondary hover:text-text-primary" id="stream-toggle">Pause</button>
+<button class="px-2 py-0.5 text-[11px] font-mono rounded bg-surface-muted text-text-secondary hover:text-text-primary">Filter</button>
+</div>
+</div>
+<!-- Terminal Container -->
+<div class="flex flex-col gap-2.5 font-mono text-[11px] leading-relaxed max-h-[380px] overflow-y-auto pr-1">
+<div class="p-2.5 rounded-lg bg-surface-muted/70 flex flex-col gap-1 hover:bg-surface-muted transition-colors">
+<div class="flex items-center justify-between text-text-muted">
+<span class="text-text-primary font-semibold">16:40:12 UTC</span>
+<span class="inline-flex px-1.5 py-0.2 rounded bg-status-positive-bg text-status-positive font-bold text-[10px]">STORE LAUNCHED</span>
+</div>
+<p class="text-text-primary break-words font-medium">"fashion-hub.pk" provisioned on Vercel Edge with automated Let's Encrypt SSL cert.</p>
+<span class="text-text-muted text-[10px]">2 mins ago • Tenant ID #TN-4091</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-muted/70 flex flex-col gap-1 hover:bg-surface-muted transition-colors">
+<div class="flex items-center justify-between text-text-muted">
+<span class="text-text-primary font-semibold">16:37:44 UTC</span>
+<span class="inline-flex px-1.5 py-0.2 rounded bg-surface-container text-on-secondary-fixed font-bold text-[10px]">FEASIBILITY ENGINE</span>
+</div>
+<p class="text-text-primary break-words font-medium">New report #FEA-9412 generated for Liberty Market, Lahore (Category: Gourmet Bakery).</p>
+<span class="text-text-muted text-[10px]">5 mins ago • Groq Llama-3 70B (0.92s)</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-muted/70 flex flex-col gap-1 hover:bg-surface-muted transition-colors">
+<div class="flex items-center justify-between text-text-muted">
+<span class="text-text-primary font-semibold">16:30:19 UTC</span>
+<span class="inline-flex px-1.5 py-0.2 rounded bg-status-positive-bg text-status-positive font-bold text-[10px]">COD ORDER COMPLETE</span>
+</div>
+<p class="text-text-primary break-words font-medium">PKR 4,500 order #ORD-1092 processed on "tech-deals" via Trax Logistics COD gateway.</p>
+<span class="text-text-muted text-[10px]">12 mins ago • Automated settlement ledger</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-muted/70 flex flex-col gap-1 hover:bg-surface-muted transition-colors">
+<div class="flex items-center justify-between text-text-muted">
+<span class="text-text-primary font-semibold">16:24:05 UTC</span>
+<span class="inline-flex px-1.5 py-0.2 rounded bg-surface-container text-on-secondary-fixed font-bold text-[10px]">DB SNAPSHOT</span>
+</div>
+<p class="text-text-primary break-words font-medium">Supabase encrypted snapshot #BKP-881 verified. Tables synced across primary replica.</p>
+<span class="text-text-muted text-[10px]">18 mins ago • Zero-downtime execution</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-muted/70 flex flex-col gap-1 hover:bg-surface-muted transition-colors">
+<div class="flex items-center justify-between text-text-muted">
+<span class="text-text-primary font-semibold">16:15:30 UTC</span>
+<span class="inline-flex px-1.5 py-0.2 rounded bg-surface-muted text-text-secondary font-bold text-[10px]">DNS CNAME</span>
+</div>
+<p class="text-text-primary break-words font-medium">Hunza Harvest mapped custom domain CNAME record to edge proxy routing.</p>
+<span class="text-text-muted text-[10px]">27 mins ago • Propagation confirmed</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-muted/70 flex flex-col gap-1 hover:bg-surface-muted transition-colors">
+<div class="flex items-center justify-between text-text-muted">
+<span class="text-text-primary font-semibold">16:02:11 UTC</span>
+<span class="inline-flex px-1.5 py-0.2 rounded bg-status-warning-bg text-status-warning font-bold text-[10px]">AI RATE BURST</span>
+</div>
+<p class="text-text-primary break-words font-medium">Groq Llama-3 inference burst: 120 req/min handled smoothly. Capacity remaining 81%.</p>
+<span class="text-text-muted text-[10px]">40 mins ago • Multi-tenant fallback ready</span>
+</div>
+</div>
+</div>
+<!-- Infrastructure & API Quota Gauges -->
+<div class="rounded-xl bg-surface-card p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-md text-[17px] font-semibold text-text-primary">Infrastructure Health &amp; Quotas</h2>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-status-positive-bg text-status-positive">RLS ENFORCED</span>
+</div>
+<div class="flex flex-col gap-space-md">
+<!-- Metric 1: Supabase Connections -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="font-medium text-text-primary">Database Connection Pool</span>
+<span class="text-text-secondary font-mono">48 / 200 (24%)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-muted overflow-hidden">
+<div class="h-full bg-status-positive rounded-full" style="width: 24%"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] text-text-muted">
+<span>Supabase PostgreSQL 16 cluster</span>
+<span>8ms pool latency</span>
+</div>
+</div>
+<!-- Metric 2: Storage CDN -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="font-medium text-text-primary">Edge Storage Capacity</span>
+<span class="text-text-secondary font-mono">14.2 GB / 100 GB</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-muted overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 14.2%"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] text-text-muted">
+<span>Merchant product CDN &amp; report exports</span>
+<span>14.2% utilized</span>
+</div>
+</div>
+<!-- Metric 3: LLM Quota -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="font-medium text-text-primary">LLM Token Allotment (Daily)</span>
+<span class="text-text-secondary font-mono">182k / 1.0M</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-muted overflow-hidden">
+<div class="h-full bg-status-positive rounded-full" style="width: 18.2%"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] text-text-muted">
+<span>Groq, Gemini Pro &amp; OpenAI GPT-4o</span>
+<span>81.8% headroom</span>
+</div>
+</div>
+<!-- Metric 4: Edge Routing Diagnostics -->
+<div class="p-space-sm rounded-lg bg-surface-muted flex flex-col gap-1 text-body-sm">
+<div class="flex items-center justify-between font-label-sm text-label-sm font-semibold">
+<span class="text-text-primary flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">router</span>
+                  Vercel Subdomain Edge Routing
+                </span>
+<span class="text-status-positive">100% Uptime</span>
+</div>
+<p class="text-[12px] text-text-secondary leading-snug">Average edge response time of 18ms across primary Pakistan nodes (Karachi, Lahore, Islamabad).</p>
+</div>
+<!-- RLS Status Micro-Badge -->
+<div class="flex items-center justify-between p-space-sm rounded-lg bg-status-positive-bg text-status-positive font-label-sm text-label-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">lock_clock</span>
+<span class="font-semibold">48 Supabase Tables Protected</span>
+</div>
+<span class="font-mono text-[11px]">0 Leaks</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom System Ribbon -->
+<div class="w-full bg-surface-card shadow-[0_-1px_3px_rgba(0,0,0,0.03)] px-gutter py-space-sm mt-space-lg flex flex-col sm:flex-row items-center justify-between gap-space-sm text-body-sm text-text-secondary font-mono text-[11px]">
+<div class="flex items-center gap-space-md flex-wrap justify-center sm:justify-start">
+<span class="flex items-center gap-1.5 text-text-primary">
+<span class="w-2 h-2 rounded-full bg-status-positive"></span>
+        Supabase RLS Active (Strict Isolation)
+      </span>
+<span class="flex items-center gap-1.5 text-text-primary">
+<span class="w-2 h-2 rounded-full bg-status-positive"></span>
+        Multi-Tenant Subdomains Online
+      </span>
+<span class="flex items-center gap-1.5 text-text-primary">
+<span class="w-2 h-2 rounded-full bg-status-positive"></span>
+        COD Settlement Engine: TCS / Leopards / Trax
+      </span>
+</div>
+<div class="flex items-center gap-space-sm text-text-muted">
+<span>pk-central-1 (Islamabad Core)</span>
+<span>•</span>
+<span>v3.4.2-prod</span>
+<span>•</span>
+<span class="text-status-positive font-bold">24ms</span>
+</div>
+</div>
+</div>
+<script>
+  // Live Dual Clocks updater
+  function updateClocks() {
+    const now = new Date();
+    const utcHours = String(now.getUTCHours()).padStart(2, '0');
+    const utcMinutes = String(now.getUTCMinutes()).padStart(2, '0');
+    const utcSeconds = String(now.getUTCSeconds()).padStart(2, '0');
+    const utcEl = document.getElementById('utc-clock');
+    if (utcEl) {
+      utcEl.textContent = `${utcHours}:${utcMinutes}:${utcSeconds} UTC`;
+    }
+
+    // PKT is UTC+5
+    const pktDate = new Date(now.getTime() + (5 * 60 * 60 * 1000));
+    const pktHours = String(pktDate.getUTCHours()).padStart(2, '0');
+    const pktMinutes = String(pktDate.getUTCMinutes()).padStart(2, '0');
+    const pktSeconds = String(pktDate.getUTCSeconds()).padStart(2, '0');
+    const pktEl = document.getElementById('pkt-clock');
+    if (pktEl) {
+      pktEl.textContent = `${pktHours}:${pktMinutes}:${pktSeconds} PKT`;
+    }
+  }
+
+  setInterval(updateClocks, 1000);
+  updateClocks();
+
+  // Stream toggle interaction
+  const toggleBtn = document.getElementById('stream-toggle');
+  let streaming = true;
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function() {
+      streaming = !streaming;
+      this.textContent = streaming ? 'Pause' : 'Resume';
+      this.classList.toggle('bg-status-warning-bg', !streaming);
+      this.classList.toggle('text-status-warning', !streaming);
+    });
+  }
+</script></main><footer class="w-full bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)] mt-space-xl"><div class="w-full px-gutter py-space-md flex flex-col md:flex-row items-center justify-between gap-space-md text-text-secondary font-body-sm text-body-sm"><div class="flex items-center gap-space-md flex-wrap"><span class="font-medium text-text-primary">Feasibility Advisor Platform</span><span class="inline-flex items-center px-space-xs py-0.5 rounded bg-surface-muted text-text-secondary text-[11px] font-mono">v4.18.2-prod</span><div class="inline-flex items-center gap-1 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-[14px] text-status-positive">verified_user</span><span>Supabase RLS Enforced</span></div><div class="inline-flex items-center gap-1 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-[14px] text-primary">dns</span><span>Edge Clusters (12 Nodes Online)</span></div></div><div class="flex items-center gap-space-lg text-on-surface-variant font-label-md text-label-md"><a class="hover:text-on-surface transition-colors" href="#">API Spec</a><a class="hover:text-on-surface transition-colors" href="#">Admin Runbook</a><a class="hover:text-on-surface transition-colors" href="#">Audit Log Policy</a><a class="hover:text-on-surface transition-colors" href="#">Incident Center</a></div></div></footer></body></html>

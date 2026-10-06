@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"surface-card":"#ffffff","on-tertiary-fixed":"#002113","border-subtle":"#e2e8f0","status-warning":"#d97706","text-primary":"#0f172a","error":"#ba1a1a","inverse-on-surface":"#eaf1ff","status-positive-bg":"#ecfdf5","on-tertiary-fixed-variant":"#005236","primary-container":"#00855d","background":"#f8f9ff","tertiary-container":"#00855b","status-positive-border":"#a7f3d0","on-secondary":"#ffffff","status-critical-bg":"#fff1f2","on-primary-container":"#f5fff7","secondary-fixed":"#dae2fd","surface-bright":"#f8f9ff","primary":"#006948","error-container":"#ffdad6","status-positive":"#059669","surface-container-highest":"#d3e4fe","text-muted":"#94a3b8","on-surface":"#0b1c30","surface-container-high":"#dce9ff","surface-container":"#e5eeff","on-primary-fixed":"#002114","secondary-fixed-dim":"#bec6e0","tertiary":"#006947","surface-container-lowest":"#ffffff","on-error":"#ffffff","outline":"#6d7a72","surface-tint":"#006c4a","canvas-bg":"#f8fafc","on-error-container":"#93000a","surface":"#f8f9ff","surface-variant":"#d3e4fe","primary-fixed-dim":"#68dba9","secondary-container":"#dae2fd","on-surface-variant":"#3d4a42","on-tertiary-container":"#f5fff6","secondary":"#565e74","on-primary-fixed-variant":"#005137","on-secondary-fixed":"#131b2e","primary-fixed":"#85f8c4","on-secondary-container":"#5c647a","on-secondary-fixed-variant":"#3f465c","on-tertiary":"#ffffff","surface-container-low":"#eff4ff","inverse-surface":"#213145","inverse-primary":"#68dba9","outline-variant":"#bccac0","tertiary-fixed-dim":"#4edea3","border-strong":"#cbd5e1","on-primary":"#ffffff","status-warning-bg":"#fffbeb","tertiary-fixed":"#6ffbbe","surface-dim":"#cbdbf5","surface-muted":"#f1f5f9","status-critical":"#e11d48","on-background":"#0b1c30","text-secondary":"#475569"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter-sm":"1rem","margin":"2rem","space-md":"1rem","space-sm":"0.5rem","margin-sm":"1rem","space-xl":"2.5rem","space-lg":"1.5rem","gutter":"1.5rem","space-xs":"0.25rem"},"fontFamily":{"body-md":["Inter"],"display-lg-mobile":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"label-md":["Inter"],"body-sm":["Inter"],"headline-sm":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Inter"],"metric-val":["Plus Jakarta Sans"],"label-sm":["Inter"]},"fontSize":{"body-md":["14px",{"lineHeight":"22px","letterSpacing":"0em","fontWeight":"400"}],"display-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["13px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"body-sm":["12px",{"lineHeight":"18px","letterSpacing":"0.005em","fontWeight":"400"}],"headline-sm":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"display-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"700"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"26px","letterSpacing":"-0.005em","fontWeight":"400"}],"metric-val":["30px",{"lineHeight":"36px","letterSpacing":"-0.025em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}]}}}};</script></head><body class="bg-canvas-bg font-body-md text-text-primary antialiased min-h-screen selection:bg-status-positive-bg selection:text-status-positive"><header class="fixed top-0 left-0 right-0 z-50 h-16 bg-surface-card/95 backdrop-blur-md shadow-[0_1px_8px_rgba(15,23,42,0.04)]"><div class="w-full h-16 px-gutter flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-lg shrink-0"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container shadow-sm"><span class="material-symbols-outlined text-[20px]">hub</span></div><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-text-primary tracking-tight font-bold">Feasibility Advisor</span><span class="px-1.5 py-0.5 rounded bg-surface-muted text-text-secondary font-label-sm text-[10px] uppercase font-bold tracking-wider">v4.8</span></div><span class="font-label-sm text-label-sm text-text-muted leading-none">Superadmin Console</span></div></div><div class="h-6 w-px bg-border-subtle"></div><div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-status-positive-bg"><span class="w-2 h-2 rounded-full bg-status-positive animate-pulse"></span><span class="font-label-sm text-label-sm text-status-positive font-semibold uppercase tracking-wider">US-East Primary Operational</span></div></div><div class="hidden xl:flex items-center flex-1 max-w-md mx-space-md"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span><input class="w-full h-9 pl-9 pr-4 bg-surface-muted font-body-sm text-body-sm text-text-primary placeholder:text-text-muted rounded-lg outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_rgba(5,150,105,0.2)] transition-all" placeholder="Search tenant IDs, model hashes, schemas, API keys... (Press ⌘K)" type="text"/></div></div><div class="flex items-center gap-space-md shrink-0"><button class="w-9 h-9 rounded-lg flex items-center justify-center text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-status-critical rounded-full ring-2 ring-surface-card"></span></button><div class="h-6 w-px bg-border-subtle"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="flex flex-col text-right hidden sm:flex"><span class="font-label-md text-label-md text-text-primary font-semibold leading-tight">Global Root Admin</span><span class="font-label-sm text-label-sm text-text-muted">sec-ops@feasibility.internal</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="material-symbols-outlined text-text-muted text-[18px] cursor-pointer hover:text-text-primary">expand_more</span></div></div></div></header><aside class="fixed left-0 top-16 bottom-10 w-64 bg-surface-card z-40 flex flex-col justify-between shadow-[1px_0_8px_rgba(15,23,42,0.03)]"><div class="flex flex-col p-space-md overflow-y-auto"><div class="px-space-sm py-space-xs mb-space-sm"><span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted font-bold">Governance &amp; Engine</span></div><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm"><a class="flex items-center px-space-md py-2.5 rounded-lg text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-colors font-body-sm text-body-sm" data-path="overview" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">dashboard</span>Overview</a><a class="flex items-center px-space-md py-2.5 rounded-lg text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-colors font-body-sm text-body-sm" data-path="tenant-stores" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">corporate_fare</span>Tenant Stores</a><a aria-current="page" class="flex items-center px-space-md py-2.5 transition-colors bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm" data-path="feasibility-engine" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">analytics</span>Feasibility Engine</a><a class="flex items-center px-space-md py-2.5 rounded-lg text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-colors font-body-sm text-body-sm" data-path="spatial-rent-data" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">map</span>Spatial &amp; Rent Data</a><a class="flex items-center px-space-md py-2.5 rounded-lg text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-colors font-body-sm text-body-sm" data-path="infrastructure-apis" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">dns</span>Infrastructure &amp; APIs</a><a class="flex items-center px-space-md py-2.5 rounded-lg text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-colors font-body-sm text-body-sm" data-path="system-logs" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">receipt_long</span>System Logs</a><a class="flex items-center px-space-md py-2.5 rounded-lg text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-colors font-body-sm text-body-sm" data-path="security-rls" href="#"><span class="material-symbols-outlined mr-3 text-[20px]">shield</span>Security &amp; RLS</a></nav></div><div class="p-space-md bg-canvas-bg/60 m-space-sm rounded-xl"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-sm text-label-sm text-text-secondary font-semibold">Cluster Telemetry</span><span class="font-label-sm text-label-sm text-status-positive font-bold">99.98%</span></div><div class="w-full h-1.5 bg-surface-muted rounded-full overflow-hidden"><div class="h-full bg-status-positive rounded-full w-[99.9%]"></div></div><div class="flex items-center justify-between mt-space-sm text-text-muted font-label-sm text-[10px]"><span>Active Shards: 24/24</span><span>Load: 31.4%</span></div></div></aside><div class="pl-64"><main class="relative pt-16 pb-12 w-full px-gutter min-h-screen bg-canvas-bg"><div class="flex flex-col w-full gap-space-lg">
+<!-- Top Header & Pipeline Control Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-card p-space-lg rounded-xl shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-2 text-text-muted font-label-sm text-label-sm">
+<span>System Admin Console</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span>Feasibility Engine</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-semibold">AI Engine Studio &amp; Fallback Router</span>
+</div>
+<div class="flex items-center gap-space-sm mt-1">
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight font-bold">AI Engine Studio &amp; Multi-LLM Orchestration</h1>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive animate-pulse"></span>
+          Cluster Active
+        </span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary max-w-2xl">
+        Configure master system prompts, fallback providers (OpenAI / Gemini / Groq), parameter temperature, and rate limits.
+      </p>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<button class="h-10 px-space-md rounded-lg bg-surface-card text-text-primary hover:bg-surface-muted font-body-sm text-body-sm font-medium shadow-sm transition-colors flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">difference</span>
+        Diff Viewer
+      </button>
+<div class="relative group">
+<button class="h-10 px-space-md rounded-lg bg-surface-card text-text-primary hover:bg-surface-muted font-body-sm text-body-sm font-semibold shadow-sm transition-colors flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">history</span>
+<span>Deploy Version</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-muted text-text-secondary font-mono font-bold text-[10px]">v2.4-prod</span>
+<span class="material-symbols-outlined text-[16px] text-text-muted">expand_more</span>
+</button>
+</div>
+<button class="h-10 px-space-lg rounded-lg bg-status-positive hover:bg-primary text-on-primary font-body-sm text-body-sm font-semibold shadow-sm transition-all flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+        Test Prompt Chain
+      </button>
+</div>
+</div>
+<!-- Summary Metrics Row (4 Compact Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Card 1 -->
+<div class="bg-surface-card p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="w-full h-0.5 bg-status-positive absolute top-0 left-0"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted font-bold">Active Primary LLM</span>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-headline-sm text-headline-sm text-text-primary font-bold">Groq Llama-3.3 70B</span>
+</div>
+</div>
+<div class="w-8 h-8 rounded-lg bg-status-positive-bg flex items-center justify-center text-status-positive">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-text-secondary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+          120ms avg token latency
+        </span>
+<span class="text-status-positive font-semibold font-mono">99.98% SLA</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-card p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="w-full h-0.5 bg-primary-container absolute top-0 left-0"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted font-bold">Fallback Providers</span>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-headline-sm text-headline-sm text-text-primary font-bold">3 Tiers Linked</span>
+</div>
+</div>
+<div class="w-8 h-8 rounded-lg bg-surface-muted flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">alt_route</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center gap-1.5 overflow-x-auto">
+<span class="px-2 py-0.5 rounded-md bg-status-positive-bg text-status-positive font-label-sm text-[11px] font-semibold flex items-center gap-1 shrink-0">
+<span class="w-1.5 h-1.5 rounded-full bg-status-positive"></span>
+          Groq 120ms
+        </span>
+<span class="px-2 py-0.5 rounded-md bg-surface-muted text-text-secondary font-label-sm text-[11px] font-semibold flex items-center gap-1 shrink-0">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          Gemini 410ms
+        </span>
+<span class="px-2 py-0.5 rounded-md bg-surface-muted text-text-muted font-label-sm text-[11px] font-semibold flex items-center gap-1 shrink-0">
+<span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>
+          OpenAI 680ms
+        </span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-card p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="w-full h-0.5 bg-border-strong absolute top-0 left-0"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted font-bold">24h Token Consumption</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-metric-val text-metric-val text-text-primary font-bold tracking-tight">1.42M</span>
+<span class="font-label-md text-label-md text-text-secondary">/ 10M daily cap</span>
+</div>
+</div>
+<div class="w-8 h-8 rounded-lg bg-surface-muted flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[20px]">data_usage</span>
+</div>
+</div>
+<div class="mt-space-md">
+<div class="w-full h-1.5 bg-surface-muted rounded-full overflow-hidden flex">
+<div class="bg-status-positive h-full" style="width: 8.5%" title="Groq: $0.85"></div>
+<div class="bg-primary h-full" style="width: 11.5%" title="Gemini: $1.15"></div>
+<div class="bg-secondary h-full" style="width: 22.0%" title="OpenAI: $2.20"></div>
+</div>
+<div class="flex items-center justify-between mt-2 font-label-sm text-label-sm text-text-secondary">
+<span>Est. Cost: <strong class="text-text-primary">$4.20 USD</strong></span>
+<span class="font-mono text-[10px] text-text-muted">14.2% Budget</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-card p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="w-full h-0.5 bg-status-positive absolute top-0 left-0"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted font-bold">Multi-AI Pass Rate</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-metric-val text-metric-val text-status-positive font-bold">99.8%</span>
+<span class="font-label-sm text-label-sm text-text-muted">1,280 runs</span>
+</div>
+</div>
+<div class="w-8 h-8 rounded-lg bg-status-positive-bg flex items-center justify-center text-status-positive">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-text-secondary truncate">0.2% auto-routed fallbacks</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-status-warning-bg text-status-warning font-mono font-bold text-[10px]">
+          2 Retries
+        </span>
+</div>
+</div>
+</div>
+<!-- Main Workspace (2 Columns) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Left Column: Master Prompt Editor & Controls (~58% -> 7 Cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<!-- Module Tabs -->
+<div class="flex items-center gap-1.5 p-1 bg-surface-card rounded-xl shadow-sm overflow-x-auto">
+<button class="px-3.5 py-2 rounded-lg text-text-secondary hover:text-text-primary font-body-sm text-body-sm font-medium whitespace-nowrap transition-colors" type="button">
+          Module 3: Feasibility Analysis
+        </button>
+<button class="px-3.5 py-2 rounded-lg bg-status-positive text-on-primary font-body-sm text-body-sm font-semibold whitespace-nowrap shadow-sm flex items-center gap-2" type="button">
+<span>Module 6: Strategic AI Advisory (Urdu/Eng)</span>
+<span class="w-2 h-2 rounded-full bg-status-positive-border"></span>
+</button>
+<button class="px-3.5 py-2 rounded-lg text-text-secondary hover:text-text-primary font-body-sm text-body-sm font-medium whitespace-nowrap transition-colors" type="button">
+          Module 7: MCQ Theme Schema
+        </button>
+<button class="px-3.5 py-2 rounded-lg text-text-secondary hover:text-text-primary font-body-sm text-body-sm font-medium whitespace-nowrap transition-colors" type="button">
+          Module 8: SEO Copy
+        </button>
+</div>
+<!-- Prompt Editor Card -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Editor Header Bar -->
+<div class="p-space-md bg-canvas-bg/80 flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-2 bg-surface-card px-2.5 py-1.5 rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-status-positive">verified</span>
+<span class="font-body-sm text-body-sm font-semibold text-text-primary">v2.4 - Current Active</span>
+<span class="text-text-muted font-body-sm text-body-sm">(Deployed 3h ago)</span>
+<span class="material-symbols-outlined text-[16px] text-text-muted cursor-pointer hover:text-text-primary">expand_more</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-muted text-text-secondary font-mono font-bold text-[11px]">
+              Prompt Hash: 4c89f02
+            </span>
+</div>
+<div class="flex items-center gap-space-md text-text-muted font-label-sm text-label-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+              1,140 tokens • 4,820 chars
+            </span>
+<span class="text-status-positive font-semibold font-mono">48% window</span>
+</div>
+</div>
+<!-- Code & Variables Area -->
+<div class="relative bg-surface-card flex flex-col font-mono text-body-sm">
+<!-- Monaco / Code Canvas Simulator -->
+<div class="p-space-md bg-surface-muted/30 overflow-x-auto select-text leading-relaxed">
+<div class="grid grid-cols-[36px_1fr] gap-space-sm text-[13px]">
+<!-- Line Numbers -->
+<div class="text-right text-text-muted/60 select-none font-mono">
+<div>01</div><div>02</div><div>03</div><div>04</div><div>05</div><div>06</div><div>07</div><div>08</div><div>09</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
+</div>
+<!-- Code Content -->
+<div class="text-text-primary space-y-1 font-mono">
+<div><span class="text-primary font-bold">You are the Chief AI Strategic Advisory Engine</span> for Pakistan SMEs launching retail storefronts.</div>
+<div class="text-text-muted">// Context Variables dynamically injected via Postgres Cache:</div>
+<div>- Business Category: <span class="bg-status-positive-bg text-status-positive px-1.5 py-0.5 rounded font-bold font-mono text-[12px]">{{ business_category }}</span></div>
+<div>- Target Metro Commercial Hub: <span class="bg-status-positive-bg text-status-positive px-1.5 py-0.5 rounded font-bold font-mono text-[12px]">{{ target_city }}</span> (<span class="bg-status-positive-bg text-status-positive px-1.5 py-0.5 rounded font-bold font-mono text-[12px]">{{ commercial_hub }}</span>)</div>
+<div>- Scraped Mean Rent: <span class="bg-status-positive-bg text-status-positive px-1.5 py-0.5 rounded font-bold font-mono text-[12px]">{{ scraped_rent_pkr }}</span> / sq.ft <span class="text-text-muted font-mono text-[11px]">(Source: Zameen &amp; Graana Cache)</span></div>
+<div>- Local Competitor Density: <span class="bg-status-positive-bg text-status-positive px-1.5 py-0.5 rounded font-bold font-mono text-[12px]">{{ spatial_competitor_count }}</span> registered retail nodes within 5km</div>
+<div>- Initial Working Capital: PKR <span class="bg-status-positive-bg text-status-positive px-1.5 py-0.5 rounded font-bold font-mono text-[12px]">{{ budget_pkr }}</span></div>
+<div> </div>
+<div class="text-primary font-bold">// Directives &amp; Policy Bounds:</div>
+<div>1. Provide realistic cash flow projections factoring in <span class="text-error font-bold">22% COD return rate benchmark</span> in Pakistan logistics.</div>
+<div>2. Deliver executive advice bilingual: High-impact English summary with tactical Roman Urdu action bullets ("Dukaan ki location aur commercial rent...").</div>
+<div>3. Flag high-risk rental overhead if rent exceeds 25% of projected monthly gross profit.</div>
+<div>4. Output clean structured JSON strictly conforming to system schema:</div>
+<div class="pl-4 text-text-secondary bg-surface-card p-2 rounded-lg my-1">
+                  {<br/>
+                    <span class="text-primary font-semibold">"feasibility_score"</span>: number, <span class="text-text-muted">// 0 to 100</span><br/>
+                    <span class="text-primary font-semibold">"viability"</span>: <span class="text-status-warning">"HIGH" | "MODERATE" | "CRITICAL"</span>,<br/>
+                    <span class="text-primary font-semibold">"key_risks"</span>: string[],<br/>
+                    <span class="text-primary font-semibold">"urdu_guidance"</span>: string<br/>
+                  }
+                </div>
+<div>5. Do not include markdown wraps or unescaped single quotes in JSON output.</div>
+</div>
+</div>
+</div>
+<!-- Variable Injection Toolbar -->
+<div class="p-space-md bg-surface-card flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">data_array</span>
+                Quick Variable Insertion
+              </span>
+<span class="text-text-muted font-label-sm text-label-sm">Click to append to cursor</span>
+</div>
+<div class="flex flex-wrap items-center gap-1.5">
+<button class="px-2.5 py-1 rounded bg-canvas-bg hover:bg-status-positive-bg hover:text-status-positive text-text-secondary font-mono font-medium text-[11px] transition-colors flex items-center gap-1" type="button">
+<span class="text-status-positive font-bold">+</span> {{ business_category }}
+              </button>
+<button class="px-2.5 py-1 rounded bg-canvas-bg hover:bg-status-positive-bg hover:text-status-positive text-text-secondary font-mono font-medium text-[11px] transition-colors flex items-center gap-1" type="button">
+<span class="text-status-positive font-bold">+</span> {{ target_city }}
+              </button>
+<button class="px-2.5 py-1 rounded bg-canvas-bg hover:bg-status-positive-bg hover:text-status-positive text-text-secondary font-mono font-medium text-[11px] transition-colors flex items-center gap-1" type="button">
+<span class="text-status-positive font-bold">+</span> {{ commercial_hub }}
+              </button>
+<button class="px-2.5 py-1 rounded bg-canvas-bg hover:bg-status-positive-bg hover:text-status-positive text-text-secondary font-mono font-medium text-[11px] transition-colors flex items-center gap-1" type="button">
+<span class="text-status-positive font-bold">+</span> {{ scraped_rent_pkr }}
+              </button>
+<button class="px-2.5 py-1 rounded bg-canvas-bg hover:bg-status-positive-bg hover:text-status-positive text-text-secondary font-mono font-medium text-[11px] transition-colors flex items-center gap-1" type="button">
+<span class="text-status-positive font-bold">+</span> {{ spatial_competitor_count }}
+              </button>
+<button class="px-2.5 py-1 rounded bg-canvas-bg hover:bg-status-positive-bg hover:text-status-positive text-text-secondary font-mono font-medium text-[11px] transition-colors flex items-center gap-1" type="button">
+<span class="text-status-positive font-bold">+</span> {{ budget_pkr }}
+              </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Hyperparameters Configuration -->
+<div class="bg-surface-card p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-text-secondary">tune</span>
+<h3 class="font-headline-sm text-headline-sm text-text-primary font-bold">Model Hyperparameters &amp; Constraints</h3>
+</div>
+<button class="text-primary hover:text-text-primary font-label-sm text-label-sm font-semibold transition-colors" type="button">
+            Reset to Deterministic Defaults
+          </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- Temperature -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md font-semibold text-text-primary">Temperature</label>
+<span class="font-mono text-body-sm font-bold text-status-positive bg-status-positive-bg px-2 py-0.5 rounded">0.40</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">Low creativity for consistent financial feasibility calculations.</p>
+<input class="w-full accent-status-positive cursor-pointer" max="1" min="0" step="0.05" type="range" value="0.4"/>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-text-muted">
+<span>0.0 (Strict Financial)</span>
+<span>1.0 (Creative Copy)</span>
+</div>
+</div>
+<!-- Top-P -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md font-semibold text-text-primary">Top-P Sampling</label>
+<span class="font-mono text-body-sm font-bold text-text-primary bg-surface-muted px-2 py-0.5 rounded">0.90</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">Nucleus sampling threshold for vocabulary bounds.</p>
+<input class="w-full accent-status-positive cursor-pointer" max="1" min="0" step="0.05" type="range" value="0.9"/>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-text-muted">
+<span>0.1 Focus</span>
+<span>1.0 Full Range</span>
+</div>
+</div>
+<!-- Max Tokens -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md font-semibold text-text-primary">Max Output Tokens</label>
+<span class="font-mono text-body-sm font-bold text-text-primary bg-surface-muted px-2 py-0.5 rounded">2,048</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">Cap response length for speed and predictable cost budgeting.</p>
+<input class="w-full accent-status-positive cursor-pointer" max="4096" min="512" step="256" type="range" value="2048"/>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-text-muted">
+<span>512</span>
+<span>4,096 tokens</span>
+</div>
+</div>
+<!-- Frequency Penalty -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md font-semibold text-text-primary">Frequency Penalty</label>
+<span class="font-mono text-body-sm font-bold text-text-primary bg-surface-muted px-2 py-0.5 rounded">0.20</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">Mitigates repetitive recommendations in executive summaries.</p>
+<input class="w-full accent-status-positive cursor-pointer" max="2" min="0" step="0.1" type="range" value="0.2"/>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-text-muted">
+<span>0.0 Neutral</span>
+<span>2.0 Max Diversity</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Multi-LLM Chain & Live Sandbox (~42% -> 5 Cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<!-- Fallback Router Card -->
+<div class="bg-surface-card p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-text-secondary">reorder</span>
+<h3 class="font-headline-sm text-headline-sm text-text-primary font-bold">Multi-Provider Router</h3>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-status-positive-bg text-status-positive font-label-sm text-label-sm font-semibold">
+            Auto-Failover ON
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">
+          Drag order to assign primary execution and fallback cascades. Requests shift within &lt;180ms upon gateway failure.
+        </p>
+<!-- Provider Priority List -->
+<div class="flex flex-col gap-space-sm">
+<!-- Priority 1 -->
+<div class="p-space-md bg-canvas-bg rounded-xl flex items-center justify-between shadow-sm cursor-grab active:cursor-grabbing hover:bg-surface-muted/60 transition-colors">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[20px] text-text-muted">drag_indicator</span>
+<span class="w-6 h-6 rounded-full bg-status-positive text-on-primary flex items-center justify-center font-mono font-bold text-label-sm">1</span>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm font-bold text-text-primary truncate">Groq Cloud (Primary)</span>
+<span class="px-1.5 py-0.2 rounded bg-status-positive-bg text-status-positive font-mono text-[10px] font-bold">LIVE</span>
+</div>
+<span class="font-mono text-body-sm text-text-muted truncate">llama-3.3-70b-versatile</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0 pl-2">
+<span class="font-mono text-body-sm font-bold text-status-positive">~120ms</span>
+<span class="font-label-sm text-label-sm text-text-muted font-mono">$0.59/1M</span>
+</div>
+</div>
+<!-- Priority 2 -->
+<div class="p-space-md bg-canvas-bg rounded-xl flex items-center justify-between shadow-sm cursor-grab active:cursor-grabbing hover:bg-surface-muted/60 transition-colors">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[20px] text-text-muted">drag_indicator</span>
+<span class="w-6 h-6 rounded-full bg-surface-muted text-text-secondary flex items-center justify-center font-mono font-bold text-label-sm">2</span>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm font-bold text-text-primary truncate">Google Vertex AI</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-muted text-text-secondary font-mono text-[10px] font-bold">STANDBY</span>
+</div>
+<span class="font-mono text-body-sm text-text-muted truncate">gemini-1.5-pro</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0 pl-2">
+<span class="font-mono text-body-sm font-bold text-text-secondary">~410ms</span>
+<span class="font-label-sm text-label-sm text-text-muted font-mono">$1.25/1M</span>
+</div>
+</div>
+<!-- Priority 3 -->
+<div class="p-space-md bg-canvas-bg rounded-xl flex items-center justify-between shadow-sm cursor-grab active:cursor-grabbing hover:bg-surface-muted/60 transition-colors">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[20px] text-text-muted">drag_indicator</span>
+<span class="w-6 h-6 rounded-full bg-surface-muted text-text-secondary flex items-center justify-center font-mono font-bold text-label-sm">3</span>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm font-bold text-text-primary truncate">OpenAI Direct</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-muted text-text-secondary font-mono text-[10px] font-bold">COLD</span>
+</div>
+<span class="font-mono text-body-sm text-text-muted truncate">gpt-4o-mini</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0 pl-2">
+<span class="font-mono text-body-sm font-bold text-text-secondary">~680ms</span>
+<span class="font-label-sm text-label-sm text-text-muted font-mono">$0.15/1M</span>
+</div>
+</div>
+</div>
+<!-- Trigger Toggles -->
+<div class="flex flex-col gap-space-xs pt-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted font-bold">Automated Failover Policies</span>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-muted/40">
+<span class="font-body-sm text-body-sm text-text-primary">Timeout Trigger (&gt; 3,000ms latency)</span>
+<input checked="" class="w-4 h-4 rounded accent-status-positive cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-muted/40">
+<span class="font-body-sm text-body-sm text-text-primary">Rate Limit Cascade (HTTP 429 Quota)</span>
+<input checked="" class="w-4 h-4 rounded accent-status-positive cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-muted/40">
+<span class="font-body-sm text-body-sm text-text-primary">Upstream Server Error (HTTP 5xx Outage)</span>
+<input checked="" class="w-4 h-4 rounded accent-status-positive cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-muted/40">
+<span class="font-body-sm text-body-sm text-text-primary">JSON Schema Validation Mismatch</span>
+<input checked="" class="w-4 h-4 rounded accent-status-positive cursor-pointer" type="checkbox"/>
+</div>
+</div>
+</div>
+<!-- Live Sandbox Simulation Card -->
+<div class="bg-surface-card p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-text-secondary">science</span>
+<h3 class="font-headline-sm text-headline-sm text-text-primary font-bold">Live Execution Sandbox</h3>
+</div>
+<span class="font-mono text-body-sm text-text-muted">Edge-Worker: isb-node-1</span>
+</div>
+<!-- Simulation Inputs -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-secondary font-semibold">Category</label>
+<input class="h-10 px-3 rounded-lg bg-surface-muted text-text-primary font-body-sm text-body-sm outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_rgba(5,150,105,0.2)] transition-all" type="text" value="Organic Apothecary &amp; Dry Fruits"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-secondary font-semibold">Working Capital (PKR)</label>
+<input class="h-10 px-3 rounded-lg bg-surface-muted text-text-primary font-body-sm text-body-sm outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_rgba(5,150,105,0.2)] transition-all" type="text" value="PKR 1,500,000"/>
+</div>
+<div class="sm:col-span-2 flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-secondary font-semibold">Target Metro Commercial Hub</label>
+<input class="h-10 px-3 rounded-lg bg-surface-muted text-text-primary font-body-sm text-body-sm outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_rgba(5,150,105,0.2)] transition-all" type="text" value="Lahore — Gulberg III / Liberty Market (Mean Rent: PKR 285/sq.ft)"/>
+</div>
+</div>
+<button class="w-full h-10 rounded-lg bg-status-positive hover:bg-primary text-on-primary font-body-sm text-body-sm font-semibold shadow-sm transition-all flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+          Run Sandbox Simulation ✨
+        </button>
+<!-- Live Execution Telemetry Header -->
+<div class="p-space-sm bg-canvas-bg rounded-lg flex flex-wrap items-center justify-between gap-2 text-label-sm font-label-sm">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-status-positive"></span>
+<span class="font-semibold text-text-primary">Groq (Llama-3.3-70b)</span>
+<span class="text-text-muted">• 0 Fallbacks</span>
+</div>
+<div class="flex items-center gap-3 font-mono text-text-secondary">
+<span>Latency: <strong class="text-text-primary">142ms</strong></span>
+<span>382 tok out</span>
+<span class="px-1.5 py-0.2 rounded bg-status-positive-bg text-status-positive font-bold">200 OK</span>
+</div>
+</div>
+<!-- Terminal Output Viewer -->
+<div class="p-space-md bg-inverse-surface text-inverse-on-surface rounded-xl font-mono text-[12px] leading-relaxed overflow-x-auto shadow-inner">
+<div class="flex items-center justify-between pb-2 mb-2 border-b border-inverse-on-surface/10 text-inverse-on-surface/60 font-mono text-[11px]">
+<span>Validated Output Payload (JSON)</span>
+<span class="text-status-positive font-semibold">Schema Check Passed</span>
+</div>
+<pre class="text-emerald-300 font-mono selection:bg-primary"><code>{
+  <span class="text-slate-300">"feasibility_score"</span>: <span class="text-amber-400 font-bold">88</span>,
+  <span class="text-slate-300">"viability_verdict"</span>: <span class="text-emerald-400">"STRONG_COMMERCIAL_VIABILITY"</span>,
+  <span class="text-slate-300">"financial_summary"</span>: <span class="text-slate-100">"Rent of PKR 285/sq.ft is sustainable at 18.2% of GMV with standard 350 sq.ft setup."</span>,
+  <span class="text-slate-300">"urdu_guidance"</span>: <span class="text-emerald-300">"Liberty Market me footfall bohat strong hai, lekin dry fruit packaging premium aur COD verification mandatory rakhein."</span>,
+  <span class="text-slate-300">"risk_flags"</span>: [
+    <span class="text-amber-300">"COD return risk benchmarked at 14% for dry fruits"</span>,
+    <span class="text-amber-300">"Advance security deposit (6 months) will absorb PKR 598,500 initial capital"</span>
+  ]
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<!-- Operational Status Callout Bar -->
+<div class="bg-surface-card p-space-md rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-space-md font-label-sm text-label-sm text-text-secondary">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-positive animate-pulse"></span>
+<span class="font-semibold text-text-primary">Multi-AI Fallback Router: Active &amp; Monitored</span>
+<span class="text-text-muted">|</span>
+<span>Supabase Edge Functions: Synced (Islamabad &amp; Karachi Nodes)</span>
+</div>
+<div class="flex items-center gap-space-md font-mono text-text-muted">
+<span>Model SLA: <strong class="text-status-positive">99.98%</strong></span>
+<span>Groq API: <strong class="text-text-primary">v0.8.2 Synced</strong></span>
+<span>Postgres Shards: <strong class="text-text-primary">24/24 OK</strong></span>
+</div>
+</div>
+</div>
+<script>
+  // Simple client-side micro-interactions for the prompt editor sliders
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
+    slider.addEventListener('input', (e) => {
+      const parent = e.target.closest('div');
+      const valBadge = parent.querySelector('span.font-mono');
+      if (valBadge) {
+        if (e.target.step === '0.05' || e.target.step === '0.1') {
+          valBadge.textContent = parseFloat(e.target.value).toFixed(2);
+        } else {
+          valBadge.textContent = Number(e.target.value).toLocaleString();
+        }
+      }
+    });
+  });
+</script></main></div><footer class="fixed bottom-0 left-0 right-0 z-40 h-10 bg-surface-card shadow-[0_-1px_8px_rgba(15,23,42,0.03)] px-gutter flex items-center justify-between text-text-secondary font-label-sm text-label-sm"><div class="flex items-center gap-space-md"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-status-positive"></span><span class="font-semibold text-text-primary">Multi-AI Fallback Router Active</span></div><span class="text-text-muted">|</span><span>Supabase RLS &amp; Serverless Functions Synced</span><span class="text-text-muted">|</span><span class="font-mono text-[11px] text-text-secondary">SHA: 7e93a0c</span></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[14px] text-status-positive">bolt</span><span>Gateway P99: <strong class="text-text-primary font-mono">34ms</strong></span></div><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[14px] text-status-positive">memory</span><span>Engine Latency: <strong class="text-text-primary font-mono">142ms</strong></span></div><span class="text-text-muted font-mono">UTC 14:26:01</span></div></footer></body></html>
