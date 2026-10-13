@@ -515,3 +515,285 @@ Saves MCQ wizard step answers, updates recommendations, and compiles immutable d
   }
   ```
 
+---
+
+## 8. Store Management API (`/api/stores`)
+
+All store management endpoints require authentication and verify store ownership (`owner_id = auth.uid()`). Returns `403 Forbidden` for unauthorized access.
+
+### `GET /api/projects/[id]/store`
+Resolve a project to its associated store. Provisions a draft store if none exists.
+
+- **Authentication**: Required (Owner)
+- **Response `200 OK`**:
+  ```json
+  {
+    "store": {
+      "id": "s823a-...",
+      "project_id": "c1f7a0e2-...",
+      "owner_id": "u5e2f-...",
+      "name": "Hunza Wild Honey Store",
+      "status": "draft",
+      "created_at": "2026-10-06T12:00:00Z"
+    }
+  }
+  ```
+
+---
+
+### `GET /api/stores/[id]/overview`
+Store dashboard KPIs.
+
+- **Authentication**: Required (Owner)
+- **Response `200 OK`**:
+  ```json
+  {
+    "kpis": {
+      "total_revenue_pkr": 458000,
+      "total_orders": 23,
+      "unfulfilled_orders": 5,
+      "total_products": 18,
+      "active_products": 15,
+      "total_customers": 12,
+      "low_stock_count": 3
+    },
+    "low_stock_products": [...],
+    "recent_orders": [...]
+  }
+  ```
+
+---
+
+### `GET /api/stores/[id]/products`
+List all products for this store.
+
+- **Authentication**: Required (Owner)
+- **Query Parameters**: `?status=active|archived` (optional filter)
+- **Response `200 OK`**:
+  ```json
+  {
+    "products": [
+      {
+        "id": "p1234-...",
+        "store_id": "s823a-...",
+        "name": "Organic Wild Honey 500g",
+        "slug": "organic-wild-honey-500g",
+        "price_pkr": 4500,
+        "compare_at_price_pkr": 5200,
+        "stock": 48,
+        "description": "Pure Hunza mountain honey",
+        "status": "active",
+        "created_at": "2026-10-06T12:10:00Z"
+      }
+    ]
+  }
+  ```
+
+---
+
+### `POST /api/stores/[id]/products`
+Create a new product.
+
+- **Authentication**: Required (Owner)
+- **Request Body**:
+  ```json
+  {
+    "name": "Mountain Bee Pollen 250g",
+    "price_pkr": 3200,
+    "compare_at_price_pkr": 3800,
+    "stock": 100,
+    "description": "Raw, unprocessed bee pollen"
+  }
+  ```
+- **Validation**: `price_pkr >= 0`, `stock >= 0`, `compare_at_price_pkr >= price_pkr`, unique slug per store
+- **Response `201 Created`**: `{ "product": { ... } }`
+
+---
+
+### `PUT /api/stores/[id]/products/[productId]`
+Update an existing product.
+
+- **Authentication**: Required (Owner)
+- **Request Body**: Partial product fields to update
+- **Response `200 OK`**: `{ "product": { ... } }`
+
+---
+
+### `DELETE /api/stores/[id]/products/[productId]`
+Soft-archive a product (sets `status = 'archived'`).
+
+- **Authentication**: Required (Owner)
+- **Response `200 OK`**: `{ "product": { ..., "status": "archived" } }`
+
+---
+
+### `GET /api/stores/[id]/inventory`
+Stock monitor with optional low-stock filter.
+
+- **Authentication**: Required (Owner)
+- **Query Parameters**: `?low_stock=true` (filter to only low-stock items)
+- **Response `200 OK`**:
+  ```json
+  {
+    "inventory": [
+      {
+        "product_id": "p1234-...",
+        "name": "Organic Wild Honey 500g",
+        "stock": 3,
+        "low_stock_threshold": 10,
+        "is_low_stock": true
+      }
+    ]
+  }
+  ```
+
+---
+
+### `POST /api/stores/[id]/inventory`
+Atomic stock adjustment with audit log entry.
+
+- **Authentication**: Required (Owner)
+- **Request Body**:
+  ```json
+  {
+    "product_id": "p1234-...",
+    "delta": -5,
+    "reason": "Damaged stock write-off"
+  }
+  ```
+- **Validation**: Resulting stock must remain >= 0
+- **Response `200 OK`**: `{ "product": { ..., "stock": 43 }, "log": { ... } }`
+
+---
+
+### `GET /api/stores/[id]/orders`
+List orders with optional status filter.
+
+- **Authentication**: Required (Owner)
+- **Query Parameters**: `?status=pending|confirmed|shipped` (optional)
+- **Response `200 OK`**:
+  ```json
+  {
+    "orders": [
+      {
+        "id": "o5678-...",
+        "order_number": "ORD-00023",
+        "status": "confirmed",
+        "total_pkr": 13500,
+        "customer_name": "Ahmad Khan",
+        "items_count": 3,
+        "created_at": "2026-10-06T14:00:00Z"
+      }
+    ]
+  }
+  ```
+
+---
+
+### `POST /api/stores/[id]/orders`
+Create a new order.
+
+- **Authentication**: Required (Owner)
+- **Request Body**:
+  ```json
+  {
+    "customer_name": "Ahmad Khan",
+    "customer_phone": "+923001234567",
+    "customer_address": "123 Gulberg III, Lahore",
+    "items": [
+      { "product_id": "p1234-...", "quantity": 2 },
+      { "product_id": "p5678-...", "quantity": 1 }
+    ]
+  }
+  ```
+- **Validation**: All products must exist and have sufficient stock
+- **Response `201 Created`**: `{ "order": { ... } }`
+
+---
+
+### `PATCH /api/stores/[id]/orders/[orderId]`
+Transition order status through the fulfillment state machine.
+
+- **Authentication**: Required (Owner)
+- **Request Body**:
+  ```json
+  {
+    "status": "confirmed"
+  }
+  ```
+- **Allowed transitions**:
+  - `pending` → `confirmed`, `cancelled`
+  - `confirmed` → `packed`, `cancelled`
+  - `packed` → `shipped`, `cancelled`
+  - `shipped` → `delivered`, `returned`
+  - `delivered` → `returned`
+  - `cancelled`, `returned` → *(terminal)*
+- **Side effects**: Stock decrements on `confirmed`, stock restores on `cancelled`/`returned`
+- **Response `200 OK`**: `{ "order": { ..., "status": "confirmed" } }`
+- **Error `422`**: Invalid transition
+
+---
+
+### `GET /api/stores/[id]/orders/[orderId]/invoice`
+Generate a printable invoice.
+
+- **Authentication**: Required (Owner)
+- **Query Parameters**: `?format=html|json` (default: `html`)
+- **Response `200 OK`** (`format=html`): HTML document with print button
+- **Response `200 OK`** (`format=json`): Invoice data as JSON
+
+---
+
+### `GET /api/stores/[id]/customers`
+Customer directory with aggregated metrics.
+
+- **Authentication**: Required (Owner)
+- **Response `200 OK`**:
+  ```json
+  {
+    "customers": [
+      {
+        "id": "c9012-...",
+        "name": "Ahmad Khan",
+        "phone": "+923001234567",
+        "total_orders": 5,
+        "lifetime_spend_pkr": 67500,
+        "last_order_at": "2026-10-06T14:00:00Z"
+      }
+    ]
+  }
+  ```
+
+---
+
+### `GET /api/stores/[id]/payments`
+List payment providers and their status.
+
+- **Authentication**: Required (Owner)
+- **Response `200 OK`**:
+  ```json
+  {
+    "providers": [
+      { "id": "cod", "name": "Cash on Delivery", "status": "active", "is_default": true, "is_enabled": true },
+      { "id": "stripe", "name": "Stripe", "status": "not_configured", "is_enabled": false },
+      { "id": "paypal", "name": "PayPal", "status": "unsupported", "is_enabled": false },
+      { "id": "jazzcash", "name": "JazzCash / EasyPaisa", "status": "planned", "is_enabled": false }
+    ]
+  }
+  ```
+
+---
+
+### `POST /api/stores/[id]/payments`
+Toggle a payment provider on or off.
+
+- **Authentication**: Required (Owner)
+- **Request Body**:
+  ```json
+  {
+    "provider_id": "stripe",
+    "is_enabled": true
+  }
+  ```
+- **Validation**: Cannot enable unsupported/planned providers
+- **Response `200 OK`**: `{ "provider": { ..., "is_enabled": true } }`

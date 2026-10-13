@@ -96,3 +96,17 @@ This matrix maps functional and non-functional requirements from the Software Re
 | **FR-7.5** | Safe Storefront Compiler | Pure JSON manifest compiler (`compileManifest`), zero executable code stored | Invariant & injection tests | ✅ Verified |
 | **FR-7.6** | Approval Gate & Versioned Drafts | `store_draft_versions` & `store_wizard_sessions` schema, status locked to `draft` | RLS & server draft compile API tests | ✅ Verified |
 
+---
+
+## Module 8: Post-Launch Store Management
+
+| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **FR-8.8** | Product CRUD & Price/Stock Management | Products API (`/api/stores/[id]/products`), slug validation, non-negative price/stock constraints, soft archiving | API CRUD tests, DB constraint verification | ✅ Verified |
+| **FR-8.9** | Low-Stock Alerts | `filterLowStockProducts()`, Inventory API (`/api/stores/[id]/inventory`), KPI alert banner | Low-stock threshold & filter tests | ✅ Verified |
+| **FR-8.10** | Order List/Details/Status/Invoices | Order API with `ALLOWED_STATUS_TRANSITIONS` state machine, stock sync on confirm/cancel, `generateInvoiceHtml()` | State machine transition tests, XSS safety audit | ✅ Verified |
+| **FR-8.11** | Customer Profiles & Order History | Customers API (`/api/stores/[id]/customers`) with aggregated lifetime spend | Directory render & aggregation tests | ✅ Verified |
+| **FR-8.12** | Payment Method Management | Payment settings API, truthful provider status registry (COD active, Stripe configurable) | Provider status audit, no-fake-charge check | ✅ Verified |
+| **Security** | Tenant Isolation & RLS | `can_manage_store()` SQL helper, `owner_id = auth.uid()`, forced RLS on all 6 tables | RLS policy & 403 guard verification | ✅ Verified |
+| **UI** | Merchant Control Panel | 6-tab interface at `/projects/[id]/store` with product modal, stock adjustment, order drawer, invoice viewer | Tab render, modal interaction, sandbox mode check | ✅ Verified |
+

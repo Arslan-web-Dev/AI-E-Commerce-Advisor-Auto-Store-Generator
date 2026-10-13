@@ -172,6 +172,20 @@ export default function ProjectDetailPage() {
                   All Projects
                 </Link>
                 <Link
+                  href={`/projects/${project.id}/storefront-wizard`}
+                  className="bg-[#222a3d] hover:bg-[#2d3449] text-[#4cd7f6] px-5 py-2.5 rounded-xl text-[13px] font-semibold text-center border border-[#2d3449] transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[16px]">palette</span>
+                  Storefront Wizard
+                </Link>
+                <Link
+                  href={`/projects/${project.id}/store`}
+                  className="bg-[#222a3d] hover:bg-[#2d3449] text-[#f59e0b] px-5 py-2.5 rounded-xl text-[13px] font-semibold text-center border border-[#2d3449] transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[16px]">storefront</span>
+                  Manage Store
+                </Link>
+                <Link
                   href="/wizard"
                   className="bg-[#4edea3] hover:bg-[#6ffbbe] text-[#003824] px-5 py-2.5 rounded-xl text-[13px] font-bold text-center shadow-[0_0_20px_rgba(78,222,163,0.3)] transition-all"
                 >
