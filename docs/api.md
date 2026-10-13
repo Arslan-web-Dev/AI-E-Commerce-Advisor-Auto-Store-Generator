@@ -797,3 +797,159 @@ Toggle a payment provider on or off.
   ```
 - **Validation**: Cannot enable unsupported/planned providers
 - **Response `200 OK`**: `{ "provider": { ..., "is_enabled": true } }`
+
+---
+
+## 9. Store Analytics API (`/api/stores/[id]/analytics`)
+
+All analytics endpoints require authentication and verify store ownership (`owner_id = auth.uid()`), returning `403 Forbidden` on cross-tenant requests.
+
+### `GET /api/stores/[id]/analytics/overview`
+Aggregated sales KPIs, order counts, average order value, visitors, and period-over-period percentage deltas.
+
+- **Authentication**: Required (Owner)
+- **Query Parameters**: `?range=7d|30d|90d|all` (default: `7d`)
+- **Response `200 OK`**:
+  ```json
+  {
+    "storeId": "s823a-...",
+    "storeName": "Organic Wild Honey Store",
+    "currency": "PKR",
+    "dateRange": { "preset": "7d", "startDate": "...", "endDate": "..." },
+    "kpis": {
+      "grossSalesPkr": 145000,
+      "netRevenuePkr": 132000,
+      "totalOrders": 18,
+      "averageOrderValuePkr": 8250,
+      "visitorsCount": 420,
+      "pageViewsCount": 1850,
+      "conversionRatePercent": 3.8,
+      "cartAbandonmentRatePercent": 62.5,
+      "cancelledOrdersCount": 2,
+      "cancelledOrdersAmountPkr": 8000,
+      "returnedOrdersCount": 1,
+      "returnedOrdersAmountPkr": 5000,
+      "delta": {
+        "grossSalesDeltaPercent": 14.2,
+        "netRevenueDeltaPercent": 11.5,
+        "ordersDeltaPercent": 5.8,
+        "aovDeltaPercent": 4.1
+      }
+    }
+  }
+  ```
+
+---
+
+### `GET /api/stores/[id]/analytics/trends`
+Daily time-series metrics for gross sales, net revenue, orders count, visitors, and page views.
+
+- **Authentication**: Required (Owner)
+- **Query Parameters**: `?range=7d|30d|90d` (default: `7d`)
+- **Response `200 OK`**:
+  ```json
+  {
+    "storeId": "s823a-...",
+    "daysCount": 7,
+    "trends": [
+      {
+        "date": "2026-10-06",
+        "label": "Oct 6",
+        "grossSalesPkr": 24000,
+        "netRevenuePkr": 21000,
+        "orders": 3,
+        "visitors": 64,
+        "pageViews": 280
+      }
+    ]
+  }
+  ```
+
+---
+
+### `GET /api/stores/[id]/analytics/products`
+Product catalog performance breakdown sorted by revenue.
+
+- **Authentication**: Required (Owner)
+- **Query Parameters**: `?range=7d|30d|90d` (default: `7d`)
+- **Response `200 OK`**:
+  ```json
+  {
+    "storeId": "s823a-...",
+    "totalProducts": 12,
+    "products": [
+      {
+        "productId": "p123-...",
+        "productName": "Wild Mountain Honey 500g",
+        "views": 340,
+        "unitsSold": 24,
+        "revenuePkr": 72000,
+        "conversionRatePercent": 7.1
+      }
+    ]
+  }
+  ```
+
+---
+
+### `GET /api/stores/[id]/analytics/behavior`
+Customer conversion funnel, cart abandonment rate analysis, and traffic sources breakdown.
+
+- **Authentication**: Required (Owner)
+- **Query Parameters**: `?range=7d|30d|90d` (default: `7d`)
+- **Response `200 OK`**:
+  ```json
+  {
+    "storeId": "s823a-...",
+    "funnel": [
+      { "stage": "Visitors", "key": "visitors", "count": 420, "conversionFromFirstPercent": 100, "dropoffPercent": 0 },
+      { "stage": "Product Views", "key": "product_view", "count": 310, "conversionFromFirstPercent": 73.8, "dropoffPercent": 26.2 },
+      { "stage": "Added to Cart", "key": "add_to_cart", "count": 84, "conversionFromFirstPercent": 20.0, "dropoffPercent": 72.9 },
+      { "stage": "Checkout Started", "key": "begin_checkout", "count": 28, "conversionFromFirstPercent": 6.7, "dropoffPercent": 66.7 },
+      { "stage": "Purchased", "key": "purchase", "count": 16, "conversionFromFirstPercent": 3.8, "dropoffPercent": 42.9 }
+    ],
+    "cartAbandonment": {
+      "cartsStarted": 84,
+      "cartsPurchased": 28,
+      "cartsAbandoned": 56,
+      "abandonmentRatePercent": 66.7,
+      "isAvailable": true,
+      "notes": "Derived from 84 cart sessions within the reporting window."
+    },
+    "trafficSources": [
+      { "source": "Direct / Internal", "count": 240, "percentage": 57.1 },
+      { "source": "Social Media (Instagram/TikTok)", "count": 110, "percentage": 26.2 },
+      { "source": "Google Search", "count": 70, "percentage": 16.7 }
+    ]
+  }
+  ```
+
+---
+
+### `POST /api/stores/[id]/analytics/events`
+First-party telemetry event ingestion. Publicly callable for valid, unbanned stores.
+
+- **Authentication**: Public (Visitors)
+- **Request Body**:
+  ```json
+  {
+    "event_type": "page_view",
+    "session_id": "anon_session_hash_9a8f2",
+    "product_id": "p123-...",
+    "referrer": "https://instagram.com/shop",
+    "utm_source": "instagram"
+  }
+  ```
+- **Validation**: Strict allowlist for `event_type`, payload string length bounds.
+- **Response `201 Created`**: `{ "success": true, "recorded": true }`
+
+---
+
+### `GET /api/stores/[id]/analytics/reports`
+Executive analytics summary report for store owners.
+
+- **Authentication**: Required (Owner)
+- **Query Parameters**: `?range=30d&format=html|json` (default: `html`)
+- **Response `200 OK` (`format=html`)**: Print-ready HTML document with `@media print` layout and print trigger.
+- **Response `200 OK` (`format=json`)**: Full JSON executive analytics report object.
+

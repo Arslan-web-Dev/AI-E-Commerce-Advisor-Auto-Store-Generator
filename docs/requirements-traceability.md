@@ -110,3 +110,20 @@ This matrix maps functional and non-functional requirements from the Software Re
 | **Security** | Tenant Isolation & RLS | `can_manage_store()` SQL helper, `owner_id = auth.uid()`, forced RLS on all 6 tables | RLS policy & 403 guard verification | ✅ Verified |
 | **UI** | Merchant Control Panel | 6-tab interface at `/projects/[id]/store` with product modal, stock adjustment, order drawer, invoice viewer | Tab render, modal interaction, sandbox mode check | ✅ Verified |
 
+---
+
+## Module 9: Generated Store Analytics, Customer Behavior & Reports
+
+| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **FR-9.1** | Gross Sales & Net Revenue Calculation | `calculateOrderMetrics()` in `src/lib/analytics/metrics.ts`, deducting returns/cancels | Fixed test fixture math tests | ✅ Verified |
+| **FR-9.2** | Daily, Weekly & Monthly Sales Trends | `generateDailyTrends()` in `metrics.ts`, `/api/stores/[id]/analytics/trends` | Time series bucketing tests | ✅ Verified |
+| **FR-9.3** | Top Performing Products & Conversion | `aggregateProductPerformance()`, `/api/stores/[id]/analytics/products` | Catalog performance aggregation tests | ✅ Verified |
+| **FR-9.4** | Customer Conversion Funnel | `computeFunnel()`, 5-stage conversion & dropoff calculation in `/api/stores/[id]/analytics/behavior` | Funnel stage tests | ✅ Verified |
+| **FR-9.5** | Cart Abandonment Tracking | `computeCartAbandonment()`, defensive availability flag for zero-events state | Cart session & abandonment tests | ✅ Verified |
+| **FR-9.6** | Traffic Sources & Attribution | `computeTrafficSources()`, referrer & UTM classification | Traffic parsing tests | ✅ Verified |
+| **FR-9.7** | Executive PDF / Print Reports | `generateAnalyticsReportHtml()`, `/api/stores/[id]/analytics/reports`, `@media print` CSS | XSS escaping & print format tests | ✅ Verified |
+| **FR-9.8** | First-Party Telemetry & Privacy Pipeline | `store_analytics_events` schema, `validateEventPayload()`, pseudonymous session hashing | SQL migration, RLS, and sanitizer tests | ✅ Verified |
+| **Security** | Multi-Tenant Authorization Guards | `can_manage_store()` RLS policy, `getUser()` & `store.owner_id === user.id` on all analytics routes | 403 Forbidden & RLS check | ✅ Verified |
+| **UI** | Analytics & Reports Merchant Panel | `AnalyticsPanel.tsx` in `/projects/[id]/store` with date range selector, trend chart, funnel, report modal | Component render & interaction tests | ✅ Verified |
+

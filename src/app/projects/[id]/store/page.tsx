@@ -6,8 +6,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { Product, Order, OrderStatus, Customer, InventoryLog, StorePaymentSettings, StoreOverviewKPIs } from '@/types/store-management';
 import { getOrderStatusMeta, ALLOWED_STATUS_TRANSITIONS } from '@/lib/store-management/orders';
 import { getStorePaymentProviders } from '@/lib/store-management/payments';
+import AnalyticsPanel from '@/components/store-management/AnalyticsPanel';
 
-type ActiveTab = 'overview' | 'products' | 'inventory' | 'orders' | 'customers' | 'payments';
+type ActiveTab = 'overview' | 'analytics' | 'products' | 'inventory' | 'orders' | 'customers' | 'payments';
 
 export default function StoreManagementPage() {
   const params = useParams();
@@ -458,6 +459,7 @@ export default function StoreManagementPage() {
           {(
             [
               { key: 'overview', label: 'Overview', icon: 'dashboard' },
+              { key: 'analytics', label: 'Analytics & Reports', icon: 'monitoring' },
               { key: 'products', label: `Products (${products.length})`, icon: 'inventory_2' },
               { key: 'inventory', label: 'Inventory & Stock', icon: 'warehouse' },
               { key: 'orders', label: `Orders (${orders.length})`, icon: 'receipt_long' },
@@ -639,6 +641,16 @@ export default function StoreManagementPage() {
               )}
             </div>
           </div>
+        )}
+
+        {/* ─── TAB: ANALYTICS & REPORTS ───────────────────────────────────────── */}
+        {activeTab === 'analytics' && (
+          <AnalyticsPanel
+            storeId={store.id}
+            storeName={store.name}
+            currency={store.currency || 'PKR'}
+            isSandbox={isSandbox}
+          />
         )}
 
         {/* ─── TAB 2: PRODUCTS ───────────────────────────────────────────────── */}
