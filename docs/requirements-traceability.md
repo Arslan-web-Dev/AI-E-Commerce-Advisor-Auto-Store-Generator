@@ -61,3 +61,38 @@ This matrix maps functional and non-functional requirements from the Software Re
 | **API Endpoints** | Feature Processing & Retrieval APIs | `POST /api/projects/[id]/process`, `GET .../features`, `GET .../processing-runs` | API route integration tests | ✅ Verified |
 | **UI Integration**| Feature Quality & Completeness Panel | `FeatureQualityPanel.tsx` on `/projects/[id]` | Component render & interaction check | ✅ Verified |
 
+---
+
+## Module 5: Feasibility Prediction and Score Classification
+
+| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **FR-5.1** | Feasibility Prediction & Outcome | Provisional MCDA scoring engine (`src/lib/scoring/mcda.ts`) | Algorithmic scoring audit | ✅ Verified (Provisional) |
+| **FR-5.2** | Supervised Model Governance | Deferred training audit (`docs/deferred-supervised-training.md`), `model_registry` schema | Schema & readiness note audit | ✅ Verified |
+| **FR-5.3** | Feasibility Classification | Categorization: High (>=75), Moderate (50-74), Low (<50) | MCDA score threshold tests | ✅ Verified |
+| **FR-5.4** | Feasibility Results Presentation | Feasibility breakdown UI (`/projects/[id]/feasibility`) | UI render & transparency tests | ✅ Verified |
+
+---
+
+## Module 6: Strategic Advisory, Budget Allocation & Location Recommendations
+
+| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **FR-6.1** | Strategic Advisory Engine | Advisory generator consuming M4 features and M5 score | Rule engine evaluation tests | ✅ Verified |
+| **FR-6.2** | Budget Allocation Breakdown | Setup, inventory, marketing, working capital splits | Currency & percentage math tests | ✅ Verified |
+| **FR-6.3** | Evidence-Based Location Rankings | Regional foot-traffic & demographic ranking with provenance | Provenance and score audit | ✅ Verified |
+| **FR-6.4** | Strategic Advisory UI | Strategic recommendations & budget allocation view | UI interactive testing | ✅ Verified |
+
+---
+
+## Module 7: Theme Configurator, 20+ Component Variant Library & Storefront Compiler
+
+| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **FR-7.1** | MCQ Theme Configurator Flow | 4-step interactive wizard (`/projects/[id]/storefront-wizard`) | Wizard step & option tests | ✅ Verified |
+| **FR-7.2** | 20+ Component Variant Library | 240 distinct variants across 12 component families in `src/lib/storefront/variant-catalog.ts` | Programmatic 20+ integrity check (`verify-catalog-20plus.mjs`) | ✅ Verified |
+| **FR-7.3** | Live Multi-Viewport Preview | Viewport-responsive schematic wireframes (`WireframePreview`) for all 12 component families | Viewport switching (Desktop/Tablet/Mobile) & render tests | ✅ Verified |
+| **FR-7.4** | Template Presets & Auto-Recommendation | 4 presets (`modern-urban`, `boutique-elegant`, `high-density-catalog`, `emerald-brand`) | MCQ mapping & deterministic fallback tests | ✅ Verified |
+| **FR-7.5** | Safe Storefront Compiler | Pure JSON manifest compiler (`compileManifest`), zero executable code stored | Invariant & injection tests | ✅ Verified |
+| **FR-7.6** | Approval Gate & Versioned Drafts | `store_draft_versions` & `store_wizard_sessions` schema, status locked to `draft` | RLS & server draft compile API tests | ✅ Verified |
+

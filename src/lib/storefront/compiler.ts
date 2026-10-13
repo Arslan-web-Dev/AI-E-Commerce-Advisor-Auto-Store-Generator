@@ -87,10 +87,10 @@ export function compileManifest(
 
   // Optional sections requested by answers
   const optionalSections: string[] = [];
-  if (answers.optional_features.includes('faq')) optionalSections.push('faq-v1-simple-bordered');
-  if (answers.optional_features.includes('newsletter_preview')) optionalSections.push('newsletter-v1-inline-bar');
+  if (answers.optional_features.includes('faq')) optionalSections.push('faq-v01-simple-clean');
+  if (answers.optional_features.includes('newsletter_preview')) optionalSections.push('newsletter-v01-inline-bar');
   if (answers.optional_features.includes('announcement_bar')) {
-    mergedVariants['announcement_bar'] = mergedVariants['announcement_bar'] ?? 'announcement_bar-v2-static-dismissible';
+    mergedVariants['announcement_bar'] = mergedVariants['announcement_bar'] ?? 'announcement-v02-static-dismissible';
   }
 
   const { primary, secondary } = paletteFromAnswers(answers);

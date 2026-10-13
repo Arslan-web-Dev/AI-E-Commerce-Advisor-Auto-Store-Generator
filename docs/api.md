@@ -402,4 +402,116 @@ Retrieves the execution history of all feature engineering runs for auditability
   }
   ```
 
+---
+
+## 5. Storefront Configurator & Compiler API (`/api/storefront` & `/api/projects/[id]/storefront-wizard`)
+
+### `GET /api/storefront/variants`
+Fetches the sanitized component variant catalog registry.
+
+- **Authentication**: Required (User or Admin)
+- **Query Parameters**:
+  - `type` (optional): Filter by component type (e.g., `header`, `hero`, `product_card`)
+  - `category` (optional): Filter variants compatible with a specific industry category
+- **Response `200 OK`**:
+  ```json
+  {
+    "data": [
+      {
+        "id": "hero-v1-fullbleed-image",
+        "name": "Full-Bleed Image Hero",
+        "componentType": "hero",
+        "description": "High-impact editorial image banner with heading and primary CTA",
+        "availability": "core",
+        "supportedCategories": [],
+        "pageSlots": ["home_hero"],
+        "requiredProps": ["title", "cta_text"],
+        "optionalProps": ["subtitle", "image_url"],
+        "responsiveBehavior": "Image scales responsively; text centers on mobile",
+        "accessibilityNotes": "Contrast ratio compliant; aria labels on CTA",
+        "themeTokens": ["--primary", "--surface"],
+        "requiresData": ["hero_image"],
+        "fallbackBehavior": "Gradient background placeholder"
+      }
+    ],
+    "count": 12
+  }
+  ```
+
+---
+
+### `GET /api/projects/[id]/storefront-wizard`
+Retrieves the most recent active or saved MCQ wizard session for the project.
+
+- **Authentication**: Required (Project Owner or Admin)
+- **Response `200 OK`**:
+  ```json
+  {
+    "data": {
+      "id": "f29b46e8-...",
+      "owner_id": "u1092-...",
+      "project_id": "c1f7a0e2-...",
+      "answers": {
+        "style_preference": "modern",
+        "audience": "general",
+        "product_presentation": "balanced",
+        "optional_features": ["faq", "announcement_bar"],
+        "schema_version": "v1.0"
+      },
+      "current_step": 4,
+      "recommended_template": "modern-urban",
+      "recommended_variants": {
+        "header": "header-v2-left-logo-full-nav",
+        "hero": "hero-v1-fullbleed-image",
+        "product_card": "product-card-v1-standard",
+        "footer": "footer-v1-standard-columns"
+      },
+      "status": "in_progress"
+    }
+  }
+  ```
+
+---
+
+### `POST /api/projects/[id]/storefront-wizard`
+Saves MCQ wizard step answers, updates recommendations, and compiles immutable draft store manifests.
+
+- **Authentication**: Required (Project Owner only)
+- **Request Body**:
+  ```json
+  {
+    "answers": {
+      "style_preference": "modern",
+      "audience": "general",
+      "product_presentation": "balanced",
+      "optional_features": ["faq"]
+    },
+    "current_step": 4,
+    "custom_variants": {
+      "hero": "hero-v2-split-text-image"
+    },
+    "action": "compile"
+  }
+  ```
+- **Response `200 OK`**:
+  ```json
+  {
+    "session": { ... },
+    "compiled": true,
+    "manifest": {
+      "manifest_version": "v1.0",
+      "template_id": "modern-urban",
+      "variants": { ... },
+      "theme_tokens": { ... },
+      "missing_requirements": [],
+      "compatibility_violations": []
+    },
+    "store_id": "s823a-...",
+    "draft_version_id": "d918c-...",
+    "approval_gate": {
+      "status": "draft_compiled",
+      "note": "Store is in draft status. Full publication requires project approval gate."
+    }
+  }
+  ```
 
