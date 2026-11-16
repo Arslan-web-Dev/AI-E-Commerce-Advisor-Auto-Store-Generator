@@ -3,6 +3,10 @@
 -- Migration: 20261006070000_module9_analytics_schema.sql
 -- ==============================================================================
 
+-- 0. Ensure stores table has is_banned column
+alter table public.stores 
+  add column if not exists is_banned boolean not null default false;
+
 -- 1. Store Analytics Events Table
 create table if not exists public.store_analytics_events (
   id uuid primary key default gen_random_uuid(),

@@ -1,0 +1,1258 @@
+﻿-- ==============================================================================
+-- MIGRATION FILE: 20261004000000_module1_auth_rbac_schema.sql
+-- ==============================================================================
+-- ====================================================================
+-- Module 1: User Authentication, RBAC Engine & System Configuration Sync
+-- AI-Powered E-Commerce Feasibility Advisor & Auto Store Generator
+-- Standard: Structured after SRS v2.0 (IEEE 830 / ISO/IEC/IEEE 29148)
+-- ====================================================================
+
+-- 1. Extensions & utility triggers
+create extension if not exists "pgcrypto";
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+-- 2. App roles & profiles
+do $$ begin
+  create type public.app_role as enum ('owner', 'admin');
+exception
+  when duplicate_object then null;
+end $$;
+
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  full_name text,
+  role public.app_role not null default 'owner',
+  must_change_password boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+-- Admin check helper: runs with security definer and pinned search path
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.profiles
+    where id = auth.uid()
+      and role = 'admin'
+  );
+$$;
+
+-- Secure new user profile creation:
+-- Role is ALWAYS hardcoded to 'owner' regardless of any client metadata.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id, full_name, role, must_change_password)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'full_name', ''),
+    'owner',
+    false
+  )
+  on conflict (id) do update
+  set full_name = coalesce(excluded.full_name, profiles.full_name);
+  return new;
+end;
+$$;
+
+-- Trigger on auth.users table
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- 3. Stores & Feasibility Reports (Foundation for Module 1 account cascades)
+do $$ begin
+  create type public.store_status as enum ('draft', 'published', 'suspended');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.report_status as enum ('pending', 'processing', 'complete', 'failed');
+exception
+  when duplicate_object then null;
+end $$;
+
+create table if not exists public.feasibility_reports (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  category text not null,
+  idea_text text,
+  city text not null,
+  area text,
+  lat double precision not null check (lat between 23.5 and 37.2),
+  lng double precision not null check (lng between 60.8 and 77.9),
+  radius_km smallint not null default 10 check (radius_km between 10 and 15),
+  budget_pkr bigint not null check (budget_pkr > 0),
+  features jsonb,
+  feasibility_score numeric(3,2) check (feasibility_score between 0 and 1),
+  risk_level text check (risk_level in ('low', 'moderate', 'high', 'critical')),
+  model_version text,
+  competitors jsonb,
+  trend_series jsonb,
+  advisory jsonb,
+  data_quality numeric(3,2),
+  status public.report_status not null default 'pending',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_feasibility_reports_owner_created 
+  on public.feasibility_reports (owner_id, created_at desc);
+
+create table if not exists public.stores (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  report_id uuid references public.feasibility_reports(id) on delete set null,
+  name text not null check (char_length(name) between 2 and 80),
+  slug text not null unique check (slug ~ '^[a-z0-9](?:[a-z0-9-]{1,28})[a-z0-9]$'),
+  custom_domain text unique,
+  status public.store_status not null default 'draft',
+  theme_config jsonb not null default '{}'::jsonb,
+  seo_config jsonb not null default '{}'::jsonb,
+  currency text not null default 'PKR',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_stores_owner on public.stores (owner_id);
+
+drop trigger if exists trg_stores_updated on public.stores;
+create trigger trg_stores_updated
+  before update on public.stores
+  for each row execute function public.set_updated_at();
+
+-- 4. Shared Reference & Rent Cache
+create table if not exists public.rent_cache (
+  id uuid primary key default gen_random_uuid(),
+  city text not null,
+  area text not null,
+  rent_per_sqft_pkr numeric(10,2) not null,
+  sample_size integer,
+  source text,
+  scraped_at timestamptz not null default now(),
+  unique (city, area)
+);
+
+create table if not exists public.ai_call_log (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid references auth.users(id) on delete set null,
+  purpose text not null,
+  provider text not null,
+  success boolean not null,
+  latency_ms integer,
+  error_code text,
+  created_at timestamptz not null default now()
+);
+
+-- 5. System Configuration & GitHub Sync Audit Log (FR-1.6)
+create table if not exists public.system_config (
+  id uuid primary key default gen_random_uuid(),
+  config_key text not null unique,
+  description text,
+  payload jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.config_sync_audit_log (
+  id uuid primary key default gen_random_uuid(),
+  actor_id uuid references auth.users(id) on delete set null,
+  repository text not null,
+  branch text not null default 'main',
+  commit_sha text,
+  status text not null check (status in ('success', 'failed')),
+  exported_keys text[] not null default '{}',
+  error_message text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_sync_audit_created 
+  on public.config_sync_audit_log (created_at desc);
+
+-- Pre-seed default non-sensitive system configuration items
+insert into public.system_config (config_key, description, payload)
+values 
+  (
+    'scoring_thresholds',
+    'XGBoost risk level and viability score boundaries',
+    '{"low_risk_min": 0.75, "moderate_risk_min": 0.55, "high_risk_min": 0.35, "critical_risk_max": 0.34}'::jsonb
+  ),
+  (
+    'theme_presets',
+    'Curated Pakistani SME brand themes and layout options',
+    '{"presets": [{"id": "terracotta-craft", "name": "Artisanal Craft", "primary": "#10b981", "secondary": "#03b5d3"}, {"id": "karachi-modern", "name": "Urban Retail", "primary": "#4edea3", "secondary": "#4cd7f6"}]}'::jsonb
+  ),
+  (
+    'seed_commercial_hubs',
+    'Pre-seeded commercial centers for quick location picker',
+    '{"cities": [{"city": "Lahore", "hubs": ["Gulberg III", "Liberty Market", "DHA Phase 5", "Anarkali"]}, {"city": "Karachi", "hubs": ["Clifton Block 2", "Saddar", "Zamzama", "Tariq Road"]}, {"city": "Islamabad", "hubs": ["Blue Area", "F-7 Markaz", "F-10 Markaz", "I-8 Markaz"]}]}'::jsonb
+  )
+on conflict (config_key) do nothing;
+
+-- 6. Row-Level Security (RLS) Enforcement
+alter table public.profiles enable row level security;
+alter table public.stores enable row level security;
+alter table public.feasibility_reports enable row level security;
+alter table public.rent_cache enable row level security;
+alter table public.ai_call_log enable row level security;
+alter table public.system_config enable row level security;
+alter table public.config_sync_audit_log enable row level security;
+
+-- Force RLS on tenant tables
+alter table public.stores force row level security;
+alter table public.feasibility_reports force row level security;
+
+-- PROFILES POLICIES
+-- Users can read their own profile; Admin can read all profiles
+drop policy if exists profiles_select_own on public.profiles;
+create policy profiles_select_own on public.profiles
+  for select
+  using (id = (select auth.uid()) or public.is_admin());
+
+-- Users can update only approved non-privileged fields on their own profile
+-- Users CANNOT change their role or must_change_password
+drop policy if exists profiles_update_own on public.profiles;
+create policy profiles_update_own on public.profiles
+  for update
+  using (id = (select auth.uid()))
+  with check (
+    id = (select auth.uid())
+    and role = (select p.role from public.profiles p where p.id = (select auth.uid()))
+    and must_change_password = (select p.must_change_password from public.profiles p where p.id = (select auth.uid()))
+  );
+
+-- Admin can manage all profiles
+drop policy if exists profiles_admin_all on public.profiles;
+create policy profiles_admin_all on public.profiles
+  for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- FEASIBILITY REPORTS POLICIES
+drop policy if exists reports_owner_all on public.feasibility_reports;
+create policy reports_owner_all on public.feasibility_reports
+  for all
+  using (owner_id = (select auth.uid()))
+  with check (owner_id = (select auth.uid()));
+
+drop policy if exists reports_admin_read on public.feasibility_reports;
+create policy reports_admin_read on public.feasibility_reports
+  for select
+  using (public.is_admin());
+
+-- STORES POLICIES
+drop policy if exists stores_owner_all on public.stores;
+create policy stores_owner_all on public.stores
+  for all
+  using (owner_id = (select auth.uid()))
+  with check (owner_id = (select auth.uid()));
+
+drop policy if exists stores_public_read on public.stores;
+create policy stores_public_read on public.stores
+  for select
+  using (status = 'published');
+
+drop policy if exists stores_admin_all on public.stores;
+create policy stores_admin_all on public.stores
+  for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- RENT CACHE POLICIES
+drop policy if exists rent_read_auth on public.rent_cache;
+create policy rent_read_auth on public.rent_cache
+  for select
+  to authenticated
+  using (true);
+
+-- AI CALL LOG POLICIES
+drop policy if exists ailog_admin_read on public.ai_call_log;
+create policy ailog_admin_read on public.ai_call_log
+  for select
+  using (public.is_admin());
+
+-- SYSTEM CONFIG POLICIES
+-- Authenticated users can read config; only admins can write/update
+drop policy if exists system_config_read on public.system_config;
+create policy system_config_read on public.system_config
+  for select
+  to authenticated
+  using (true);
+
+drop policy if exists system_config_admin_all on public.system_config;
+create policy system_config_admin_all on public.system_config
+  for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- CONFIG SYNC AUDIT LOG POLICIES
+-- Only admins can read or write config sync audit logs
+drop policy if exists sync_audit_admin_all on public.config_sync_audit_log;
+create policy sync_audit_admin_all on public.config_sync_audit_log
+  for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261006000000_module2_projects_wizard_schema.sql
+-- ==============================================================================
+-- ====================================================================
+-- Module 2: Business Idea Input and Project Creation Schema
+-- AI-Powered E-Commerce Feasibility Advisor & Auto Store Generator
+-- Standard: Structured after SRS v2.0 (FR-2.1, FR-2.2, FR-2.6)
+-- ====================================================================
+
+-- 1. Enums for Project Status & Scale
+do $$ begin
+  create type public.project_status as enum ('draft', 'submitted', 'analyzing', 'completed', 'failed');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.business_scale as enum ('small', 'medium', 'large');
+exception
+  when duplicate_object then null;
+end $$;
+
+-- 2. Projects Table
+create table if not exists public.projects (
+  id                   uuid primary key default gen_random_uuid(),
+  owner_id             uuid not null references auth.users(id) on delete cascade,
+  title                text,
+  category             text not null,
+  custom_category      text,
+  target_location      text not null,
+  city                 text,
+  region               text,
+  country              text default 'Pakistan',
+  postal_code          text,
+  lat                  double precision,
+  lng                  double precision,
+  radius_km            numeric(4,1) not null default 10.0 check (radius_km between 1.0 and 50.0),
+  budget_amount        numeric(12,2) not null check (budget_amount > 0),
+  budget_currency      text not null default 'USD' check (budget_currency in ('USD', 'PKR')),
+  budget_pkr           bigint,
+  
+  -- FR-2.2 Advanced Input Options
+  target_audience      jsonb not null default '{}'::jsonb, -- { age_group, gender, income_level }
+  business_scale       public.business_scale not null default 'small',
+  business_model       text not null default 'hybrid' check (business_model in ('d2c', 'hybrid', 'physical')),
+  storefront_footprint text default 'boutique', -- 'kiosk', 'boutique', 'commercial', 'flagship'
+  product_description  text,
+  product_types        text[] not null default '{}',
+  product_file_url     text,
+  product_file_name    text,
+  product_file_size    integer,
+  
+  -- Draft State & Metadata
+  current_step         integer not null default 1 check (current_step between 1 and 5),
+  form_version         integer not null default 1,
+  metadata             jsonb not null default '{}'::jsonb,
+  
+  -- Lifecycle Status & Analysis Linkage
+  status               public.project_status not null default 'draft',
+  report_id            uuid references public.feasibility_reports(id) on delete set null,
+  
+  -- Timestamps
+  created_at           timestamptz not null default now(),
+  updated_at           timestamptz not null default now(),
+  submitted_at         timestamptz
+);
+
+-- Indexes for efficient queries
+create index if not exists idx_projects_owner_updated 
+  on public.projects (owner_id, updated_at desc);
+
+create index if not exists idx_projects_status 
+  on public.projects (status);
+
+-- Updated_at trigger
+drop trigger if exists trg_projects_updated on public.projects;
+create trigger trg_projects_updated
+  before update on public.projects
+  for each row execute function public.set_updated_at();
+
+-- 3. Row Level Security (RLS)
+alter table public.projects enable row level security;
+alter table public.projects force row level security;
+
+-- Owners can view their own projects; Admins can view all
+drop policy if exists projects_owner_select on public.projects;
+create policy projects_owner_select on public.projects
+  for select
+  using (owner_id = (select auth.uid()) or public.is_admin());
+
+-- Owners can insert projects for themselves
+drop policy if exists projects_owner_insert on public.projects;
+create policy projects_owner_insert on public.projects
+  for insert
+  with check (owner_id = (select auth.uid()));
+
+-- Owners can update their projects only while in 'draft' status; Admins can update all
+drop policy if exists projects_owner_update on public.projects;
+create policy projects_owner_update on public.projects
+  for update
+  using (
+    (owner_id = (select auth.uid()) and status = 'draft')
+    or public.is_admin()
+  )
+  with check (
+    owner_id = (select auth.uid()) or public.is_admin()
+  );
+
+-- Owners can delete their own drafts; Admins can delete all
+drop policy if exists projects_owner_delete on public.projects;
+create policy projects_owner_delete on public.projects
+  for delete
+  using (
+    (owner_id = (select auth.uid()) and status = 'draft')
+    or public.is_admin()
+  );
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261006010000_module3_data_collection_schema.sql
+-- ==============================================================================
+-- ====================================================================
+-- Module 3: Data Collection and Provider Integration Schema
+-- AI-Powered E-Commerce Feasibility Advisor & Auto Store Generator
+-- Standard: Structured after SRS v2.0 (FR-3.1, FR-3.2, FR-3.3)
+-- ====================================================================
+
+-- 1. Collection Runs Table
+create table if not exists public.project_collection_runs (
+  id               uuid primary key default gen_random_uuid(),
+  project_id       uuid not null references public.projects(id) on delete cascade,
+  status           text not null default 'pending' check (status in ('pending', 'running', 'completed', 'partial', 'failed', 'unavailable')),
+  providers_status jsonb not null default '{}'::jsonb,
+  started_at       timestamptz not null default now(),
+  completed_at     timestamptz,
+  created_at       timestamptz not null default now()
+);
+
+create index if not exists idx_collection_runs_project 
+  on public.project_collection_runs (project_id, created_at desc);
+
+-- 2. Competitor POI Records (FR-3.1)
+create table if not exists public.project_competitors (
+  id           uuid primary key default gen_random_uuid(),
+  project_id   uuid not null references public.projects(id) on delete cascade,
+  run_id       uuid references public.project_collection_runs(id) on delete cascade,
+  name         text not null,
+  category     text not null,
+  provider     text not null default 'overpass_osm',
+  provenance   text not null default 'external_api' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
+  lat          double precision not null,
+  lng          double precision not null,
+  distance_km  numeric(6,2) not null,
+  rating       numeric(3,2),
+  review_count integer,
+  price_level  text,
+  address      text,
+  raw_data     jsonb,
+  retrieved_at timestamptz not null default now()
+);
+
+create index if not exists idx_competitors_project 
+  on public.project_competitors (project_id, distance_km);
+
+-- 3. Regional Demographics & Market Observations (FR-3.2)
+create table if not exists public.project_market_observations (
+  id              uuid primary key default gen_random_uuid(),
+  project_id      uuid not null references public.projects(id) on delete cascade,
+  run_id          uuid references public.project_collection_runs(id) on delete cascade,
+  metric_name     text not null,
+  metric_value    numeric(14,2) not null,
+  unit            text not null,
+  geography       text not null,
+  period_year     integer not null default 2024,
+  provider        text not null default 'pbs_census',
+  provenance      text not null default 'licensed_dataset' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
+  source_citation text,
+  retrieved_at    timestamptz not null default now()
+);
+
+create index if not exists idx_market_obs_project 
+  on public.project_market_observations (project_id, metric_name);
+
+-- 4. Category Demand & Search Trends (FR-3.2)
+create table if not exists public.project_demand_trends (
+  id           uuid primary key default gen_random_uuid(),
+  project_id   uuid not null references public.projects(id) on delete cascade,
+  run_id       uuid references public.project_collection_runs(id) on delete cascade,
+  category     text not null,
+  region       text not null default 'PK',
+  trend_series jsonb not null default '[]'::jsonb, -- array of { month: string, index: number }
+  avg_interest numeric(5,2) not null,
+  trend_slope  text not null default 'stable' check (trend_slope in ('growing', 'stable', 'declining')),
+  provider     text not null default 'google_trends',
+  provenance   text not null default 'external_api' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
+  retrieved_at timestamptz not null default now()
+);
+
+create index if not exists idx_demand_trends_project 
+  on public.project_demand_trends (project_id);
+
+-- 5. Cost Baselines & Estimates (FR-3.3)
+create table if not exists public.project_cost_estimates (
+  id             uuid primary key default gen_random_uuid(),
+  project_id     uuid not null references public.projects(id) on delete cascade,
+  run_id         uuid references public.project_collection_runs(id) on delete cascade,
+  cost_type      text not null check (cost_type in ('setup', 'rent_monthly', 'marketing_initial', 'logistics_per_order')),
+  amount_min     numeric(12,2) not null,
+  amount_max     numeric(12,2) not null,
+  currency       text not null default 'PKR' check (currency in ('USD', 'PKR')),
+  period_or_unit text not null default 'one-time',
+  assumptions    text,
+  provider       text not null default 'rent_cache_model',
+  provenance     text not null default 'manual_estimate' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
+  retrieved_at   timestamptz not null default now()
+);
+
+create index if not exists idx_cost_estimates_project 
+  on public.project_cost_estimates (project_id, cost_type);
+
+-- ====================================================================
+-- 6. Row-Level Security (RLS) Enforcement on Data Collection Tables
+-- ====================================================================
+alter table public.project_collection_runs enable row level security;
+alter table public.project_collection_runs force row level security;
+
+alter table public.project_competitors enable row level security;
+alter table public.project_competitors force row level security;
+
+alter table public.project_market_observations enable row level security;
+alter table public.project_market_observations force row level security;
+
+alter table public.project_demand_trends enable row level security;
+alter table public.project_demand_trends force row level security;
+
+alter table public.project_cost_estimates enable row level security;
+alter table public.project_cost_estimates force row level security;
+
+-- RLS Helper: Project ownership verification
+create or replace function public.can_access_project(p_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.projects
+    where id = p_id
+      and (owner_id = auth.uid() or public.is_admin())
+  );
+$$;
+
+-- Collection Runs Policies
+drop policy if exists collection_runs_access on public.project_collection_runs;
+create policy collection_runs_access on public.project_collection_runs
+  for all
+  using (public.can_access_project(project_id))
+  with check (public.can_access_project(project_id));
+
+-- Competitors Policies
+drop policy if exists competitors_access on public.project_competitors;
+create policy competitors_access on public.project_competitors
+  for all
+  using (public.can_access_project(project_id))
+  with check (public.can_access_project(project_id));
+
+-- Market Observations Policies
+drop policy if exists market_obs_access on public.project_market_observations;
+create policy market_obs_access on public.project_market_observations
+  for all
+  using (public.can_access_project(project_id))
+  with check (public.can_access_project(project_id));
+
+-- Demand Trends Policies
+drop policy if exists demand_trends_access on public.project_demand_trends;
+create policy demand_trends_access on public.project_demand_trends
+  for all
+  using (public.can_access_project(project_id))
+  with check (public.can_access_project(project_id));
+
+-- Cost Estimates Policies
+drop policy if exists cost_estimates_access on public.project_cost_estimates;
+create policy cost_estimates_access on public.project_cost_estimates
+  for all
+  using (public.can_access_project(project_id))
+  with check (public.can_access_project(project_id));
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261006020000_module4_feature_processing_schema.sql
+-- ==============================================================================
+-- ====================================================================
+-- Module 4: Data Processing and Feature Engineering Schema
+-- AI-Powered E-Commerce Feasibility Advisor & Auto Store Generator
+-- Standard: Structured after SRS v2.0 (FR-4.1, FR-4.2)
+-- ====================================================================
+
+-- 1. Feature Processing Runs Table (FR-4.2 Auditable Lifecycle)
+create table if not exists public.project_processing_runs (
+  id                   uuid primary key default gen_random_uuid(),
+  project_id           uuid not null references public.projects(id) on delete cascade,
+  collection_run_id    uuid references public.project_collection_runs(id) on delete set null,
+  status               text not null default 'pending' check (status in ('pending', 'running', 'completed', 'partial', 'failed')),
+  quality_score        numeric(5,2) not null default 0.00 check (quality_score >= 0.00 and quality_score <= 100.00),
+  data_completeness    text not null default 'unavailable' check (data_completeness in ('complete', 'partial', 'unavailable')),
+  imputations_count    integer not null default 0,
+  deduplication_stats  jsonb not null default '{}'::jsonb,
+  domain_completeness  jsonb not null default '{}'::jsonb,
+  provenance_summary   jsonb not null default '{}'::jsonb,
+  error_log            text,
+  started_at           timestamptz not null default now(),
+  completed_at         timestamptz,
+  created_at           timestamptz not null default now()
+);
+
+create index if not exists idx_processing_runs_project 
+  on public.project_processing_runs (project_id, created_at desc);
+
+-- 2. Project Features Table (FR-4.1 ML-ready Engineered Features)
+create table if not exists public.project_features (
+  id                          uuid primary key default gen_random_uuid(),
+  project_id                  uuid not null references public.projects(id) on delete cascade,
+  processing_run_id           uuid not null references public.project_processing_runs(id) on delete cascade,
+  competitors_count           integer not null default 0,
+  category_saturation         numeric(16,8), -- competitors_count / population (null if population unavailable)
+  budget_ratio                numeric(10,4), -- user_budget / estimated_total_cost
+  avg_demand_index            numeric(6,2),  -- 0.00 to 100.00
+  trend_slope                 text check (trend_slope in ('growing', 'stable', 'declining')),
+  trend_slope_score           numeric(4,2),  -- +1.00 (growing), 0.00 (stable), -1.00 (declining)
+  population                  bigint,
+  internet_penetration_pct    numeric(5,2),
+  ecommerce_growth_rate_pct   numeric(5,2),
+  total_estimated_setup_cost  numeric(14,2), -- In project currency
+  total_estimated_monthly_cost numeric(14,2), -- In project currency
+  total_estimated_annual_cost numeric(14,2), -- In project currency
+  user_budget                 numeric(14,2),
+  currency                    text not null default 'PKR',
+  engineered_vector           jsonb not null default '{}'::jsonb, -- ML-ready normalized features
+  feature_version             text not null default 'v1.0',
+  created_at                  timestamptz not null default now()
+);
+
+create index if not exists idx_features_project 
+  on public.project_features (project_id, created_at desc);
+
+create index if not exists idx_features_run 
+  on public.project_features (processing_run_id);
+
+-- ====================================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ====================================================================
+
+alter table public.project_processing_runs enable row level security;
+alter table public.project_processing_runs force row level security;
+
+alter table public.project_features enable row level security;
+alter table public.project_features force row level security;
+
+-- Processing Runs Policies
+drop policy if exists processing_runs_access on public.project_processing_runs;
+create policy processing_runs_access on public.project_processing_runs
+  for all
+  using (public.can_access_project(project_id))
+  with check (public.can_access_project(project_id));
+
+-- Project Features Policies
+drop policy if exists features_access on public.project_features;
+create policy features_access on public.project_features
+  for all
+  using (public.can_access_project(project_id))
+  with check (public.can_access_project(project_id));
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261006030000_module5_feasibility_schema.sql
+-- ==============================================================================
+-- ====================================================================
+-- Module 5: Feasibility Prediction and Score Classification Schema
+-- AI-Powered E-Commerce Feasibility Advisor & Auto Store Generator
+-- Standard: Structured after SRS v2.0 (FR-5.1, FR-5.2, FR-5.3)
+-- ====================================================================
+
+-- 1. Model Registry Table (FR-5.3 Admin Retraining Controls)
+create table if not exists public.model_registry (
+  id                   uuid primary key default gen_random_uuid(),
+  name                 text not null,
+  version              text not null,
+  scoring_mode         text not null check (scoring_mode in ('supervised_model', 'provisional_mcda')),
+  is_active            boolean not null default false,
+  configuration        jsonb not null default '{}'::jsonb, -- Weights for MCDA or model refs
+  evaluation_metrics   jsonb,
+  training_dataset_ref text,
+  created_by           uuid references auth.users(id) on delete set null,
+  created_at           timestamptz not null default now(),
+  unique(name, version)
+);
+
+create unique index if not exists idx_model_registry_active on public.model_registry (scoring_mode) where is_active = true;
+
+-- 2. Feasibility Runs Table (FR-5.1, FR-5.2)
+create table if not exists public.project_feasibility_runs (
+  id                   uuid primary key default gen_random_uuid(),
+  project_id           uuid not null references public.projects(id) on delete cascade,
+  processing_run_id    uuid not null references public.project_processing_runs(id) on delete cascade,
+  model_id             uuid references public.model_registry(id) on delete set null,
+  score_value          numeric(5,4) check (score_value >= 0.0 and score_value <= 1.0),
+  scoring_mode         text not null check (scoring_mode in ('supervised_model', 'provisional_mcda', 'unavailable')),
+  classification       text check (classification in ('High Feasibility', 'Medium Feasibility', 'Low Feasibility', 'Not Feasible')),
+  explanations         jsonb not null default '{}'::jsonb,
+  status               text not null default 'pending' check (status in ('pending', 'completed', 'failed')),
+  error_log            text,
+  created_at           timestamptz not null default now()
+);
+
+create index if not exists idx_feasibility_runs_project on public.project_feasibility_runs (project_id, created_at desc);
+
+-- ====================================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ====================================================================
+
+alter table public.model_registry enable row level security;
+alter table public.model_registry force row level security;
+
+alter table public.project_feasibility_runs enable row level security;
+alter table public.project_feasibility_runs force row level security;
+
+-- Model Registry Policies: Read-only for authenticated, write restricted to super_admin via RPC/direct backend access
+drop policy if exists model_registry_read on public.model_registry;
+create policy model_registry_read on public.model_registry
+  for select
+  to authenticated
+  using (true);
+
+-- Feasibility Runs Policies: Bound to project access
+drop policy if exists feasibility_runs_access on public.project_feasibility_runs;
+create policy feasibility_runs_access on public.project_feasibility_runs
+  for all
+  using (public.can_access_project(project_id))
+  with check (public.can_access_project(project_id));
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261006040000_module6_strategic_advisory_schema.sql
+-- ==============================================================================
+-- ====================================================================
+-- Module 6: Strategic Advisory and Budget Allocation Schema
+-- AI-Powered E-Commerce Feasibility Advisor & Auto Store Generator
+-- Standard: Structured after SRS v2.0 (FR-6.1, FR-6.2, FR-6.3)
+-- ====================================================================
+
+-- 1. Advisory Reports Table
+create table if not exists public.project_advisory_reports (
+  id                        uuid primary key default gen_random_uuid(),
+  project_id                uuid not null references public.projects(id) on delete cascade,
+  feasibility_run_id        uuid not null references public.project_feasibility_runs(id) on delete cascade,
+  processing_run_id         uuid not null references public.project_processing_runs(id) on delete cascade,
+  
+  -- Dynamic Budget Allocation Planning Scenario
+  budget_currency           text not null default 'PKR',
+  budget_total              numeric(14,2) not null,
+  budget_allocations        jsonb not null default '{}'::jsonb, -- { inventory, marketing, operations, contingency }
+  
+  -- Structured Insights (Deterministic)
+  insights                  jsonb not null default '{}'::jsonb, -- { strengths: [], risks: [], immediate_actions: [] }
+  
+  -- Location / Commercial Hub Recommendations
+  location_recommendations  jsonb not null default '{"status": "unavailable", "reason": "No comparable spatial hub data available in current scope"}'::jsonb,
+  
+  -- Audit and Metadata
+  advisory_version          text not null default 'v1.0',
+  metadata                  jsonb not null default '{}'::jsonb, -- language, currency conversion rates
+  status                    text not null default 'completed' check (status in ('pending', 'completed', 'failed')),
+  error_log                 text,
+  created_at                timestamptz not null default now()
+);
+
+-- Index for efficient querying of a project's latest advisory report
+create index if not exists idx_advisory_reports_project 
+  on public.project_advisory_reports (project_id, created_at desc);
+
+-- ====================================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ====================================================================
+
+alter table public.project_advisory_reports enable row level security;
+alter table public.project_advisory_reports force row level security;
+
+drop policy if exists advisory_reports_access on public.project_advisory_reports;
+create policy advisory_reports_access on public.project_advisory_reports
+  for all
+  using (public.can_access_project(project_id))
+  with check (public.can_access_project(project_id));
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261006050000_module7_storefront_configurator_schema.sql
+-- ==============================================================================
+-- ====================================================================
+-- Module 7: Theme Configurator, Variant Catalog & Storefront Draft
+-- AI-Powered E-Commerce Feasibility Advisor & Auto Store Generator
+-- Standard: Structured after SRS v2.0 (FR-7.1â€“FR-7.6)
+-- ====================================================================
+
+-- 1. Store Wizard Answers (persisted MCQ state per project attempt)
+create table if not exists public.store_wizard_sessions (
+  id                   uuid primary key default gen_random_uuid(),
+  owner_id             uuid not null references auth.users(id) on delete cascade,
+  project_id           uuid references public.projects(id) on delete set null,
+  
+  -- MCQ answers (schema-versioned JSONB; never executable)
+  answers              jsonb not null default '{}'::jsonb,
+  answers_version      text not null default 'v1.0',
+  
+  -- Derived recommendation
+  recommended_template text,          -- allowlisted template ID
+  recommended_variants jsonb,         -- { section_id -> variant_id }
+  
+  -- State
+  current_step         integer not null default 1 check (current_step between 1 and 4),
+  status               text not null default 'in_progress'
+                       check (status in ('in_progress', 'completed', 'abandoned')),
+  
+  created_at           timestamptz not null default now(),
+  updated_at           timestamptz not null default now()
+);
+
+drop trigger if exists trg_wizard_sessions_updated on public.store_wizard_sessions;
+create trigger trg_wizard_sessions_updated
+  before update on public.store_wizard_sessions
+  for each row execute function public.set_updated_at();
+
+create index if not exists idx_wizard_sessions_owner
+  on public.store_wizard_sessions (owner_id, updated_at desc);
+
+-- 2. Store Draft Versions (versioned theme manifests; immutable after compile)
+create table if not exists public.store_draft_versions (
+  id                   uuid primary key default gen_random_uuid(),
+  store_id             uuid not null references public.stores(id) on delete cascade,
+  wizard_session_id    uuid references public.store_wizard_sessions(id) on delete set null,
+  project_id           uuid references public.projects(id) on delete set null,
+  feasibility_run_id   uuid references public.project_feasibility_runs(id) on delete set null,
+
+  -- Validated manifest (variant IDs + props only; no executable code)
+  manifest             jsonb not null default '{}'::jsonb,
+  manifest_version     text not null default 'v1.0',
+  
+  -- Compilation metadata
+  compile_status       text not null default 'pending'
+                       check (compile_status in ('pending', 'compiled', 'failed')),
+  compile_errors       jsonb,
+  
+  -- Approval gate: stores must remain in 'draft' status until published by a future workflow
+  -- Users cannot self-approve; this column is set server-side only
+  approval_ref         text,
+  
+  version_label        text,  -- e.g. "v1", "v2-adjusted-hero"
+  created_at           timestamptz not null default now()
+);
+
+create index if not exists idx_store_drafts_store
+  on public.store_draft_versions (store_id, created_at desc);
+
+-- ====================================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ====================================================================
+
+alter table public.store_wizard_sessions enable row level security;
+alter table public.store_wizard_sessions force row level security;
+
+alter table public.store_draft_versions enable row level security;
+alter table public.store_draft_versions force row level security;
+
+-- Wizard sessions: owner can manage their own
+drop policy if exists wizard_sessions_owner_all on public.store_wizard_sessions;
+create policy wizard_sessions_owner_all on public.store_wizard_sessions
+  for all
+  using (owner_id = (select auth.uid()) or public.is_admin())
+  with check (owner_id = (select auth.uid()));
+
+-- Draft versions: owner of the parent store can read/write
+drop policy if exists store_drafts_owner_all on public.store_draft_versions;
+create policy store_drafts_owner_all on public.store_draft_versions
+  for all
+  using (
+    exists (
+      select 1 from public.stores s
+      where s.id = store_id
+        and (s.owner_id = (select auth.uid()) or public.is_admin())
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.stores s
+      where s.id = store_id
+        and s.owner_id = (select auth.uid())
+    )
+  );
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261006060000_module8_store_management_schema.sql
+-- ==============================================================================
+-- ==============================================================================
+-- Module 8: Generated Store Management Schema
+-- Products, Inventory, Orders, Customers, Invoices, Payment Settings & RLS
+-- ==============================================================================
+
+-- Helper check function for store management access
+create or replace function public.can_manage_store(p_store_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.stores
+    where id = p_store_id
+      and (owner_id = auth.uid() or public.is_admin())
+  );
+$$;
+
+-- ------------------------------------------------------------------------------
+-- 1. Products Table
+-- ------------------------------------------------------------------------------
+create table if not exists public.products (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id) on delete cascade,
+  name text not null check (char_length(name) between 1 and 200),
+  slug text not null check (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
+  sku text,
+  description text,
+  price_pkr bigint not null check (price_pkr >= 0),
+  compare_at_price_pkr bigint check (compare_at_price_pkr is null or compare_at_price_pkr >= price_pkr),
+  cost_price_pkr bigint check (cost_price_pkr is null or cost_price_pkr >= 0),
+  stock integer not null default 0 check (stock >= 0),
+  low_stock_threshold integer not null default 5 check (low_stock_threshold >= 0),
+  category text,
+  images text[] not null default '{}',
+  variants jsonb not null default '[]'::jsonb,
+  seo jsonb not null default '{}'::jsonb,
+  is_active boolean not null default true,
+  is_archived boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (store_id, slug)
+);
+
+create index if not exists idx_products_store_active on public.products (store_id, is_active, is_archived);
+create index if not exists idx_products_store_stock on public.products (store_id, stock);
+
+drop trigger if exists trg_products_updated on public.products;
+create trigger trg_products_updated
+  before update on public.products
+  for each row execute function public.set_updated_at();
+
+-- ------------------------------------------------------------------------------
+-- 2. Orders Table
+-- ------------------------------------------------------------------------------
+create table if not exists public.orders (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id) on delete cascade,
+  order_number text not null,
+  customer_name text not null check (char_length(customer_name) between 1 and 120),
+  customer_phone text not null check (char_length(customer_phone) between 7 and 20),
+  customer_email text,
+  shipping_address text not null check (char_length(shipping_address) >= 5),
+  city text not null,
+  payment_method text not null default 'cod' check (payment_method in ('cod', 'stripe', 'paypal', 'card_mock')),
+  payment_status text not null default 'pending' check (payment_status in ('pending', 'paid', 'refunded', 'failed')),
+  fulfillment_status text not null default 'unfulfilled' check (fulfillment_status in ('unfulfilled', 'fulfilled', 'cancelled', 'returned')),
+  subtotal_pkr bigint not null check (subtotal_pkr >= 0),
+  shipping_fee_pkr bigint not null default 0 check (shipping_fee_pkr >= 0),
+  tax_pkr bigint not null default 0 check (tax_pkr >= 0),
+  total_pkr bigint not null check (total_pkr >= 0),
+  status text not null default 'pending' check (status in ('pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned')),
+  status_history jsonb not null default '[]'::jsonb,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_orders_store_status on public.orders (store_id, status, created_at desc);
+
+drop trigger if exists trg_orders_updated on public.orders;
+create trigger trg_orders_updated
+  before update on public.orders
+  for each row execute function public.set_updated_at();
+
+-- ------------------------------------------------------------------------------
+-- 3. Order Items Table
+-- ------------------------------------------------------------------------------
+create table if not exists public.order_items (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders(id) on delete cascade,
+  product_id uuid references public.products(id) on delete set null,
+  name text not null,
+  sku text,
+  unit_price_pkr bigint not null check (unit_price_pkr >= 0),
+  quantity integer not null check (quantity > 0),
+  total_price_pkr bigint not null check (total_price_pkr >= 0)
+);
+
+create index if not exists idx_order_items_order on public.order_items (order_id);
+
+-- ------------------------------------------------------------------------------
+-- 4. Store Customers Table (Aggregated Profiles)
+-- ------------------------------------------------------------------------------
+create table if not exists public.customers (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id) on delete cascade,
+  full_name text not null,
+  phone text not null,
+  email text,
+  city text,
+  address text,
+  total_orders integer not null default 0 check (total_orders >= 0),
+  total_spend_pkr bigint not null default 0 check (total_spend_pkr >= 0),
+  last_order_at timestamptz,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (store_id, phone)
+);
+
+create index if not exists idx_customers_store_spend on public.customers (store_id, total_spend_pkr desc);
+
+drop trigger if exists trg_customers_updated on public.customers;
+create trigger trg_customers_updated
+  before update on public.customers
+  for each row execute function public.set_updated_at();
+
+-- ------------------------------------------------------------------------------
+-- 5. Inventory Logs Table (Audit Trail)
+-- ------------------------------------------------------------------------------
+create table if not exists public.inventory_logs (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id) on delete cascade,
+  product_id uuid not null references public.products(id) on delete cascade,
+  delta integer not null,
+  previous_stock integer not null check (previous_stock >= 0),
+  new_stock integer not null check (new_stock >= 0),
+  reason text not null check (reason in ('manual_adjustment', 'order_placed', 'order_cancelled', 'restock', 'damage', 'initial_setup')),
+  actor_id uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_inventory_logs_product on public.inventory_logs (product_id, created_at desc);
+
+-- ------------------------------------------------------------------------------
+-- 6. Store Payment Settings Table
+-- ------------------------------------------------------------------------------
+create table if not exists public.store_payment_settings (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id) on delete cascade unique,
+  cod_enabled boolean not null default true,
+  stripe_enabled boolean not null default false,
+  stripe_account_id text,
+  paypal_enabled boolean not null default false,
+  paypal_email text,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- ------------------------------------------------------------------------------
+-- 7. Row-Level Security (RLS) Configuration
+-- ------------------------------------------------------------------------------
+alter table public.products enable row level security;
+alter table public.products force row level security;
+
+alter table public.orders enable row level security;
+alter table public.orders force row level security;
+
+alter table public.order_items enable row level security;
+alter table public.order_items force row level security;
+
+alter table public.customers enable row level security;
+alter table public.customers force row level security;
+
+alter table public.inventory_logs enable row level security;
+alter table public.inventory_logs force row level security;
+
+alter table public.store_payment_settings enable row level security;
+alter table public.store_payment_settings force row level security;
+
+-- Policies for products
+create policy "Owners manage store products"
+  on public.products
+  for all
+  to authenticated
+  using (public.can_manage_store(store_id))
+  with check (public.can_manage_store(store_id));
+
+create policy "Public can view active products of published stores"
+  on public.products
+  for select
+  to public
+  using (
+    is_active = true and is_archived = false and exists (
+      select 1 from public.stores where id = products.store_id and status = 'published'
+    )
+  );
+
+-- Policies for orders
+create policy "Owners manage store orders"
+  on public.orders
+  for all
+  to authenticated
+  using (public.can_manage_store(store_id))
+  with check (public.can_manage_store(store_id));
+
+-- Policies for order items
+create policy "Owners manage store order items"
+  on public.order_items
+  for all
+  to authenticated
+  using (
+    exists (
+      select 1 from public.orders where id = order_items.order_id and public.can_manage_store(orders.store_id)
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.orders where id = order_items.order_id and public.can_manage_store(orders.store_id)
+    )
+  );
+
+-- Policies for customers
+create policy "Owners manage store customers"
+  on public.customers
+  for all
+  to authenticated
+  using (public.can_manage_store(store_id))
+  with check (public.can_manage_store(store_id));
+
+-- Policies for inventory logs
+create policy "Owners view store inventory logs"
+  on public.inventory_logs
+  for select
+  to authenticated
+  using (public.can_manage_store(store_id));
+
+create policy "Owners insert store inventory logs"
+  on public.inventory_logs
+  for insert
+  to authenticated
+  with check (public.can_manage_store(store_id));
+
+-- Policies for payment settings
+create policy "Owners manage store payment settings"
+  on public.store_payment_settings
+  for all
+  to authenticated
+  using (public.can_manage_store(store_id))
+  with check (public.can_manage_store(store_id));
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261006070000_module9_analytics_schema.sql
+-- ==============================================================================
+-- ==============================================================================
+-- Module 9: Generated Store Analytics, Customer Behavior & Event Tracking
+-- Migration: 20261006070000_module9_analytics_schema.sql
+-- ==============================================================================
+
+-- 0. Ensure stores table has is_banned column
+alter table public.stores 
+  add column if not exists is_banned boolean not null default false;
+
+-- 1. Store Analytics Events Table
+create table if not exists public.store_analytics_events (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id) on delete cascade,
+  session_id text not null, -- Pseudonymous session hash (privacy-safe, no personal data)
+  event_type text not null check (
+    event_type in ('page_view', 'product_view', 'add_to_cart', 'remove_from_cart', 'begin_checkout', 'purchase')
+  ),
+  product_id uuid references public.products(id) on delete set null,
+  referrer text,
+  utm_source text,
+  utm_medium text,
+  utm_campaign text,
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+-- 2. Indexes for fast aggregation and time-range filtering
+create index if not exists idx_store_events_store_date 
+  on public.store_analytics_events(store_id, created_at desc);
+
+create index if not exists idx_store_events_store_type 
+  on public.store_analytics_events(store_id, event_type);
+
+create index if not exists idx_store_events_product 
+  on public.store_analytics_events(product_id);
+
+create index if not exists idx_store_events_session 
+  on public.store_analytics_events(store_id, session_id);
+
+-- 3. Row-Level Security
+alter table public.store_analytics_events enable row level security;
+alter table public.store_analytics_events force row level security;
+
+-- Only authorized store owners or system admins can read analytics events
+create policy "store_owners_select_events" on public.store_analytics_events
+  for select
+  using (can_manage_store(store_id));
+
+-- Public storefront visitors can insert telemetry events only for unbanned, valid stores
+create policy "public_insert_store_events" on public.store_analytics_events
+  for insert
+  with check (
+    exists (
+      select 1 from public.stores s 
+      where s.id = store_id and s.is_banned = false
+    )
+  );
+
+-- Store owners can purge their own events for privacy or retention maintenance
+create policy "store_owners_delete_events" on public.store_analytics_events
+  for delete
+  using (can_manage_store(store_id));
+
+
+
+
