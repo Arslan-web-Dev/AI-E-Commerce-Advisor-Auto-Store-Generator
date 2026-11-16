@@ -1,5 +1,6 @@
 import React from 'react';
 import BusinessIdeaWizard from '@/components/wizard/BusinessIdeaWizard';
+import Reveal from '@/components/ui/Reveal';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,5 +15,5 @@ interface PageProps {
 
 export default async function ResumeWizardPage({ params }: PageProps) {
   const { id } = await params;
-  return <BusinessIdeaWizard initialProjectId={id} />;
+  return <Reveal><BusinessIdeaWizard initialProjectId={id} /></Reveal>;
 }

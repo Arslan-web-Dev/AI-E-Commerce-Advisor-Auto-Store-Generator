@@ -99,3 +99,176 @@ h1, h2, h3, h4, h5, h6, .font-display {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--outline-variant);
 }
+
+
+/* ============================================================
+   UI ENHANCEMENT LAYER — 3D motion system, aurora ambience,
+   glass surfaces, micro-interactions
+   ============================================================ */
+
+/* ---------- Ambient background layers ---------- */
+.ui-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -12;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 45% at 15% 8%, rgba(16, 185, 129, 0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 85% 20%, rgba(76, 215, 246, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 55% 95%, rgba(111, 251, 190, 0.08) 0%, transparent 65%),
+    linear-gradient(180deg, #0b1326 0%, #060e20 100%);
+  animation: ui-aurora-drift 26s ease-in-out infinite alternate;
+}
+
+@keyframes ui-aurora-drift {
+  0%   { background-position: 0% 0%, 0% 0%, 0% 0%, 0 0; }
+  50%  { background-position: 4% 6%, -5% 3%, 3% -4%, 0 0; }
+  100% { background-position: -3% -5%, 5% -6%, -4% 5%, 0 0; }
+}
+
+.ui-grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -11;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(78, 222, 163, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(78, 222, 163, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black 30%, transparent 100%);
+  animation: ui-grid-pan 60s linear infinite;
+}
+
+@keyframes ui-grid-pan {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 44px 44px, 44px 44px; }
+}
+
+/* ---------- Glass surfaces ---------- */
+.glass {
+  background: rgba(23, 31, 51, 0.55);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(78, 222, 163, 0.14);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.glass-strong {
+  background: rgba(19, 27, 46, 0.72);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(78, 222, 163, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ---------- Motion keyframes ---------- */
+@keyframes ui-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+.animate-float { animation: ui-float 6s ease-in-out infinite; }
+
+@keyframes ui-float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-18px) rotate(2deg); }
+}
+.animate-float-slow { animation: ui-float-slow 9s ease-in-out infinite; }
+
+@keyframes ui-pulse-glow {
+  0%, 100% { box-shadow: 0 0 18px rgba(16, 185, 129, 0.25); }
+  50%      { box-shadow: 0 0 42px rgba(78, 222, 163, 0.55); }
+}
+.animate-pulse-glow { animation: ui-pulse-glow 3.2s ease-in-out infinite; }
+
+@keyframes ui-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.ui-shimmer {
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: ui-shimmer 3.5s linear infinite;
+}
+
+@keyframes ui-spin-slow {
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: ui-spin-slow 14s linear infinite; }
+
+@keyframes ui-orbit {
+  from { transform: rotate(0deg) translateX(10px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(10px) rotate(-360deg); }
+}
+.animate-orbit { animation: ui-orbit 8s linear infinite; }
+
+@keyframes ui-gradient-text {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+.ui-gradient-text {
+  background: linear-gradient(90deg, #4edea3, #4cd7f6, #6ffbbe, #4edea3);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ui-gradient-text 6s ease infinite;
+}
+
+/* ---------- Enhanced interactive cards ---------- */
+.ui-card-3d {
+  transition: transform 0.25s ease-out, box-shadow 0.35s ease, border-color 0.3s ease;
+}
+.ui-card-3d:hover {
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(78, 222, 163, 0.25),
+    0 0 32px rgba(16, 185, 129, 0.12);
+}
+
+/* ---------- Reveal helper (used with IntersectionObserver) ---------- */
+.ui-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ui-reveal.ui-reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Enhanced scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-container-lowest);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--surface-container-highest), #3c4a42);
+  border-radius: 9999px;
+  border: 2px solid var(--surface-container-lowest);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4edea3, #10b981);
+}
+
+/* ---------- Selection & focus ---------- */
+::selection {
+  background: rgba(16, 185, 129, 0.35);
+  color: #eafff5;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(78, 222, 163, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- Section divider glow line ---------- */
+.ui-glow-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(78, 222, 163, 0.5), transparent);
+  box-shadow: 0 0 12px rgba(78, 222, 163, 0.35);
+}

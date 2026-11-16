@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Project, PREDEFINED_CATEGORIES } from '@/types/project';
+import Reveal from '@/components/ui/Reveal';
 
 export default function ProjectsListPage() {
   const router = useRouter();
@@ -79,6 +80,7 @@ export default function ProjectsListPage() {
   };
 
   return (
+    <Reveal>
     <div className="min-h-screen bg-[#0b1326] text-[#dae2fd] font-sans flex flex-col justify-between selection:bg-[#10b981]/30 selection:text-[#4edea3]">
       {/* Toast Notification */}
       {toast && (
@@ -341,5 +343,6 @@ export default function ProjectsListPage() {
         </div>
       </main>
     </div>
+    </Reveal>
   );
 }

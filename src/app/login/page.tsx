@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import Reveal from '@/components/ui/Reveal';
 
 function LoginFormContent() {
   const router = useRouter();
@@ -481,6 +482,7 @@ function LoginFormContent() {
 
 export default function LoginPage() {
   return (
+    <Reveal>
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#0b1326] flex items-center justify-center">
@@ -490,5 +492,6 @@ export default function LoginPage() {
     >
       <LoginFormContent />
     </Suspense>
+    </Reveal>
   );
 }

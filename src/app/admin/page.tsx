@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import Reveal from '@/components/ui/Reveal';
 
 interface SyncAuditLog {
   id: string;
@@ -157,6 +158,7 @@ export default function AdminCommandCenterPage() {
   if (!isAdmin) return null;
 
   return (
+    <Reveal>
     <div className="min-h-screen bg-[#0b1326] text-[#dae2fd] flex flex-col font-sans selection:bg-[#10b981]/30 selection:text-[#4edea3]">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-[#171f33]/90 backdrop-blur-xl border-b border-[#2d3449]">
@@ -470,5 +472,6 @@ export default function AdminCommandCenterPage() {
         </div>
       </main>
     </div>
+    </Reveal>
   );
 }

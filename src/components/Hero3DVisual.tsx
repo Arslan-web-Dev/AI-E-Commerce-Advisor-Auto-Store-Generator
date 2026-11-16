@@ -180,6 +180,41 @@ export default function Hero3DVisual() {
     window.addEventListener('mousemove', handlePointerMove, { passive: true });
     window.addEventListener('touchmove', handlePointerMove, { passive: true });
 
+    // --- Drag-to-rotate with inertia (makes the hologram directly movable) ---
+    let isDragging = false;
+    let lastX = 0;
+    let lastY = 0;
+    let rotX = 0;
+    let rotY = 0;
+    let velX = 0;
+    let velY = 0;
+
+    const onPointerDown = (e: PointerEvent) => {
+      isDragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      velX = 0;
+      velY = 0;
+    };
+    const onPointerDrag = (e: PointerEvent) => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      rotY += dx * 0.005;
+      rotX += dy * 0.003;
+      rotX = Math.max(-0.6, Math.min(0.9, rotX));
+      velY = dx * 0.005;
+      velX = dy * 0.003;
+    };
+    const onPointerUp = () => {
+      isDragging = false;
+    };
+    container.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerDrag, { passive: true });
+    window.addEventListener('pointerup', onPointerUp);
+
     // 4. Animation loop
     let animationFrameId: number;
     let clock = new THREE.Clock();
@@ -192,8 +227,17 @@ export default function Hero3DVisual() {
       mouseX += (targetX - mouseX) * 0.05;
       mouseY += (targetY - mouseY) * 0.05;
 
-      group.rotation.y = elapsedTime * 0.15 + mouseX;
-      group.rotation.x = 0.35 + mouseY * 0.2;
+      // Inertia after release
+      if (!isDragging) {
+        rotY += velY;
+        rotX += velX;
+        velY *= 0.94;
+        velX *= 0.94;
+        rotX = Math.max(-0.6, Math.min(0.9, rotX));
+      }
+
+      group.rotation.y = elapsedTime * 0.08 + mouseX + rotY;
+      group.rotation.x = 0.35 + mouseY * 0.2 + rotX;
 
       // Pulse effects
       const scale1 = 1 + Math.sin(elapsedTime * 2.0) * 0.04;
@@ -229,6 +273,9 @@ export default function Hero3DVisual() {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handlePointerMove);
       window.removeEventListener('touchmove', handlePointerMove);
+      container.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointermove', onPointerDrag);
+      window.removeEventListener('pointerup', onPointerUp);
 
       if (container && renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);

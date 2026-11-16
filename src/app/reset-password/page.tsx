@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import Reveal from '@/components/ui/Reveal';
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState('');
@@ -37,8 +38,9 @@ export default function ResetPasswordPage() {
   };
 
   return (
+    <Reveal>
     <div className="min-h-screen bg-[#0b1326] flex flex-col justify-center items-center p-4 selection:bg-[#10b981]/30 selection:text-[#4edea3]">
-      <div className="w-full max-w-md bg-[#171f33] border border-[#2d3449] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="w-full max-w-md glass-strong ui-card-3d rounded-2xl p-6 sm:p-8 space-y-6">
         {/* Top Back Link */}
         <Link
           href="/login"
@@ -121,5 +123,6 @@ export default function ResetPasswordPage() {
         )}
       </div>
     </div>
+    </Reveal>
   );
 }

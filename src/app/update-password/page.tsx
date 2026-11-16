@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import Reveal from '@/components/ui/Reveal';
 
 function UpdatePasswordContent() {
   const router = useRouter();
@@ -95,8 +96,9 @@ function UpdatePasswordContent() {
   };
 
   return (
+    <Reveal>
     <div className="min-h-screen bg-[#0b1326] flex flex-col justify-center items-center p-4 selection:bg-[#10b981]/30 selection:text-[#4edea3]">
-      <div className="w-full max-w-md bg-[#171f33] border border-[#2d3449] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="w-full max-w-md glass-strong ui-card-3d rounded-2xl p-6 sm:p-8 space-y-6">
         <div>
           <div className="w-12 h-12 rounded-xl bg-[#10b981]/15 text-[#4edea3] flex items-center justify-center mb-4">
             <span className="material-symbols-outlined text-[26px]">key</span>
@@ -190,6 +192,7 @@ function UpdatePasswordContent() {
         </form>
       </div>
     </div>
+    </Reveal>
   );
 }
 

@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Project, PREDEFINED_CATEGORIES } from '@/types/project';
 import MarketDataPanel from '@/components/data-collection/MarketDataPanel';
 import FeatureQualityPanel from '@/components/data-processing/FeatureQualityPanel';
+import Reveal from '@/components/ui/Reveal';
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -90,6 +91,7 @@ export default function ProjectDetailPage() {
   const categoryMeta = PREDEFINED_CATEGORIES.find((c) => c.name === project.category);
 
   return (
+    <Reveal>
     <div className="min-h-screen bg-[#0b1326] text-[#dae2fd] font-sans flex flex-col justify-between selection:bg-[#10b981]/30 selection:text-[#4edea3]">
       {/* Top Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0b1326]/90 backdrop-blur-xl border-b border-[#2d3449]/50 shadow-[0_1px_8px_rgba(0,0,0,0.2)]">
@@ -369,5 +371,6 @@ export default function ProjectDetailPage() {
         </div>
       </main>
     </div>
+    </Reveal>
   );
 }

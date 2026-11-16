@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import Reveal from '@/components/ui/Reveal';
+import TiltCard from '@/components/ui/TiltCard';
+import MagneticButton from '@/components/ui/MagneticButton';
 
 // Dynamically import the 3D scene with SSR disabled to prevent layout shifts & server rendering issues
 const Hero3DVisual = dynamic(() => import('@/components/Hero3DVisual'), {
@@ -73,12 +76,14 @@ export default function LandingPage() {
               >
                 Sign In
               </Link>
+<MagneticButton strength={0.3}>
               <Link
                 href="/wizard"
                 className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-[#10b981] hover:bg-[#4edea3] text-[#003824] font-semibold text-[13px] shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-150 transform hover:-translate-y-0.5"
               >
                 Launch Wizard
               </Link>
+              </MagneticButton>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-2 text-[#bbcabf] hover:text-[#dae2fd]"
@@ -141,7 +146,7 @@ export default function LandingPage() {
           <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-[#4edea3]/10 rounded-full blur-[140px] -z-10"></div>
           <div className="pointer-events-none absolute top-[30%] -left-32 w-[420px] h-[420px] bg-[#4cd7f6]/10 rounded-full blur-[120px] -z-10"></div>
 
-          <section className="max-w-[1440px] mx-auto px-4 lg:px-8 pt-8 pb-16">
+          <Reveal delay=0><section className="max-w-[1440px] mx-auto px-4 lg:px-8 pt-8 pb-16">
             {/* Announcement Pill */}
             <div className="flex items-center justify-center mb-6">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#222a3d]/80 backdrop-blur-md border border-[#3c4a42]/50 shadow-sm">
@@ -171,13 +176,16 @@ export default function LandingPage() {
 
               {/* CTA Cluster */}
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
+                <MagneticButton strength={0.25}>
+                  <Link
                   href="/wizard"
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#10b981] hover:bg-[#4edea3] text-[#003824] font-semibold text-[14px] shadow-lg shadow-[#10b981]/25 transition-all duration-150 transform hover:-translate-y-0.5"
                 >
                   <span className="material-symbols-outlined text-[18px]">auto_graph</span>
                   <span>Analyze Your Business Idea</span>
-                </Link>
+                  </Link>
+                </MagneticButton>
+                <MagneticButton strength={0.25}>
                 <a
                   href="#how-it-works"
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#222a3d]/90 hover:bg-[#31394d] text-[#dae2fd] text-[14px] font-medium border border-[#3c4a42]/60 transition-all duration-150"
@@ -187,6 +195,7 @@ export default function LandingPage() {
                   </div>
                   <span>Explore Methodology</span>
                 </a>
+                </MagneticButton>
               </div>
             </div>
 
@@ -278,11 +287,11 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-          </section>
+          </section></Reveal>
         </div>
 
         {/* 3. Methodology & Specifications Banner */}
-        <section className="w-full bg-[#131b2e]/90 border-y border-[#2d3449] py-8">
+        <Reveal delay=90><section className="w-full bg-[#131b2e]/90 border-y border-[#2d3449] py-8">
           <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               <div className="flex flex-col items-center">
@@ -307,10 +316,10 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section></Reveal>
 
         {/* 4. Core Capabilities (3 Pillars) */}
-        <section id="features" className="max-w-[1440px] mx-auto px-4 lg:px-8 py-20">
+        <Reveal delay=180><section id="features" className="max-w-[1440px] mx-auto px-4 lg:px-8 py-20">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-[11px] uppercase tracking-widest text-[#4edea3] font-semibold">
               CORE CAPABILITIES
@@ -325,7 +334,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Capability 1 */}
-            <div className="rounded-2xl bg-[#171f33]/70 border border-[#2d3449] p-6 flex flex-col justify-between hover:border-[#4edea3]/50 transition-all duration-200">
+            <TiltCard className="ui-card-3d rounded-2xl bg-[#171f33]/70 border border-[#2d3449] p-6 flex flex-col justify-between hover:border-[#4edea3]/50 transition-all duration-200">
               <div>
                 <div className="w-12 h-12 rounded-xl bg-[#10b981]/10 flex items-center justify-center text-[#4edea3] mb-4">
                   <span className="material-symbols-outlined text-[26px]">network_node</span>
@@ -347,10 +356,10 @@ export default function LandingPage() {
                   <span>Low &bull; Mod &bull; High &bull; Crit</span>
                 </div>
               </div>
-            </div>
+            </div></TiltCard>
 
             {/* Capability 2 */}
-            <div className="rounded-2xl bg-[#171f33]/70 border border-[#2d3449] p-6 flex flex-col justify-between hover:border-[#4cd7f6]/50 transition-all duration-200">
+            <TiltCard className="ui-card-3d rounded-2xl bg-[#171f33]/70 border border-[#2d3449] p-6 flex flex-col justify-between hover:border-[#4cd7f6]/50 transition-all duration-200">
               <div>
                 <div className="w-12 h-12 rounded-xl bg-[#03b5d3]/10 flex items-center justify-center text-[#4cd7f6] mb-4">
                   <span className="material-symbols-outlined text-[26px]">psychology</span>
@@ -372,10 +381,10 @@ export default function LandingPage() {
                   <span>3-tier automated failover</span>
                 </div>
               </div>
-            </div>
+            </div></TiltCard>
 
             {/* Capability 3 */}
-            <div className="rounded-2xl bg-[#171f33]/70 border border-[#2d3449] p-6 flex flex-col justify-between hover:border-[#45dfa4]/50 transition-all duration-200">
+            <TiltCard className="ui-card-3d rounded-2xl bg-[#171f33]/70 border border-[#2d3449] p-6 flex flex-col justify-between hover:border-[#45dfa4]/50 transition-all duration-200">
               <div>
                 <div className="w-12 h-12 rounded-xl bg-[#00b982]/10 flex items-center justify-center text-[#45dfa4] mb-4">
                   <span className="material-symbols-outlined text-[26px]">storefront</span>
@@ -397,12 +406,12 @@ export default function LandingPage() {
                   <span>Cash on Delivery (COD)</span>
                 </div>
               </div>
-            </div>
+            </div></TiltCard>
           </div>
-        </section>
+        </section></Reveal>
 
         {/* 5. End-to-End Workflow (How It Works) */}
-        <section id="how-it-works" className="w-full bg-[#131b2e]/60 border-y border-[#2d3449] py-20">
+        <Reveal delay=270><section id="how-it-works" className="w-full bg-[#131b2e]/60 border-y border-[#2d3449] py-20">
           <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <span className="text-[11px] uppercase tracking-widest text-[#4edea3] font-semibold">
@@ -462,10 +471,10 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section></Reveal>
 
         {/* 6. FAQs & Methodology Accordion */}
-        <section id="faqs" className="max-w-[1000px] mx-auto px-4 lg:px-8 py-20">
+        <Reveal delay=360><section id="faqs" className="max-w-[1000px] mx-auto px-4 lg:px-8 py-20">
           <div className="text-center mb-12">
             <span className="text-[11px] uppercase tracking-widest text-[#4edea3] font-semibold">
               TRANSPARENT METHODOLOGY
@@ -518,10 +527,10 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </section>
+        </section></Reveal>
 
         {/* 7. Bottom CTA Banner */}
-        <section className="max-w-[1440px] mx-auto px-4 lg:px-8 pb-20">
+        <Reveal delay=450><section className="max-w-[1440px] mx-auto px-4 lg:px-8 pb-20">
           <div className="rounded-2xl bg-gradient-to-r from-[#171f33] via-[#131b2e] to-[#171f33] border border-[#3c4a42]/50 p-8 sm:p-12 text-center relative overflow-hidden">
             <div className="pointer-events-none absolute -top-20 right-10 w-72 h-72 bg-[#4edea3]/10 rounded-full blur-3xl"></div>
             <h3 className="font-display text-[26px] sm:text-[34px] font-bold text-[#dae2fd] mb-4">
@@ -545,7 +554,7 @@ export default function LandingPage() {
               </Link>
             </div>
           </div>
-        </section>
+        </section></Reveal>
       </main>
 
       {/* 8. Footer */}

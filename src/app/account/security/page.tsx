@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import Reveal from '@/components/ui/Reveal';
 
 interface ProfileData {
   id: string;
@@ -208,6 +209,7 @@ export default function AccountSecurityPage() {
   const isAdmin = profile?.role === 'admin';
 
   return (
+    <Reveal>
     <div className="min-h-screen bg-[#0b1326] text-[#dae2fd] flex flex-col font-sans selection:bg-[#10b981]/30 selection:text-[#4edea3]">
       {/* Toast Notification */}
       {toastMessage && (
@@ -741,5 +743,6 @@ export default function AccountSecurityPage() {
         </div>
       )}
     </div>
+    </Reveal>
   );
 }

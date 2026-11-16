@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
+import Scene3DBackground from '@/components/ui/Scene3DBackground';
+import MouseGlow from '@/components/ui/MouseGlow';
+import PageTransition from '@/components/ui/PageTransition';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -53,6 +56,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-[#0b1326] text-[#dae2fd] font-sans antialiased selection:bg-[#10b981]/30 selection:text-[#4edea3]">
+        <Scene3DBackground />
+        <MouseGlow />
+        <PageTransition />
         {children}
       </body>
     </html>
