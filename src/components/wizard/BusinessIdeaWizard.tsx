@@ -758,7 +758,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                       value={formData.target_location}
                       onChange={(e) => {
                         const val = e.target.value;
-                        setFormData((prev) => ({ ...prev, target_location: val, city: '', lat: null, lng: null }));
+                        setFormData((prev) => ({ ...prev, target_location: val, city: '', lat: undefined, lng: undefined }));
                         setErrors((prev) => {
                           const copy = { ...prev };
                           delete copy.target_location;
