@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, getBrowserSupabaseConfigError } from '@/lib/supabase/client';
 import Reveal from '@/components/ui/Reveal';
 
 function LoginFormContent() {
@@ -39,6 +39,11 @@ function LoginFormContent() {
     setLoading(true);
 
     try {
+      const configError = getBrowserSupabaseConfigError();
+      if (configError) {
+        throw new Error(configError);
+      }
+
       if (authMode === 'signup') {
         // Enforce password length rule
         if (password.length < 8) {
@@ -104,7 +109,12 @@ function LoginFormContent() {
         }
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Authentication failed';
+      const msg =
+        err instanceof Error && /failed to fetch|networkerror/i.test(err.message)
+          ? 'Could not reach Supabase Auth. Check the deployment Supabase URL and public anon key, then try again.'
+          : err instanceof Error
+            ? err.message
+            : 'Authentication failed';
       setErrorMessage(msg);
     } finally {
       setLoading(false);
@@ -117,6 +127,11 @@ function LoginFormContent() {
     setOauthLoading(true);
 
     try {
+      const configError = getBrowserSupabaseConfigError();
+      if (configError) {
+        throw new Error(configError);
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -133,7 +148,12 @@ function LoginFormContent() {
         setOauthLoading(false);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Google OAuth initialization failed';
+      const msg =
+        err instanceof Error && /failed to fetch|networkerror/i.test(err.message)
+          ? 'Could not reach Supabase Auth. Check the deployment Supabase URL and public anon key, then try again.'
+          : err instanceof Error
+            ? err.message
+            : 'Google OAuth initialization failed';
       setErrorMessage(msg);
       setOauthLoading(false);
     }
