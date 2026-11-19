@@ -652,7 +652,7 @@ export default function AccountSecurityPage() {
                     <div className="h-full bg-[#4cd7f6] rounded-full" style={{ width: '8%' }}></div>
                   </div>
                   <span className="text-[11px] text-[#bbcabf]">
-                    Powered by Groq Llama-3, Google Gemini, and OpenAI GPT-4o-mini failover.
+                    The current advisor uses deterministic rules. External AI providers are not configured.
                   </span>
                 </div>
               </div>

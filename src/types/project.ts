@@ -141,14 +141,14 @@ export interface CommercialHubPreset {
 }
 
 export const COMMERCIAL_HUB_PRESETS: CommercialHubPreset[] = [
-  { name: 'Gulberg III, Lahore', city: 'Lahore', lat: 31.5204, lng: 74.3587, label: 'Top Density Commercial Zone' },
-  { name: 'DHA Phase 5 & 6, Lahore', city: 'Lahore', lat: 31.4722, lng: 74.4093, label: 'Affluent Residential/Retail' },
-  { name: 'Anarkali & Mall Road, Lahore', city: 'Lahore', lat: 31.5657, lng: 74.3142, label: 'Heritage Wholesale Corridor' },
-  { name: 'Blue Area, Islamabad', city: 'Islamabad', lat: 33.7153, lng: 73.0673, label: 'Capital Financial District' },
-  { name: 'F-7 / F-10 Markaz, Islamabad', city: 'Islamabad', lat: 33.7208, lng: 73.0564, label: 'High-Footfall Markaz' },
-  { name: 'Clifton & Defence, Karachi', city: 'Karachi', lat: 24.8138, lng: 67.0305, label: 'Prime Coastal Retail Hub' },
-  { name: 'Saddar Commercial, Karachi', city: 'Karachi', lat: 24.8569, lng: 67.0264, label: 'Historic Mega-Market' },
-  { name: 'Clock Tower / D-Ground, Faisalabad', city: 'Faisalabad', lat: 31.4187, lng: 73.0791, label: 'Textile & Trade Center' }
+  { name: 'Gulberg III, Lahore', city: 'Lahore', lat: 31.5204, lng: 74.3587, label: 'Seeded commercial area; verify locally' },
+  { name: 'DHA Phase 5 & 6, Lahore', city: 'Lahore', lat: 31.4722, lng: 74.4093, label: 'Seeded commercial area; verify locally' },
+  { name: 'Anarkali & Mall Road, Lahore', city: 'Lahore', lat: 31.5657, lng: 74.3142, label: 'Seeded commercial area; verify locally' },
+  { name: 'Blue Area, Islamabad', city: 'Islamabad', lat: 33.7153, lng: 73.0673, label: 'Seeded commercial area; verify locally' },
+  { name: 'F-7 / F-10 Markaz, Islamabad', city: 'Islamabad', lat: 33.7208, lng: 73.0564, label: 'Seeded commercial area; verify locally' },
+  { name: 'Clifton & Defence, Karachi', city: 'Karachi', lat: 24.8138, lng: 67.0305, label: 'Seeded commercial area; verify locally' },
+  { name: 'Saddar Commercial, Karachi', city: 'Karachi', lat: 24.8569, lng: 67.0264, label: 'Seeded commercial area; verify locally' },
+  { name: 'Clock Tower / D-Ground, Faisalabad', city: 'Faisalabad', lat: 31.4187, lng: 73.0791, label: 'Seeded commercial area; verify locally' }
 ];
 
 export const AGE_GROUP_OPTIONS = [
@@ -189,4 +189,5 @@ export const FOOTPRINT_OPTIONS: { id: StorefrontFootprint; label: string; sub: s
 ];
 
 // Helper to convert PKR / USD
+// Fixed illustrative conversion used by the current wizard; this is not a live FX quote.
 export const EXCHANGE_RATE_USD_TO_PKR = 278;

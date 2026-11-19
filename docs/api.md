@@ -159,14 +159,14 @@ Initiate or retry external and benchmark data collection across competitors, dem
       },
       "regional_stats": {
         "status": "completed",
-        "provider": "pbs_census_open_data",
-        "provenance": "licensed_dataset",
+        "provider": "curated_regional_reference_estimates",
+        "provenance": "manual_estimate",
         "item_count": 3
       },
       "trends": {
         "status": "completed",
-        "provider": "google_trends_pytrends",
-        "provenance": "external_api",
+        "provider": "synthetic_category_trend_curve",
+        "provenance": "synthetic_demo",
         "item_count": 12
       },
       "costs": {
@@ -258,7 +258,7 @@ Retrieve regional census demographics and 12-month demand trend observations.
         "unit": "count",
         "geography": "Lahore, Pakistan",
         "period_year": 2023,
-        "provenance": "licensed_dataset"
+        "provenance": "manual_estimate"
       }
     ],
     "demand_trend": {

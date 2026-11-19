@@ -1,5 +1,7 @@
 # Module 8 Implementation Audit: Generated Store Management, Products, Inventory, Orders, Customers & Payments
 
+> **Historical status note (19 November 2026):** The initial audit table describes a pre-implementation snapshot and is not the current module status. Later implementation claims in this file have not been independently verified in the current repository/environment. See [the current delivery baseline](FINAL_DELIVERY_BASELINE.md).
+
 ## 1. Executive Summary & Git Working Tree State
 
 - **Repository**: `AI-E-Commerce-Advisor-Auto-Store-Generator`

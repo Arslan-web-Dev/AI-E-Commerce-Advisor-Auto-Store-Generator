@@ -419,7 +419,7 @@ export default function AdminCommandCenterPage() {
                 <div className="p-3 rounded-xl bg-[#131b2e] border border-[#2d3449]">
                   <div className="flex items-center justify-between font-mono text-[#4edea3]">
                     <span>scoring_thresholds</span>
-                    <span className="text-[10px] text-[#bbcabf]">XGBoost</span>
+                    <span className="text-[10px] text-[#bbcabf]">MCDA thresholds</span>
                   </div>
                   <p className="text-[11px] text-[#bbcabf] mt-1">
                     Continuous boundaries: 0.75 (Low), 0.55 (Moderate), 0.35 (High), &lt;0.35 (Critical).
@@ -429,7 +429,7 @@ export default function AdminCommandCenterPage() {
                 <div className="p-3 rounded-xl bg-[#131b2e] border border-[#2d3449]">
                   <div className="flex items-center justify-between font-mono text-[#4cd7f6]">
                     <span>seed_commercial_hubs</span>
-                    <span className="text-[10px] text-[#bbcabf]">GIS Hubs</span>
+                    <span className="text-[10px] text-[#bbcabf]">Seeded locations</span>
                   </div>
                   <p className="text-[11px] text-[#bbcabf] mt-1">
                     Pre-seeded retail centers: Gulberg III, Liberty, Saddar, Clifton, Blue Area.
@@ -449,7 +449,7 @@ export default function AdminCommandCenterPage() {
                 <div className="p-3 rounded-xl bg-[#131b2e] border border-[#2d3449]">
                   <div className="flex items-center justify-between font-mono text-[#10b981]">
                     <span>rent_cache_snapshot</span>
-                    <span className="text-[10px] text-[#bbcabf]">Rent Registry</span>
+                    <span className="text-[10px] text-[#bbcabf]">Cost estimates</span>
                   </div>
                   <p className="text-[11px] text-[#bbcabf] mt-1">
                     Aggregated commercial rent per sq. ft. by city and area with sample size.

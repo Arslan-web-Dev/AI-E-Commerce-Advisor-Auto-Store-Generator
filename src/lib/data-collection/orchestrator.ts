@@ -180,7 +180,7 @@ export async function runDataCollection(
         area: project.target_location,
         footprint: project.storefront_footprint || 'boutique',
         budgetAmount: Number(project.budget_amount) || 15000,
-        budgetCurrency: project.budget_currency || 'USD',
+        budgetCurrency: project.budget_currency || 'PKR',
       });
       return {
         records,

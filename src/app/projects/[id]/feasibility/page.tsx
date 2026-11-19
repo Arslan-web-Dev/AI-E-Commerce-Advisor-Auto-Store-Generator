@@ -96,9 +96,9 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Score</div>
+                <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Provisional MCDA Index</div>
                 <div className="text-3xl font-black text-gray-900">
-                  {run.score_value !== null ? (run.score_value * 100).toFixed(1) + '%' : 'N/A'}
+                  {run.score_value !== null ? `${run.score_value.toFixed(2)} / 1.00` : 'N/A'}
                 </div>
               </div>
             </div>

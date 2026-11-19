@@ -49,9 +49,9 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
     postal_code: '',
     lat: 31.5204,
     lng: 74.3587,
-    radius_km: 12.5,
+    radius_km: 12,
     budget_amount: 15000,
-    budget_currency: 'USD',
+    budget_currency: 'PKR',
     target_audience: {
       age_group: 'Young Professionals (25-34 years)',
       gender: 'All Genders / Unisex',
@@ -109,9 +109,9 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
           postal_code: p.postal_code || '',
           lat: p.lat ?? 31.5204,
           lng: p.lng ?? 74.3587,
-          radius_km: p.radius_km || 12.5,
+          radius_km: Math.min(15, Math.max(10, Math.round(p.radius_km || 12))),
           budget_amount: Number(p.budget_amount) || 15000,
-          budget_currency: p.budget_currency || 'USD',
+          budget_currency: p.budget_currency || 'PKR',
           target_audience: p.target_audience || {},
           business_scale: p.business_scale || 'small',
           business_model: p.business_model || 'hybrid',
@@ -397,10 +397,6 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
   const allocMkt = Math.round(budgetNum * 0.18);
   const allocBuf = Math.round(budgetNum * 0.12);
 
-  // Addressable reach & saturation simulation
-  const reachCount = Math.round(Number(formData.radius_km || 10) * 27200);
-  const saturationPercent = Math.min(Math.round(Number(formData.radius_km || 10) * 1.8), 85);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0b1326] flex items-center justify-center text-[#dae2fd]">
@@ -503,7 +499,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 bg-[#171f33] px-3 py-1.5 rounded-full text-[#bbcabf] text-[12px] border border-[#2d3449]">
                   <span className="w-2 h-2 rounded-full bg-[#4cd7f6] animate-pulse"></span>
-                  <span>Spatial Footfall DB v4.1 Sync</span>
+                  <span>Illustrative location preview</span>
                 </div>
                 {lastSavedTime && (
                   <span className="text-[#bbcabf] text-[12px] hidden lg:inline font-mono">
@@ -742,7 +738,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   Where will your primary store or hub be located?
                 </h2>
                 <p className="text-[15px] text-[#bbcabf] max-w-3xl leading-relaxed">
-                  Our spatial intelligence engine will evaluate competitor clusters, footfall density proxy, and 10–15 km delivery corridors based on your target node.
+                  Select a Pakistan commercial hub to attach its stored coordinates. Competitor and regional results are calculated after data collection; this screen is only an illustrative radius preview.
                 </p>
               </div>
 
@@ -751,7 +747,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[13px] font-medium text-[#bbcabf] flex items-center justify-between">
                     <span>Primary Operating Node, City, or Postal/ZIP Code <span className="text-[#ffb4ab]">*</span></span>
-                    <span className="text-[11px] text-[#4edea3]">Worldwide Text &amp; Seeded Hubs Supported</span>
+                    <span className="text-[11px] text-[#4edea3]">Pakistan only · select a hub to set coordinates</span>
                   </label>
                   <div className="relative w-full">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#4edea3] text-[22px]">
@@ -762,19 +758,19 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                       value={formData.target_location}
                       onChange={(e) => {
                         const val = e.target.value;
-                        setFormData((prev) => ({ ...prev, target_location: val }));
+                        setFormData((prev) => ({ ...prev, target_location: val, city: '', lat: null, lng: null }));
                         setErrors((prev) => {
                           const copy = { ...prev };
                           delete copy.target_location;
                           return copy;
                         });
                       }}
-                      placeholder="e.g. Gulberg III, Lahore, Pakistan or 54000 or Austin, TX..."
+                      placeholder="e.g. Liberty Market, Lahore, Pakistan"
                       className="w-full bg-[#060e20] text-[#dae2fd] text-[16px] pl-12 pr-40 py-3.5 rounded-xl border border-[#2d3449] focus:outline-none focus:ring-2 focus:ring-[#4edea3]"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1.5 bg-[#2d3449] px-3 py-1.5 rounded-lg text-[#4cd7f6] text-[11px] font-medium border border-[#2d3449]">
                       <span className="w-2 h-2 rounded-full bg-[#4cd7f6]"></span>
-                      <span>Verified Trade Node</span>
+                      <span>Manual location text</span>
                     </div>
                   </div>
                   {errors.target_location && (
@@ -783,6 +779,9 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                       {errors.target_location}
                     </span>
                   )}
+                  <p className="text-[11px] text-[#86948a]">
+                    Text is not geocoded. Select a commercial hub below to attach its stored Pakistan coordinates before submitting.
+                  </p>
                 </div>
 
                 {/* Quick Hub Chips */}
@@ -849,10 +848,12 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   <div className="relative z-10 flex items-center justify-between">
                     <div className="bg-[#171f33]/90 backdrop-blur-md px-3 py-1.5 rounded-lg flex items-center gap-2 border border-[#2d3449] shadow-lg">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#4edea3] animate-ping"></span>
-                      <span className="text-[12px] font-medium text-[#dae2fd]">GIS Catchment Active</span>
+                      <span className="text-[12px] font-medium text-[#dae2fd]">Illustrative radius preview</span>
                     </div>
                     <div className="bg-[#171f33]/90 backdrop-blur-md px-3 py-1.5 rounded-lg text-[12px] font-mono text-[#4cd7f6] border border-[#2d3449] shadow-lg">
-                      Lat: {Number(formData.lat || 31.5204).toFixed(4)}° N, Lng: {Number(formData.lng || 74.3587).toFixed(4)}° E
+                      {formData.lat !== null && formData.lng !== null
+                        ? `Lat: ${Number(formData.lat).toFixed(4)}° N, Lng: ${Number(formData.lng).toFixed(4)}° E`
+                        : 'Coordinates not set'}
                     </div>
                   </div>
 
@@ -860,7 +861,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   <div className="relative z-10 my-auto flex flex-col items-center justify-center">
                     <div className="bg-[#4edea3] text-[#003824] px-3.5 py-1 rounded-full text-[12px] font-bold shadow-xl -mb-1 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[15px]">storefront</span>
-                      <span>Target Flagship Location</span>
+                      <span>{formData.lat !== null && formData.lng !== null ? 'Hub coordinates attached' : 'Location not geocoded'}</span>
                     </div>
                     <div className="w-6 h-6 rounded-full bg-[#4edea3] flex items-center justify-center shadow-lg ring-4 ring-[#4edea3]/40">
                       <div className="w-2 h-2 rounded-full bg-[#003824]"></div>
@@ -871,15 +872,15 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   <div className="relative z-10 flex justify-between items-center px-4">
                     <div className="bg-[#171f33]/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-[#ffb4ab] flex items-center gap-1 shadow-md text-[11px] border border-[#2d3449]">
                       <span className="material-symbols-outlined text-[13px]">warning</span>
-                      <span>Competitor Cluster A (0.8km)</span>
+                      <span>Sample marker · not live data</span>
                     </div>
                     <div className="bg-[#171f33]/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-[#4cd7f6] flex items-center gap-1 shadow-md text-[11px] border border-[#2d3449]">
                       <span className="material-symbols-outlined text-[13px]">local_shipping</span>
-                      <span>Logistics Hub (1.4km)</span>
+                      <span>Sample marker · not live data</span>
                     </div>
                     <div className="bg-[#171f33]/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-[#ffb4ab] flex items-center gap-1 shadow-md text-[11px] border border-[#2d3449]">
                       <span className="material-symbols-outlined text-[13px]">warning</span>
-                      <span>Competitor Cluster B (2.1km)</span>
+                      <span>Sample marker · not live data</span>
                     </div>
                   </div>
 
@@ -902,11 +903,11 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     <div className="flex items-center justify-between">
                       <h3 className="text-[17px] font-semibold text-[#dae2fd]">Delivery Catchment</h3>
                       <span className="bg-[#4cd7f6]/10 text-[#4cd7f6] px-2.5 py-0.5 rounded-full text-[11px] font-semibold">
-                        Dynamic GIS
+                        Radius setting
                       </span>
                     </div>
                     <p className="text-[13px] text-[#bbcabf] leading-relaxed">
-                      Adjust the dispatch threshold to calibrate 15–30 min hyper-local delivery coverage and competitor scanning scope.
+                      Set the radius used by supported data collection. This preview does not calculate delivery time, footfall, or household reach.
                     </p>
 
                     {/* Radius Slider */}
@@ -917,61 +918,45 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                       </div>
                       <input
                         type="range"
-                        min="5"
-                        max="25"
-                        step="0.5"
+                        min="10"
+                        max="15"
+                        step="1"
                         value={formData.radius_km}
                         onChange={(e) => setFormData((prev) => ({ ...prev, radius_km: parseFloat(e.target.value) }))}
                         className="w-full accent-[#4edea3] bg-[#222a3d] rounded-lg cursor-pointer h-2"
                       />
                       <div className="flex justify-between text-[11px] text-[#bbcabf]">
-                        <span>5 km (Micro)</span>
-                        <span>10–15 km (SRS Std)</span>
-                        <span>25 km (Metro)</span>
+                        <span>10 km</span>
+                        <span>12 km</span>
+                        <span>15 km</span>
                       </div>
                     </div>
 
-                    {/* Live Catchment Indicators */}
+                    {/* Evidence availability */}
                     <div className="flex flex-col gap-3 pt-2">
                       <div className="p-3.5 rounded-xl bg-[#171f33] border border-[#2d3449] flex flex-col gap-1">
                         <span className="text-[11px] text-[#bbcabf] uppercase tracking-wider font-semibold">
-                          Estimated Addressable Reach
+                          Addressable Reach
                         </span>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-[26px] font-bold text-[#dae2fd]">
-                            {reachCount.toLocaleString()}
-                          </span>
-                          <span className="text-[13px] text-[#bbcabf]">households</span>
-                        </div>
-                        <span className="text-[11px] text-[#4edea3] flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[13px]">timer</span>
-                          Within 15-min delivery window
+                        <span className="text-[15px] font-bold text-[#dae2fd]">Not available</span>
+                        <span className="text-[11px] text-[#bbcabf]">
+                          No verified household-level dataset is configured.
                         </span>
                       </div>
 
                       <div className="p-3.5 rounded-xl bg-[#171f33] border border-[#2d3449] flex flex-col gap-1">
                         <span className="text-[11px] text-[#bbcabf] uppercase tracking-wider font-semibold">
-                          Competitor Saturation Proxy
+                          Competitor Saturation
                         </span>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[15px] font-bold text-[#4edea3]">
-                            {saturationPercent}% ({saturationPercent < 30 ? 'Low Risk' : saturationPercent < 60 ? 'Moderate' : 'High Competition'})
-                          </span>
-                          <span className="material-symbols-outlined text-[#4edea3] text-[18px]">query_stats</span>
-                        </div>
-                        <div className="w-full bg-[#2d3449] h-2 rounded-full overflow-hidden mt-1">
-                          <div
-                            className="bg-[#4edea3] h-full rounded-full transition-all duration-300"
-                            style={{ width: `${saturationPercent}%` }}
-                          ></div>
-                        </div>
+                        <span className="text-[15px] font-bold text-[#dae2fd]">Calculated after collection</span>
+                        <span className="text-[11px] text-[#bbcabf]">No competitor records are shown in this preview.</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="p-3 rounded-lg bg-[#2d3449]/40 border border-[#2d3449] text-[#bbcabf] text-[12px] flex items-center gap-2">
                     <span className="material-symbols-outlined text-[#4cd7f6] text-[18px]">lightbulb</span>
-                    <span>Pro-tip: 10–15 km gives highest accuracy for urban retail footfall calculations.</span>
+                    <span>Radius is a search parameter only; accuracy depends on source coverage and is reported with the analysis.</span>
                   </div>
                 </div>
               </div>
@@ -1039,6 +1024,10 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     </button>
                   </div>
                 </div>
+
+                <p className="text-[10px] text-[#86948a] text-right">
+                  Fixed illustrative conversion: 1 USD = PKR {EXCHANGE_RATE_USD_TO_PKR}. This is not a live exchange rate.
+                </p>
 
                 {/* Range Slider & Manual Input */}
                 <div className="flex flex-col gap-2">
@@ -1213,11 +1202,11 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                         <div className="flex items-center gap-2">
                           <span className="text-[14px] font-semibold text-[#dae2fd]">Physical Retail + Online Hybrid</span>
                           <span className="bg-[#4edea3]/20 text-[#4edea3] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                            Recommended
+                            Optional
                           </span>
                         </div>
                         <span className="text-[12px] text-[#bbcabf] leading-snug">
-                          High footfall synergy, walk-in showroom, premium brand trust &amp; omni-channel pickup.
+                          Choose this option if you plan to serve in-person customers as well as online orders.
                         </span>
                       </div>
                     </label>
@@ -1285,7 +1274,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   Define your audience, scale &amp; catalog specifications
                 </h2>
                 <p className="text-[15px] text-[#bbcabf] max-w-3xl leading-relaxed">
-                  These optional attributes allow our multi-AI engine to tailor feasibility recommendations specifically to your venture profile.
+                  These optional attributes are saved with your project and can inform the current rule-based recommendations.
                 </p>
               </div>
 
@@ -1523,7 +1512,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   Review your business idea before feasibility submission
                 </h2>
                 <p className="text-[15px] text-[#bbcabf] max-w-3xl leading-relaxed">
-                  Verify the parameters of your venture. Upon submission, this idea will be securely persisted and queued for Module 3 Smart Data Aggregation &amp; XGBoost Feasibility Scoring.
+                  Review your venture details. Submission starts data collection and the current provisional MCDA analysis workflow when the configured sources are available.
                 </p>
               </div>
 
@@ -1590,13 +1579,15 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                         <span className="font-semibold text-[#4edea3]">{formData.radius_km} km</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Estimated Reach:</span>
-                        <span className="font-semibold text-[#dae2fd]">{reachCount.toLocaleString()} households</span>
+                        <span>Addressable Reach:</span>
+                        <span className="font-semibold text-[#dae2fd]">Not available</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Coordinates:</span>
                         <span className="font-mono text-[#bbcabf]">
-                          {Number(formData.lat || 31.5204).toFixed(3)}°N, {Number(formData.lng || 74.3587).toFixed(3)}°E
+                          {formData.lat !== null && formData.lng !== null
+                            ? `${Number(formData.lat).toFixed(3)}°N, ${Number(formData.lng).toFixed(3)}°E`
+                            : 'Not set'}
                         </span>
                       </div>
                     </div>

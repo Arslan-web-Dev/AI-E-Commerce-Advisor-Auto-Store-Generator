@@ -19,29 +19,28 @@
 - **Rate Limits & Hygiene**: Up to 2 concurrent connections per IP. 15-second query timeouts.
 - **Fallback**: When unreachable or rate-limited, the system falls back to `CompetitorDemoProvider` with provenance `synthetic_demo`.
 
-### B. Regional Statistics & Demographic Data (PBS / PTA Open Datasets)
-- **Primary Source**: Pakistan Bureau of Statistics 2023 Digital Census Publications & Pakistan Telecommunication Authority 2024/2025 Digital Reports.
+### B. Regional Statistics & Demographic Data (embedded estimates)
+- **Current implementation**: Embedded city reference values with citations; no live PBS/PTA request or versioned licensed dataset is loaded by this provider.
 - **Metrics Collected**:
   - `population`: Regional census projection.
   - `internet_penetration_pct`: Regional broadband/cellular penetration rate.
   - `ecommerce_growth_rate_pct`: Estimated annual sector expansion index.
-- **Licensing**: Public Government Open Data.
-- **Fallback**: Synthetic demographic calculations matching provincial averages with provenance `synthetic_demo`.
+- **Provenance**: `manual_estimate`; values and source dates require validation before decision use.
+- **Fallback**: An embedded national urban estimate is used for unsupported cities and must be treated as low-confidence.
 
-### C. Category Demand & Search Trends (Google Trends / Pytrends)
-- **Primary Method**: Relative Search Interest Series (`0–100`) for the target commercial vertical over 12 months.
-- **Region**: Pakistan (`PK`).
-- **Unit**: Relative Search Index (not absolute unit sales).
-- **Fallback**: Seeded 12-month cyclical interest curves with provenance `synthetic_demo`.
+### C. Category Demand & Search Trends (synthetic curve)
+- **Current implementation**: In-code category seasonality curve, not Google Trends or Pytrends.
+- **Unit**: Synthetic illustrative index (`0–100`), not observed search interest or absolute unit sales.
+- **Provenance**: `synthetic_demo`; do not use as measured market demand.
 
 ### D. SME Commercial Cost Benchmarks & Rent Cache
-- **Primary Source**: PostgreSQL `rent_cache` table containing commercial square-footage rates scraped/benchmarked for key Pakistani business districts.
+- **Current implementation**: Attempts an owner-authenticated `rent_cache` lookup and uses embedded city defaults when no row is available. This is a benchmark model, not a verified live rent feed.
 - **Cost Categories**:
   - `setup`: Fit-out, electrical, display shelving, signage.
   - `rent_monthly`: Derived from footprint square footage and `rent_per_sqft_pkr`.
   - `marketing_initial`: Launch advertising, Meta/Google ads CAC baseline.
   - `logistics_per_order`: Courier Cash on Delivery (COD) rate average.
-- **Provenance**: `manual_estimate` or `licensed_dataset`.
+- **Provenance**: `manual_estimate`; sources, sample size, and observation date should be shown where a cache row exists.
 
 ---
 

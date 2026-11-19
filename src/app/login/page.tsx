@@ -183,11 +183,11 @@ function LoginFormContent() {
           <div className="grid grid-cols-12 gap-3 items-center bg-[#131b2e] p-4 rounded-xl mb-4 border border-[#2d3449]/70">
             <div className="col-span-4 flex flex-col items-center justify-center text-center">
               <span className="font-display text-[26px] font-bold text-[#4edea3]">0.85</span>
-              <span className="text-[10px] text-[#bbcabf] uppercase tracking-wider">Viability</span>
+              <span className="text-[10px] text-[#bbcabf] uppercase tracking-wider">Example Index</span>
             </div>
             <div className="col-span-8 flex flex-col space-y-1 pl-2 border-l border-[#2d3449]">
-              <span className="text-[12px] font-semibold text-[#dae2fd]">XGBoost Low Risk</span>
-              <p className="text-[11px] text-[#bbcabf]">Optimal commercial rent-to-budget ratio for SME launch.</p>
+              <span className="text-[12px] font-semibold text-[#dae2fd]">Illustrative MCDA Example</span>
+              <p className="text-[11px] text-[#bbcabf]">Illustrative sample only; no project evidence is attached.</p>
             </div>
           </div>
 

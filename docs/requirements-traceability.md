@@ -1,129 +1,51 @@
-# Requirements Traceability Matrix
+# Requirements Traceability and Repository Status
 
-This matrix maps functional and non-functional requirements from the Software Requirements Specification (SRS v2.0) to their technical implementations in the codebase.
+**Authority:** user-supplied *FYP SRS & SDD Combined*, v1.0, October 2026, 90 pages. User identified it as the advanced version and asked that it be used. See [the delivery baseline](FINAL_DELIVERY_BASELINE.md) for decisions, work order and copy-ready prompts. The source PDF is not committed to this repository.
 
----
+> This replaces older traceability claims based on SRS v2.0/module numbering. The source defines eight modules, 70 functional requirements (54 Must, 14 Should, 2 Could) and separate SEO requirements. Previous “Verified” labels were not runtime acceptance evidence. Statuses below are repository inspection only; no tests/build were run for this baseline update.
 
-## Module 1: User Authentication, RBAC & Landing Page
+## Functional requirement registry
 
-| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **FR-1.1** | Email/Password Registration & Login | `src/app/login/page.tsx`, Supabase Auth integration | Automated Auth Flow + Build verification | ✅ Verified |
-| **FR-1.2** | Google OAuth & Account Linking | `src/app/auth/callback/route.ts` with code exchange | Route handler & verified email linking | ✅ Verified |
-| **FR-1.3** | Roles: Owner & Admin | `profiles.role` enum, server-side trigger `handle_new_user()` | RLS Policy + Trigger enforcement | ✅ Verified |
-| **FR-1.4** | Route Guards in Middleware | `src/middleware.ts`, `src/lib/supabase/middleware.ts` | SSR route guard tests | ✅ Verified |
-| **FR-1.5** | Seed Admin Bootstrap | `scripts/seed-admin.mjs` with env secrets | Script execution check | ✅ Verified |
-| **FR-1.6** | System GitHub REST Sync | `src/app/api/admin/sync/route.ts`, `src/app/admin/page.tsx` | Admin API check & audit log | ✅ Verified |
-| **FR-1.7** | Password Reset & Session Revocation | `src/app/reset-password`, `src/app/update-password`, `/api/auth/signout` | Route tests | ✅ Verified |
-| **FR-1.8** | User Account Deletion & Cascades | `/api/auth/delete-account`, PostgreSQL foreign-key cascades | Cascading delete tests | ✅ Verified |
+Each range below lists every source FR identifier in that module and the requirement coverage in compact form. Source priority/verification tags remain authoritative in the PDF. `T` = test, `D` = demonstration, `I` = inspection, `A` = analysis.
 
----
+| Source module | FR IDs and coverage | Repository status and gap |
+| --- | --- | --- |
+| **1. Authentication and RBAC** | **FR-1.1** email/password; **1.2** Google OAuth/account linking; **1.3** owner/admin roles; **1.4** route guards + authoritative RLS; **1.5** env-seeded admin/forced password change; **1.6** audited, PII-free GitHub configuration export; **1.7** password recovery/session refresh/all-device sign-out; **1.8** account deletion/cascades; **1.9** optional demo mode disabled in production. | Partial. Auth and role foundation exists. Model-admin endpoint and RLS write policy were changed in this pass, but no runtime auth/RLS test was run. Review every route, Google linking, all-device logout, cascade and demo-mode production gate. |
+| **2. Business idea and location wizard** | **FR-2.1** three-step persisted drafts; **2.2** predefined category + idea text; **2.3** Pakistan-restricted Places/Mapbox or seeded commercial hub resolving lat/lng/city/area; **2.4** PKR/USD input, canonical PKR and Rs. 10,000–50,000,000 validation; **2.5** optional business model/audience/shop size; **2.6** idempotent pending report + analysis; **2.7** default 10 km, max 15 km. | Partial. PKR default, seeded-hub and coordinate matching, coordinate clearing, radius bounds and server validation changed in this pass. Draft persistence/recovery, configured geocoder/FX, full PKR normalization and idempotence still need evidence. |
+| **3. Smart data aggregation** | **FR-3.1** category-mapped Overpass POIs with name/coordinates/tags/distance; **3.2** timeout/retry/alternate endpoint + seven-day cache; **3.3** scheduled aggregated rent cache/source/sample/time, analysis reads cache only; **3.4** nearest/city rent fallback with low confidence; **3.5** 12-month Pakistan Google Trends via Pytrends with stale cache fallback; **3.6** typed payload + data-source health; **3.7** lawful terms/robots and aggregated rent only. | Partial. Overpass foundation exists. In-code demand curves and regional figures were relabeled synthetic/manual this pass. Live Pytrends, scheduled lawful rent collection and full cache/fallback/health behavior remain gaps. |
+| **4. Feature engineering and XGBoost** | **FR-4.1** competitor count/density/rating, rent/sqft/monthly rent/rent-budget, budget/setup-cost, demand, trend slope and saturation; **4.2** documented imputation/data quality; **4.3** XGBoost score [0,1] rounded to 2 decimals; **4.4** four risk bands; **4.5** model version per report; **4.6** SHAP/gain contributions; **4.7** rule-generated training provenance, required limited-data disclaimer and MAE/RMSE/CV evaluation; **4.8** configurable thresholds. | Partial. Feature processing and provisional MCDA exist. No verified XGBoost serving artifact found. SRS permits documented rule-generated labels but does not permit real-revenue claims. Close OI-5/OI-6 before model training; persist artifact/version/evaluation and disclaimer before claiming inference. |
+| **5. Competition/location/rent map** | **FR-5.1** interactive map, markers, radius and popups; **5.2** area rent overlay; **5.3** rent-budget gauge/bands; **5.4** saturation 0–100 and four labels; **5.5** 12-month trend chart; **5.6** sortable/filterable competitor table + CSV; **5.7** OSM attribution on every map. | Partial. Feasibility/results UI foundation exists. Confirm every view uses sourced analysis data, includes unavailable states, required bands/labels, interaction and attribution. |
+| **6. Multi-AI advisory and risk engine** | **FR-6.1** configurable OpenAI→Gemini→Groq chain; **6.2** 429/5xx/20s/invalid-schema failover + ai_call_log; **6.3** deterministic final fallback; **6.4** English/Roman Urdu switch/cache; **6.5** computed-facts-only grounded JSON; **6.6** model risk + rule flags; **6.7** priority/impact/effort action checklist with saved ticks; **6.8** stored-data-only budget re-simulation; **6.9** prompt hygiene/server-only secrets. | Partial. Deterministic advice exists; configured provider chain, strict schema/logging, caching, risk/action persistence, and no-refetch resimulation are not confirmed. |
+| **7. MCQ theme configurator** | **FR-7.1** four steps, 3–5 choices each, live preview; **7.2** Groq JSON-schema compilation; **7.3** schema validation, one retry, deterministic preset fallback; **7.4** saved theme_config JSONB; **7.5** WCAG AA contrast check/adjustment; **7.6** rerun with configuration history. | Partial. Theme questionnaire and manifest/draft foundations exist. Verify exact choice/preview behavior, live configured Groq path, retry/fallback, persistence/history and contrast adjustment. |
+| **8. Multi-tenant deployment, SEO and admin** | **FR-8.1** unique reserved-word-safe slug; **8.2** one-click publish/wildcard URL after readiness; **8.3** optional Vercel custom domain/DNS polling; **8.4** unpublish/republish; **8.5** Home/Catalogue/Product/Cart/COD Checkout/Confirmation/About/Contact; **8.6** theme-config-only style and 375px responsive; **8.7** guest checkout with server DB prices; **8.8** owner product CRUD/images; **8.9** editable AI description writer; **8.10** timestamped order pipeline and stock transitions; **8.11** orders/revenue/low-stock/SEO KPIs; **8.12** system admin store/usage/AI log/provider health/suspension; **SEO-1** validated title/description; **SEO-2** Store/Product/BreadcrumbList JSON-LD; **SEO-3** tenant sitemap/robots; **SEO-4** canonical/headings/alt/OG; **SEO-5** checked AI copy/SEO score. | Not complete end to end. Merchant/product/order foundations exist, but no complete public tenant storefront or provider-confirmed publish lifecycle was found. Owner operation foundations do not satisfy public customer checkout. Build and evidence this as Module 8, not old Module 9. |
 
-## Module 2: Business Idea Input and Project Creation
+## Data, quality and interface requirements
 
-| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **FR-2.1** | Store Requirement Input (Category, Location, Budget) | `src/components/wizard/BusinessIdeaWizard.tsx` (Steps 1–3) | Input validation + Schema tests | ✅ Verified |
-| **FR-2.2** | Advanced Input Options (Audience, Scale, Products) | `src/components/wizard/BusinessIdeaWizard.tsx` (Step 4), file upload | Schema verification + Type checks | ✅ Verified |
-| **FR-2.3** | Commercial Hub Picker & Location | `COMMERCIAL_HUB_PRESETS`, worldwide location text | Coordinate & preset validation | ✅ Verified |
-| **FR-2.4** | Budget Range Validation & Currency | USD ($100–$10M) / PKR (Rs. 10k–500M) dual-currency slider | Range validator tests | ✅ Verified |
-| **FR-2.5** | Optional Inputs (Channel, Footprint) | D2C vs Hybrid, Kiosk/Boutique/Outlet/Flagship footprint | Form & DB persistence checks | ✅ Verified |
-| **FR-2.6** | Submission Lifecycle & Report Linkage | `POST /api/projects/[id]/submit` links `feasibility_reports` | Status transition tests | ✅ Verified |
-| **FR-2.7** | Search Radius Selection | 5–25 km dynamic slider with 10–15 km standard default | Slider state & reach calculations | ✅ Verified |
+These requirements apply across modules. Source identifiers are retained; implementation claims must reference the exact code/migration and actual evidence.
 
----
+| Source IDs | Required acceptance scope | Initial status |
+| --- | --- | --- |
+| **DAT-1–DAT-3** | Customer name/phone/address/email only for fulfilment and stored only in orders; account deletion cascades owned data; RLS tests prove tenant/user isolation, public published/active reads only, no anonymous order reads and no self-role change. | Partial/unverified. Schema and policies require full review and runtime cross-role evidence. |
+| **NFR-P1–P4** | Analysis P90 ≤15s warm cache; storefront LCP ≤2.5s typical 4G; theme ≤10s; resimulation P90 ≤3s. | Not measured. |
+| **NFR-S1–S4** | Shared tenant infrastructure; tenant indexes/query plan review; stateless Python service; evaluation target 50 concurrent users/20 active stores on free tiers. | Architecture gap: FastAPI service absent from the current repository; scale not measured. |
+| **NFR-C1–C6** | Rs. 0–15,000 target; 80% quota warnings; open components preferred; tenant image isolation/2 MB file and 50 MB store defaults; 20 LLM calls/user/hour; cache reports/descriptions/trends. | Partial/unverified; current spend/quota/image limits not evidenced. |
+| **NFR-R1–R7** | AI fallback; per-provider circuit breaker (3 failures/5 min); schema validation; stale-source disclosure; idempotent jobs; 99% evaluation storefront target with no SLA claim; versioned migrations/seeds and pre-milestone DB export. | Partial/unverified. |
+| **NFR-SEC1–SEC6** | HTTPS/secrets; RLS and JWT; schema validation and encoded AI output; delimited prompts/no tools; CSP/HSTS/CSRF/guest abuse limits; audited role/suspension changes. | Partial/unverified. |
+| **NFR-U1–U4** | 375px and WCAG AA contrast; actionable errors; light/dark mode; latest two stable Chrome/Edge/Firefox/Safari. | Partial/unverified. |
+| **NFR-M1–M3** | Modular frontend/ML/versioned migrations; unit coverage of features and AI router; GitHub Actions CI. | FastAPI/ML service and CI/test coverage remain open; no tests/build run for this baseline update. |
+| **UI-1–UI-3** | Responsive interface/light-dark; consistent navigation/actionable errors; storefront style only from validated theme config. | Partial/unverified. |
+| **HI-1–HI-2** | Standard mobile/desktop browser; CPU laptop model training and free-tier inference target. | Not demonstrated. |
+| **SI-1–SI-6** | Supabase DB/Auth/Storage; Overpass/Pytrends; OpenAI/Gemini/Groq; Places/Mapbox; Vercel Domains/GitHub REST; FastAPI-loaded XGBoost artifact. | Several providers/services are absent, static, or unconfigured; report each accurately. |
+| **CI-1–CI-4** | HTTPS; app-to-analytics REST/JSON with verified JWT; external calls server-side; no WebSocket requirement. | FastAPI service/integration absent. |
+| **GEO-1–GEO-5 / OI-1–OI-12** | Pakistan restriction and geography assumptions; geocoder, domain, sparse ratings, online-only rent, setup-cost baselines, label approval, cold start, lawful rent sources, privacy-law review, SQL/order security decisions, document metadata and stakeholder interviews. | Close and record each open issue; never invent external approvals or research. |
 
-## Module 3: Data Collection and Provider Integration
+## Requirements not in the current completion scope
 
-| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **FR-3.1** | Competitor Data Collection | `OverpassCompetitorProvider` & `DemoCompetitorProvider` | Overpass API QL + Synthetic Fallback | ✅ Verified |
-| **FR-3.2** | Market & Demographics Data | `PbsRegionalStatsProvider` (PBS 2023 Census & PTA) | Metric observations persistence | ✅ Verified |
-| **FR-3.2** | Category Demand & Search Trends | `GoogleTrendsProvider` (12-month relative interest) | Trend point array & slope calculation | ✅ Verified |
-| **FR-3.3** | Cost Data Collection (Setup, Rent, Logistics) | `BenchmarkCostEstimateProvider` + `rent_cache` | Currency conversion & range checks | ✅ Verified |
-| **Orchestration** | Independent Concurrent Provider Execution | `runDataCollection()` via `Promise.allSettled` | Concurrency & partial failure tests | ✅ Verified |
-| **Persistence** | Normalized Source Records & Provenance | `project_collection_runs`, `project_competitors`, etc. | PostgreSQL RLS + Provenance tags | ✅ Verified |
-| **Transparency** | UI Status, Provenance Badges & Fallback Actions | `MarketDataPanel.tsx` in `/projects/[id]` | UI component render & toggle checks | ✅ Verified |
+Per SRS §3.15.1, visitor analytics, coupons, reviews and PDF invoices are future work. Do not use the older repository's Module 9 numbering or feature list to supersede source Module 8. Existing code in these areas may remain unless it conflicts with a security or privacy requirement; avoid new expansion until the approved baseline changes.
 
----
+## Status key
 
-## Module 4: Data Processing and Feature Engineering
-
-| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **FR-4.1** | Competitor Deduplication & Count | `deduplicateCompetitors()` spatial Haversine (<50m) & brand match | Deduplication unit tests | ✅ Verified |
-| **FR-4.1** | Category Saturation Feature | `category_saturation = competitors_count / population` | Mathematical formula & edge case null test | ✅ Verified |
-| **FR-4.1** | Budget Ratio Feature | `budget_ratio = user_budget / total_estimated_cost` | Currency normalization & coverage math test | ✅ Verified |
-| **FR-4.1** | ML Feature Vector | Bounded $[0, 1]$ `engineered_vector` JSON schema | Vector structure & range tests | ✅ Verified |
-| **FR-4.2** | Missing Value Imputation | `cleanAndValidateData()` with national benchmarks & audit tags | Imputation counter & integrity check | ✅ Verified |
-| **FR-4.2** | Data Completeness & Quality Scoring | 4-domain scoring (0–100%) & status (`complete`, `partial`, `unavailable`) | Scoring threshold verification | ✅ Verified |
-| **Persistence** | Auditable Run & Features Persistence | `project_processing_runs` & `project_features` with RLS | Migration & policy verification | ✅ Verified |
-| **API Endpoints** | Feature Processing & Retrieval APIs | `POST /api/projects/[id]/process`, `GET .../features`, `GET .../processing-runs` | API route integration tests | ✅ Verified |
-| **UI Integration**| Feature Quality & Completeness Panel | `FeatureQualityPanel.tsx` on `/projects/[id]` | Component render & interaction check | ✅ Verified |
-
----
-
-## Module 5: Feasibility Prediction and Score Classification
-
-| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **FR-5.1** | Feasibility Prediction & Outcome | Provisional MCDA scoring engine (`src/lib/scoring/mcda.ts`) | Algorithmic scoring audit | ✅ Verified (Provisional) |
-| **FR-5.2** | Supervised Model Governance | Deferred training audit (`docs/deferred-supervised-training.md`), `model_registry` schema | Schema & readiness note audit | ✅ Verified |
-| **FR-5.3** | Feasibility Classification | Categorization: High (>=75), Moderate (50-74), Low (<50) | MCDA score threshold tests | ✅ Verified |
-| **FR-5.4** | Feasibility Results Presentation | Feasibility breakdown UI (`/projects/[id]/feasibility`) | UI render & transparency tests | ✅ Verified |
-
----
-
-## Module 6: Strategic Advisory, Budget Allocation & Location Recommendations
-
-| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **FR-6.1** | Strategic Advisory Engine | Advisory generator consuming M4 features and M5 score | Rule engine evaluation tests | ✅ Verified |
-| **FR-6.2** | Budget Allocation Breakdown | Setup, inventory, marketing, working capital splits | Currency & percentage math tests | ✅ Verified |
-| **FR-6.3** | Evidence-Based Location Rankings | Regional foot-traffic & demographic ranking with provenance | Provenance and score audit | ✅ Verified |
-| **FR-6.4** | Strategic Advisory UI | Strategic recommendations & budget allocation view | UI interactive testing | ✅ Verified |
-
----
-
-## Module 7: Theme Configurator, 20+ Component Variant Library & Storefront Compiler
-
-| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **FR-7.1** | MCQ Theme Configurator Flow | 4-step interactive wizard (`/projects/[id]/storefront-wizard`) | Wizard step & option tests | ✅ Verified |
-| **FR-7.2** | 20+ Component Variant Library | 240 distinct variants across 12 component families in `src/lib/storefront/variant-catalog.ts` | Programmatic 20+ integrity check (`verify-catalog-20plus.mjs`) | ✅ Verified |
-| **FR-7.3** | Live Multi-Viewport Preview | Viewport-responsive schematic wireframes (`WireframePreview`) for all 12 component families | Viewport switching (Desktop/Tablet/Mobile) & render tests | ✅ Verified |
-| **FR-7.4** | Template Presets & Auto-Recommendation | 4 presets (`modern-urban`, `boutique-elegant`, `high-density-catalog`, `emerald-brand`) | MCQ mapping & deterministic fallback tests | ✅ Verified |
-| **FR-7.5** | Safe Storefront Compiler | Pure JSON manifest compiler (`compileManifest`), zero executable code stored | Invariant & injection tests | ✅ Verified |
-| **FR-7.6** | Approval Gate & Versioned Drafts | `store_draft_versions` & `store_wizard_sessions` schema, status locked to `draft` | RLS & server draft compile API tests | ✅ Verified |
-
----
-
-## Module 8: Post-Launch Store Management
-
-| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **FR-8.8** | Product CRUD & Price/Stock Management | Products API (`/api/stores/[id]/products`), slug validation, non-negative price/stock constraints, soft archiving | API CRUD tests, DB constraint verification | ✅ Verified |
-| **FR-8.9** | Low-Stock Alerts | `filterLowStockProducts()`, Inventory API (`/api/stores/[id]/inventory`), KPI alert banner | Low-stock threshold & filter tests | ✅ Verified |
-| **FR-8.10** | Order List/Details/Status/Invoices | Order API with `ALLOWED_STATUS_TRANSITIONS` state machine, stock sync on confirm/cancel, `generateInvoiceHtml()` | State machine transition tests, XSS safety audit | ✅ Verified |
-| **FR-8.11** | Customer Profiles & Order History | Customers API (`/api/stores/[id]/customers`) with aggregated lifetime spend | Directory render & aggregation tests | ✅ Verified |
-| **FR-8.12** | Payment Method Management | Payment settings API, truthful provider status registry (COD active, Stripe configurable) | Provider status audit, no-fake-charge check | ✅ Verified |
-| **Security** | Tenant Isolation & RLS | `can_manage_store()` SQL helper, `owner_id = auth.uid()`, forced RLS on all 6 tables | RLS policy & 403 guard verification | ✅ Verified |
-| **UI** | Merchant Control Panel | 6-tab interface at `/projects/[id]/store` with product modal, stock adjustment, order drawer, invoice viewer | Tab render, modal interaction, sandbox mode check | ✅ Verified |
-
----
-
-## Module 9: Generated Store Analytics, Customer Behavior & Reports
-
-| SRS ID | Requirement Title | Technical Implementation | Verification Method | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **FR-9.1** | Gross Sales & Net Revenue Calculation | `calculateOrderMetrics()` in `src/lib/analytics/metrics.ts`, deducting returns/cancels | Fixed test fixture math tests | ✅ Verified |
-| **FR-9.2** | Daily, Weekly & Monthly Sales Trends | `generateDailyTrends()` in `metrics.ts`, `/api/stores/[id]/analytics/trends` | Time series bucketing tests | ✅ Verified |
-| **FR-9.3** | Top Performing Products & Conversion | `aggregateProductPerformance()`, `/api/stores/[id]/analytics/products` | Catalog performance aggregation tests | ✅ Verified |
-| **FR-9.4** | Customer Conversion Funnel | `computeFunnel()`, 5-stage conversion & dropoff calculation in `/api/stores/[id]/analytics/behavior` | Funnel stage tests | ✅ Verified |
-| **FR-9.5** | Cart Abandonment Tracking | `computeCartAbandonment()`, defensive availability flag for zero-events state | Cart session & abandonment tests | ✅ Verified |
-| **FR-9.6** | Traffic Sources & Attribution | `computeTrafficSources()`, referrer & UTM classification | Traffic parsing tests | ✅ Verified |
-| **FR-9.7** | Executive PDF / Print Reports | `generateAnalyticsReportHtml()`, `/api/stores/[id]/analytics/reports`, `@media print` CSS | XSS escaping & print format tests | ✅ Verified |
-| **FR-9.8** | First-Party Telemetry & Privacy Pipeline | `store_analytics_events` schema, `validateEventPayload()`, pseudonymous session hashing | SQL migration, RLS, and sanitizer tests | ✅ Verified |
-| **Security** | Multi-Tenant Authorization Guards | `can_manage_store()` RLS policy, `getUser()` & `store.owner_id === user.id` on all analytics routes | 403 Forbidden & RLS check | ✅ Verified |
-| **UI** | Analytics & Reports Merchant Panel | `AnalyticsPanel.tsx` in `/projects/[id]/store` with date range selector, trend chart, funnel, report modal | Component render & interaction tests | ✅ Verified |
-
+- **Partial:** useful implementation exists, but source requirements or evidence are incomplete.
+- **Not complete end to end:** a dependent user flow/integration is missing as a whole.
+- **Unverified:** no current acceptance run/evidence was recorded. This baseline update did not run tests, build or lint.
+- **Complete:** reserved for a requirement with recorded acceptance evidence, not merely present code.

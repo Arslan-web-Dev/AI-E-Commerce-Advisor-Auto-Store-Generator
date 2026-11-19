@@ -18,7 +18,7 @@ export interface DeduplicationStats {
 export interface DomainCompletenessDetail {
   available: boolean;
   item_count: number;
-  provenance: DataProvenance;
+  provenance: DataProvenance | 'unavailable';
   quality_pct: number;
   missing_fields: string[];
 }
@@ -35,7 +35,7 @@ export interface ProvenanceBreakdown {
   synthetic_demo_count: number;
   licensed_dataset_count: number;
   manual_estimate_count: number;
-  primary_source: DataProvenance;
+  primary_source: DataProvenance | 'unavailable';
 }
 
 export interface EngineeredVector {

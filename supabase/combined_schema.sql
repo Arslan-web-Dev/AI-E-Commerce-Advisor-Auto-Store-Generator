@@ -352,7 +352,7 @@ create table if not exists public.projects (
   lng                  double precision,
   radius_km            numeric(4,1) not null default 10.0 check (radius_km between 1.0 and 50.0),
   budget_amount        numeric(12,2) not null check (budget_amount > 0),
-  budget_currency      text not null default 'USD' check (budget_currency in ('USD', 'PKR')),
+  budget_currency      text not null default 'PKR' check (budget_currency in ('USD', 'PKR')),
   budget_pkr           bigint,
   
   -- FR-2.2 Advanced Input Options
@@ -491,7 +491,7 @@ create table if not exists public.project_market_observations (
   geography       text not null,
   period_year     integer not null default 2024,
   provider        text not null default 'pbs_census',
-  provenance      text not null default 'licensed_dataset' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
+  provenance      text not null default 'manual_estimate' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
   source_citation text,
   retrieved_at    timestamptz not null default now()
 );
@@ -509,8 +509,8 @@ create table if not exists public.project_demand_trends (
   trend_series jsonb not null default '[]'::jsonb, -- array of { month: string, index: number }
   avg_interest numeric(5,2) not null,
   trend_slope  text not null default 'stable' check (trend_slope in ('growing', 'stable', 'declining')),
-  provider     text not null default 'google_trends',
-  provenance   text not null default 'external_api' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
+  provider     text not null default 'synthetic_category_trend_curve',
+  provenance   text not null default 'synthetic_demo' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
   retrieved_at timestamptz not null default now()
 );
 
@@ -753,6 +753,14 @@ create policy model_registry_read on public.model_registry
   for select
   to authenticated
   using (true);
+
+-- Model registry writes are restricted to administrators.
+drop policy if exists model_registry_admin_manage on public.model_registry;
+create policy model_registry_admin_manage on public.model_registry
+  for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
 
 -- Feasibility Runs Policies: Bound to project access
 drop policy if exists feasibility_runs_access on public.project_feasibility_runs;

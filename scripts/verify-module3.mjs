@@ -89,7 +89,7 @@ const pbsCode = fs.readFileSync(path.join(rootDir, 'src/lib/providers/regional/p
 assert(pbsCode.includes('PbsRegionalStatsProvider'), 'PbsRegionalStatsProvider defined');
 assert(pbsCode.includes('population'), 'Population metric handled');
 assert(pbsCode.includes('internet_penetration_pct'), 'Internet penetration metric handled');
-assert(pbsCode.includes("provenance = 'licensed_dataset'"), 'PBS demographics tagged as licensed_dataset');
+assert(pbsCode.includes("provenance = 'manual_estimate'"), 'Embedded regional reference figures tagged as manual estimates');
 
 const trendsCode = fs.readFileSync(path.join(rootDir, 'src/lib/providers/trends/google-trends.ts'), 'utf-8');
 assert(trendsCode.includes('GoogleTrendsProvider'), 'GoogleTrendsProvider defined');

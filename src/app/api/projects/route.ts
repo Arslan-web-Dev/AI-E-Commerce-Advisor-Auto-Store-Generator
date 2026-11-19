@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const category = body.category || 'Apparel & Fashion';
     const targetLocation = body.target_location || 'Gulberg III, Lahore, Pakistan';
     const budgetAmount = body.budget_amount ? Number(body.budget_amount) : 15000;
-    const budgetCurrency = body.budget_currency || 'USD';
+    const budgetCurrency = body.budget_currency || 'PKR';
     const budgetPkr =
       budgetCurrency === 'PKR'
         ? Math.round(budgetAmount)

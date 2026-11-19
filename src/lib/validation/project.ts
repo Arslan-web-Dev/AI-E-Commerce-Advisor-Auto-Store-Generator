@@ -38,15 +38,15 @@ export function validateProjectStep(step: number, data: Partial<ProjectFormData>
 
     if (data.radius_km !== undefined) {
       const radius = Number(data.radius_km);
-      if (isNaN(radius) || radius < 1 || radius > 50) {
-        errors.radius_km = 'Buffer radius must be between 1 km and 50 km.';
+      if (isNaN(radius) || radius < 10 || radius > 15) {
+        errors.radius_km = 'Analysis radius must be between 10 km and 15 km.';
       }
     }
   }
 
   if (step === 3 || step === 5) {
     const budget = Number(data.budget_amount);
-    const currency = (data.budget_currency as BudgetCurrency) || 'USD';
+    const currency = (data.budget_currency as BudgetCurrency) || 'PKR';
 
     if (data.budget_amount === undefined || data.budget_amount === null || isNaN(budget) || !isFinite(budget)) {
       errors.budget_amount = 'Please enter a valid numeric budget amount.';

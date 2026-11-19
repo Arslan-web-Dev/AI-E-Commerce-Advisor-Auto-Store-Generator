@@ -18,13 +18,13 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'FeasibilityAdvisor | AI-Powered E-Commerce Feasibility & Auto Store Generator',
+  title: 'FeasibilityAdvisor | E-Commerce Feasibility & Store Drafts',
   description:
-    'Validate commercial footfall, competitor saturation, and rent-to-budget feasibility across Pakistani commercial hubs with XGBoost & Multi-LLMs, then generate a live e-commerce storefront in minutes.',
+    'Review Pakistan-focused market evidence and provisional feasibility scores, then configure a multi-tenant e-commerce store draft.',
   keywords: [
     'Pakistan E-Commerce',
     'Business Feasibility Advisor',
-    'XGBoost Spatial ML',
+    'Provisional MCDA',
     'COD Storefront Generator',
     'Lahore Karachi Islamabad Retail',
     'OpenStreetMap Overpass',
@@ -32,9 +32,9 @@ export const metadata: Metadata = {
   authors: [{ name: 'Muhammad Arslan' }],
   metadataBase: new URL('https://feasibilityadvisor.pk'),
   openGraph: {
-    title: 'FeasibilityAdvisor | AI-Powered E-Commerce Feasibility & Auto Store Generator',
+    title: 'FeasibilityAdvisor | E-Commerce Feasibility & Store Drafts',
     description:
-      'Evaluate Pakistani retail feasibility with XGBoost spatial ML, OSM competitor density & rent intelligence, then launch a live online store.',
+      'Evaluate Pakistan-focused business ideas with available competitor data, disclosed cost estimates, and a provisional MCDA index.',
     type: 'website',
     locale: 'en_PK',
   },

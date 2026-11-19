@@ -1,4 +1,7 @@
 # Work Breakdown Structure (WBS)
+
+> **Historical planning copy:** This WBS includes scope (manager approval, analytics, invoices) that conflicts with the user-supplied advanced October 2026 SRS/SDD v1.0. For current work, follow [the reconciled delivery baseline](FINAL_DELIVERY_BASELINE.md) and [requirements traceability](requirements-traceability.md). Do not treat work packages here as approved requirements.
+
 ## AI E-Commerce Advisor & Auto Store Generator
 
 **Document type:** Project delivery baseline  

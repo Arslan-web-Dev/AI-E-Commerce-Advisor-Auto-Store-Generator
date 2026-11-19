@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { validateCompleteProject } from '@/lib/validation/project';
-import { EXCHANGE_RATE_USD_TO_PKR } from '@/types/project';
+import { COMMERCIAL_HUB_PRESETS, EXCHANGE_RATE_USD_TO_PKR } from '@/types/project';
 import { runDataCollection } from '@/lib/data-collection/orchestrator';
 
 interface RouteContext {
@@ -62,14 +62,48 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Coordinate fallbacks for Pakistan if missing
-    let lat = project.lat !== null && project.lat !== undefined ? Number(project.lat) : 31.5204;
-    let lng = project.lng !== null && project.lng !== undefined ? Number(project.lng) : 74.3587;
-    // Bound coordinates to Pakistan range required by feasibility_reports check constraint
-    if (lat < 23.5 || lat > 37.2) lat = 31.5204;
-    if (lng < 60.8 || lng > 77.9) lng = 74.3587;
+    // Require an actual selected Pakistan hub/coordinate; never silently relocate a project.
+    const lat = Number(project.lat);
+    const lng = Number(project.lng);
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng) ||
+      lat < 23.5 || lat > 37.2 ||
+      lng < 60.8 || lng > 77.9
+    ) {
+      return NextResponse.json(
+        { error: 'Select a seeded Pakistan commercial hub to set valid coordinates before submitting this project.' },
+        { status: 400 }
+      );
+    }
+    if (typeof project.city !== 'string' || !project.city.trim()) {
+      return NextResponse.json(
+        { error: 'Select a seeded Pakistan commercial hub so the project has a city and coordinates.' },
+        { status: 400 }
+      );
+    }
+    const locationText = typeof project.target_location === 'string' ? project.target_location.toLowerCase() : '';
+    const matchesSeededHub = COMMERCIAL_HUB_PRESETS.some((hub) =>
+      hub.city.toLowerCase() === project.city.toLowerCase() &&
+      Math.abs(hub.lat - lat) < 0.0001 &&
+      Math.abs(hub.lng - lng) < 0.0001 &&
+      locationText.includes(hub.name.toLowerCase())
+    );
+    if (!matchesSeededHub) {
+      return NextResponse.json(
+        { error: 'Choose a listed commercial hub. This version does not geocode free-text locations.' },
+        { status: 400 }
+      );
+    }
 
-    const radiusKm = Math.min(15, Math.max(10, Math.round(project.radius_km || 10)));
+    const requestedRadiusKm = Number(project.radius_km);
+    if (!Number.isFinite(requestedRadiusKm) || requestedRadiusKm < 10 || requestedRadiusKm > 15) {
+      return NextResponse.json(
+        { error: 'Analysis radius must be between 10 and 15 km.' },
+        { status: 400 }
+      );
+    }
+    const radiusKm = Math.round(requestedRadiusKm);
     const budgetPkr =
       project.budget_pkr ||
       (project.budget_currency === 'PKR'
@@ -83,7 +117,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         owner_id: user.id,
         category: project.category,
         idea_text: project.product_description || `${project.category} venture at ${project.target_location}`,
-        city: project.city || 'Lahore',
+        city: project.city,
         area: project.target_location,
         lat,
         lng,

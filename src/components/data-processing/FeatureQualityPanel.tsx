@@ -295,8 +295,8 @@ export default function FeatureQualityPanel({ projectId, isSubmitted }: FeatureQ
 
               <div className="bg-[#171f33] p-3 rounded-lg border border-[#2d3449]/50 flex flex-col gap-1">
                 <span className="text-[#bbcabf] font-medium">Primary Provenance</span>
-                <span className="text-[#4edea3] font-mono capitalize">
-                  {latestRun?.provenance_summary?.primary_source || 'external_api'}
+                <span className="text-[#bbcabf] font-mono capitalize">
+                  {latestRun?.provenance_summary?.primary_source?.replaceAll('_', ' ') || 'unavailable'}
                 </span>
               </div>
             </div>

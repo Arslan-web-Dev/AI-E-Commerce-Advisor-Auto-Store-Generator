@@ -1,5 +1,7 @@
 # Software Requirements Specification (Revised)
 
+> **Historical repository copy:** This checked-in v2.0 draft is not the current requirements authority where it differs from the user-supplied advanced `FYP SRS & SDD Combined` v1.0 (October 2026). Current implementation must follow [the reconciled baseline](FINAL_DELIVERY_BASELINE.md) and [its traceability](requirements-traceability.md). Do not use this historical draft to restore manager approval or superseded module numbering.
+
 ## AI-Powered E-Commerce Feasibility Advisor & Auto Store Generator
 
 | Field | Value |

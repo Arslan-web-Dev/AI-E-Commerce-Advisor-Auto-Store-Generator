@@ -171,7 +171,7 @@ export default function LandingPage() {
                 &amp; Spatial Intelligence
               </h1>
               <p className="text-[16px] sm:text-[18px] text-[#bbcabf] max-w-2xl mx-auto leading-relaxed">
-                Validate competition in Pakistani commercial hubs, analyze local rent &amp; demand with XGBoost, and auto-deploy a live multi-tenant storefront in minutes.
+                Review available competitor data, regional estimates, and provisional feasibility scoring for Pakistani business ideas. Configure a store draft for the next stage.
               </p>
 
               {/* CTA Cluster */}
@@ -217,12 +217,15 @@ export default function LandingPage() {
                 <div className="flex items-center gap-2">
                   <span className="px-3 py-1 rounded-full bg-[#10b981]/15 text-[#4edea3] text-[12px] flex items-center gap-1.5 font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#4edea3] animate-pulse"></span>
-                    Model: XGBoost Spatial v4.2
+                    Provisional MCDA · example view
                   </span>
                   <span className="px-2.5 py-1 rounded-full bg-[#222a3d] text-[#bbcabf] text-[11px] font-mono">
                     PKR-Native
                   </span>
                 </div>
+                <p className="text-[10px] text-[#bbcabf] text-right">
+                  Illustrative interface preview; displayed figures are examples, not a live analysis.
+                </p>
               </div>
 
               {/* Grid: 3D Scene + Telemetry Breakdown */}
@@ -231,29 +234,29 @@ export default function LandingPage() {
                 <div className="lg:col-span-7 flex flex-col">
                   <Hero3DVisual />
                   <p className="text-[11px] text-[#bbcabf] text-center mt-2 font-mono">
-                    Interactive 3D POI scan • Drag to rotate coordinate angle • Powered by Three.js & WebGL
+                    Illustrative 3D graphic; markers are not collected points of interest.
                   </p>
                 </div>
 
                 {/* Telemetry Breakdown Cards (5 cols) */}
                 <div className="lg:col-span-5 flex flex-col gap-4">
-                  {/* Card 1: XGBoost Viability Score */}
+                  {/* Card 1: Illustrative MCDA sample */}
                   <div className="bg-[#131b2e]/80 border border-[#2d3449] rounded-xl p-4">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-[13px] font-semibold text-[#dae2fd] flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[#4edea3] text-[18px]">verified</span>
-                        Viability Score Output
+                        Illustrative Sample Index
                       </span>
                       <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#222a3d] text-[#4edea3]">
-                        0.85 / 1.00
+                        Example 0.85 / 1.00
                       </span>
                     </div>
                     <div className="w-full bg-[#2d3449] rounded-full h-2 overflow-hidden mb-2">
                       <div className="bg-[#4edea3] h-2 rounded-full" style={{ width: '85%' }}></div>
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-[#bbcabf]">
-                      <span>Risk Threshold: &ge;0.75</span>
-                      <span className="text-[#4edea3] font-semibold">Low Risk (Favorable)</span>
+                      <span>Provisional MCDA example</span>
+                      <span className="text-[#4edea3] font-semibold">Not a prediction</span>
                     </div>
                   </div>
 
@@ -267,7 +270,7 @@ export default function LandingPage() {
                       <span className="text-[11px] text-[#bbcabf] font-mono">10–15 KM Radius</span>
                     </div>
                     <p className="text-[12px] text-[#bbcabf] leading-snug">
-                      Queries live OpenStreetMap Overpass points of interest to compute competitive saturation index.
+                      The configured analysis can query OpenStreetMap Overpass. Coverage depends on mapped businesses and source availability.
                     </p>
                   </div>
 
@@ -281,7 +284,7 @@ export default function LandingPage() {
                       <span className="text-[12px] font-bold text-[#dae2fd]">Rs. 65k / mo</span>
                     </div>
                     <p className="text-[12px] text-[#bbcabf] leading-snug">
-                      Pre-scraped commercial rent cache estimates average sq. ft. cost for Pakistani business hubs.
+                      Cost figures are benchmark estimates and may not reflect current asking rents.
                     </p>
                   </div>
                 </div>
@@ -300,14 +303,14 @@ export default function LandingPage() {
                 <span className="text-[11px] text-[#bbcabf]">OpenStreetMap Overpass POIs</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="font-display text-[26px] md:text-[32px] font-bold text-[#4cd7f6]">XGBoost</span>
+                <span className="font-display text-[26px] md:text-[32px] font-bold text-[#4cd7f6]">MCDA</span>
                 <span className="text-[13px] font-semibold text-[#dae2fd] mt-1">Continuous Scoring</span>
                 <span className="text-[11px] text-[#bbcabf]">0.00 – 1.00 &amp; 4 Risk Bands</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="font-display text-[26px] md:text-[32px] font-bold text-[#45dfa4]">Multi-AI</span>
+                <span className="font-display text-[26px] md:text-[32px] font-bold text-[#45dfa4]">Rule-Based</span>
                 <span className="text-[13px] font-semibold text-[#dae2fd] mt-1">Provider Failover Chain</span>
-                <span className="text-[11px] text-[#bbcabf]">GPT-4o-mini &rarr; Gemini &rarr; Groq</span>
+                <span className="text-[11px] text-[#bbcabf]">Current advisory engine</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="font-display text-[26px] md:text-[32px] font-bold text-[#dae2fd]">PKR Native</span>
@@ -340,10 +343,10 @@ export default function LandingPage() {
                   <span className="material-symbols-outlined text-[26px]">network_node</span>
                 </div>
                 <h3 className="font-display text-[18px] font-semibold text-[#dae2fd] mb-2">
-                  XGBoost Feasibility Scoring
+                  Provisional Feasibility Scoring
                 </h3>
                 <p className="text-[13px] text-[#bbcabf] leading-relaxed mb-6">
-                  Engineered features assess competitor density, saturation index, estimated rental costs, and regional Google Trends to generate a calibrated feasibility score.
+                  A transparent weighted MCDA index summarizes available features. It is not a trained model or a calibrated probability; some inputs are estimates or synthetic demonstrations.
                 </p>
               </div>
               <div className="bg-[#131b2e] p-3 rounded-xl border border-[#2d3449]/60 text-[11px] text-[#bbcabf] space-y-1.5 font-mono">
@@ -365,10 +368,10 @@ export default function LandingPage() {
                   <span className="material-symbols-outlined text-[26px]">psychology</span>
                 </div>
                 <h3 className="font-display text-[18px] font-semibold text-[#dae2fd] mb-2">
-                  Multi-AI Advisory &amp; Action Matrix
+                  Rule-Based Advisory &amp; Action Matrix
                 </h3>
                 <p className="text-[13px] text-[#bbcabf] leading-relaxed mb-6">
-                  Structured facts are explained by an intelligent LLM advisor in English or Roman Urdu, backed by a fault-tolerant failover chain (OpenAI, Gemini, Groq) and a rule-based fallback.
+                  The current advisor creates deterministic rule-based insights from stored project features. A live LLM provider chain is not yet configured.
                 </p>
               </div>
               <div className="bg-[#131b2e] p-3 rounded-xl border border-[#2d3449]/60 text-[11px] text-[#bbcabf] space-y-1.5 font-mono">
@@ -390,10 +393,10 @@ export default function LandingPage() {
                   <span className="material-symbols-outlined text-[26px]">storefront</span>
                 </div>
                 <h3 className="font-display text-[18px] font-semibold text-[#dae2fd] mb-2">
-                  Auto Multi-Tenant Storefront
+                  Storefront Configuration
                 </h3>
                 <p className="text-[13px] text-[#bbcabf] leading-relaxed mb-6">
-                  Complete the 4-step MCQ configurator to generate a validated JSON theme and publish a live customer-facing store with Cash on Delivery (COD) and automated SEO.
+                  Complete the configurator to save a validated theme draft. Public storefront publishing and automated SEO are not yet available.
                 </p>
               </div>
               <div className="bg-[#131b2e] p-3 rounded-xl border border-[#2d3449]/60 text-[11px] text-[#bbcabf] space-y-1.5 font-mono">
@@ -418,7 +421,7 @@ export default function LandingPage() {
                 SYSTEM WORKFLOW
               </span>
               <h2 className="font-display text-[28px] sm:text-[36px] font-bold text-[#dae2fd] mt-2 mb-4">
-                From Idea to Feasibility to Live Store
+                From Idea to Feasibility to Store Draft
               </h2>
               <p className="text-[15px] text-[#bbcabf]">
                 Two linked engines: Decision Engine (Modules 2–6) followed by Execution Engine (Modules 7–8).
@@ -453,7 +456,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 rounded-lg bg-[#00b982]/20 text-[#45dfa4] font-display font-bold text-[14px] flex items-center justify-center mb-4">
                   03
                 </div>
-                <h4 className="font-display text-[16px] font-semibold text-[#dae2fd] mb-2">XGBoost &amp; Multi-AI</h4>
+                <h4 className="font-display text-[16px] font-semibold text-[#dae2fd] mb-2">Provisional Analysis</h4>
                 <p className="text-[13px] text-[#bbcabf] leading-relaxed">
                   Computes viability score, risk tier, and an action checklist explained in clear English or Roman Urdu.
                 </p>
@@ -494,12 +497,12 @@ export default function LandingPage() {
                 a: 'Competitors are queried from OpenStreetMap (OSM) Overpass API within a 10–15 km radius. Rent estimates are aggregated from a cached commercial scrape tagged with source date and confidence level, avoiding expensive commercial data fees.',
               },
               {
-                q: 'How does the XGBoost scoring model work?',
-                a: 'The model ingests 10 engineered spatial and financial features (competitor density, rent-to-budget ratio, saturation index, trend slope, etc.) to produce a continuous viability score between 0.00 and 1.00 mapped to 4 risk tiers.',
+                q: 'How does the provisional feasibility score work?',
+                a: 'The current implementation uses a weighted provisional MCDA index from budget coverage, demand, estimated saturation, trend direction, and an estimated e-commerce growth factor. The score ranges from 0.00 to 1.00 and is not a probability.',
               },
               {
                 q: 'What happens if an AI provider experiences downtime?',
-                a: 'Our AI router automatically cascades: OpenAI GPT-4o-mini &rarr; Google Gemini &rarr; Groq Llama-3. If all external APIs fail, a deterministic rule-based summary generates an action matrix so the user is never left without guidance.',
+                a: 'The current score is a weighted provisional MCDA index based on the available engineered features. It is not a trained probability of success. Advice is generated with deterministic rules; live LLM integration is not currently configured.',
               },
               {
                 q: 'What roles exist on the platform?',
@@ -537,7 +540,7 @@ export default function LandingPage() {
               Ready to Validate Your E-Commerce Venture?
             </h3>
             <p className="text-[15px] text-[#bbcabf] max-w-xl mx-auto mb-8">
-              Sign up today to explore Pakistan commercial market telemetry, run XGBoost feasibility models, and auto-deploy your first online storefront.
+              Sign up to assess a Pakistan-focused business idea, review disclosed estimates, and configure a storefront draft.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link

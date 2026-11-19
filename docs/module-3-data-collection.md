@@ -1,5 +1,7 @@
 # Module 3: Data Collection and Provider Integration — Specification & Architecture
 
+> **Current implementation note (19 November 2026):** The provider inventory below is a target specification, not proof that every source is connected. Overpass is the live external adapter. Regional figures are embedded `manual_estimate` values, the category demand curve is `synthetic_demo`, and cost outputs are estimates. This module is partial until provider provenance and source coverage are verified.
+
 ## 1. Overview & Objectives
 
 Module 3 implements **Smart Data Aggregation & Provider Integration** for the **AI E-Commerce Advisor & Auto Store Generator**. When an authenticated entrepreneur submits a business idea in Module 2, Module 3 orchestrates and aggregates market data from external APIs and configured providers:
@@ -18,7 +20,7 @@ Module 3 implements **Smart Data Aggregation & Provider Integration** for the **
 | Requirement ID | Description | Module 3 Implementation | State |
 | :--- | :--- | :--- | :--- |
 | **FR-3.1** | Competitor Data Collection: nearby businesses by location & category | Overpass OSM API query with bounding circle & category shop tags + local demo provider | ✅ Fully In Scope |
-| **FR-3.2** | Market & Demand Data: population, internet penetration, search trend series | Regional statistics provider (PBS / PTA census data) + 12-month Google Trends series | ✅ Fully In Scope |
+| **FR-3.2** | Market & Demand Data: population, internet penetration, search trend series | Embedded regional estimates + synthetic category curve; live PBS/PTA and Google Trends connections remain outstanding | ⚠️ Partial |
 | **FR-3.3** | Cost Data Collection: setup, marketing, logistics, and rent estimates | Commercial `rent_cache` lookup + SME retail cost model (setup, marketing, logistics) | ✅ Fully In Scope |
 | **Operational** | Quota handling, timeouts, retry, partial success | Independent provider execution via `Promise.allSettled`, 10s timeouts, partial status | ✅ Fully In Scope |
 | **Security** | API keys in env, RLS, tenant isolation | Server-side only keys (`OVERPASS_API_URL`, etc.), forced PostgreSQL RLS on all data | ✅ Fully In Scope |

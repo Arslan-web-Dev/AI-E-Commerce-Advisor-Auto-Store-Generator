@@ -39,8 +39,10 @@ const CATEGORY_TREND_CURVES: Record<string, { baseline: number[]; slope: 'growin
 };
 
 export class GoogleTrendsProvider implements IDemandTrendProvider {
-  name = 'google_trends_pytrends';
-  provenance = 'external_api' as const;
+  // This adapter currently uses an in-code seasonal curve, not Google Trends.
+  // Keep its synthetic provenance until a real provider is implemented.
+  name = 'synthetic_category_trend_curve';
+  provenance = 'synthetic_demo' as const;
 
   async getDemandTrends(input: DemandTrendQueryInput): Promise<DemandTrendRecord> {
     const curve = CATEGORY_TREND_CURVES[input.category] || CATEGORY_TREND_CURVES['Other Niche Venture'];

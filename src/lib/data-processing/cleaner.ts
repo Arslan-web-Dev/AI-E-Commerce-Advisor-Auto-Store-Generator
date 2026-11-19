@@ -155,7 +155,7 @@ export function cleanAndValidateData(
     synthetic_demo_count: provenances.filter((p) => p === 'synthetic_demo').length,
     licensed_dataset_count: provenances.filter((p) => p === 'licensed_dataset').length,
     manual_estimate_count: provenances.filter((p) => p === 'manual_estimate').length,
-    primary_source: 'external_api',
+    primary_source: provenances.length > 0 ? 'external_api' : 'unavailable',
   };
 
   const maxProvenance = Math.max(
@@ -165,7 +165,8 @@ export function cleanAndValidateData(
     breakdown.manual_estimate_count
   );
 
-  if (maxProvenance === breakdown.synthetic_demo_count) breakdown.primary_source = 'synthetic_demo';
+  if (provenances.length === 0) breakdown.primary_source = 'unavailable';
+  else if (maxProvenance === breakdown.synthetic_demo_count) breakdown.primary_source = 'synthetic_demo';
   else if (maxProvenance === breakdown.licensed_dataset_count) breakdown.primary_source = 'licensed_dataset';
   else if (maxProvenance === breakdown.manual_estimate_count) breakdown.primary_source = 'manual_estimate';
   else breakdown.primary_source = 'external_api';
@@ -182,28 +183,28 @@ export function cleanAndValidateData(
     competitors: {
       available: validCompetitors.length > 0,
       item_count: validCompetitors.length,
-      provenance: validCompetitors[0]?.provenance || 'synthetic_demo',
+      provenance: validCompetitors[0]?.provenance || 'unavailable',
       quality_pct: Math.round((competitorsQuality / 25) * 100),
       missing_fields: compMissingFields,
     },
     regional_stats: {
       available: observations.length > 0,
       item_count: observations.length,
-      provenance: popObs?.provenance || 'licensed_dataset',
+      provenance: popObs?.provenance || 'unavailable',
       quality_pct: Math.round((((population ? 15 : 0) + 10) / 25) * 100),
       missing_fields: demoMissingFields,
     },
     trends: {
       available: Boolean(trends),
       item_count: trends?.trend_series?.length || 0,
-      provenance: trends?.provenance || 'synthetic_demo',
+      provenance: trends?.provenance || 'unavailable',
       quality_pct: Math.round((trendsQuality / 25) * 100),
       missing_fields: trendsMissingFields,
     },
     costs: {
       available: costs.length > 0,
       item_count: costs.length,
-      provenance: costs[0]?.provenance || 'manual_estimate',
+      provenance: costs[0]?.provenance || 'unavailable',
       quality_pct: Math.round((costsQuality / 25) * 100),
       missing_fields: costsMissingFields,
     },

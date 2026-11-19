@@ -1,5 +1,7 @@
 # Module 7 Implementation Audit: Storefront Theme Configurator, Component Variant Library & Storefront Compiler
 
+> **Historical status note (19 November 2026):** This audit records prior implementation claims. Its verification results have not been rerun against the current repository/environment and do not establish that a public storefront is deployed. See [the current delivery baseline](FINAL_DELIVERY_BASELINE.md) for present scope and status.
+
 ## 1. Executive Summary & Git Working Tree State
 
 - **Repository**: `AI-E-Commerce-Advisor-Auto-Store-Generator`
@@ -41,8 +43,8 @@ In compliance with prompt instructions, each system integration is audited below
 | **Groq AI Router (LLM)** | AI theme compiler assistant (SRS FR-7.2) & product descriptions (FR-8.9) | `src/lib/ai/` / AI router pattern | `GROQ_API_KEY` | **Not Configured (Graceful Deterministic Fallback)** | Strictly falls back to deterministic preset mapping and pure TypeScript compiler (`compileManifest`). Never fails wizard completion; no runtime crash. |
 | **OpenAI / Google Gemini** | Secondary LLM fallback chain for advisory & descriptions (SRS FR-6.1) | `src/lib/ai/` | `OPENAI_API_KEY`, `GEMINI_API_KEY` | **Not Configured (Optional)** | Gracefully bypassed; rule-based advisory and preset compiler take precedence. |
 | **OpenStreetMap Overpass API** | Competitor POI discovery for Pakistani retail locations | `src/lib/providers/competitors/overpass.ts` | Public endpoint `OVERPASS_API_URL` | **Configured & Working** | Public query with 15s timeout. Falls back to `DemoCompetitorProvider` (`synthetic_demo`) when offline or rate-limited. |
-| **PBS 2023 Digital Census / PTA** | Demographics & internet penetration benchmarks | `src/lib/providers/regional/pbs.ts` | Local open dataset benchmarks | **Configured** | Static curated benchmarks from official census publications; labelled as `licensed_dataset`. |
-| **Google Trends / Pytrends** | 12-month relative interest trends by commercial category | `src/lib/providers/trends/google-trends.ts` | Trends API / Demo provider | **Configured (Demo fallback active)** | Returns bounded 0–100 relative trend indices; labelled honestly with provenance tags. |
+| **Regional reference values** | Population and digital-market indicators | `src/lib/providers/regional/pbs.ts` | Embedded curated estimates; no live PBS/PTA fetch | **Estimate only** | Tagged `manual_estimate`; source date and values require verification before decision use. |
+| **Category demand curve** | Synthetic seasonal demand illustration | `src/lib/providers/trends/google-trends.ts` | In-code deterministic curve; no Google Trends/Pytrends call | **Demo only** | Tagged `synthetic_demo`; must not be presented as observed search history. |
 | **Commercial Rent Cache** | Pakistani commercial district square-footage rent estimates | `src/lib/providers/costs/benchmark.ts`, `supabase/migrations/` | PostgreSQL `rent_cache` | **Configured** | Area-level estimates; labelled with source dates and confidence levels. |
 | **Vercel Domains API** | Custom domain attachment for published stores (SRS FR-8.3) | Module 8 scope | `VERCEL_TOKEN`, `VERCEL_PROJECT_ID` | **Planned (Module 8)** | Not invoked in Module 7 draft compilation. Default multi-tenant routing uses subdomain/slug rewrite. |
 | **Payment Gateway (COD)** | E-commerce checkout payment method | Module 8 checkout flow | N/A (Cash on Delivery default) | **Planned (Module 8)** | COD default per SRS GEO-5; no live credit card gateway required or simulated in Module 7. |

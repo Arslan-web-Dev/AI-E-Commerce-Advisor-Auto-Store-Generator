@@ -153,7 +153,7 @@ export default function ProjectDetailPage() {
                     </span>
                   </div>
                   <p className="text-[14px] text-[#bbcabf] max-w-2xl leading-relaxed">
-                    This business idea has been recorded in PostgreSQL. It is now awaiting execution of Module 3 Smart Data Aggregation (OpenStreetMap Overpass POI collection, rent scraping cache, and Google Trends).
+                    This business idea has been recorded. Its analysis uses the latest available collection run; provider provenance indicates live, estimated, demo, or unavailable inputs.
                   </p>
                   <div className="flex flex-wrap items-center gap-4 text-[12px] text-[#bbcabf] pt-2 font-mono">
                     {project.submitted_at && (

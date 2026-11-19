@@ -1,5 +1,7 @@
 # Module 9 Implementation Audit: Generated Store Analytics, Customer Behavior, Traffic Insights, and Reports
 
+> **Historical status note (19 November 2026):** The automated audit results below are historical claims and have not been rerun against the current repository/environment. File/source checks are not end-to-end or security evidence. See [the current delivery baseline](FINAL_DELIVERY_BASELINE.md).
+
 **Audit Date:** October 2026  
 **Auditor:** AntiGravity Automated Verification Engine  
 **Target Repository:** `AI-E-Commerce-Advisor-Auto-Store-Generator`  

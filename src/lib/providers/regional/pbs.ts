@@ -63,8 +63,9 @@ const CITY_DEMOGRAPHICS_DATABASE: Record<string, CityDemographics> = {
 };
 
 export class PbsRegionalStatsProvider implements IRegionalStatsProvider {
-  name = 'pbs_census_open_data';
-  provenance = 'licensed_dataset' as const;
+  // Values are embedded reference estimates; this code does not fetch PBS/PTA data.
+  name = 'curated_regional_reference_estimates';
+  provenance = 'manual_estimate' as const;
 
   async getRegionalStats(input: RegionalQueryInput): Promise<MarketObservation[]> {
     const cityKey = (input.city || '').toLowerCase().trim();
