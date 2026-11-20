@@ -352,7 +352,7 @@ create table if not exists public.projects (
   lng                  double precision,
   radius_km            numeric(4,1) not null default 10.0 check (radius_km between 1.0 and 50.0),
   budget_amount        numeric(12,2) not null check (budget_amount > 0),
-  budget_currency      text not null default 'PKR' check (budget_currency in ('USD', 'PKR')),
+  budget_currency      text not null default 'USD' check (budget_currency in ('USD', 'PKR')),
   budget_pkr           bigint,
   
   -- FR-2.2 Advanced Input Options
@@ -491,7 +491,7 @@ create table if not exists public.project_market_observations (
   geography       text not null,
   period_year     integer not null default 2024,
   provider        text not null default 'pbs_census',
-  provenance      text not null default 'manual_estimate' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
+  provenance      text not null default 'licensed_dataset' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
   source_citation text,
   retrieved_at    timestamptz not null default now()
 );
@@ -509,8 +509,8 @@ create table if not exists public.project_demand_trends (
   trend_series jsonb not null default '[]'::jsonb, -- array of { month: string, index: number }
   avg_interest numeric(5,2) not null,
   trend_slope  text not null default 'stable' check (trend_slope in ('growing', 'stable', 'declining')),
-  provider     text not null default 'synthetic_category_trend_curve',
-  provenance   text not null default 'synthetic_demo' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
+  provider     text not null default 'google_trends',
+  provenance   text not null default 'external_api' check (provenance in ('external_api', 'synthetic_demo', 'licensed_dataset', 'manual_estimate')),
   retrieved_at timestamptz not null default now()
 );
 
@@ -753,14 +753,6 @@ create policy model_registry_read on public.model_registry
   for select
   to authenticated
   using (true);
-
--- Model registry writes are restricted to administrators.
-drop policy if exists model_registry_admin_manage on public.model_registry;
-create policy model_registry_admin_manage on public.model_registry
-  for all
-  to authenticated
-  using (public.is_admin())
-  with check (public.is_admin());
 
 -- Feasibility Runs Policies: Bound to project access
 drop policy if exists feasibility_runs_access on public.project_feasibility_runs;
@@ -1260,6 +1252,201 @@ create policy "public_insert_store_events" on public.store_analytics_events
 create policy "store_owners_delete_events" on public.store_analytics_events
   for delete
   using (can_manage_store(store_id));
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261119000000_module5_model_registry_admin_policy.sql
+-- ==============================================================================
+-- Allow verified administrators to manage model registry entries.
+-- Authenticated users retain read-only access through model_registry_read.
+drop policy if exists model_registry_admin_manage on public.model_registry;
+create policy model_registry_admin_manage on public.model_registry
+  for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261119010000_module2_default_currency_pkr.sql
+-- ==============================================================================
+-- Pakistan-first intake: default newly created projects to PKR.
+alter table public.projects
+  alter column budget_currency set default 'PKR';
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261119020000_module3_truthful_provider_defaults.sql
+-- ==============================================================================
+-- Conservative defaults prevent omitted provenance fields from implying live or licensed data.
+alter table public.project_market_observations
+  alter column provider set default 'curated_regional_reference_estimates',
+  alter column provenance set default 'manual_estimate';
+
+alter table public.project_demand_trends
+  alter column provider set default 'synthetic_category_trend_curve',
+  alter column provenance set default 'synthetic_demo';
+
+
+
+
+-- ==============================================================================
+-- MIGRATION FILE: 20261119030000_audit_storage_and_hardening.sql
+-- ==============================================================================
+-- ==============================================================================
+-- Additive Schema Hardening & Storage Configuration
+-- Migration: 20261006080000_audit_storage_and_hardening.sql
+-- Conforms to: FINAL_DELIVERY_BASELINE.md and requirements-traceability.md
+-- SAFETY: Purely additive. Preserves all tables, rows, and relationships.
+-- ==============================================================================
+
+-- 1. Ensure `is_banned` exists on stores with default false
+alter table public.stores 
+  add column if not exists is_banned boolean not null default false;
+
+-- 2. Update stores public read policy to exclude banned stores
+drop policy if exists stores_public_read on public.stores;
+create policy stores_public_read on public.stores
+  for select
+  using (status = 'published' and is_banned = false);
+
+-- 3. Idempotent Policy Hardening for Store Products (Module 8)
+drop policy if exists "Owners manage store products" on public.products;
+create policy "Owners manage store products"
+  on public.products
+  for all
+  to authenticated
+  using (public.can_manage_store(store_id))
+  with check (public.can_manage_store(store_id));
+
+drop policy if exists "Public can view active products of published stores" on public.products;
+create policy "Public can view active products of published stores"
+  on public.products
+  for select
+  to public
+  using (
+    is_active = true and is_archived = false and exists (
+      select 1 from public.stores 
+      where id = products.store_id 
+        and status = 'published' 
+        and is_banned = false
+    )
+  );
+
+-- 4. Idempotent Policy Hardening for Orders and Order Items
+drop policy if exists "Owners manage store orders" on public.orders;
+create policy "Owners manage store orders"
+  on public.orders
+  for all
+  to authenticated
+  using (public.can_manage_store(store_id))
+  with check (public.can_manage_store(store_id));
+
+drop policy if exists "Owners manage store order items" on public.order_items;
+create policy "Owners manage store order items"
+  on public.order_items
+  for all
+  to authenticated
+  using (
+    exists (
+      select 1 from public.orders 
+      where id = order_items.order_id 
+        and public.can_manage_store(orders.store_id)
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.orders 
+      where id = order_items.order_id 
+        and public.can_manage_store(orders.store_id)
+    )
+  );
+
+-- 5. Idempotent Policy Hardening for Customers, Inventory Logs, Payment Settings
+drop policy if exists "Owners manage store customers" on public.customers;
+create policy "Owners manage store customers"
+  on public.customers
+  for all
+  to authenticated
+  using (public.can_manage_store(store_id))
+  with check (public.can_manage_store(store_id));
+
+drop policy if exists "Owners view store inventory logs" on public.inventory_logs;
+create policy "Owners view store inventory logs"
+  on public.inventory_logs
+  for select
+  to authenticated
+  using (public.can_manage_store(store_id));
+
+drop policy if exists "Owners insert store inventory logs" on public.inventory_logs;
+create policy "Owners insert store inventory logs"
+  on public.inventory_logs
+  for insert
+  to authenticated
+  with check (public.can_manage_store(store_id));
+
+drop policy if exists "Owners manage store payment settings" on public.store_payment_settings;
+create policy "Owners manage store payment settings"
+  on public.store_payment_settings
+  for all
+  to authenticated
+  using (public.can_manage_store(store_id))
+  with check (public.can_manage_store(store_id));
+
+-- 6. Storage Bucket Configuration (FR-2.2 & NFR-C4: Project Attachment Uploads)
+-- Safely register the project-attachments bucket if storage extension is available
+do $$
+begin
+  if exists (select 1 from information_schema.schemata where schema_name = 'storage') then
+    insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+    values (
+      'project-attachments',
+      'project-attachments',
+      true,
+      5242880, -- 5 MB
+      array['application/pdf', 'text/csv', 'application/json', 'image/png', 'image/jpeg', 'image/webp']
+    )
+    on conflict (id) do update set
+      public = true,
+      file_size_limit = 5242880;
+
+    -- Storage Object Policies
+    drop policy if exists "Authenticated users can upload attachments" on storage.objects;
+    create policy "Authenticated users can upload attachments"
+      on storage.objects for insert to authenticated
+      with check (
+        bucket_id = 'project-attachments'
+        and (storage.foldername(name))[1] = auth.uid()::text
+      );
+
+    drop policy if exists "Users can update their attachments" on storage.objects;
+    create policy "Users can update their attachments"
+      on storage.objects for update to authenticated
+      using (
+        bucket_id = 'project-attachments'
+        and (storage.foldername(name))[1] = auth.uid()::text
+      );
+
+    drop policy if exists "Users can delete their attachments" on storage.objects;
+    create policy "Users can delete their attachments"
+      on storage.objects for delete to authenticated
+      using (
+        bucket_id = 'project-attachments'
+        and (storage.foldername(name))[1] = auth.uid()::text
+      );
+
+    drop policy if exists "Public can view project attachments" on storage.objects;
+    create policy "Public can view project attachments"
+      on storage.objects for select
+      using (bucket_id = 'project-attachments');
+  end if;
+end $$;
 
 
 
