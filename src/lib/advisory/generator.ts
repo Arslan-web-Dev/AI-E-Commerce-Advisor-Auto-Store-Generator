@@ -1,4 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import { randomUUID } from 'node:crypto';
+import { executeAIGateway, createAIAttemptLogger } from '@/lib/ai/gateway';
 
 export interface BudgetAllocation {
   inventory: number;
@@ -17,7 +19,7 @@ export interface Insight {
   title: BilingualText;
   description: BilingualText;
   feature_ref?: string;
-  value?: any;
+  value?: unknown;
   is_evidence_based: boolean;
 }
 
@@ -31,7 +33,8 @@ export const DEFAULT_BUDGET_WEIGHTS = {
 export async function generateAdvisoryReport(
   supabase: SupabaseClient,
   projectId: string,
-  feasibilityRunId: string
+  feasibilityRunId: string,
+  ownerId: string,
 ) {
   // 1. Fetch Feasibility Run
   const { data: feasibility, error: feasErr } = await supabase
@@ -166,6 +169,53 @@ export async function generateAdvisoryReport(
     }
   };
 
+  const advisoryFacts = {
+    averageDemandIndex: features.avg_demand_index,
+    categorySaturation: features.category_saturation,
+    budgetRatio: features.budget_ratio,
+    feasibilityScore: feasibility.score_value,
+    classification: feasibility.classification,
+    currency: budgetCurrency,
+    budgetTotal,
+    deterministicSignals: insights.map(({ type, title, feature_ref, value }) => ({
+      type,
+      title: title.en,
+      feature: feature_ref ?? null,
+      value: value ?? null,
+    })),
+  };
+  const summarySchema = {
+    type: 'object',
+    required: ['summary_en', 'summary_ur_roman'],
+    additionalProperties: false,
+    properties: {
+      summary_en: { type: 'string', minLength: 10, maxLength: 700 },
+      summary_ur_roman: { type: 'string', minLength: 10, maxLength: 700 },
+    },
+  };
+  const deterministicSummary = {
+    summary_en: `This ${feasibility.classification} assessment is based on the stored market indicators and budget ratio. Review the listed evidence and risks before making a decision.`,
+    summary_ur_roman: `Yeh ${feasibility.classification} assessment stored market indicators aur budget ratio par mabni hai. Faisla karne se pehle evidence aur risks ka jaiza lein.`,
+  };
+  const aiSummaryResult = await executeAIGateway({
+    task: 'advisory',
+    requestId: randomUUID(),
+    language: 'en',
+    systemPrompt: 'Explain only the supplied computed facts. Do not invent values or recommendations unsupported by them. Return one JSON object with summary_en and summary_ur_roman. No tools.',
+    prompt: JSON.stringify(advisoryFacts),
+    outputSchema: summarySchema,
+  }, {
+    ownerId,
+    fallback: () => JSON.stringify(deterministicSummary),
+    onAttempt: createAIAttemptLogger(ownerId),
+  });
+  let aiSummary = deterministicSummary;
+  try {
+    aiSummary = JSON.parse(aiSummaryResult.content) as typeof deterministicSummary;
+  } catch {
+    // The gateway validates structured output; retain deterministic text defensively.
+  }
+
   // 6. Save Report
   const payload = {
     project_id: projectId,
@@ -182,7 +232,10 @@ export async function generateAdvisoryReport(
     location_recommendations,
     metadata: {
       language_supported: ['en', 'ur'],
-      generated_from_mode: feasibility.scoring_mode
+      generated_from_mode: feasibility.scoring_mode,
+      ai_summary: aiSummary,
+      ai_provider: aiSummaryResult.provider,
+      ai_fallback: aiSummaryResult.fallback,
     }
   };
 

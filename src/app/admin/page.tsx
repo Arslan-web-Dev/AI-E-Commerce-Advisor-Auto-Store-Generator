@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -17,9 +17,17 @@ interface SyncAuditLog {
   created_at: string;
 }
 
+interface AIProviderStatus {
+  name: string;
+  configured: boolean;
+  model: string | null;
+  circuitOpen: boolean;
+  keyEnvName: string;
+}
+
 export default function AdminCommandCenterPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -33,10 +41,21 @@ export default function AdminCommandCenterPage() {
   } | null>(null);
 
   const [auditLogs, setAuditLogs] = useState<SyncAuditLog[]>([]);
+  const [aiProviders, setAIProviders] = useState<AIProviderStatus[]>([]);
 
   // Time state for UTC / PKT clocks
   const [utcTime, setUtcTime] = useState('');
   const [pktTime, setPktTime] = useState('');
+
+  const loadAuditLogs = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('config_sync_audit_log')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (!error && data) setAuditLogs(data as SyncAuditLog[]);
+  }, [supabase]);
 
   useEffect(() => {
     const updateClocks = () => {
@@ -93,23 +112,15 @@ export default function AdminCommandCenterPage() {
 
       setIsAdmin(true);
       loadAuditLogs();
+      fetch('/api/admin/ai-providers')
+        .then(async (response) => response.ok ? response.json() : null)
+        .then((data) => { if (data?.providers) setAIProviders(data.providers); })
+        .catch(() => setAIProviders([]));
       setLoading(false);
     }
 
     verifyAdmin();
-  }, [router, supabase]);
-
-  const loadAuditLogs = async () => {
-    const { data, error } = await supabase
-      .from('config_sync_audit_log')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(10);
-
-    if (!error && data) {
-      setAuditLogs(data as SyncAuditLog[]);
-    }
-  };
+  }, [router, supabase, loadAuditLogs]);
 
   const handleTriggerSync = async () => {
     setSyncing(true);
@@ -406,6 +417,25 @@ export default function AdminCommandCenterPage() {
 
           {/* Right Column: Platform Telemetry & Reference Config Items */}
           <div className="lg:col-span-5 flex flex-col gap-6">
+            <div className="bg-[#171f33] border border-[#2d3449] rounded-2xl p-6 shadow-xl">
+              <h3 className="font-display text-[16px] font-bold text-[#dae2fd] mb-1">AI Provider Status</h3>
+              <p className="text-[12px] text-[#bbcabf] mb-4">Keys stay in deployment secrets. This panel shows configuration state only.</p>
+              <div className="space-y-2">
+                {aiProviders.map((provider) => (
+                  <div key={provider.name} className="flex items-center justify-between rounded-xl bg-[#131b2e] border border-[#2d3449] px-3 py-2 text-[12px]">
+                    <div>
+                      <div className="font-semibold capitalize text-[#dae2fd]">{provider.name}</div>
+                      <div className="font-mono text-[10px] text-[#bbcabf]">{provider.model ?? provider.keyEnvName}</div>
+                    </div>
+                    <span className={provider.circuitOpen ? 'text-amber-300' : provider.configured ? 'text-[#4edea3]' : 'text-[#bbcabf]'}>
+                      {provider.circuitOpen ? 'Temporarily paused' : provider.configured ? 'Configured' : 'Not configured'}
+                    </span>
+                  </div>
+                ))}
+                {aiProviders.length === 0 && <p className="text-[12px] text-[#bbcabf]">Provider status is unavailable.</p>}
+              </div>
+            </div>
+
             {/* Approved Non-PII Configuration Items Preview */}
             <div className="bg-[#171f33] border border-[#2d3449] rounded-2xl p-6 shadow-xl">
               <h3 className="font-display text-[16px] font-bold text-[#dae2fd] mb-1">

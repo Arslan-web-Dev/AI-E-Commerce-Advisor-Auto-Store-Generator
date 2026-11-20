@@ -62,14 +62,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: 'feasibility_run_id is required' }, { status: 400 });
     }
 
-    const result = await generateAdvisoryReport(supabase, projectId, feasibility_run_id);
+    const result = await generateAdvisoryReport(supabase, projectId, feasibility_run_id, user.id);
 
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: result.status || 500 });
     }
 
     return NextResponse.json({ data: result.data });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Invalid advisory request';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
