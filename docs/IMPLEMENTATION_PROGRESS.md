@@ -2,7 +2,7 @@
 
 **Working branch:** `feat/complete-fyp-modules`  
 **Base:** `main` at `6d07fa2`  
-**Latest implementation commit:** `d0854445d5794bf64bee249433492530f08e98e0`
+**Latest implementation commit:** `6aba6743a4a20785d3af0e0600a56d7576fa8049`
 
 ## Requirements authority
 
@@ -24,6 +24,16 @@ Changes:
 - Adds `public.create_store_cod_order(...)`, a server-side PostgreSQL function for guest COD checkout.
 - The function accepts product IDs and quantities, reads product names/SKUs/prices from the database, checks that the store is published and not banned, validates customer input, locks product rows, checks stock, and inserts the order and order items in one database transaction.
 - Grants execution to the `anon` and `authenticated` roles; the function itself does not accept client-supplied prices, payment method, shipping fee, tax, or totals.
+
+### Atomic order-state foundation
+
+Added migration `20261123010000_atomic_order_status_inventory.sql`:
+- Adds `public.transition_store_order(...)` for authenticated store owners/admins.
+- Validates the documented order state transitions.
+- Locks the order, adjusts stock with guarded updates, writes inventory ledger rows, appends status history, and updates order fulfillment/payment fields in one transaction.
+- Decrements stock when pending orders are confirmed; restores stock for eligible cancellations and returns.
+
+This function is not yet connected to the existing PATCH route. Until that route is switched to the RPC and direct status mutation is removed, the existing non-transactional route remains a bypass and FR-8.10 is not accepted.
 
 ## Important integration gap
 
@@ -48,7 +58,7 @@ The migration has not been applied to a Supabase project. SQL execution, RLS beh
 | SQL syntax / migration-from-empty test | Not run |
 | Public guest checkout endpoint | Not implemented yet |
 | Existing merchant price-trust vulnerability removed | Not yet |
-| Atomic confirmation/cancellation stock transition | Not implemented yet |
+| Atomic confirmation/cancellation stock transition | Database function added; route integration and tests not done |
 | RLS / tenant isolation tests | Not run |
 | Lint / typecheck / build | Not run |
 | End-to-end browser test | Not run |
