@@ -134,6 +134,7 @@ begin
       end,
       payment_status = case
         when p_target_status = 'delivered' and payment_method = 'cod' then 'paid'
+        when p_target_status = 'returned' and payment_status = 'paid' then 'refunded'
         else payment_status
       end
   where id = v_order.id
