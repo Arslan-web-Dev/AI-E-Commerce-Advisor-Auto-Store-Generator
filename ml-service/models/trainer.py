@@ -22,7 +22,8 @@ def train_and_compare_models(
     validation_strategy: str = "stratified_kfold",
     cv_folds: int = 5,
     test_size: float = 0.2,
-    progress_callback = None
+    progress_callback = None,
+    artifacts_dir: Optional[Any] = None
 ) -> Dict[str, Any]:
     """
     Executes a multi-algorithm training loop with rigorous cross-validation,

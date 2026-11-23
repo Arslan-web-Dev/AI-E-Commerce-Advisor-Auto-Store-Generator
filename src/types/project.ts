@@ -141,14 +141,21 @@ export interface CommercialHubPreset {
 }
 
 export const COMMERCIAL_HUB_PRESETS: CommercialHubPreset[] = [
-  { name: 'Gulberg III, Lahore', city: 'Lahore', lat: 31.5204, lng: 74.3587, label: 'Seeded commercial area; verify locally' },
-  { name: 'DHA Phase 5 & 6, Lahore', city: 'Lahore', lat: 31.4722, lng: 74.4093, label: 'Seeded commercial area; verify locally' },
-  { name: 'Anarkali & Mall Road, Lahore', city: 'Lahore', lat: 31.5657, lng: 74.3142, label: 'Seeded commercial area; verify locally' },
-  { name: 'Blue Area, Islamabad', city: 'Islamabad', lat: 33.7153, lng: 73.0673, label: 'Seeded commercial area; verify locally' },
-  { name: 'F-7 / F-10 Markaz, Islamabad', city: 'Islamabad', lat: 33.7208, lng: 73.0564, label: 'Seeded commercial area; verify locally' },
-  { name: 'Clifton & Defence, Karachi', city: 'Karachi', lat: 24.8138, lng: 67.0305, label: 'Seeded commercial area; verify locally' },
-  { name: 'Saddar Commercial, Karachi', city: 'Karachi', lat: 24.8569, lng: 67.0264, label: 'Seeded commercial area; verify locally' },
-  { name: 'Clock Tower / D-Ground, Faisalabad', city: 'Faisalabad', lat: 31.4187, lng: 73.0791, label: 'Seeded commercial area; verify locally' }
+  { name: 'Gulberg III, Lahore', city: 'Lahore', lat: 31.5204, lng: 74.3587, label: 'Lahore Retail & Fashion Hub' },
+  { name: 'DHA Phase 5 & 6, Lahore', city: 'Lahore', lat: 31.4722, lng: 74.4093, label: 'Lahore Affluent Residential Commercial' },
+  { name: 'Anarkali & Mall Road, Lahore', city: 'Lahore', lat: 31.5657, lng: 74.3142, label: 'Lahore Historic Central Bazaar' },
+  { name: 'Model Town / Johar Town, Lahore', city: 'Lahore', lat: 31.4697, lng: 74.2728, label: 'Lahore High-Density Suburban Hub' },
+  { name: 'Clock Tower / D-Ground, Faisalabad', city: 'Faisalabad', lat: 31.4187, lng: 73.0791, label: 'Faisalabad Textile & Wholesale Hub' },
+  { name: 'Saddar Commercial, Rawalpindi', city: 'Rawalpindi', lat: 33.5973, lng: 73.0479, label: 'Rawalpindi Central Business District' },
+  { name: 'Bahria Town Commercial, Rawalpindi', city: 'Rawalpindi', lat: 33.5186, lng: 73.1094, label: 'Rawalpindi / Islamabad Twin Cities Modern Retail' },
+  { name: 'Hussain Agahi & Cantt, Multan', city: 'Multan', lat: 30.1984, lng: 71.4687, label: 'South Punjab Trade Hub' },
+  { name: 'Model Town / GT Road, Gujranwala', city: 'Gujranwala', lat: 32.1877, lng: 74.1945, label: 'Gujranwala Manufacturing & Retail Strip' },
+  { name: 'Paris Road / Shahab Pura, Sialkot', city: 'Sialkot', lat: 32.4945, lng: 74.5229, label: 'Sialkot Export & Commercial Center' },
+  { name: 'Circular Road, Bahawalpur', city: 'Bahawalpur', lat: 29.3956, lng: 71.6836, label: 'Bahawalpur City Center' },
+  { name: 'Blue Area, Islamabad', city: 'Islamabad', lat: 33.7153, lng: 73.0673, label: 'Federal Capital Corporate Hub' },
+  { name: 'F-7 / F-10 Markaz, Islamabad', city: 'Islamabad', lat: 33.7208, lng: 73.0564, label: 'Islamabad Prime Retail Markaz' },
+  { name: 'Clifton & Defence, Karachi', city: 'Karachi', lat: 24.8138, lng: 67.0305, label: 'Karachi Coastal Commercial' },
+  { name: 'Saddar Commercial, Karachi', city: 'Karachi', lat: 24.8569, lng: 67.0264, label: 'Karachi Central Wholesale District' },
 ];
 
 export const AGE_GROUP_OPTIONS = [

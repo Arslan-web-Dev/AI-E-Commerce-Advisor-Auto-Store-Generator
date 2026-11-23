@@ -2,7 +2,21 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { mlClient } from '@/lib/ml-client';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+  if (profile?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden. Admin role required.' }, { status: 403 });
+  }
+
   const { searchParams } = new URL(request.url);
   const jobId = searchParams.get('job_id');
 
@@ -48,7 +62,7 @@ export async function POST(request: Request) {
       test_size: test_size || 0.2,
     });
 
-    // Optionally sync best model to model_registry in Supabase
+    // Sync best model to model_registry in Supabase if completed
     if (job?.results?.best_model_id && job?.results?.best_model_name) {
       try {
         await supabase.from('model_registry').insert({
@@ -58,20 +72,19 @@ export async function POST(request: Request) {
           is_active: true,
           configuration: {
             algorithm: job.results.best_algorithm,
-            artifact_path: job.results.artifact_path,
-            feature_names: job.results.feature_names,
+            problem_type: job.problem_type,
+            test_f1: job.results.best_score,
+            cv_mean: job.results.leaderboard?.[0]?.cv_score,
+            dataset_id: job.dataset_id,
           },
-          evaluation_metrics: job.results.test_metrics,
-          training_dataset_ref: dataset_id,
-          created_by: user.id,
         });
-      } catch {
-        // Safe fallback
+      } catch (dbSyncErr) {
+        console.warn('Could not sync to model_registry table:', dbSyncErr);
       }
     }
 
     return NextResponse.json({ job });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Training failed' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Failed to start training' }, { status: 500 });
   }
 }

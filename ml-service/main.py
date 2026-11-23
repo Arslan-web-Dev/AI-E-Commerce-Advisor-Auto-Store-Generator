@@ -2,16 +2,26 @@ import os
 import uuid
 import json
 import shutil
+import secrets
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import pandas as pd
 import joblib
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query, BackgroundTasks
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query, BackgroundTasks, Security, Depends, status
+from fastapi.security.api_key import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from config import DATASETS_DIR, ARTIFACTS_DIR, CACHE_DIR, ML_SERVICE_PORT, ML_SERVICE_HOST
+from config import (
+    DATASETS_DIR,
+    ARTIFACTS_DIR,
+    CACHE_DIR,
+    ML_SERVICE_PORT,
+    ML_SERVICE_HOST,
+    ML_SERVICE_API_KEY,
+    ALLOWED_ORIGINS,
+)
 from datasets.manager import inspect_dataset
 from datasets.sample_dataset_generator import save_sample_dataset
 from models.trainer import train_and_compare_models
@@ -25,13 +35,30 @@ app = FastAPI(
     description="Multi-model ML training, cross-validation, prediction, and Punjab market analytics service."
 )
 
+# Hardened CORS: allow only explicit application and development origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "x-api-key", "Authorization"],
 )
+
+# API Key Authentication Dependency
+api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
+
+def verify_api_key(api_key: Optional[str] = Security(api_key_header)):
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required. Missing x-api-key header."
+        )
+    if not secrets.compare_digest(api_key, ML_SERVICE_API_KEY):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid or unauthorized API key."
+        )
+    return api_key
 
 # In-memory jobs store
 TRAINING_JOBS: Dict[str, Dict[str, Any]] = {}
@@ -41,7 +68,6 @@ ACTIVE_MODEL_ID: Optional[str] = None
 # Pre-load existing datasets and artifacts on startup
 def _init_storage():
     global ACTIVE_MODEL_ID
-    # Ensure sample dataset exists
     sample_file = DATASETS_DIR / "punjab_retail_feasibility_v1.csv"
     if not sample_file.exists():
         save_sample_dataset(sample_file)
@@ -60,7 +86,6 @@ def _init_storage():
                 **report
             }
 
-    # Find any existing active model
     for f in ARTIFACTS_DIR.glob("*.joblib"):
         try:
             bundle = joblib.load(f)
@@ -75,7 +100,7 @@ _init_storage()
 class TrainRequest(BaseModel):
     dataset_id: str
     target_column: str
-    problem_type: str # 'classification' or 'regression'
+    problem_type: str  # 'classification' or 'regression'
     candidate_algorithms: Optional[List[str]] = None
     validation_strategy: Optional[str] = "stratified_kfold"
     cv_folds: Optional[int] = 5
@@ -93,7 +118,9 @@ class MarketDemandRequest(BaseModel):
     district_data: Optional[Dict[str, Any]] = None
 
 @app.get("/")
+@app.get("/health")
 def health_check():
+    """Public health / liveness check."""
     return {
         "status": "healthy",
         "service": "Punjab E-Commerce ML & Market Intelligence Engine",
@@ -104,11 +131,11 @@ def health_check():
 
 # ----------------- DATASET ENDPOINTS -----------------
 
-@app.get("/datasets")
+@app.get("/datasets", dependencies=[Depends(verify_api_key)])
 def list_datasets():
     return list(DATASETS_STORE.values())
 
-@app.post("/datasets/upload")
+@app.post("/datasets/upload", dependencies=[Depends(verify_api_key)])
 async def upload_dataset(
     file: UploadFile = File(...),
     name: Optional[str] = Form(None),
@@ -140,21 +167,21 @@ async def upload_dataset(
     DATASETS_STORE[ds_id] = entry
     return entry
 
-@app.get("/datasets/{dataset_id}")
+@app.get("/datasets/{dataset_id}", dependencies=[Depends(verify_api_key)])
 def get_dataset(dataset_id: str):
     if dataset_id not in DATASETS_STORE:
         raise HTTPException(status_code=404, detail="Dataset not found.")
     return DATASETS_STORE[dataset_id]
 
-@app.post("/datasets/generate-sample")
-def generate_sample_punjab_dataset():
-    sample_file = DATASETS_DIR / "punjab_retail_feasibility_v1.csv"
-    save_sample_dataset(sample_file)
-    ds_id = "punjab_retail_feasibility_v1"
-    report = inspect_dataset(sample_file, target_col="feasibility_class")
+@app.post("/datasets/generate-sample", dependencies=[Depends(verify_api_key)])
+def generate_sample_dataset():
+    sample_file = DATASETS_DIR / f"punjab_retail_feasibility_{str(uuid.uuid4())[:6]}.csv"
+    save_sample_dataset(sample_file, num_samples=1500)
+    ds_id = sample_file.stem
+    report = inspect_dataset(sample_file)
     entry = {
         "id": ds_id,
-        "name": "Punjab Retail Feasibility Baseline (Sample)",
+        "name": "Punjab Retail Feasibility (1,500 Samples)",
         "file_name": sample_file.name,
         "file_path": str(sample_file),
         "file_size_bytes": sample_file.stat().st_size,
@@ -164,35 +191,33 @@ def generate_sample_punjab_dataset():
     DATASETS_STORE[ds_id] = entry
     return entry
 
-# ----------------- TRAINING & MODEL PIPELINE -----------------
+# ----------------- TRAINING & MODEL EVALUATION -----------------
 
 def _run_training_job_task(job_id: str, req: TrainRequest):
     global ACTIVE_MODEL_ID
+    ds_entry = DATASETS_STORE[req.dataset_id]
+    file_path = ds_entry["file_path"]
+
+    TRAINING_JOBS[job_id]["status"] = "training"
+    TRAINING_JOBS[job_id]["progress_pct"] = 15.0
+    TRAINING_JOBS[job_id]["current_step"] = "Loading and validating dataset"
+
     try:
-        ds_info = DATASETS_STORE.get(req.dataset_id)
-        if not ds_info:
-            raise ValueError(f"Dataset '{req.dataset_id}' not found.")
+        if file_path.endswith(".csv"):
+            df = pd.read_csv(file_path)
+        else:
+            df = pd.read_excel(file_path)
 
-        TRAINING_JOBS[job_id]["status"] = "running"
-        TRAINING_JOBS[job_id]["current_step"] = "Loading dataset and cleaning split"
-
-        file_path = Path(ds_info["file_path"])
-        ext = file_path.suffix.lower()
-        df = pd.read_excel(file_path) if ext in [".xlsx", ".xls"] else pd.read_csv(file_path)
-
-        def progress_cb(pct: float, step: str):
-            TRAINING_JOBS[job_id]["progress_pct"] = pct
-            TRAINING_JOBS[job_id]["current_step"] = step
+        TRAINING_JOBS[job_id]["progress_pct"] = 35.0
+        TRAINING_JOBS[job_id]["current_step"] = "Executing candidate algorithms and cross-validation"
 
         results = train_and_compare_models(
             df=df,
             target_col=req.target_column,
             problem_type=req.problem_type,
             candidate_algorithms=req.candidate_algorithms,
-            validation_strategy=req.validation_strategy,
-            cv_folds=req.cv_folds,
-            test_size=req.test_size,
-            progress_callback=progress_cb
+            cv_folds=req.cv_folds or 5,
+            test_size=req.test_size or 0.2
         )
 
         TRAINING_JOBS[job_id]["status"] = "completed"
@@ -201,7 +226,6 @@ def _run_training_job_task(job_id: str, req: TrainRequest):
         TRAINING_JOBS[job_id]["results"] = results
         TRAINING_JOBS[job_id]["best_model_id"] = results["best_model_id"]
         
-        # Auto-activate best model
         ACTIVE_MODEL_ID = results["best_model_id"]
 
     except Exception as e:
@@ -209,7 +233,7 @@ def _run_training_job_task(job_id: str, req: TrainRequest):
         TRAINING_JOBS[job_id]["error_message"] = str(e)
         TRAINING_JOBS[job_id]["current_step"] = f"Failed: {str(e)}"
 
-@app.post("/train")
+@app.post("/train", dependencies=[Depends(verify_api_key)])
 def start_training(req: TrainRequest, background_tasks: BackgroundTasks):
     if req.dataset_id not in DATASETS_STORE:
         raise HTTPException(status_code=404, detail="Dataset not found.")
@@ -228,18 +252,16 @@ def start_training(req: TrainRequest, background_tasks: BackgroundTasks):
         "error_message": None
     }
 
-    # Execute training synchronously if small, or in background
-    # Given requirements, running synchronously for immediate response if requested
     _run_training_job_task(job_id, req)
     return TRAINING_JOBS[job_id]
 
-@app.get("/train/{job_id}")
+@app.get("/train/{job_id}", dependencies=[Depends(verify_api_key)])
 def get_training_job(job_id: str):
     if job_id not in TRAINING_JOBS:
         raise HTTPException(status_code=404, detail="Training job not found.")
     return TRAINING_JOBS[job_id]
 
-@app.get("/models")
+@app.get("/models", dependencies=[Depends(verify_api_key)])
 def list_models():
     models = []
     for f in ARTIFACTS_DIR.glob("*.joblib"):
@@ -260,97 +282,88 @@ def list_models():
             pass
     return models
 
-@app.get("/models/{model_id}")
-def get_model_details(model_id: str):
+@app.get("/models/{model_id}", dependencies=[Depends(verify_api_key)])
+def get_model(model_id: str):
+    target = None
     for f in ARTIFACTS_DIR.glob("*.joblib"):
         try:
             bundle = joblib.load(f)
-            if bundle["model_id"] == model_id:
-                return {
-                    "model_id": bundle["model_id"],
-                    "name": bundle["name"],
-                    "algorithm_key": bundle["algorithm_key"],
-                    "problem_type": bundle["problem_type"],
-                    "target_col": bundle["target_col"],
-                    "feature_names": bundle["feature_names"],
-                    "global_importances": bundle["global_importances"],
-                    "metrics": bundle["metrics"],
-                    "class_labels": bundle.get("class_labels"),
-                    "is_active": (bundle["model_id"] == ACTIVE_MODEL_ID)
-                }
+            if bundle.get("model_id") == model_id:
+                target = bundle
+                break
         except Exception:
             pass
-    raise HTTPException(status_code=404, detail="Model artifact not found.")
 
-@app.post("/models/{model_id}/activate")
+    if not target:
+        raise HTTPException(status_code=404, detail="Model artifact not found.")
+
+    clean_bundle = {k: v for k, v in target.items() if k != "pipeline"}
+    clean_bundle["is_active"] = (model_id == ACTIVE_MODEL_ID)
+    return clean_bundle
+
+@app.post("/models/{model_id}/activate", dependencies=[Depends(verify_api_key)])
 def activate_model(model_id: str):
     global ACTIVE_MODEL_ID
+    found = False
     for f in ARTIFACTS_DIR.glob("*.joblib"):
         try:
             bundle = joblib.load(f)
-            if bundle["model_id"] == model_id:
-                ACTIVE_MODEL_ID = model_id
-                return {"status": "success", "active_model_id": ACTIVE_MODEL_ID, "model_name": bundle["name"]}
+            if bundle.get("model_id") == model_id:
+                found = True
+                break
         except Exception:
             pass
-    raise HTTPException(status_code=404, detail="Model artifact not found.")
+
+    if not found:
+        raise HTTPException(status_code=404, detail="Model artifact not found.")
+
+    ACTIVE_MODEL_ID = model_id
+    return {"status": "success", "active_model_id": ACTIVE_MODEL_ID}
 
 # ----------------- PREDICTION & INFERENCE -----------------
 
-@app.post("/predict")
+@app.post("/predict", dependencies=[Depends(verify_api_key)])
 def predict_feasibility(req: PredictRequest):
+    global ACTIVE_MODEL_ID
     target_model_id = req.model_id or ACTIVE_MODEL_ID
     if not target_model_id:
-        raise HTTPException(status_code=400, detail="No active model found. Train and activate a model first.")
+        raise HTTPException(
+            status_code=400,
+            detail="No active model found. Please train or activate a model first."
+        )
 
     target_bundle = None
     for f in ARTIFACTS_DIR.glob("*.joblib"):
         try:
-            b = joblib.load(f)
-            if b["model_id"] == target_model_id:
-                target_bundle = b
+            bundle = joblib.load(f)
+            if bundle.get("model_id") == target_model_id:
+                target_bundle = bundle
                 break
         except Exception:
             pass
 
     if not target_bundle:
-        raise HTTPException(status_code=404, detail=f"Model artifact '{target_model_id}' not found.")
+        raise HTTPException(status_code=404, detail="Model artifact could not be loaded.")
 
     pipeline = target_bundle["pipeline"]
-    raw_num = target_bundle.get("raw_numeric_cols", [])
-    raw_cat = target_bundle.get("raw_categorical_cols", [])
-    expected_cols = list(raw_num) + list(raw_cat)
-
-    # Ensure all expected columns exist in input_df, filling missing ones with None / NaN
-    row_data = {}
-    for col in expected_cols:
-        row_data[col] = req.input_features.get(col, None)
-    
-    # Also include any remaining keys from input_features
-    for k, v in req.input_features.items():
-        if k not in row_data:
-            row_data[k] = v
-
-    input_df = pd.DataFrame([row_data])
+    input_df = pd.DataFrame([req.input_features])
 
     try:
         raw_pred = pipeline.predict(input_df)[0]
     except Exception as e:
-        raise HTTPException(status_code=422, detail=f"Inference input transformation error: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Inference error: {str(e)}")
 
     prob_map = {}
     confidence = None
     if hasattr(pipeline, "predict_proba"):
         try:
             probs = pipeline.predict_proba(input_df)[0]
-            classes = target_bundle.get("class_labels", getattr(pipeline, "classes_", []))
-            prob_map = {str(classes[i]): round(float(probs[i]), 4) for i in range(len(classes))}
-            if prob_map:
-                confidence = round(float(max(prob_map.values())), 4)
+            classes = [str(c) for c in getattr(pipeline, "classes_", [f"class_{i}" for i in range(len(probs))])]
+            prob_map = {classes[i]: float(probs[i]) for i in range(len(probs))}
+            confidence = float(max(prob_map.values())) if prob_map else None
         except Exception:
             pass
 
-    # Explainability factors
     local_factors = compute_local_prediction_factors(
         input_dict=req.input_features,
         global_importances=target_bundle.get("global_importances", []),
@@ -372,7 +385,7 @@ def predict_feasibility(req: PredictRequest):
 
 # ----------------- MARKET INTELLIGENCE & GOOGLE TRENDS -----------------
 
-@app.get("/market/trends")
+@app.get("/market/trends", dependencies=[Depends(verify_api_key)])
 def get_trends(
     keywords: str = Query(..., description="Comma-separated keywords"),
     geo: str = Query("PK", description="Geo code: 'PK' or 'PK-PB'"),
@@ -383,8 +396,8 @@ def get_trends(
         raise HTTPException(status_code=400, detail="At least one keyword is required.")
     return fetch_google_trends(keywords=kw_list, geo=geo, timeframe=timeframe)
 
-@app.post("/market/demand-analysis")
-def get_market_demand_analysis(req: MarketDemandRequest):
+@app.post("/market/demand-analysis", dependencies=[Depends(verify_api_key)])
+def get_market_demand_analysis(req: MarketDemandRequest, api_key: str = Depends(verify_api_key)):
     district_data = req.district_data or {
         "district": req.district,
         "purchasing_power_index": 78.0,

@@ -17,6 +17,7 @@ import {
   BudgetCurrency,
   BusinessScale,
   BusinessModel,
+
   StorefrontFootprint
 } from '@/types/project';
 import { validateProjectStep, validateCompleteProject } from '@/lib/validation/project';
@@ -42,15 +43,15 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
     title: '',
     category: 'Grocery & Gourmet Food',
     custom_category: '',
-    target_location: 'Gulberg III, Lahore, Pakistan',
-    city: 'Lahore',
+    target_location: '',
+    city: '',
     region: 'Punjab',
     country: 'Pakistan',
     postal_code: '',
-    lat: 31.5204,
-    lng: 74.3587,
+    lat: undefined,
+    lng: undefined,
     radius_km: 10,
-    budget_amount: 15000,
+    budget_amount: 250000,
     budget_currency: 'PKR',
     target_audience: {
       age_group: 'Young Professionals (25-34 years)',
@@ -386,6 +387,18 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
     } finally {
       setUploadingFile(false);
     }
+  };
+
+  // Remove Attachment
+  const handleRemoveAttachment = () => {
+    setUploadedFileName(null);
+    setFormData((prev) => ({
+      ...prev,
+      product_file_url: undefined,
+      product_file_name: undefined,
+      product_file_size: undefined
+    }));
+    showToast('Attachment removed from draft', 'success');
   };
 
   // Capital breakdown calculations
@@ -803,6 +816,40 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     })}
                   </div>
                 </div>
+
+                {/* Location Resolution Status */}
+                {formData.lat && formData.lng ? (
+                  <div className="flex items-center gap-2 p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3]">
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span>
+                      <strong>Coordinates Confirmed:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b]">
+                    <span className="material-symbols-outlined text-[18px]">location_searching</span>
+                    <span>
+                      Please select a listed commercial hub above to attach verified geographic coordinates for Punjab feasibility radar.
+                    </span>
+                  </div>
+                )}
+
+                {/* Location Resolution Confirmation */}
+                {formData.lat && formData.lng ? (
+                  <div className="flex items-center gap-2 p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3]">
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span>
+                      <strong>Coordinates Confirmed:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b]">
+                    <span className="material-symbols-outlined text-[18px]">location_searching</span>
+                    <span>
+                      Please select a listed commercial hub above to attach verified geographic coordinates for Punjab feasibility radar.
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Radar Spatial Map Visual Container */}
@@ -952,6 +999,23 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     <span>Radius is a search parameter only; accuracy depends on source coverage and is reported with the analysis.</span>
                   </div>
                 </div>
+
+                {/* Location Resolution Status */}
+                {formData.lat && formData.lng ? (
+                  <div className="flex items-center gap-2 p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3]">
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span>
+                      <strong>Coordinates Confirmed:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b]">
+                    <span className="material-symbols-outlined text-[18px]">location_searching</span>
+                    <span>
+                      Please select a listed commercial hub above to attach verified geographic coordinates for Punjab feasibility radar.
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1139,6 +1203,23 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     </div>
                   </div>
                 </div>
+
+                {/* Location Resolution Status */}
+                {formData.lat && formData.lng ? (
+                  <div className="flex items-center gap-2 p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3]">
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span>
+                      <strong>Coordinates Confirmed:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b]">
+                    <span className="material-symbols-outlined text-[18px]">location_searching</span>
+                    <span>
+                      Please select a listed commercial hub above to attach verified geographic coordinates for Punjab feasibility radar.
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Operational Model & Shop Footprint */}
@@ -1244,6 +1325,23 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     </span>
                   </div>
                 </div>
+
+                {/* Location Resolution Status */}
+                {formData.lat && formData.lng ? (
+                  <div className="flex items-center gap-2 p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3]">
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span>
+                      <strong>Coordinates Confirmed:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b]">
+                    <span className="material-symbols-outlined text-[18px]">location_searching</span>
+                    <span>
+                      Please select a listed commercial hub above to attach verified geographic coordinates for Punjab feasibility radar.
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1377,6 +1475,23 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     </select>
                   </div>
                 </div>
+
+                {/* Location Resolution Status */}
+                {formData.lat && formData.lng ? (
+                  <div className="flex items-center gap-2 p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3]">
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span>
+                      <strong>Coordinates Confirmed:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b]">
+                    <span className="material-symbols-outlined text-[18px]">location_searching</span>
+                    <span>
+                      Please select a listed commercial hub above to attach verified geographic coordinates for Punjab feasibility radar.
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Product Types and Specification Upload */}
@@ -1469,6 +1584,24 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                         </>
                       )}
                     </div>
+                    {uploadedFileName && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveAttachment}
+                        className="text-[#ffb4ab] hover:text-[#ff897d] text-[12px] font-semibold underline mt-1"
+                      >
+                        Remove Attachment
+                      </button>
+                    )}
+                    {uploadedFileName && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveAttachment}
+                        className="text-[#ffb4ab] hover:text-[#ff897d] text-[12px] font-semibold underline mt-0.5"
+                      >
+                        Remove Attachment
+                      </button>
+                    )}
                     <label className="mt-1 cursor-pointer bg-[#2d3449] hover:bg-[#31394d] text-[#dae2fd] text-[12px] font-semibold px-4 py-1.5 rounded-lg transition-colors border border-[#2d3449]">
                       <span>{uploadedFileName ? 'Replace File' : 'Browse File'}</span>
                       <input
@@ -1481,6 +1614,23 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     </label>
                   </div>
                 </div>
+
+                {/* Location Resolution Status */}
+                {formData.lat && formData.lng ? (
+                  <div className="flex items-center gap-2 p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3]">
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span>
+                      <strong>Coordinates Confirmed:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b]">
+                    <span className="material-symbols-outlined text-[18px]">location_searching</span>
+                    <span>
+                      Please select a listed commercial hub above to attach verified geographic coordinates for Punjab feasibility radar.
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1618,6 +1768,23 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     </div>
                   </div>
                 </div>
+
+                {/* Location Resolution Status */}
+                {formData.lat && formData.lng ? (
+                  <div className="flex items-center gap-2 p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3]">
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span>
+                      <strong>Coordinates Confirmed:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b]">
+                    <span className="material-symbols-outlined text-[18px]">location_searching</span>
+                    <span>
+                      Please select a listed commercial hub above to attach verified geographic coordinates for Punjab feasibility radar.
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* 4. Audience, Scale & Product Details Review */}
