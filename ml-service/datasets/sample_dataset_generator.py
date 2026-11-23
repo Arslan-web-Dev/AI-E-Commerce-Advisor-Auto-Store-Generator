@@ -124,9 +124,13 @@ def generate_punjab_feasibility_dataset(num_samples: int = 1500, random_seed: in
     df = pd.DataFrame(records)
     return df
 
-def save_sample_dataset(output_path: Path) -> Path:
+def save_sample_dataset(output_path: Path, num_samples: int = 1500) -> Path:
+    """
+    Save a generated sample dataset to the given output_path.
+    Allows specifying the number of samples via ``num_samples``.
+    """
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    df = generate_punjab_feasibility_dataset()
+    df = generate_punjab_feasibility_dataset(num_samples=num_samples)
     df.to_csv(output_path, index=False)
     return output_path
 
