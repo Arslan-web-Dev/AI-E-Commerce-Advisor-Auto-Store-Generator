@@ -86,10 +86,10 @@ begin
   -- Aggregate duplicate product IDs to prevent quantity splitting.
   for v_item in
     select
-      (entry->>'product_id')::uuid as product_id,
-      sum((entry->>'quantity')::integer)::integer as quantity
-    from jsonb_array_elements(p_items) as entry
-    group by (entry->>'product_id')::uuid
+      (item->>'product_id')::uuid as product_id,
+      sum((item->>'quantity')::integer)::integer as quantity
+    from jsonb_array_elements(p_items) as entries(item)
+    group by (item->>'product_id')::uuid
   loop
     v_quantity := v_item.quantity;
     if v_item.product_id is null or v_quantity < 1 or v_quantity > 1000 then
