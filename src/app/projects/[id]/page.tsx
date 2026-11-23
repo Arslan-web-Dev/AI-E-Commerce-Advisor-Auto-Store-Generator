@@ -16,6 +16,30 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloadingAttachment, setDownloadingAttachment] = useState(false);
+  const [attachmentError, setAttachmentError] = useState<string | null>(null);
+
+  const handleDownloadAttachment = async () => {
+    try {
+      setDownloadingAttachment(true);
+      setAttachmentError(null);
+      const res = await fetch(`/api/projects/${id}/attachments`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to generate secure download link');
+      }
+      const data = await res.json();
+      if (data.signed_url) {
+        window.open(data.signed_url, '_blank', 'noopener,noreferrer');
+      } else {
+        throw new Error('No signed URL returned from storage service');
+      }
+    } catch (err: any) {
+      setAttachmentError(err.message || 'Error downloading attachment');
+    } finally {
+      setDownloadingAttachment(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -334,15 +358,38 @@ export default function ProjectDetailPage() {
             )}
 
             {project.product_file_name && (
-              <div className="bg-[#171f33] p-3.5 rounded-xl border border-[#2d3449] flex items-center justify-between text-[13px]">
+              <div className="bg-[#171f33] p-3.5 rounded-xl border border-[#2d3449] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[13px]">
                 <div className="flex items-center gap-2 text-[#4cd7f6]">
+                  <span className="material-symbols-outlined text-[18px]">lock</span>
                   <span className="material-symbols-outlined text-[18px]">attachment</span>
-                  <span className="font-medium">Attached Catalog: {project.product_file_name}</span>
+                  <div>
+                    <span className="font-medium block">Private Document: {project.product_file_name}</span>
+                    <span className="text-[11px] text-[#bbcabf]">
+                      Protected bucket storage • 1-hour signed access
+                    </span>
+                  </div>
                 </div>
-                {project.product_file_size && (
-                  <span className="text-[11px] font-mono text-[#bbcabf]">
-                    {(project.product_file_size / 1024).toFixed(1)} KB
-                  </span>
+                <div className="flex items-center gap-3">
+                  {project.product_file_size && (
+                    <span className="text-[11px] font-mono text-[#bbcabf]">
+                      {(project.product_file_size / 1024).toFixed(1)} KB
+                    </span>
+                  )}
+                  <button
+                    onClick={handleDownloadAttachment}
+                    disabled={downloadingAttachment}
+                    className="bg-[#222a3d] hover:bg-[#2d3449] text-[#4edea3] border border-[#4edea3]/30 px-3 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50"
+                  >
+                    {downloadingAttachment ? (
+                      <span className="w-3.5 h-3.5 border-2 border-[#4edea3] border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      <span className="material-symbols-outlined text-[16px]">download</span>
+                    )}
+                    <span>Download File</span>
+                  </button>
+                </div>
+                {attachmentError && (
+                  <p className="text-[#ffb4ab] text-[11px] sm:col-span-2">{attachmentError}</p>
                 )}
               </div>
             )}

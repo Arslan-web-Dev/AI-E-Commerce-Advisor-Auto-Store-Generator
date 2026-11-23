@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { validateProjectStep } from '@/lib/validation/project';
-import { EXCHANGE_RATE_USD_TO_PKR } from '@/types/project';
+import { convertUsdToPkr } from '@/lib/currency/exchange-rate';
+
+export const dynamic = 'force-dynamic';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -34,7 +36,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    // Role check for admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -115,30 +116,50 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     const updates: Record<string, unknown> = {};
 
-    if (body.title !== undefined) updates.title = body.title;
+    if (body.title !== undefined) updates.title = String(body.title).trim();
     if (body.category !== undefined) updates.category = body.category;
     if (body.custom_category !== undefined) updates.custom_category = body.custom_category;
-    if (body.target_location !== undefined) updates.target_location = body.target_location;
+    if (body.target_location !== undefined) updates.target_location = String(body.target_location).trim();
     if (body.city !== undefined) updates.city = body.city;
     if (body.region !== undefined) updates.region = body.region;
-    if (body.country !== undefined) updates.country = body.country;
+    if (body.country !== undefined) updates.country = 'Pakistan'; // Platform strictly locked to Pakistan
     if (body.postal_code !== undefined) updates.postal_code = body.postal_code;
-    if (body.lat !== undefined) updates.lat = Number(body.lat);
-    if (body.lng !== undefined) updates.lng = Number(body.lng);
-    if (body.radius_km !== undefined) updates.radius_km = Number(body.radius_km);
+
+    // Validate coordinates if being updated
+    if (body.lat !== undefined && body.lat !== null && body.lng !== undefined && body.lng !== null) {
+      const lat = Number(body.lat);
+      const lng = Number(body.lng);
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        if (lat < 23.5 || lat > 37.2 || lng < 60.8 || lng > 77.9) {
+          return NextResponse.json(
+            { error: 'Coordinates must be located within Pakistan territory (Lat: 23.5–37.2, Lng: 60.8–77.9).' },
+            { status: 400 }
+          );
+        }
+        updates.lat = lat;
+        updates.lng = lng;
+      }
+    } else if (body.lat === null || body.lng === null) {
+      updates.lat = null;
+      updates.lng = null;
+    }
+
+    if (body.radius_km !== undefined) {
+      updates.radius_km = Math.min(15, Math.max(5, Number(body.radius_km)));
+    }
+
     if (body.budget_amount !== undefined) {
       const amt = Number(body.budget_amount);
       updates.budget_amount = amt;
       const curr = (body.budget_currency || existingProject.budget_currency) as 'USD' | 'PKR';
-      updates.budget_pkr =
-        curr === 'PKR' ? Math.round(amt) : Math.round(amt * EXCHANGE_RATE_USD_TO_PKR);
+      updates.budget_pkr = curr === 'PKR' ? Math.round(amt) : convertUsdToPkr(amt);
     }
     if (body.budget_currency !== undefined) {
       updates.budget_currency = body.budget_currency;
       const amt = updates.budget_amount !== undefined ? Number(updates.budget_amount) : Number(existingProject.budget_amount);
-      updates.budget_pkr =
-        body.budget_currency === 'PKR' ? Math.round(amt) : Math.round(amt * EXCHANGE_RATE_USD_TO_PKR);
+      updates.budget_pkr = body.budget_currency === 'PKR' ? Math.round(amt) : convertUsdToPkr(amt);
     }
+
     if (body.target_audience !== undefined) updates.target_audience = body.target_audience;
     if (body.business_scale !== undefined) updates.business_scale = body.business_scale;
     if (body.business_model !== undefined) updates.business_model = body.business_model;
@@ -150,6 +171,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (body.product_file_size !== undefined) updates.product_file_size = body.product_file_size;
     if (body.current_step !== undefined) updates.current_step = Number(body.current_step);
     if (body.metadata !== undefined) updates.metadata = body.metadata;
+
+    // Never allow updating owner_id from request body
+    delete updates.owner_id;
 
     const { data: updatedProject, error: updateError } = await supabase
       .from('projects')

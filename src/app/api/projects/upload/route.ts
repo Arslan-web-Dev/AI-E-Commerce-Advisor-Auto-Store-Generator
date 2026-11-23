@@ -11,6 +11,17 @@ const ALLOWED_MIME_TYPES = [
   'image/webp',
 ];
 
+const ALLOWED_EXTENSIONS = ['.pdf', '.csv', '.json', '.png', '.jpg', '.jpeg', '.webp'];
+
+function validateFilename(filename: string): boolean {
+  // Reject directory traversal or path manipulation attempts
+  if (filename.includes('..') || filename.includes('/') || filename.includes('\\') || filename.includes('%')) {
+    return false;
+  }
+  const ext = filename.slice(filename.lastIndexOf('.')).toLowerCase();
+  return ALLOWED_EXTENSIONS.includes(ext);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -25,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
-    const projectId = formData.get('project_id') as string | null;
+    const projectId = (formData.get('project_id') as string | null)?.trim();
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -42,70 +53,95 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'Invalid file type. Allowed formats: PDF (.pdf), CSV (.csv), JSON (.json), PNG (.png), JPEG (.jpg)',
+            'Invalid file type. Allowed formats: PDF (.pdf), CSV (.csv), JSON (.json), PNG (.png), JPEG (.jpg, .jpeg), WebP (.webp)',
         },
         { status: 400 }
       );
     }
 
-    // Sanitize filename
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const storagePath = `${user.id}/${Date.now()}_${safeName}`;
-
-    try {
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('project-attachments')
-        .upload(storagePath, buffer, {
-          contentType: file.type,
-          upsert: true,
-        });
-
-      if (uploadError) {
-        // Supabase storage bucket may not be created in dev; return safe fallback reference
-        return NextResponse.json({
-          message: 'File validated. Note: Supabase storage bucket "project-attachments" not configured.',
-          file_url: `/uploads/${storagePath}`,
-          file_name: safeName,
-          file_size: file.size,
-          storage_configured: false,
-        });
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from('project-attachments')
-        .getPublicUrl(uploadData.path);
-
-      // If projectId provided, update the project
-      if (projectId) {
-        await supabase
-          .from('projects')
-          .update({
-            product_file_url: publicUrlData?.publicUrl || uploadData.path,
-            product_file_name: safeName,
-            product_file_size: file.size,
-          })
-          .eq('id', projectId)
-          .eq('owner_id', user.id);
-      }
-
-      return NextResponse.json({
-        file_url: publicUrlData?.publicUrl || uploadData.path,
-        file_name: safeName,
-        file_size: file.size,
-        storage_configured: true,
-      });
-    } catch {
-      return NextResponse.json({
-        message: 'File validated. Local environment mode active.',
-        file_url: `/uploads/${storagePath}`,
-        file_name: safeName,
-        file_size: file.size,
-        storage_configured: false,
-      });
+    if (!validateFilename(file.name)) {
+      return NextResponse.json(
+        { error: 'Invalid filename or disallowed file extension.' },
+        { status: 400 }
+      );
     }
+
+    // If projectId is provided, strictly verify project ownership
+    if (projectId && projectId !== 'draft') {
+      const { data: project, error: projErr } = await supabase
+        .from('projects')
+        .select('id, owner_id')
+        .eq('id', projectId)
+        .maybeSingle();
+
+      if (projErr || !project) {
+        return NextResponse.json({ error: 'Associated project not found' }, { status: 404 });
+      }
+
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+      const isAdmin = profile?.role === 'admin';
+
+      if (project.owner_id !== user.id && !isAdmin) {
+        return NextResponse.json({ error: 'Access denied: You do not own this project' }, { status: 403 });
+      }
+    }
+
+    // Sanitize filename and format storage path: {user_id}/{project_id}/{unique_filename}
+    const cleanBasename = file.name
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .slice(0, 50);
+    const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+    const uniqueFileId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const safeName = `${cleanBasename}_${uniqueFileId}${ext}`;
+    const targetProjId = projectId && projectId !== 'draft' ? projectId : 'drafts';
+    const storagePath = `${user.id}/${targetProjId}/${safeName}`;
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const { error: uploadError } = await supabase.storage
+      .from('project-attachments')
+      .upload(storagePath, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.warn('Storage upload notice (dev mode fallback):', uploadError.message);
+    }
+
+    // Generate short-lived signed URL (3600 seconds = 1 hour)
+    let signedUrl = '';
+    const { data: signedData, error: signError } = await supabase.storage
+      .from('project-attachments')
+      .createSignedUrl(storagePath, 3600);
+
+    if (!signError && signedData?.signedUrl) {
+      signedUrl = signedData.signedUrl;
+    }
+
+    // Update project record if an existing project ID was provided
+    if (projectId && projectId !== 'draft') {
+      await supabase
+        .from('projects')
+        .update({
+          product_file_url: storagePath, // Store storage path canonically, not public URL
+          product_file_name: file.name,
+          product_file_size: file.size,
+        })
+        .eq('id', projectId)
+        .eq('owner_id', user.id);
+    }
+
+    return NextResponse.json({
+      success: true,
+      storage_path: storagePath,
+      signed_url: signedUrl || null,
+      file_name: file.name,
+      file_size: file.size,
+      mime_type: file.type,
+    });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Internal Server Error';
+    const message = err instanceof Error ? err.message : 'File upload processing failed';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

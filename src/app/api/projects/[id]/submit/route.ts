@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { validateCompleteProject } from '@/lib/validation/project';
-import { COMMERCIAL_HUB_PRESETS, EXCHANGE_RATE_USD_TO_PKR } from '@/types/project';
+import { COMMERCIAL_HUB_PRESETS } from '@/types/project';
+import { convertUsdToPkr } from '@/lib/currency/exchange-rate';
 import { runDataCollection } from '@/lib/data-collection/orchestrator';
 
 interface RouteContext {
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Require an actual selected Pakistan hub/coordinate; never silently relocate a project.
+    // Geographic verification: strictly inside Pakistan
     const lat = Number(project.lat);
     const lng = Number(project.lng);
     if (
@@ -72,43 +73,51 @@ export async function POST(request: NextRequest, context: RouteContext) {
       lng < 60.8 || lng > 77.9
     ) {
       return NextResponse.json(
-        { error: 'Select a seeded Pakistan commercial hub to set valid coordinates before submitting this project.' },
-        { status: 400 }
-      );
-    }
-    if (typeof project.city !== 'string' || !project.city.trim()) {
-      return NextResponse.json(
-        { error: 'Select a seeded Pakistan commercial hub so the project has a city and coordinates.' },
-        { status: 400 }
-      );
-    }
-    const locationText = typeof project.target_location === 'string' ? project.target_location.toLowerCase() : '';
-    const matchesSeededHub = COMMERCIAL_HUB_PRESETS.some((hub) =>
-      hub.city.toLowerCase() === project.city.toLowerCase() &&
-      Math.abs(hub.lat - lat) < 0.0001 &&
-      Math.abs(hub.lng - lng) < 0.0001 &&
-      locationText.includes(hub.name.toLowerCase())
-    );
-    if (!matchesSeededHub) {
-      return NextResponse.json(
-        { error: 'Choose a listed commercial hub. This version does not geocode free-text locations.' },
+        { error: 'Coordinates must be valid numbers within Pakistan geographic bounds (Lat: 23.5–37.2, Lng: 60.8–77.9).' },
         { status: 400 }
       );
     }
 
-    const requestedRadiusKm = Number(project.radius_km);
-    if (!Number.isFinite(requestedRadiusKm) || requestedRadiusKm < 10 || requestedRadiusKm > 15) {
+    if (typeof project.city !== 'string' || !project.city.trim()) {
       return NextResponse.json(
-        { error: 'Analysis radius must be between 10 and 15 km.' },
+        { error: 'Please specify a target city within Pakistan before submitting.' },
+        { status: 400 }
+      );
+    }
+
+    // Ensure location is not a foreign country
+    if (project.country && project.country.toLowerCase() !== 'pakistan') {
+      return NextResponse.json(
+        { error: 'This platform evaluates business feasibility exclusively within Pakistan.' },
+        { status: 400 }
+      );
+    }
+
+    // Radius validation: 5 km to 15 km
+    const requestedRadiusKm = Number(project.radius_km);
+    if (!Number.isFinite(requestedRadiusKm) || requestedRadiusKm < 5 || requestedRadiusKm > 15) {
+      return NextResponse.json(
+        { error: 'Analysis radius must be between 5 and 15 km (10 km standard default).' },
         { status: 400 }
       );
     }
     const radiusKm = Math.round(requestedRadiusKm);
-    const budgetPkr =
-      project.budget_pkr ||
-      (project.budget_currency === 'PKR'
-        ? Math.round(project.budget_amount)
-        : Math.round(project.budget_amount * EXCHANGE_RATE_USD_TO_PKR));
+
+    // Compute canonical integer PKR budget
+    const rawBudget = Number(project.budget_amount);
+    let budgetPkr = project.budget_pkr;
+    if (!budgetPkr || budgetPkr <= 0) {
+      budgetPkr = project.budget_currency === 'USD'
+        ? convertUsdToPkr(rawBudget)
+        : Math.round(rawBudget);
+    }
+
+    if (budgetPkr < 10_000 || budgetPkr > 50_000_000) {
+      return NextResponse.json(
+        { error: 'Project investment capital must be between Rs. 10,000 and Rs. 50,000,000 PKR.' },
+        { status: 400 }
+      );
+    }
 
     // 1. Create linked feasibility_reports row with status 'pending' (SRS FR-2.6)
     const { data: report, error: reportError } = await supabase
@@ -129,7 +138,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
       .single();
 
     if (reportError) {
-      // If error occurs inserting feasibility_reports, report error
       return NextResponse.json(
         { error: `Failed to initialize feasibility report: ${reportError.message}` },
         { status: 500 }
@@ -144,7 +152,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
         status: 'submitted',
         submitted_at: submittedAt,
         report_id: report.id,
-        current_step: 5,
+        budget_pkr: budgetPkr,
+        current_step: 3,
       })
       .eq('id', id)
       .select()

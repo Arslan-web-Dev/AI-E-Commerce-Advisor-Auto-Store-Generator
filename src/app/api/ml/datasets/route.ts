@@ -2,12 +2,19 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { mlClient } from '@/lib/ml-client';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+  if (profile?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden. Admin role required.' }, { status: 403 });
   }
 
   try {
@@ -26,7 +33,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Check admin role
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (profile?.role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden. Admin role required.' }, { status: 403 });
@@ -58,14 +64,13 @@ export async function POST(request: Request) {
         columns_metadata: uploaded.columns_metadata,
         data_quality_report: uploaded.data_quality_report,
         is_sample: uploaded.is_sample,
-        created_by: user.id,
       });
-    } catch {
-      // Graceful fallback if table is not yet migrated in Supabase cloud
+    } catch (dbErr) {
+      console.warn('Note: ml_datasets table insert:', dbErr);
     }
 
     return NextResponse.json({ dataset: uploaded });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to process dataset' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Failed to upload dataset' }, { status: 500 });
   }
 }

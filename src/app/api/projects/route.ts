@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { validateProjectStep } from '@/lib/validation/project';
-import { EXCHANGE_RATE_USD_TO_PKR } from '@/types/project';
+import { convertUsdToPkr } from '@/lib/currency/exchange-rate';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -56,20 +58,36 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Partial step 1 validation minimum for creating a draft
+    // Partial step validation for initializing a draft
     const stepValidation = validateProjectStep(1, body);
     if (!stepValidation.valid && body.category) {
       return NextResponse.json({ error: 'Validation failed', details: stepValidation.errors }, { status: 400 });
     }
 
-    const category = body.category || 'Apparel & Fashion';
-    const targetLocation = body.target_location || 'Gulberg III, Lahore, Pakistan';
-    const budgetAmount = body.budget_amount ? Number(body.budget_amount) : 15000;
-    const budgetCurrency = body.budget_currency || 'PKR';
-    const budgetPkr =
-      budgetCurrency === 'PKR'
-        ? Math.round(budgetAmount)
-        : Math.round(budgetAmount * EXCHANGE_RATE_USD_TO_PKR);
+    const category = body.category ? String(body.category).trim() : 'Apparel & Fashion';
+    const targetLocation = body.target_location ? String(body.target_location).trim() : '';
+    const budgetAmount = body.budget_amount ? Number(body.budget_amount) : 250000;
+    const budgetCurrency = body.budget_currency === 'USD' ? 'USD' : 'PKR';
+    const budgetPkr = budgetCurrency === 'USD' ? convertUsdToPkr(budgetAmount) : Math.round(budgetAmount);
+
+    // Validate coordinates if supplied; do NOT inject false defaults
+    let lat: number | null = null;
+    let lng: number | null = null;
+    if (body.lat !== undefined && body.lat !== null && body.lng !== undefined && body.lng !== null) {
+      const parsedLat = Number(body.lat);
+      const parsedLng = Number(body.lng);
+      if (Number.isFinite(parsedLat) && Number.isFinite(parsedLng)) {
+        if (parsedLat >= 23.5 && parsedLat <= 37.2 && parsedLng >= 60.8 && parsedLng <= 77.9) {
+          lat = parsedLat;
+          lng = parsedLng;
+        } else {
+          return NextResponse.json(
+            { error: 'Specified coordinates are outside Pakistan geographic territory (Lat 23.5–37.2, Lng 60.8–77.9).' },
+            { status: 400 }
+          );
+        }
+      }
+    }
 
     // Parse simple city if available
     let parsedCity = body.city || null;
@@ -81,18 +99,18 @@ export async function POST(request: NextRequest) {
     }
 
     const newProject = {
-      owner_id: user.id,
-      title: body.title || `${category} - ${parsedCity || 'New Venture'}`,
+      owner_id: user.id, // Strictly derived from server session
+      title: body.title ? String(body.title).trim() : `${category} Venture`,
       category,
       custom_category: body.custom_category || null,
       target_location: targetLocation,
       city: parsedCity,
-      region: body.region || null,
-      country: body.country || 'Pakistan',
+      region: body.region || 'Punjab',
+      country: 'Pakistan',
       postal_code: body.postal_code || null,
-      lat: body.lat !== undefined ? Number(body.lat) : 31.5204,
-      lng: body.lng !== undefined ? Number(body.lng) : 74.3587,
-      radius_km: body.radius_km ? Number(body.radius_km) : 10.0,
+      lat,
+      lng,
+      radius_km: body.radius_km ? Math.min(15, Math.max(5, Number(body.radius_km))) : 10.0,
       budget_amount: budgetAmount,
       budget_currency: budgetCurrency,
       budget_pkr: budgetPkr,
@@ -100,14 +118,9 @@ export async function POST(request: NextRequest) {
       business_scale: body.business_scale || 'small',
       business_model: body.business_model || 'hybrid',
       storefront_footprint: body.storefront_footprint || 'boutique',
-      product_description: body.product_description || null,
+      product_description: body.product_description || '',
       product_types: Array.isArray(body.product_types) ? body.product_types : [],
-      product_file_url: body.product_file_url || null,
-      product_file_name: body.product_file_name || null,
-      product_file_size: body.product_file_size || null,
       current_step: body.current_step ? Number(body.current_step) : 1,
-      form_version: 1,
-      metadata: body.metadata || {},
       status: 'draft',
     };
 
