@@ -49,7 +49,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
     postal_code: '',
     lat: 31.5204,
     lng: 74.3587,
-    radius_km: 12,
+    radius_km: 10,
     budget_amount: 15000,
     budget_currency: 'PKR',
     target_audience: {
@@ -413,11 +413,10 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed bottom-24 right-6 z-50 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 border ${
-            toast.type === 'success'
-              ? 'bg-[#171f33] border-[#4edea3] text-[#4edea3]'
-              : 'bg-[#171f33] border-[#ffb4ab] text-[#ffb4ab]'
-          }`}
+          className={`fixed bottom-24 right-6 z-50 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 border ${toast.type === 'success'
+            ? 'bg-[#171f33] border-[#4edea3] text-[#4edea3]'
+            : 'bg-[#171f33] border-[#ffb4ab] text-[#ffb4ab]'
+            }`}
         >
           <span className="material-symbols-outlined text-[20px]">
             {toast.type === 'success' ? 'check_circle' : 'error'}
@@ -481,7 +480,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
           {/* Sub-Header Status Tracker & Stepper Pill Navigation */}
           <div className="w-full bg-[#131b2e] rounded-xl p-4 md:p-6 shadow-xl relative overflow-hidden flex flex-col gap-4 border border-[#2d3449]/40">
             <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-[#4edea3]/5 blur-3xl pointer-events-none"></div>
-            
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#060e20] p-1.5 flex items-center justify-center text-[#4edea3] border border-[#2d3449]">
@@ -526,22 +525,20 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     key={s.step}
                     type="button"
                     onClick={() => goToStep(s.step)}
-                    className={`text-left p-3 rounded-xl transition-all duration-200 flex items-center gap-3 border ${
-                      isActive
-                        ? 'bg-[#222a3d] text-[#dae2fd] border-[#4edea3]/60 shadow-[0_0_15px_rgba(78,222,163,0.15)] ring-1 ring-[#4edea3]/40'
-                        : isCompleted
+                    className={`text-left p-3 rounded-xl transition-all duration-200 flex items-center gap-3 border ${isActive
+                      ? 'bg-[#222a3d] text-[#dae2fd] border-[#4edea3]/60 shadow-[0_0_15px_rgba(78,222,163,0.15)] ring-1 ring-[#4edea3]/40'
+                      : isCompleted
                         ? 'bg-[#171f33] text-[#dae2fd] border-[#2d3449] hover:bg-[#222a3d]/80'
                         : 'bg-[#171f33]/60 text-[#bbcabf] border-[#2d3449]/40 opacity-70 hover:opacity-100'
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`w-7 h-7 rounded-full text-[12px] font-semibold flex items-center justify-center shrink-0 ${
-                        isActive
-                          ? 'bg-[#4edea3] text-[#003824]'
-                          : isCompleted
+                      className={`w-7 h-7 rounded-full text-[12px] font-semibold flex items-center justify-center shrink-0 ${isActive
+                        ? 'bg-[#4edea3] text-[#003824]'
+                        : isCompleted
                           ? 'bg-[#4edea3]/20 text-[#4edea3]'
                           : 'bg-[#2d3449] text-[#bbcabf]'
-                      }`}
+                        }`}
                     >
                       {isCompleted ? (
                         <span className="material-symbols-outlined text-[16px]">check</span>
@@ -603,26 +600,23 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                           return copy;
                         });
                       }}
-                      className={`cursor-pointer rounded-xl p-5 transition-all duration-200 relative flex flex-col justify-between border ${
-                        isSelected
-                          ? 'bg-[#222a3d] border-[#4edea3] ring-2 ring-[#4edea3]/40 shadow-xl'
-                          : 'bg-[#131b2e] border-[#2d3449]/60 hover:bg-[#171f33] hover:border-[#2d3449] shadow-sm'
-                      }`}
+                      className={`cursor-pointer rounded-xl p-5 transition-all duration-200 relative flex flex-col justify-between border ${isSelected
+                        ? 'bg-[#222a3d] border-[#4edea3] ring-2 ring-[#4edea3]/40 shadow-xl'
+                        : 'bg-[#131b2e] border-[#2d3449]/60 hover:bg-[#171f33] hover:border-[#2d3449] shadow-sm'
+                        }`}
                     >
                       <div className="flex items-start justify-between gap-3 mb-4">
                         <div
-                          className={`w-11 h-11 rounded-xl flex items-center justify-center transition-transform ${
-                            isSelected ? 'bg-[#4edea3]/20 text-[#4edea3]' : 'bg-[#2d3449] text-[#4cd7f6]'
-                          }`}
+                          className={`w-11 h-11 rounded-xl flex items-center justify-center transition-transform ${isSelected ? 'bg-[#4edea3]/20 text-[#4edea3]' : 'bg-[#2d3449] text-[#4cd7f6]'
+                            }`}
                         >
                           <span className="material-symbols-outlined text-[26px]">{cat.icon}</span>
                         </div>
                         <span
-                          className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
-                            isSelected
-                              ? 'bg-[#4edea3]/20 text-[#4edea3]'
-                              : 'bg-[#2d3449] text-[#bbcabf]'
-                          }`}
+                          className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${isSelected
+                            ? 'bg-[#4edea3]/20 text-[#4edea3]'
+                            : 'bg-[#2d3449] text-[#bbcabf]'
+                            }`}
                         >
                           {cat.badge}
                         </span>
@@ -798,11 +792,10 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                           key={hub.name}
                           type="button"
                           onClick={() => handleSelectHub(hub)}
-                          className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all border ${
-                            isSelected
-                              ? 'bg-[#4edea3] text-[#003824] font-semibold border-[#4edea3] shadow-md ring-2 ring-[#4edea3]/40'
-                              : 'bg-[#171f33] text-[#dae2fd] border-[#2d3449] hover:bg-[#222a3d]'
-                          }`}
+                          className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all border ${isSelected
+                            ? 'bg-[#4edea3] text-[#003824] font-semibold border-[#4edea3] shadow-md ring-2 ring-[#4edea3]/40'
+                            : 'bg-[#171f33] text-[#dae2fd] border-[#2d3449] hover:bg-[#222a3d]'
+                            }`}
                         >
                           {hub.name}
                         </button>
@@ -1003,22 +996,20 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     <button
                       type="button"
                       onClick={() => handleCurrencyChange('USD')}
-                      className={`px-4 py-2 rounded-lg text-[13px] font-semibold transition-all ${
-                        formData.budget_currency === 'USD'
-                          ? 'bg-[#4edea3] text-[#003824] shadow-md'
-                          : 'text-[#bbcabf] hover:text-[#dae2fd]'
-                      }`}
+                      className={`px-4 py-2 rounded-lg text-[13px] font-semibold transition-all ${formData.budget_currency === 'USD'
+                        ? 'bg-[#4edea3] text-[#003824] shadow-md'
+                        : 'text-[#bbcabf] hover:text-[#dae2fd]'
+                        }`}
                     >
                       USD ($)
                     </button>
                     <button
                       type="button"
                       onClick={() => handleCurrencyChange('PKR')}
-                      className={`px-4 py-2 rounded-lg text-[13px] font-semibold transition-all ${
-                        formData.budget_currency === 'PKR'
-                          ? 'bg-[#4edea3] text-[#003824] shadow-md'
-                          : 'text-[#bbcabf] hover:text-[#dae2fd]'
-                      }`}
+                      className={`px-4 py-2 rounded-lg text-[13px] font-semibold transition-all ${formData.budget_currency === 'PKR'
+                        ? 'bg-[#4edea3] text-[#003824] shadow-md'
+                        : 'text-[#bbcabf] hover:text-[#dae2fd]'
+                        }`}
                     >
                       PKR (Rs)
                     </button>
@@ -1162,11 +1153,10 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   <div className="flex flex-col gap-3">
                     <label
                       onClick={() => setFormData((p) => ({ ...p, business_model: 'd2c' }))}
-                      className={`cursor-pointer p-4 rounded-xl flex items-start gap-3 transition-all border ${
-                        formData.business_model === 'd2c'
-                          ? 'bg-[#222a3d] border-[#4edea3] ring-1 ring-[#4edea3]/40'
-                          : 'bg-[#171f33] border-[#2d3449] hover:bg-[#222a3d]/60'
-                      }`}
+                      className={`cursor-pointer p-4 rounded-xl flex items-start gap-3 transition-all border ${formData.business_model === 'd2c'
+                        ? 'bg-[#222a3d] border-[#4edea3] ring-1 ring-[#4edea3]/40'
+                        : 'bg-[#171f33] border-[#2d3449] hover:bg-[#222a3d]/60'
+                        }`}
                     >
                       <input
                         type="radio"
@@ -1185,11 +1175,10 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
 
                     <label
                       onClick={() => setFormData((p) => ({ ...p, business_model: 'hybrid' }))}
-                      className={`cursor-pointer p-4 rounded-xl flex items-start gap-3 transition-all border ${
-                        formData.business_model === 'hybrid'
-                          ? 'bg-[#222a3d] border-[#4edea3] ring-1 ring-[#4edea3]/40'
-                          : 'bg-[#171f33] border-[#2d3449] hover:bg-[#222a3d]/60'
-                      }`}
+                      className={`cursor-pointer p-4 rounded-xl flex items-start gap-3 transition-all border ${formData.business_model === 'hybrid'
+                        ? 'bg-[#222a3d] border-[#4edea3] ring-1 ring-[#4edea3]/40'
+                        : 'bg-[#171f33] border-[#2d3449] hover:bg-[#222a3d]/60'
+                        }`}
                     >
                       <input
                         type="radio"
@@ -1234,11 +1223,10 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                           key={fp.id}
                           type="button"
                           onClick={() => setFormData((p) => ({ ...p, storefront_footprint: fp.id }))}
-                          className={`p-3.5 rounded-xl text-left transition-all flex flex-col border ${
-                            isSelected
-                              ? 'bg-[#4edea3] text-[#003824] border-[#4edea3] shadow-md ring-2 ring-[#4edea3]/40'
-                              : 'bg-[#171f33] text-[#dae2fd] border-[#2d3449] hover:bg-[#222a3d]'
-                          }`}
+                          className={`p-3.5 rounded-xl text-left transition-all flex flex-col border ${isSelected
+                            ? 'bg-[#4edea3] text-[#003824] border-[#4edea3] shadow-md ring-2 ring-[#4edea3]/40'
+                            : 'bg-[#171f33] text-[#dae2fd] border-[#2d3449] hover:bg-[#222a3d]'
+                            }`}
                         >
                           <span className="text-[13px] font-bold leading-tight">{fp.label}</span>
                           <span className={`text-[11px] mt-0.5 ${isSelected ? 'text-[#003824]/90 font-medium' : 'text-[#bbcabf]'}`}>
@@ -1292,11 +1280,10 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                       <div
                         key={scale.id}
                         onClick={() => setFormData((p) => ({ ...p, business_scale: scale.id }))}
-                        className={`cursor-pointer p-4 rounded-xl transition-all border flex flex-col justify-between ${
-                          isSelected
-                            ? 'bg-[#222a3d] border-[#4edea3] ring-1 ring-[#4edea3]/40'
-                            : 'bg-[#171f33] border-[#2d3449] hover:bg-[#222a3d]/60'
-                        }`}
+                        className={`cursor-pointer p-4 rounded-xl transition-all border flex flex-col justify-between ${isSelected
+                          ? 'bg-[#222a3d] border-[#4edea3] ring-1 ring-[#4edea3]/40'
+                          : 'bg-[#171f33] border-[#2d3449] hover:bg-[#222a3d]/60'
+                          }`}
                       >
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[14px] font-bold text-[#dae2fd]">{scale.label}</span>
@@ -1715,11 +1702,10 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
               type="button"
               onClick={handlePrev}
               disabled={currentStep === 1}
-              className={`text-[13px] font-medium px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 border border-[#2d3449] ${
-                currentStep === 1
-                  ? 'opacity-40 cursor-not-allowed text-[#86948a]'
-                  : 'text-[#bbcabf] hover:text-[#dae2fd] hover:bg-[#171f33]'
-              }`}
+              className={`text-[13px] font-medium px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 border border-[#2d3449] ${currentStep === 1
+                ? 'opacity-40 cursor-not-allowed text-[#86948a]'
+                : 'text-[#bbcabf] hover:text-[#dae2fd] hover:bg-[#171f33]'
+                }`}
             >
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
               <span>Previous Step</span>

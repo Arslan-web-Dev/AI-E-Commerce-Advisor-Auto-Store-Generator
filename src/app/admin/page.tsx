@@ -42,6 +42,28 @@ export default function AdminCommandCenterPage() {
 
   const [auditLogs, setAuditLogs] = useState<SyncAuditLog[]>([]);
   const [aiProviders, setAIProviders] = useState<AIProviderStatus[]>([]);
+  const [stores, setStores] = useState<any[]>([]);
+
+  const loadStores = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/stores');
+      if (res.ok) {
+        const data = await res.json();
+        setStores(data.stores || []);
+      }
+    } catch {}
+  }, []);
+
+  const toggleSuspendStore = async (storeId: string) => {
+    try {
+      const res = await fetch(`/api/admin/stores/${storeId}/suspend`, { method: 'POST' });
+      if (res.ok) {
+        loadStores();
+      }
+    } catch (err: any) {
+      alert(`Suspend toggle failed: ${err.message}`);
+    }
+  };
 
   // Time state for UTC / PKT clocks
   const [utcTime, setUtcTime] = useState('');
@@ -112,6 +134,7 @@ export default function AdminCommandCenterPage() {
 
       setIsAdmin(true);
       loadAuditLogs();
+      loadStores();
       fetch('/api/admin/ai-providers')
         .then(async (response) => response.ok ? response.json() : null)
         .then((data) => { if (data?.providers) setAIProviders(data.providers); })
@@ -120,7 +143,7 @@ export default function AdminCommandCenterPage() {
     }
 
     verifyAdmin();
-  }, [router, supabase, loadAuditLogs]);
+  }, [router, supabase, loadAuditLogs, loadStores]);
 
   const handleTriggerSync = async () => {
     setSyncing(true);
@@ -426,6 +449,77 @@ export default function AdminCommandCenterPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Tenant Store Administration & Abuse Control */}
+            <div className="bg-[#171f33] border border-[#2d3449] rounded-2xl p-6 shadow-xl">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-display text-[16px] font-bold text-[#dae2fd]">Tenant Stores ({stores.length})</h3>
+                <button onClick={loadStores} className="text-[12px] text-[#4edea3] hover:underline">Refresh</button>
+              </div>
+              <p className="text-[12px] text-[#bbcabf] mb-4">
+                Monitor all tenant storefronts, inspect active catalogs, and toggle administrative suspensions.
+              </p>
+
+              {stores.length === 0 ? (
+                <div className="p-4 rounded-xl bg-[#131b2e] border border-[#2d3449] text-center text-[12px] text-[#bbcabf]">
+                  No tenant stores found.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-[12px]">
+                    <thead>
+                      <tr className="border-b border-[#2d3449] text-[#bbcabf] text-[10px] uppercase font-mono">
+                        <th className="pb-2">Slug</th>
+                        <th className="pb-2">Status</th>
+                        <th className="pb-2">Products</th>
+                        <th className="pb-2">Orders</th>
+                        <th className="pb-2 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#2d3449]/50">
+                      {stores.map((s: any) => (
+                        <tr key={s.id}>
+                          <td className="py-2.5 font-mono text-[#dae2fd]">
+                            <a href={`/${s.slug}`} target="_blank" rel="noreferrer" className="text-[#4cd7f6] hover:underline">
+                              {s.slug}
+                            </a>
+                          </td>
+                          <td className="py-2.5">
+                            {s.is_banned ? (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#ef4444]/20 text-[#ef4444]">
+                                Suspended
+                              </span>
+                            ) : s.is_published ? (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#10b981]/20 text-[#4edea3]">
+                                Live
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#f59e0b]/20 text-[#f59e0b]">
+                                Draft
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2.5 text-[#bbcabf]">{s.store_products?.[0]?.count ?? '—'}</td>
+                          <td className="py-2.5 text-[#bbcabf]">{s.store_orders?.[0]?.count ?? '—'}</td>
+                          <td className="py-2.5 text-right">
+                            <button
+                              onClick={() => toggleSuspendStore(s.id)}
+                              className={`px-2.5 py-1 rounded text-[11px] font-bold border transition-colors ${
+                                s.is_banned
+                                  ? 'bg-[#10b981]/20 text-[#4edea3] border-[#10b981]/40 hover:bg-[#10b981]/30'
+                                  : 'bg-[#ef4444]/20 text-[#ef4444] border-[#ef4444]/40 hover:bg-[#ef4444]/30'
+                              }`}
+                            >
+                              {s.is_banned ? 'Unsuspend' : 'Suspend'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
 

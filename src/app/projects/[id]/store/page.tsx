@@ -371,6 +371,22 @@ export default function StoreManagementPage() {
     }
   };
 
+  const handleTogglePublish = async () => {
+    if (!store?.id) return;
+    try {
+      setActionLoading(true);
+      const res = await fetch(`/api/stores/${store.id}/publish`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      notifySuccess(data.is_published ? `Store published! Public URL: /${store.slug}` : 'Store unpublished (draft mode).');
+      loadStoreData();
+    } catch (e: any) {
+      alert(`Publish error: ${e.message}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0b1326] flex items-center justify-center text-[#dae2fd]">
@@ -429,10 +445,36 @@ export default function StoreManagementPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="hidden md:inline-flex items-center gap-1.5 text-[12px] font-mono text-[#bbcabf] bg-[#131b2e] px-3 py-1.5 rounded-lg border border-[#2d3449]">
-              <span className="w-2 h-2 rounded-full bg-[#4edea3]"></span>
-              {store.slug}.platform.pk
-            </span>
+            {store.is_published ? (
+              <a
+                href={`/${store.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="hidden md:inline-flex items-center gap-1.5 text-[12px] font-mono text-[#4edea3] hover:underline bg-[#131b2e] px-3 py-1.5 rounded-lg border border-[#4edea3]/40"
+              >
+                <span className="w-2 h-2 rounded-full bg-[#4edea3] animate-pulse"></span>
+                <span>Live: /{store.slug} ↗</span>
+              </a>
+            ) : (
+              <span className="hidden md:inline-flex items-center gap-1.5 text-[12px] font-mono text-[#bbcabf] bg-[#131b2e] px-3 py-1.5 rounded-lg border border-[#2d3449]">
+                <span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+                <span>Draft /{store.slug}</span>
+              </span>
+            )}
+            <button
+              onClick={handleTogglePublish}
+              disabled={actionLoading}
+              className={`px-3 py-1.5 rounded-xl text-[12px] font-bold border transition-colors flex items-center gap-1 ${
+                store.is_published
+                  ? 'bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/40 hover:bg-[#ef4444]/25'
+                  : 'bg-[#4edea3] text-[#003824] border-[#4edea3] hover:bg-[#6ffbbe]'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                {store.is_published ? 'visibility_off' : 'rocket_launch'}
+              </span>
+              <span>{store.is_published ? 'Unpublish' : 'Publish Store'}</span>
+            </button>
             <Link
               href={`/projects/${projectId}/storefront-wizard`}
               className="bg-[#222a3d] hover:bg-[#2d3449] text-[#dae2fd] px-3 py-1.5 rounded-xl text-[12px] font-semibold flex items-center gap-1 border border-[#2d3449]"
