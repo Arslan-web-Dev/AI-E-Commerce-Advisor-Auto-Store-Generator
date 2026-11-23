@@ -16,12 +16,38 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json().catch(() => ({}));
     const confirmation = body.confirmation;
+    const password = body.password;
 
     if (confirmation !== 'DELETE') {
       return NextResponse.json(
         { error: 'Confirmation mismatch. You must explicitly type "DELETE" to confirm account erasure.' },
         { status: 400 }
       );
+    }
+
+    // Re-authentication requirement (FR-1.8 & Security Specification)
+    // Irreversible account deletion requires password verification or verified recent session authentication.
+    if (user.email && password) {
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: String(password),
+      });
+      if (verifyError) {
+        return NextResponse.json(
+          { error: 'Re-authentication failed: Invalid password supplied for account deletion.' },
+          { status: 401 }
+        );
+      }
+    } else if (user.app_metadata?.provider === 'email') {
+      // If user is email-authenticated and no password was passed, check if session was established within 10 minutes
+      const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : 0;
+      const isRecent = Date.now() - lastSignIn < 10 * 60 * 1000;
+      if (!isRecent) {
+        return NextResponse.json(
+          { error: 'Re-authentication required: Please provide your password to confirm permanent account deletion.' },
+          { status: 401 }
+        );
+      }
     }
 
     // Perform privileged server-side Auth deletion using admin client.

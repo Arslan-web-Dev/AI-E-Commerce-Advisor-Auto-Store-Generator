@@ -4,7 +4,31 @@
  */
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://127.0.0.1:8000';
-const ML_SERVICE_API_KEY = process.env.ML_SERVICE_API_KEY || 'internal-dev-ml-secret-key-2026';
+
+const DISALLOWED_DEFAULT_SECRETS = new Set([
+  'internal-dev-ml-secret-key-2026',
+  'change-me',
+  'secret',
+  'placeholder',
+  'your-ml-api-key-here',
+]);
+
+function getMlApiKey(): string {
+  const key = process.env.ML_SERVICE_API_KEY?.trim() || '';
+  if (!key) {
+    throw new Error(
+      'FAIL-CLOSED SECURITY ERROR: ML_SERVICE_API_KEY is not configured. ' +
+      'Please configure a secure ML_SERVICE_API_KEY in your environment.'
+    );
+  }
+  if (DISALLOWED_DEFAULT_SECRETS.has(key.toLowerCase())) {
+    throw new Error(
+      `FAIL-CLOSED SECURITY ERROR: ML_SERVICE_API_KEY cannot use known default placeholder '${key}'. ` +
+      'Please configure a secure, unique key in your environment.'
+    );
+  }
+  return key;
+}
 
 export interface DatasetInfo {
   id: string;
@@ -31,7 +55,7 @@ export interface DatasetInfo {
     duplicate_rows: number;
     warnings: string[];
     health_score: number;
-    target_analysis?: any;
+    target_analysis?: Record<string, unknown>;
   };
   is_sample: boolean;
 }
@@ -46,14 +70,35 @@ export interface TrainingJobRequest {
   test_size?: number;
 }
 
+export interface TrainingJobResponse {
+  job_id: string;
+  dataset_id: string;
+  target_column: string;
+  problem_type: string;
+  status: 'pending' | 'training' | 'completed' | 'failed';
+  progress_pct: number;
+  current_step: string;
+  best_model_id?: string;
+  error_message?: string;
+  results?: {
+    best_model_id?: string;
+    best_model_name?: string;
+    best_algorithm?: string;
+    best_score?: number;
+    leaderboard?: Array<{ algorithm_key: string; cv_score: number; [key: string]: unknown }>;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 export interface ModelLeaderboardEntry {
   algorithm_key: string;
   name: string;
   description: string;
   rank_score: number;
   cv_score: number;
-  test_metrics: Record<string, any>;
-  hyperparameters: Record<string, any>;
+  test_metrics: Record<string, unknown>;
+  hyperparameters: Record<string, unknown>;
 }
 
 export interface RegisteredModelSummary {
@@ -62,7 +107,7 @@ export interface RegisteredModelSummary {
   algorithm_key: string;
   problem_type: string;
   target_col: string;
-  metrics: Record<string, any>;
+  metrics: Record<string, unknown>;
   is_active: boolean;
   file_size_bytes: number;
   file_name: string;
@@ -92,8 +137,8 @@ export interface GoogleTrendsResult {
   geo: string;
   timeframe: string;
   keywords: string[];
-  interest_over_time: Array<Record<string, any>>;
-  related_queries: Record<string, { top: any[]; rising: any[] }>;
+  interest_over_time: Array<Record<string, unknown>>;
+  related_queries: Record<string, { top: unknown[]; rising: unknown[] }>;
   analytics: Record<string, {
     average_interest: number;
     trend_slope: number;
@@ -132,7 +177,7 @@ async function requestML<T>(endpoint: string, options: RequestInit = {}): Promis
     const res = await fetch(url, {
       ...options,
       headers: {
-        'x-api-key': ML_SERVICE_API_KEY,
+        'x-api-key': getMlApiKey(),
         ...options.headers,
       },
       cache: 'no-store',
@@ -150,8 +195,9 @@ async function requestML<T>(endpoint: string, options: RequestInit = {}): Promis
     }
 
     return await res.json() as T;
-  } catch (err: any) {
-    if (err.cause?.code === 'ECONNREFUSED' || err.message?.includes('fetch failed')) {
+  } catch (err: unknown) {
+    const errorObj = err as { cause?: { code?: string }; message?: string };
+    if (errorObj?.cause?.code === 'ECONNREFUSED' || errorObj?.message?.includes('fetch failed')) {
       throw new Error(
         `Python ML Service unreachable at ${ML_SERVICE_URL}. Please ensure the ML service process is running (uvicorn main:app).`
       );
@@ -183,7 +229,7 @@ export const mlClient = {
       method: 'POST',
       body: formData,
       headers: {
-        'x-api-key': ML_SERVICE_API_KEY,
+        'x-api-key': getMlApiKey(),
       },
     });
     if (!res.ok) {
@@ -193,16 +239,16 @@ export const mlClient = {
     return res.json();
   },
 
-  async startTraining(payload: TrainingJobRequest) {
-    return requestML<any>('/train', {
+  async startTraining(payload: TrainingJobRequest): Promise<TrainingJobResponse> {
+    return requestML<TrainingJobResponse>('/train', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
   },
 
-  async getTrainingJob(jobId: string) {
-    return requestML<any>(`/train/${jobId}`);
+  async getTrainingJob(jobId: string): Promise<TrainingJobResponse> {
+    return requestML<TrainingJobResponse>(`/train/${jobId}`);
   },
 
   async listModels(): Promise<RegisteredModelSummary[]> {
@@ -210,7 +256,7 @@ export const mlClient = {
   },
 
   async getModelDetails(modelId: string) {
-    return requestML<any>(`/models/${modelId}`);
+    return requestML<Record<string, unknown>>(`/models/${modelId}`);
   },
 
   async activateModel(modelId: string) {
@@ -219,7 +265,7 @@ export const mlClient = {
     });
   },
 
-  async predict(inputFeatures: Record<string, any>, modelId?: string): Promise<PredictionResponse> {
+  async predict(inputFeatures: Record<string, unknown>, modelId?: string): Promise<PredictionResponse> {
     return requestML<PredictionResponse>('/predict', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -241,7 +287,7 @@ export const mlClient = {
     primaryKeyword: string,
     district: string,
     comparisonKeywords?: string[],
-    districtData?: Record<string, any>
+    districtData?: Record<string, unknown>
   ): Promise<MarketDemandAnalysisResult> {
     return requestML<MarketDemandAnalysisResult>('/market/demand-analysis', {
       method: 'POST',

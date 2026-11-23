@@ -64,11 +64,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Validation failed', details: stepValidation.errors }, { status: 400 });
     }
 
-    const category = body.category ? String(body.category).trim() : 'Apparel & Fashion';
+    const category = body.category ? String(body.category).trim() : '';
     const targetLocation = body.target_location ? String(body.target_location).trim() : '';
-    const budgetAmount = body.budget_amount ? Number(body.budget_amount) : 250000;
+    const budgetAmount = body.budget_amount ? Number(body.budget_amount) : 0;
     const budgetCurrency = body.budget_currency === 'USD' ? 'USD' : 'PKR';
-    const budgetPkr = budgetCurrency === 'USD' ? convertUsdToPkr(budgetAmount) : Math.round(budgetAmount);
+    const budgetPkr = budgetAmount > 0
+      ? (budgetCurrency === 'USD' ? convertUsdToPkr(budgetAmount) : Math.round(budgetAmount))
+      : 0;
+
+    const exchangeRate = budgetCurrency === 'USD' ? 278.0 : 1.0;
+    const exchangeRateSource = budgetCurrency === 'USD' ? 'State Bank of Pakistan Benchmark' : 'Canonical PKR';
+    const exchangeRateTimestamp = new Date().toISOString();
 
     // Validate coordinates if supplied; do NOT inject false defaults
     let lat: number | null = null;
@@ -114,6 +120,9 @@ export async function POST(request: NextRequest) {
       budget_amount: budgetAmount,
       budget_currency: budgetCurrency,
       budget_pkr: budgetPkr,
+      exchange_rate: exchangeRate,
+      exchange_rate_source: exchangeRateSource,
+      exchange_rate_timestamp: exchangeRateTimestamp,
       target_audience: body.target_audience || {},
       business_scale: body.business_scale || 'small',
       business_model: body.business_model || 'hybrid',

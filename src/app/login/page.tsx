@@ -11,7 +11,11 @@ function LoginFormContent() {
   const searchParams = useSearchParams();
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
   const initialError = searchParams.get('error') || '';
-  const redirectTo = searchParams.get('redirectTo') || '/account/security';
+  const rawRedirect = searchParams.get('redirectTo') || '/account/security';
+  const redirectTo =
+    rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') && !rawRedirect.startsWith('/\\') && !rawRedirect.includes('://')
+      ? rawRedirect
+      : '/account/security';
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>(initialMode);
   const [fullName, setFullName] = useState('');

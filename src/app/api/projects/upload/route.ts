@@ -106,7 +106,11 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.warn('Storage upload notice (dev mode fallback):', uploadError.message);
+      console.error('[Storage Upload Error]:', uploadError.message);
+      return NextResponse.json(
+        { error: `Failed to upload file to storage: ${uploadError.message}` },
+        { status: 500 }
+      );
     }
 
     // Generate short-lived signed URL (3600 seconds = 1 hour)
@@ -135,6 +139,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       storage_path: storagePath,
+      file_url: storagePath, // Canonical backward-compatible field
       signed_url: signedUrl || null,
       file_name: file.name,
       file_size: file.size,

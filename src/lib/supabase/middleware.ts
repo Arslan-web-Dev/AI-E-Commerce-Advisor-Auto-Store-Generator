@@ -11,10 +11,47 @@ function isValidHttpUrl(str?: string): boolean {
   }
 }
 
+/**
+ * Open-redirect defense: strictly allow only relative, internal application paths.
+ * Rejects protocol-relative URLs (//evil.com), malformed backslash redirects (/\evil.com),
+ * and absolute URLs (https://...).
+ */
+export function sanitizeRedirectPath(pathStr?: string | null): string {
+  if (!pathStr || typeof pathStr !== 'string') return '/account/security';
+  const trimmed = pathStr.trim();
+  if (
+    trimmed.startsWith('//') ||
+    trimmed.startsWith('/\\') ||
+    trimmed.startsWith('\\') ||
+    trimmed.includes('://')
+  ) {
+    return '/account/security';
+  }
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
+
+  const pathname = request.nextUrl.pathname;
+
+  // Protected paths requiring authenticated session
+  const isProtectedPath =
+    pathname.startsWith('/account') ||
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/wizard') ||
+    pathname.startsWith('/projects') ||
+    pathname.startsWith('/stores');
+
+  const isAuthPath =
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/reset-password';
+
+  const isPasswordUpdatePath = pathname === '/update-password';
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabasePublicKey =
@@ -22,8 +59,14 @@ export async function updateSession(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     '';
 
-  // If Supabase is not configured, skip auth checks and let the request through
+  // FAIL CLOSED: If Supabase configuration is missing or invalid, reject access to protected paths
   if (!isValidHttpUrl(supabaseUrl) || !supabasePublicKey) {
+    if (isProtectedPath) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('error', 'configuration_missing');
+      return NextResponse.redirect(url);
+    }
     return supabaseResponse;
   }
 
@@ -44,38 +87,20 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // IMPORTANT: Avoid using getSession() which may be spoofed; getUser() validates the token on the auth server.
+  // Authoritative server-side identity check (token validation on auth server)
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const pathname = request.nextUrl.pathname;
-
-  // Protected paths
-  const isProtectedPath =
-    pathname.startsWith('/account') ||
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/admin') ||
-    pathname.startsWith('/wizard') ||
-    pathname.startsWith('/projects') ||
-    pathname.startsWith('/stores');
-
-  const isAuthPath =
-    pathname === '/login' ||
-    pathname === '/register' ||
-    pathname === '/reset-password';
-
-  const isPasswordUpdatePath = pathname === '/update-password';
 
   // If not authenticated and trying to access protected paths
   if (!user && isProtectedPath) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
-    url.searchParams.set('redirectTo', pathname);
+    url.searchParams.set('redirectTo', sanitizeRedirectPath(pathname));
     return NextResponse.redirect(url);
   }
 
-  // If authenticated, check user profile flags (role and must_change_password)
+  // If authenticated, check user profile flags (authoritative role and must_change_password)
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -86,7 +111,7 @@ export async function updateSession(request: NextRequest) {
     const mustChangePassword = profile?.must_change_password === true;
     const role = profile?.role || 'owner';
 
-    // Enforce password update if flagged
+    // Enforce password update if flagged (FR-1.5)
     if (mustChangePassword && !isPasswordUpdatePath && pathname !== '/auth/callback' && !pathname.startsWith('/api/')) {
       const url = request.nextUrl.clone();
       url.pathname = '/update-password';
@@ -94,7 +119,7 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Role-based route guard for /admin
+    // Role-based route guard for /admin: strict owner/admin isolation
     if (pathname.startsWith('/admin')) {
       if (role !== 'admin') {
         const url = request.nextUrl.clone();
@@ -104,7 +129,7 @@ export async function updateSession(request: NextRequest) {
       }
     }
 
-    // If user is logged in, has changed password, and visits auth pages, redirect to appropriate destination
+    // If user is logged in, has changed password, and visits auth pages, redirect to dashboard
     if (isAuthPath && !mustChangePassword) {
       const url = request.nextUrl.clone();
       url.pathname = role === 'admin' ? '/admin' : '/account/security';

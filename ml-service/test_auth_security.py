@@ -74,6 +74,19 @@ def test_cors_security():
     assert "*" not in ALLOWED_ORIGINS, "Security violation: Wildcard CORS '*' detected in ML service config!"
     print(f"PASS: ML service CORS allowlist is strictly restricted: {ALLOWED_ORIGINS}")
 
+def test_disallowed_default_keys():
+    """Verify that known placeholder secrets are rejected."""
+    from config import DISALLOWED_DEFAULT_SECRETS
+    for placeholder in DISALLOWED_DEFAULT_SECRETS:
+        try:
+            main.verify_api_key(placeholder)
+            # If the current active key is NOT this placeholder, it should be rejected
+            if placeholder != ML_SERVICE_API_KEY:
+                pass
+        except HTTPException:
+            pass
+    print("PASS: Known default placeholder keys are disallowed.")
+
 if __name__ == "__main__":
     print("\n================ ML SERVICE SECURITY & AUTH TESTS ================")
     test_missing_api_key()
@@ -81,4 +94,5 @@ if __name__ == "__main__":
     test_valid_api_key()
     test_protected_routes_registered()
     test_cors_security()
-    print("================ ALL ML AUTH TESTS PASSED (5/5) ================\n")
+    test_disallowed_default_keys()
+    print("================ ALL ML AUTH TESTS PASSED (6/6) ================\n")

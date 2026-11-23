@@ -153,11 +153,17 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       updates.budget_amount = amt;
       const curr = (body.budget_currency || existingProject.budget_currency) as 'USD' | 'PKR';
       updates.budget_pkr = curr === 'PKR' ? Math.round(amt) : convertUsdToPkr(amt);
+      updates.exchange_rate = curr === 'USD' ? 278.0 : 1.0;
+      updates.exchange_rate_source = curr === 'USD' ? 'State Bank of Pakistan Benchmark' : 'Canonical PKR';
+      updates.exchange_rate_timestamp = new Date().toISOString();
     }
     if (body.budget_currency !== undefined) {
       updates.budget_currency = body.budget_currency;
       const amt = updates.budget_amount !== undefined ? Number(updates.budget_amount) : Number(existingProject.budget_amount);
       updates.budget_pkr = body.budget_currency === 'PKR' ? Math.round(amt) : convertUsdToPkr(amt);
+      updates.exchange_rate = body.budget_currency === 'USD' ? 278.0 : 1.0;
+      updates.exchange_rate_source = body.budget_currency === 'USD' ? 'State Bank of Pakistan Benchmark' : 'Canonical PKR';
+      updates.exchange_rate_timestamp = new Date().toISOString();
     }
 
     if (body.target_audience !== undefined) updates.target_audience = body.target_audience;

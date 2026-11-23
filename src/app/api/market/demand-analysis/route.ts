@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { mlClient } from '@/lib/ml-client';
-import { PUNJAB_DISTRICT_BENCHMARKS } from '../regional/route';
+import { PUNJAB_DISTRICT_BENCHMARKS } from '@/lib/constants/punjab-benchmarks';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { primary_keyword, district, comparison_keywords, geo } = body;
+    const { primary_keyword, district, comparison_keywords } = body;
 
     if (!primary_keyword || !district) {
       return NextResponse.json(
@@ -26,9 +26,10 @@ export async function POST(request: Request) {
     );
 
     return NextResponse.json({ analysis: result });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Market demand analysis failed';
     return NextResponse.json(
-      { error: err.message || 'Market demand calculation failed.' },
+      { error: message },
       { status: 500 }
     );
   }
