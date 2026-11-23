@@ -176,12 +176,12 @@ def get_dataset(dataset_id: str):
 @app.post("/datasets/generate-sample", dependencies=[Depends(verify_api_key)])
 def generate_sample_dataset():
     sample_file = DATASETS_DIR / f"punjab_retail_feasibility_{str(uuid.uuid4())[:6]}.csv"
-    save_sample_dataset(sample_file, num_samples=1500)
+    save_sample_dataset(sample_file, num_samples=150000)
     ds_id = sample_file.stem
     report = inspect_dataset(sample_file)
     entry = {
         "id": ds_id,
-        "name": "Punjab Retail Feasibility (1,500 Samples)",
+        "name": "Punjab Retail Feasibility (1,50000 Samples)",
         "file_name": sample_file.name,
         "file_path": str(sample_file),
         "file_size_bytes": sample_file.stat().st_size,
