@@ -1,12 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import {
-  canTransitionOrder,
-  shouldDecrementStockOnTransition,
-  shouldRestoreStockOnTransition,
-  appendStatusHistory,
-} from '@/lib/store-management/orders';
-import { OrderStatus } from '@/types/store-management';
 
 interface RouteContext {
   params: Promise<{ id: string; orderId: string }>;
