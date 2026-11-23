@@ -230,6 +230,20 @@ export default function AdminCommandCenterPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/ml"
+              className="px-3 py-1.5 rounded-xl bg-[#171f33] hover:bg-[#222a3d] border border-[#2d3449] text-[12px] font-semibold text-[#4edea3] flex items-center gap-1.5 transition-all"
+            >
+              <span className="material-symbols-outlined text-[16px]">model_training</span>
+              <span>ML Pipeline</span>
+            </Link>
+            <Link
+              href="/market-intelligence"
+              className="px-3 py-1.5 rounded-xl bg-[#171f33] hover:bg-[#222a3d] border border-[#2d3449] text-[12px] font-semibold text-[#4cd7f6] flex items-center gap-1.5 transition-all"
+            >
+              <span className="material-symbols-outlined text-[16px]">trending_up</span>
+              <span>Market Intelligence</span>
+            </Link>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#10b981]/15 text-[#4edea3] text-[12px] font-semibold font-mono border border-[#4edea3]/30">
               <span className="w-2 h-2 rounded-full bg-[#4edea3] animate-pulse"></span>
               <span>Cluster Status: Operational</span>
