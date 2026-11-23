@@ -48,7 +48,7 @@ declare
   v_order public.orders%rowtype;
   v_validated_items jsonb := '[]'::jsonb;
   v_subtotal bigint := 0;
-  v_shipping_fee bigint := 200;
+  v_shipping_fee bigint := 0;
   v_quantity integer;
   v_line_total bigint;
   v_order_number text;
