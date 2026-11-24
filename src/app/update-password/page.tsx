@@ -59,23 +59,22 @@ function UpdatePasswordContent() {
     setLoading(true);
 
     try {
-      // 1. Update Auth password
-      const { data, error } = await supabase.auth.updateUser({
-        password,
+      // Complete the password change and the privileged flag update server-side.
+      // Success is reported only when both operations succeed on the server.
+      const response = await fetch('/api/auth/complete-password-change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, confirm_password: confirmPassword }),
       });
 
-      if (error) {
-        setErrorMessage(error.message);
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        // Covers both Auth password failures and profile-completion failures.
+        // The form remains available so the user can safely retry.
+        setErrorMessage(payload?.error || 'Password update failed. Please try again.');
         setLoading(false);
         return;
-      }
-
-      // 2. Clear must_change_password on profile if it was set
-      if (data.user) {
-        await supabase
-          .from('profiles')
-          .update({ must_change_password: false })
-          .eq('id', data.user.id);
       }
 
       setSuccessMessage('Password updated successfully! Redirecting to your dashboard...');

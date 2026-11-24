@@ -34,6 +34,8 @@ For a local run, set `FORCE_DEMO_DATA=true` only when you explicitly want the sy
 
 Apply the SQL migrations under `supabase/migrations/` in timestamp order to a fresh Supabase project. `supabase/combined_schema.sql` is the consolidated schema for review or one-shot setup; do not apply it on top of migrations already applied to the same database. Review changes and take a backup before applying new migrations to a database with data.
 
+The `project-attachments` storage bucket is created **private** (`public = false`) with owner-isolated policies. Keep it private: attachments are never exposed through public URLs and are served to authorized owners only via short-lived signed URLs. Do not configure this bucket, or its policies, to be publicly readable.
+
 ### Install and run
 
 ```bash

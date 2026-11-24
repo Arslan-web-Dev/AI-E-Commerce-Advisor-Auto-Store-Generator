@@ -1399,8 +1399,9 @@ create policy "Owners manage store payment settings"
   using (public.can_manage_store(store_id))
   with check (public.can_manage_store(store_id));
 
--- 6. Storage Bucket Configuration (FR-2.2 & NFR-C4: Project Attachment Uploads)
--- Safely register the project-attachments bucket if storage extension is available
+-- 6. Storage Bucket Configuration (FR-2.2 & NFR-C4: Private Project Attachment Uploads)
+-- The project-attachments bucket is STRICTLY PRIVATE. Files are never exposed via
+-- public URLs; authorized owners retrieve them through short-lived signed URLs.
 do $$
 begin
   if exists (select 1 from information_schema.schemata where schema_name = 'storage') then
@@ -1408,43 +1409,63 @@ begin
     values (
       'project-attachments',
       'project-attachments',
-      true,
+      false, -- STRICTLY PRIVATE
       5242880, -- 5 MB
       array['application/pdf', 'text/csv', 'application/json', 'image/png', 'image/jpeg', 'image/webp']
     )
     on conflict (id) do update set
-      public = true,
-      file_size_limit = 5242880;
+      public = false,
+      file_size_limit = 5242880,
+      allowed_mime_types = array['application/pdf', 'text/csv', 'application/json', 'image/png', 'image/jpeg', 'image/webp'];
 
-    -- Storage Object Policies
+    -- Storage Object Policies (authenticated, owner-isolated)
+    -- Object path convention: {user_id}/{project_id}/{unique_file_name}
+    drop policy if exists "Public can view project attachments" on storage.objects;
     drop policy if exists "Authenticated users can upload attachments" on storage.objects;
-    create policy "Authenticated users can upload attachments"
+    drop policy if exists "Users can update their attachments" on storage.objects;
+    drop policy if exists "Users can delete their attachments" on storage.objects;
+
+    drop policy if exists "Owner can upload attachments" on storage.objects;
+    create policy "Owner can upload attachments"
       on storage.objects for insert to authenticated
       with check (
         bucket_id = 'project-attachments'
         and (storage.foldername(name))[1] = auth.uid()::text
       );
 
-    drop policy if exists "Users can update their attachments" on storage.objects;
-    create policy "Users can update their attachments"
+    drop policy if exists "Owner can read own attachments" on storage.objects;
+    create policy "Owner can read own attachments"
+      on storage.objects for select to authenticated
+      using (
+        bucket_id = 'project-attachments'
+        and (
+          (storage.foldername(name))[1] = auth.uid()::text
+          or public.is_admin()
+        )
+      );
+
+    drop policy if exists "Owner can update own attachments" on storage.objects;
+    create policy "Owner can update own attachments"
       on storage.objects for update to authenticated
       using (
         bucket_id = 'project-attachments'
         and (storage.foldername(name))[1] = auth.uid()::text
-      );
-
-    drop policy if exists "Users can delete their attachments" on storage.objects;
-    create policy "Users can delete their attachments"
-      on storage.objects for delete to authenticated
-      using (
+      )
+      with check (
         bucket_id = 'project-attachments'
         and (storage.foldername(name))[1] = auth.uid()::text
       );
 
-    drop policy if exists "Public can view project attachments" on storage.objects;
-    create policy "Public can view project attachments"
-      on storage.objects for select
-      using (bucket_id = 'project-attachments');
+    drop policy if exists "Owner can delete own attachments" on storage.objects;
+    create policy "Owner can delete own attachments"
+      on storage.objects for delete to authenticated
+      using (
+        bucket_id = 'project-attachments'
+        and (
+          (storage.foldername(name))[1] = auth.uid()::text
+          or public.is_admin()
+        )
+      );
   end if;
 end $$;
 

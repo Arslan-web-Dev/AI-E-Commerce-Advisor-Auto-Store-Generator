@@ -99,12 +99,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
         { status: 400 }
       );
     }
-    const radiusKm = Math.round(requestedRadiusKm);
-
     // Compute canonical integer PKR budget and currency metadata
     const rawBudget = Number(project.budget_amount);
-    let budgetPkr = project.budget_pkr;
-    if (!budgetPkr || budgetPkr <= 0) {
+    let budgetPkr = Number(project.budget_pkr);
+    if (!Number.isFinite(budgetPkr) || budgetPkr <= 0) {
       budgetPkr = project.budget_currency === 'USD'
         ? convertUsdToPkr(rawBudget)
         : Math.round(rawBudget);
@@ -117,76 +115,55 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Attempt Atomic & Idempotent Submission via PostgreSQL RPC
+    // Persist the canonical PKR budget on the owned draft project so the atomic
+    // RPC reads the correct value. This is a draft normalization only — it does
+    // not create a report or change submission status, so no partial submission
+    // can result.
+    if (Number(project.budget_pkr) !== budgetPkr) {
+      const { error: budgetSyncError } = await supabase
+        .from('projects')
+        .update({ budget_pkr: budgetPkr })
+        .eq('id', id)
+        .eq('owner_id', user.id);
+
+      if (budgetSyncError) {
+        console.error('[Submit Project] Failed to normalize canonical PKR budget:', budgetSyncError.message);
+        return NextResponse.json(
+          { error: 'Failed to finalize project budget before submission. Please retry.' },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Atomic & idempotent submission via the secure RPC. Identity is derived
+    // from auth.uid() inside PostgreSQL; the caller supplies only the project
+    // ID. There is deliberately no non-atomic fallback path: if the RPC fails,
+    // no report is created and the project status is left unchanged.
     let reportId: string | null = null;
     let finalProject: typeof project | null = null;
 
     const { data: rpcData, error: rpcError } = await supabase.rpc('submit_project_for_feasibility', {
       p_project_id: id,
-      p_user_id: user.id,
     });
 
-    if (!rpcError && rpcData?.success) {
-      reportId = rpcData.report_id;
-      const { data: refreshedProj } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('id', id)
-        .single();
-      finalProject = refreshedProj;
-    } else {
-      // Fallback atomic execution in environments where the RPC function is pending deployment
-      // 1. Create or reuse linked feasibility_reports row
-      let repId = project.report_id;
-      if (!repId) {
-        const { data: report, error: reportError } = await supabase
-          .from('feasibility_reports')
-          .insert({
-            owner_id: user.id,
-            category: project.category,
-            idea_text: project.product_description || `${project.category} venture at ${project.target_location}`,
-            city: project.city,
-            area: project.target_location,
-            lat,
-            lng,
-            radius_km: radiusKm,
-            budget_pkr: budgetPkr,
-            status: 'pending',
-          })
-          .select('id')
-          .single();
-
-        if (reportError) {
-          return NextResponse.json(
-            { error: `Failed to initialize feasibility report: ${reportError.message}` },
-            { status: 500 }
-          );
-        }
-        repId = report.id;
-      }
-
-      // 2. Transition project to 'submitted'
-      const submittedAt = new Date().toISOString();
-      const { data: updatedProject, error: updateError } = await supabase
-        .from('projects')
-        .update({
-          status: 'submitted',
-          submitted_at: submittedAt,
-          report_id: repId,
-          budget_pkr: budgetPkr,
-          current_step: 3,
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (updateError) {
-        return NextResponse.json({ error: updateError.message }, { status: 500 });
-      }
-
-      reportId = repId;
-      finalProject = updatedProject;
+    if (rpcError || !rpcData?.success) {
+      console.error(
+        '[Submit Project] Atomic submission RPC failed:',
+        rpcError?.message || 'RPC returned an unsuccessful result'
+      );
+      return NextResponse.json(
+        { error: 'Failed to submit project for feasibility analysis. Please retry.' },
+        { status: 500 }
+      );
     }
+
+    reportId = rpcData.report_id;
+    const { data: refreshedProj } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('id', id)
+      .single();
+    finalProject = refreshedProj;
 
     // 3. Initiate Module 3 Data Collection for the submitted project (Handoff)
     let collectionResult = null;
