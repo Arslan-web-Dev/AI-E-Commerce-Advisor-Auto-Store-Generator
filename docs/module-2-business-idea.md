@@ -18,13 +18,13 @@ Module 2 implements the **Business Idea Input and Project Creation** wizard for 
 
 | Requirement ID | Description | Module 2 Implementation | State |
 | :--- | :--- | :--- | :--- |
-| **FR-2.1** | Store Requirement Input: Category, Target Location, Available Budget | Guided Wizard Steps 1, 2, 3 with category taxonomy, location search & commercial hub chips, budget input with USD/PKR allocation | ✅ Fully In Scope |
-| **FR-2.2** | Advanced Input Options: Target Audience, Business Scale, Product Details | Guided Wizard Step 4 with age/gender/income selectors, Small/Med/Large scale picker, product description, and optional file upload | ✅ Fully In Scope |
-| **FR-2.3** | Commercial Hub picker & location resolution | Pakistan commercial hub presets (Lahore, Karachi, Islamabad) + worldwide city/postal input | ✅ Fully In Scope |
-| **FR-2.4** | Budget range validation & canonical currency | Range validation (USD $500–$1,000,000 / PKR Rs. 50,000–50,000,000) with clear formatting | ✅ Fully In Scope |
-| **FR-2.5** | Optional inputs: business model, audience, footprint | D2C Online vs Hybrid, footprint pills (Kiosk, Boutique, Outlet, Flagship) | ✅ Fully In Scope |
-| **FR-2.6** | Submission creates `feasibility_reports` row with status `pending` | Idempotent submit endpoint `/api/projects/[id]/submit` creates linked `feasibility_reports` record | ✅ Fully In Scope |
-| **FR-2.7** | Search radius selection (10–15 km) | Buffer radius slider (5–25 km range, 10–15 km recommended defaults) | ✅ Fully In Scope |
+| **FR-2.1** | Store Requirement Input: Category, Target Location, Available Budget | Guided three-step wizard (Step 1 Profile & Location, Step 2 Finance & Operations, Step 3 Review & Submission) with the five approved categories, Punjab district/city selection, seeded commercial hub chips, and budget input with USD/PKR allocation | ✅ Fully In Scope |
+| **FR-2.2** | Advanced Input Options: Target Audience, Business Scale, Product Details | Wizard Step 2 with age/gender/income selectors, Small/Med/Large scale picker, product description, and optional file upload | ✅ Fully In Scope |
+| **FR-2.3** | Commercial Hub picker & location resolution | Punjab-only commercial hub presets resolving district/city/lat/lng. Province is fixed to Punjab and country to Pakistan; no out-of-province or invented localities | ✅ Fully In Scope |
+| **FR-2.4** | Budget range validation & canonical currency | Server-side range validation (PKR Rs. 10,000–50,000,000; USD $50–$200,000) storing canonical integer `budget_pkr` with disclosed SBP benchmark provenance | ✅ Fully In Scope |
+| **FR-2.5** | Optional inputs: business model, audience, footprint | D2C Online vs Hybrid vs Physical, footprint pills (Kiosk, Boutique, Outlet, Flagship) | ✅ Fully In Scope |
+| **FR-2.6** | Submission creates `feasibility_reports` row with status `pending` | Idempotent submit endpoint `/api/projects/[id]/submit` submits exclusively via the secure `submit_project_for_feasibility` RPC | ✅ Fully In Scope |
+| **FR-2.7** | Search radius selection (10–15 km) | Buffer radius slider (5–15 km range, 10 km recommended default) | ✅ Fully In Scope |
 
 ---
 
@@ -44,6 +44,7 @@ create table public.projects (
   custom_category      text,
   target_location      text not null,
   city                 text,
+  district             text,
   region               text,
   country              text,
   postal_code          text,
@@ -98,11 +99,39 @@ create table public.projects (
 
 ## 5. User Interface Architecture
 
-- **/wizard**: Interactive guided wizard implementing the 5-step workflow:
-  - **Step 1**: Category & Commercial Vertical
-  - **Step 2**: Target Location & Spatial Catchment
-  - **Step 3**: Budget & Operational Capital Runway
-  - **Step 4**: Target Audience, Scale & Product Details
-  - **Step 5**: Review & Final Submission
+- **/wizard**: Interactive guided three-step wizard (`BusinessIdeaWizard.tsx`) with continuous draft autosave (1500 ms debounce) and resume:
+  - **Step 1 — Business Profile & Location**: five approved categories, business name & product description, and Punjab location (fixed province, district select, city select, commercial hub chips, locality input, coordinates, 5–15 km radius slider).
+  - **Step 2 — Financial & Operational Information**: PKR/USD budget input with canonical PKR conversion and disclosure, then business scale, operating model, storefront footprint, target audience profiling, and private specification-document attachment.
+  - **Step 3 — Review & Submission**: read-only review cards (Business Profile, Location & Catchment Radius, Capital Allocation & Currency, Operational Setup) with per-card edit links, followed by atomic submission.
 - **/projects**: User project portfolio dashboard showing drafts and submitted projects with status tags.
 - **/projects/[id]**: Project detail & submission confirmation view with clear status indicators.
+
+### Approved business categories
+
+The five approved categories are consistent across the frontend, the API, the database taxonomy and every data-collection provider (competitors, demand trends):
+
+1. Grocery / General Stores
+2. Clothing / Footwear
+3. Mobile Phones / Accessories
+4. Restaurants / Cafes
+5. Pharmacies / Medical Stores
+
+### Punjab geography
+
+Province is fixed to `Punjab` and country to `Pakistan`. The wizard offers a district select (`PUNJAB_DISTRICTS` in `src/types/project.ts`) whose city select is populated only once a district is chosen, and validation rejects any city that does not belong to the selected district. Commercial hub presets (`COMMERCIAL_HUB_PRESETS`) are Punjab-only and supply verified district/city/lat/lng values.
+
+### Drafts, validation and submission
+
+- Drafts are created with `POST /api/projects` and updated with `PATCH /api/projects/[id]`. Both routes run `validateProjectFields` server-side so no invalid value is ever persisted, even for partial drafts.
+- Ownership is enforced server-side: `owner_id` is always derived from the authenticated session on create and can never be set from the request body.
+- Submission uses only `POST /api/projects/[id]/submit`, which validates completeness and delegates to the `SECURITY DEFINER` RPC `submit_project_for_feasibility(p_project_id uuid)` (added by `supabase/migrations/20261124000000_secure_submit_project_rpc.sql`).
+- The `district` column is added forward-only by `supabase/migrations/20261124020000_module2_wizard_district.sql`.
+
+---
+
+## 6. Known Limitations & Documented Decisions
+
+- **ML dataset taxonomy is not yet aligned (documented, not silently resolved).** The five Task 3 categories are applied consistently to the frontend, API, database taxonomy and every data-collection provider. However, the Python training dataset (`ml-service/datasets/sample_dataset_generator.py`) still uses a separate six-category taxonomy (`Fashion & Apparel`, `Electronics & Mobile`, `Grocery & Gourmet`, `Health & Beauty`, `Home & Living`, `Specialty Crafts`). The real project→ML feature path derives numeric engineered features and does not feed the raw project category as a categorical model input, and the encoder uses `handle_unknown='ignore'`, so unseen categories degrade to a neutral (all-zero) encoding rather than erroring. Re-aligning the ML dataset taxonomy is out of scope for this task.
+- **Punjab-only hubs.** The former non-Punjab commercial hub presets (Islamabad, Karachi) were removed because the current scope is fixed to Punjab. The wizard offers seven districts (Lahore, Rawalpindi, Faisalabad, Multan, Gujranwala, Sialkot, Bahawalpur) and eleven Punjab commercial hubs.
+- **`current_step` range.** The database constraint still permits `current_step` 1–5 for backward compatibility, while the Task 3 wizard only uses steps 1–3.
+- **Legacy `custom_category` column.** The column remains in the schema for backward compatibility but the custom-category input was removed from the wizard; only the five approved categories can be selected.

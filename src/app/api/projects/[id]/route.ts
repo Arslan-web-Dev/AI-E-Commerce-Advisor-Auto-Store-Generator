@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { validateProjectStep } from '@/lib/validation/project';
+import { validateProjectFields } from '@/lib/validation/project';
 import { convertUsdToPkr } from '@/lib/currency/exchange-rate';
 
 export const dynamic = 'force-dynamic';
@@ -106,12 +106,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     const body = await request.json();
 
-    // Partial step validation if step specified
-    if (body.current_step) {
-      const stepVal = validateProjectStep(Number(body.current_step), { ...existingProject, ...body });
-      if (!stepVal.valid) {
-        return NextResponse.json({ error: 'Validation failed', details: stepVal.errors }, { status: 400 });
-      }
+    // Field-level validation: any supplied value is validated server-side. Drafts
+    // may be partial, but no draft write may persist an invalid field value
+    // (Task 3 §6, §8).
+    const fieldValidation = validateProjectFields(body);
+    if (!fieldValidation.valid) {
+      return NextResponse.json({ error: 'Validation failed', details: fieldValidation.errors }, { status: 400 });
     }
 
     const updates: Record<string, unknown> = {};
@@ -121,6 +121,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (body.custom_category !== undefined) updates.custom_category = body.custom_category;
     if (body.target_location !== undefined) updates.target_location = String(body.target_location).trim();
     if (body.city !== undefined) updates.city = body.city;
+    if (body.district !== undefined) updates.district = body.district ? String(body.district).trim() : null;
     if (body.region !== undefined) updates.region = body.region;
     if (body.country !== undefined) updates.country = 'Pakistan'; // Platform strictly locked to Pakistan
     if (body.postal_code !== undefined) updates.postal_code = body.postal_code;

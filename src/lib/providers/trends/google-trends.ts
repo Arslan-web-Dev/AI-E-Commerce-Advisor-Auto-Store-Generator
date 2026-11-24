@@ -7,32 +7,37 @@ import {
 } from '../../../types/data-collection';
 import { mlClient } from '../../ml-client';
 
-// Seasonal 12-month relative search volume pattern in Pakistan (0-100 scale) as fallback
+// Seasonal 12-month relative search volume pattern in Pakistan (0-100 scale) as fallback.
+// Keys are the five approved Task 3 category names (Task 3 §3) and must match
+// PREDEFINED_CATEGORIES exactly.
 const CATEGORY_TREND_CURVES: Record<string, { baseline: number[]; slope: 'growing' | 'stable' | 'declining' }> = {
-  'Apparel & Fashion': {
-    baseline: [62, 58, 74, 96, 70, 65, 82, 91, 75, 68, 72, 85],
-    slope: 'growing',
-  },
-  'Consumer Electronics': {
-    baseline: [55, 52, 58, 61, 59, 63, 60, 66, 72, 88, 95, 84],
-    slope: 'growing',
-  },
-  'Cosmetics & Skincare': {
-    baseline: [70, 72, 75, 78, 69, 66, 68, 73, 76, 82, 89, 87],
-    slope: 'growing',
-  },
-  'Grocery & Gourmet Food': {
+  'Grocery / General Stores': {
     baseline: [65, 62, 88, 98, 72, 68, 64, 66, 70, 75, 85, 89],
     slope: 'stable',
   },
-  'Home Decor & Living': {
-    baseline: [48, 50, 54, 52, 49, 45, 53, 58, 62, 65, 69, 71],
+  'Clothing / Footwear': {
+    baseline: [62, 58, 74, 96, 70, 65, 82, 91, 75, 68, 72, 85],
     slope: 'growing',
   },
-  'Other Niche Venture': {
-    baseline: [50, 52, 51, 55, 53, 54, 52, 56, 58, 60, 59, 62],
+  'Mobile Phones / Accessories': {
+    baseline: [55, 52, 58, 61, 59, 63, 60, 66, 72, 88, 95, 84],
+    slope: 'growing',
+  },
+  'Restaurants / Cafes': {
+    baseline: [58, 60, 66, 71, 68, 64, 70, 76, 79, 82, 86, 90],
+    slope: 'growing',
+  },
+  'Pharmacies / Medical Stores': {
+    baseline: [66, 68, 74, 78, 72, 70, 69, 72, 76, 80, 85, 88],
     slope: 'stable',
   },
+};
+
+// Neutral fallback used only if an unrecognised category name reaches the
+// provider. Any recognised (approved) category always resolves to its own curve.
+const FALLBACK_TREND_CURVE = {
+  baseline: [50, 52, 51, 55, 53, 54, 52, 56, 58, 60, 59, 62],
+  slope: 'stable' as const,
 };
 
 export class GoogleTrendsProvider implements IDemandTrendProvider {
@@ -74,7 +79,7 @@ export class GoogleTrendsProvider implements IDemandTrendProvider {
     }
 
     // Graceful fallback to verified seasonal Punjab patterns
-    const curve = CATEGORY_TREND_CURVES[input.category] || CATEGORY_TREND_CURVES['Other Niche Venture'];
+    const curve = CATEGORY_TREND_CURVES[input.category] || FALLBACK_TREND_CURVE;
     const points: DemandTrendPoint[] = [];
     const today = new Date();
 

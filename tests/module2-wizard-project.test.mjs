@@ -16,10 +16,10 @@ assert.ok(fs.existsSync(wizardPath), 'BusinessIdeaWizard.tsx must exist');
 
 const wizardCode = fs.readFileSync(wizardPath, 'utf8');
 assert.ok(
-  wizardCode.includes('Step 01 — Idea & Product Scope') &&
-  wizardCode.includes('Step 02 — Capital & Punjab Catchment') &&
-  wizardCode.includes('Step 03 — Audit & Submission'),
-  'Wizard must be organized into 3 logical steps'
+  wizardCode.includes('Step 01 — Profile & Location') &&
+  wizardCode.includes('Step 02 — Finance & Operations') &&
+  wizardCode.includes('Step 03 — Review & Submission'),
+  'Wizard must be organized into the 3 Task-3 steps (Profile & Location, Finance & Operations, Review & Submission)'
 );
 
 assert.ok(

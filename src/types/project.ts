@@ -18,6 +18,7 @@ export interface Project {
   custom_category: string | null;
   target_location: string;
   city: string | null;
+  district: string | null;
   region: string | null;
   country: string | null;
   postal_code: string | null;
@@ -52,6 +53,7 @@ export interface ProjectFormData {
   custom_category: string;
   target_location: string;
   city: string;
+  district: string;
   region: string;
   country: string;
   postal_code: string;
@@ -81,81 +83,99 @@ export interface StoreCategoryOption {
   description: string;
 }
 
+// Five approved priority categories (Task 3 §3). These identifiers are the
+// single source of truth shared by the wizard, the API validation layer, the
+// database `projects.category` value and downstream provider payloads.
 export const PREDEFINED_CATEGORIES: StoreCategoryOption[] = [
   {
-    id: 'apparel-fashion',
-    name: 'Apparel & Fashion',
+    id: 'grocery-general-stores',
+    name: 'Grocery / General Stores',
+    tagline: 'Essential Daily Demand',
+    badge: 'Essential',
+    icon: 'local_grocery_store',
+    description: 'Kirana & general stores, mini-marts, daily-need convenience and household retail.'
+  },
+  {
+    id: 'clothing-footwear',
+    name: 'Clothing / Footwear',
     tagline: 'High Demand',
     badge: 'High Demand',
     icon: 'apparel',
-    description: 'Eastern & western wear, footwear, contemporary accessories & ready-to-wear lines.'
+    description: 'Ready-to-wear apparel, unstitched fabric, footwear and fashion accessories.'
   },
   {
-    id: 'consumer-electronics',
-    name: 'Consumer Electronics',
+    id: 'mobile-phones-accessories',
+    name: 'Mobile Phones / Accessories',
     tagline: 'Fast Moving',
     badge: 'Fast Moving',
     icon: 'devices',
-    description: 'Mobile accessories, smart home hardware, audio gear & personal micro-electronics.'
+    description: 'Mobile handsets, repair services, chargers, covers and everyday phone accessories.'
   },
   {
-    id: 'cosmetics-skincare',
-    name: 'Cosmetics & Skincare',
-    tagline: 'High Margin',
-    badge: 'High Margin',
-    icon: 'auto_fix_high',
-    description: 'Organic skincare, dermatological beauty, hair wellness & custom perfumery.'
+    id: 'restaurants-cafes',
+    name: 'Restaurants / Cafes',
+    tagline: 'Experience Led',
+    badge: 'Growing',
+    icon: 'restaurant',
+    description: 'Dine-in restaurants, fast food outlets, bakeries and specialty cafes.'
   },
   {
-    id: 'grocery-gourmet',
-    name: 'Grocery & Gourmet Food',
-    tagline: 'Local Footprint',
-    badge: 'Local Footprint',
-    icon: 'nutrition',
-    description: 'Organic honey, mountain dry fruits, cold-pressed oils & artisanal regional pantry snacks.'
-  },
-  {
-    id: 'home-decor',
-    name: 'Home Decor & Living',
-    tagline: 'Emerging',
-    badge: 'Emerging',
-    icon: 'deck',
-    description: 'Artisan pottery, architectural lamps, sustainable rugs & handcrafted wooden furniture.'
-  },
-  {
-    id: 'other-niche',
-    name: 'Other Niche Venture',
-    tagline: 'Custom Model',
-    badge: 'Custom Model',
-    icon: 'explore',
-    description: 'Specialized sports equipment, pet boutique supplies, or experiential subscription models.'
+    id: 'pharmacies-medical-stores',
+    name: 'Pharmacies / Medical Stores',
+    tagline: 'Essential Footprint',
+    badge: 'Essential',
+    icon: 'local_pharmacy',
+    description: 'Retail pharmacies, medical stores, surgical supplies and everyday wellness retail.'
   }
 ];
 
+export const PUNJAB_PROVINCE = 'Punjab';
+
+export interface PunjabDistrict {
+  name: string;
+  cities: string[];
+}
+
+// Authoritative launch coverage for the wizard's District/City selectors.
+// These districts and cities are taken from the verified Punjab commercial hub
+// presets below; the list is intentionally limited to locations for which
+// coordinates are available and is NOT a claim of complete Punjab coverage.
+export const PUNJAB_DISTRICTS: PunjabDistrict[] = [
+  { name: 'Lahore', cities: ['Lahore'] },
+  { name: 'Rawalpindi', cities: ['Rawalpindi'] },
+  { name: 'Faisalabad', cities: ['Faisalabad'] },
+  { name: 'Multan', cities: ['Multan'] },
+  { name: 'Gujranwala', cities: ['Gujranwala'] },
+  { name: 'Sialkot', cities: ['Sialkot'] },
+  { name: 'Bahawalpur', cities: ['Bahawalpur'] }
+];
+
+export const PUNJAB_CITIES: string[] = PUNJAB_DISTRICTS.flatMap((d) => d.cities);
+
 export interface CommercialHubPreset {
   name: string;
+  district: string;
   city: string;
   lat: number;
   lng: number;
   label: string;
 }
 
+// Punjab-only commercial hub presets (Task 3 §4 location constraints).
+// Non-Punjab locations (Islamabad federal capital, Karachi/Sindh) were removed
+// because the wizard scope is strictly Punjab province.
 export const COMMERCIAL_HUB_PRESETS: CommercialHubPreset[] = [
-  { name: 'Gulberg III, Lahore', city: 'Lahore', lat: 31.5204, lng: 74.3587, label: 'Lahore Retail & Fashion Hub' },
-  { name: 'DHA Phase 5 & 6, Lahore', city: 'Lahore', lat: 31.4722, lng: 74.4093, label: 'Lahore Affluent Residential Commercial' },
-  { name: 'Anarkali & Mall Road, Lahore', city: 'Lahore', lat: 31.5657, lng: 74.3142, label: 'Lahore Historic Central Bazaar' },
-  { name: 'Model Town / Johar Town, Lahore', city: 'Lahore', lat: 31.4697, lng: 74.2728, label: 'Lahore High-Density Suburban Hub' },
-  { name: 'Clock Tower / D-Ground, Faisalabad', city: 'Faisalabad', lat: 31.4187, lng: 73.0791, label: 'Faisalabad Textile & Wholesale Hub' },
-  { name: 'Saddar Commercial, Rawalpindi', city: 'Rawalpindi', lat: 33.5973, lng: 73.0479, label: 'Rawalpindi Central Business District' },
-  { name: 'Bahria Town Commercial, Rawalpindi', city: 'Rawalpindi', lat: 33.5186, lng: 73.1094, label: 'Rawalpindi / Islamabad Twin Cities Modern Retail' },
-  { name: 'Hussain Agahi & Cantt, Multan', city: 'Multan', lat: 30.1984, lng: 71.4687, label: 'South Punjab Trade Hub' },
-  { name: 'Model Town / GT Road, Gujranwala', city: 'Gujranwala', lat: 32.1877, lng: 74.1945, label: 'Gujranwala Manufacturing & Retail Strip' },
-  { name: 'Paris Road / Shahab Pura, Sialkot', city: 'Sialkot', lat: 32.4945, lng: 74.5229, label: 'Sialkot Export & Commercial Center' },
-  { name: 'Circular Road, Bahawalpur', city: 'Bahawalpur', lat: 29.3956, lng: 71.6836, label: 'Bahawalpur City Center' },
-  { name: 'Blue Area, Islamabad', city: 'Islamabad', lat: 33.7153, lng: 73.0673, label: 'Federal Capital Corporate Hub' },
-  { name: 'F-7 / F-10 Markaz, Islamabad', city: 'Islamabad', lat: 33.7208, lng: 73.0564, label: 'Islamabad Prime Retail Markaz' },
-  { name: 'Clifton & Defence, Karachi', city: 'Karachi', lat: 24.8138, lng: 67.0305, label: 'Karachi Coastal Commercial' },
-  { name: 'Saddar Commercial, Karachi', city: 'Karachi', lat: 24.8569, lng: 67.0264, label: 'Karachi Central Wholesale District' },
+  { name: 'Gulberg III, Lahore', district: 'Lahore', city: 'Lahore', lat: 31.5204, lng: 74.3587, label: 'Lahore Retail & Fashion Hub' },
+  { name: 'DHA Phase 5 & 6, Lahore', district: 'Lahore', city: 'Lahore', lat: 31.4722, lng: 74.4093, label: 'Lahore Affluent Residential Commercial' },
+  { name: 'Anarkali & Mall Road, Lahore', district: 'Lahore', city: 'Lahore', lat: 31.5657, lng: 74.3142, label: 'Lahore Historic Central Bazaar' },
+  { name: 'Model Town / Johar Town, Lahore', district: 'Lahore', city: 'Lahore', lat: 31.4697, lng: 74.2728, label: 'Lahore High-Density Suburban Hub' },
+  { name: 'Clock Tower / D-Ground, Faisalabad', district: 'Faisalabad', city: 'Faisalabad', lat: 31.4187, lng: 73.0791, label: 'Faisalabad Textile & Wholesale Hub' },
+  { name: 'Saddar Commercial, Rawalpindi', district: 'Rawalpindi', city: 'Rawalpindi', lat: 33.5973, lng: 73.0479, label: 'Rawalpindi Central Business District' },
+  { name: 'Bahria Town Commercial, Rawalpindi', district: 'Rawalpindi', city: 'Rawalpindi', lat: 33.5186, lng: 73.1094, label: 'Rawalpindi Modern Retail Corridor' },
+  { name: 'Hussain Agahi & Cantt, Multan', district: 'Multan', city: 'Multan', lat: 30.1984, lng: 71.4687, label: 'South Punjab Trade Hub' },
+  { name: 'Model Town / GT Road, Gujranwala', district: 'Gujranwala', city: 'Gujranwala', lat: 32.1877, lng: 74.1945, label: 'Gujranwala Manufacturing & Retail Strip' },
+  { name: 'Paris Road / Shahab Pura, Sialkot', district: 'Sialkot', city: 'Sialkot', lat: 32.4945, lng: 74.5229, label: 'Sialkot Export & Commercial Center' },
+  { name: 'Circular Road, Bahawalpur', district: 'Bahawalpur', city: 'Bahawalpur', lat: 29.3956, lng: 71.6836, label: 'Bahawalpur City Center' },
 ];
 
 export const AGE_GROUP_OPTIONS = [

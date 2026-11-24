@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { validateProjectStep } from '@/lib/validation/project';
+import { validateProjectFields } from '@/lib/validation/project';
 import { convertUsdToPkr } from '@/lib/currency/exchange-rate';
 
 export const dynamic = 'force-dynamic';
@@ -58,10 +58,11 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Partial step validation for initializing a draft
-    const stepValidation = validateProjectStep(1, body);
-    if (!stepValidation.valid && body.category) {
-      return NextResponse.json({ error: 'Validation failed', details: stepValidation.errors }, { status: 400 });
+    // Field-level validation: any supplied value is validated server-side even
+    // though a draft may legitimately be partial (Task 3 §6, §8).
+    const fieldValidation = validateProjectFields(body);
+    if (!fieldValidation.valid) {
+      return NextResponse.json({ error: 'Validation failed', details: fieldValidation.errors }, { status: 400 });
     }
 
     const category = body.category ? String(body.category).trim() : '';
@@ -111,6 +112,7 @@ export async function POST(request: NextRequest) {
       custom_category: body.custom_category || null,
       target_location: targetLocation,
       city: parsedCity,
+      district: body.district ? String(body.district).trim() : null,
       region: body.region || 'Punjab',
       country: 'Pakistan',
       postal_code: body.postal_code || null,

@@ -8,6 +8,8 @@ import {
   ProjectFormData,
   PREDEFINED_CATEGORIES,
   COMMERCIAL_HUB_PRESETS,
+  PUNJAB_PROVINCE,
+  PUNJAB_DISTRICTS,
   AGE_GROUP_OPTIONS,
   GENDER_OPTIONS,
   INCOME_LEVEL_OPTIONS,
@@ -43,6 +45,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
     custom_category: '',
     target_location: '',
     city: '',
+    district: '',
     region: 'Punjab',
     country: 'Pakistan',
     postal_code: '',
@@ -107,6 +110,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
           custom_category: p.custom_category || '',
           target_location: p.target_location || '',
           city: p.city || '',
+          district: p.district || '',
           region: p.region || 'Punjab',
           country: p.country || 'Pakistan',
           postal_code: p.postal_code || '',
@@ -329,6 +333,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
       ...prev,
       target_location: `${hub.name}, Pakistan`,
       city: hub.city,
+      district: hub.district,
       lat: hub.lat,
       lng: hub.lng,
     }));
@@ -438,6 +443,10 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
     }));
     showToast('Attachment removed from draft', 'success');
   };
+
+  // District / City cascading selectors (Task 3 §4 location constraints)
+  const selectedDistrict = PUNJAB_DISTRICTS.find((d) => d.name === formData.district) || null;
+  const cityOptions = selectedDistrict ? selectedDistrict.cities : [];
 
   // Financial allocations
   const budgetNum = Number(formData.budget_amount) || 0;
@@ -555,9 +564,9 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
             {/* Stepper Tabs (3 Unified Logical Steps) */}
             <nav aria-label="Wizard Steps" className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
               {[
-                { step: 1, title: 'Concept & Catalog', subtitle: 'Step 01 — Idea & Product Scope' },
-                { step: 2, title: 'Budget & Location', subtitle: 'Step 02 — Capital & Punjab Catchment' },
-                { step: 3, title: 'Review & Feasibility', subtitle: 'Step 03 — Audit & Submission' },
+                { step: 1, title: 'Business Profile & Location', subtitle: 'Step 01 — Profile & Location' },
+                { step: 2, title: 'Financial & Operational', subtitle: 'Step 02 — Finance & Operations' },
+                { step: 3, title: 'Review & Submission', subtitle: 'Step 03 — Review & Submission' },
               ].map((s) => {
                 const isActive = currentStep === s.step;
                 const isCompleted = currentStep > s.step;
@@ -609,20 +618,20 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
           </div>
 
           {/* ============================================================== */}
-          {/* STEP 1: BUSINESS CONCEPT, CATALOG & AUDIENCE PROFILE          */}
+          {/* STEP 1: BUSINESS PROFILE & LOCATION (Task 3 §4)              */}
           {/* ============================================================== */}
           {currentStep === 1 && (
             <div className="flex flex-col gap-6 w-full animate-fadeIn">
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2 text-[#4edea3] text-[13px] font-medium">
                   <span className="material-symbols-outlined text-[18px]">lightbulb</span>
-                  <span>Business Idea &amp; Commercial Specifications (SRS FR-2.1, FR-2.2)</span>
+                  <span>Step 1 — Business Profile &amp; Location (Task 3 §4)</span>
                 </div>
                 <h2 className="text-[28px] md:text-[34px] font-bold text-[#dae2fd] tracking-tight">
                   What business are you planning to establish in Punjab?
                 </h2>
                 <p className="text-[15px] text-[#bbcabf] max-w-3xl leading-relaxed">
-                  Provide your business title, select an empirical commercial category, and specify your product catalog, operational model, and target demographic.
+                  Provide your business name and description, select one of the five approved categories, and choose a supported Punjab district, city and commercial location.
                 </p>
               </div>
 
@@ -683,23 +692,6 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                       })}
                     </div>
 
-                    {formData.category === 'Other Niche Venture' && (
-                      <div className="mt-2 flex flex-col gap-1.5 animate-fadeIn">
-                        <label className="text-[12px] text-[#4edea3] font-medium">
-                          Specify Custom Commercial Category *
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.custom_category || ''}
-                          onChange={(e) => setFormData((p) => ({ ...p, custom_category: e.target.value }))}
-                          placeholder="e.g. Specialized Solar Electronics, Surgical Tools Trading..."
-                          className="w-full bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3]"
-                        />
-                        {errors.custom_category && (
-                          <span className="text-[#ffb4ab] text-[12px]">{errors.custom_category}</span>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -798,6 +790,352 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Punjab Business Location: Province / District / City (Task 3 §4) */}
+              <div className="bg-[#131b2e] border border-[#2d3449]/60 rounded-xl p-6 shadow-sm flex flex-col gap-5">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[15px] font-semibold text-[#dae2fd] flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#4edea3] text-[20px]">pin_drop</span>
+                    Punjab Business Location *
+                  </label>
+                  <p className="text-[12px] text-[#bbcabf]">
+                    Country is fixed to Pakistan and province to Punjab. Select a district and city, then attach a verified commercial hub to capture coordinates.
+                  </p>
+                </div>
+
+                {/* Province (fixed) / District / City */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[12px] text-[#bbcabf] font-medium">Province (Fixed)</label>
+                    <input
+                      type="text"
+                      value={PUNJAB_PROVINCE}
+                      readOnly
+                      aria-readonly="true"
+                      className="bg-[#0e1626] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#86948a] cursor-not-allowed"
+                    />
+                    {errors.region && <span className="text-[#ffb4ab] text-[12px]">{errors.region}</span>}
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="wizard-district" className="text-[12px] text-[#bbcabf] font-medium">District *</label>
+                    <select
+                      id="wizard-district"
+                      value={formData.district || ''}
+                      onChange={(e) => {
+                        const district = e.target.value;
+                        setFormData((p) => ({ ...p, district, city: '', target_location: '', lat: undefined, lng: undefined }));
+                        setErrors((p) => {
+                          const c = { ...p };
+                          delete c.district;
+                          delete c.city;
+                          delete c.coordinates;
+                          return c;
+                        });
+                      }}
+                      className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3]"
+                    >
+                      <option value="">Select Punjab district...</option>
+                      {PUNJAB_DISTRICTS.map((d) => (
+                        <option key={d.name} value={d.name}>
+                          {d.name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.district && <span className="text-[#ffb4ab] text-[12px]">{errors.district}</span>}
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="wizard-city" className="text-[12px] text-[#bbcabf] font-medium">City *</label>
+                    <select
+                      id="wizard-city"
+                      value={formData.city || ''}
+                      disabled={!selectedDistrict}
+                      onChange={(e) => {
+                        setFormData((p) => ({ ...p, city: e.target.value }));
+                        setErrors((p) => {
+                          const c = { ...p };
+                          delete c.city;
+                          return c;
+                        });
+                      }}
+                      className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3] disabled:opacity-50"
+                    >
+                      <option value="">{selectedDistrict ? 'Select city...' : 'Select district first'}</option>
+                      {cityOptions.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.city && <span className="text-[#ffb4ab] text-[12px]">{errors.city}</span>}
+                  </div>
+                </div>
+
+                {/* Hub Presets Chips */}
+                <div className="flex flex-wrap gap-2">
+                  {COMMERCIAL_HUB_PRESETS.map((hub) => {
+                    const isSelected = formData.city === hub.city && formData.target_location.includes(hub.name);
+                    return (
+                      <button
+                        key={hub.name}
+                        type="button"
+                        onClick={() => handleSelectHub(hub)}
+                        className={`px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all border flex items-center gap-1.5 ${
+                          isSelected
+                            ? 'bg-[#222a3d] border-[#4edea3] text-[#4edea3] ring-1 ring-[#4edea3]/30'
+                            : 'bg-[#171f33] border-[#2d3449] text-[#bbcabf] hover:text-[#dae2fd] hover:bg-[#222a3d]/50'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[14px]">location_on</span>
+                        <span>{hub.name}</span>
+                        <span className="text-[10px] opacity-60">({hub.city})</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Manual Target Location Entry */}
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="wizard-locality" className="text-[12px] text-[#bbcabf] font-medium">Specific Locality / Address Description *</label>
+                  <input
+                    id="wizard-locality"
+                    type="text"
+                    value={formData.target_location}
+                    onChange={(e) => {
+                      setFormData((p) => ({ ...p, target_location: e.target.value }));
+                      setErrors((p) => {
+                        const c = { ...p };
+                        delete c.target_location;
+                        return c;
+                      });
+                    }}
+                    placeholder="e.g. M.M. Alam Road, Gulberg III, Lahore, Punjab"
+                    className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3]"
+                  />
+                  {errors.target_location && (
+                    <span className="text-[#ffb4ab] text-[12px]">{errors.target_location}</span>
+                  )}
+                </div>
+
+                {/* Coordinate Status */}
+                {formData.lat && formData.lng ? (
+                  <div className="p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3] flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span>
+                      <strong>Verified Punjab Coordinates:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b] flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">location_searching</span>
+                    <span>
+                      Please select a verified commercial hub above to attach exact spatial coordinates for competitive radar analysis.
+                    </span>
+                  </div>
+                )}
+                {errors.coordinates && (
+                  <span className="text-[#ffb4ab] text-[12px]">{errors.coordinates}</span>
+                )}
+
+                {/* Analysis Radius Slider (5 - 15 km) */}
+                <div className="flex flex-col gap-2 pt-3 border-t border-[#2d3449]/40">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[13px] font-semibold text-[#dae2fd] flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[#4edea3] text-[18px]">radar</span>
+                      Competitor Analysis Catchment Radius:
+                      <span className="text-[#4edea3] font-mono text-[14px]">
+                        {formData.radius_km || 10} km
+                      </span>
+                    </label>
+                    <span className="text-[11px] text-[#bbcabf]">Configurable: 5 km to 15 km (10 km standard default)</span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="5"
+                    max="15"
+                    step="1"
+                    value={formData.radius_km || 10}
+                    onChange={(e) => setFormData((p) => ({ ...p, radius_km: parseFloat(e.target.value) }))}
+                    className="w-full accent-[#4edea3] bg-[#222a3d] rounded-lg cursor-pointer h-2"
+                  />
+                  <div className="flex justify-between text-[11px] text-[#bbcabf] font-mono">
+                    <span>5 km</span>
+                    <span>10 km (Recommended)</span>
+                    <span>15 km (Max)</span>
+                  </div>
+                  {errors.radius_km && (
+                    <span className="text-[#ffb4ab] text-[12px]">{errors.radius_km}</span>
+                  )}
+                </div>
+
+                {/* Spatial Radar Simulation Preview */}
+                <div className="bg-[#060e20] border border-[#2d3449] rounded-xl relative overflow-hidden min-h-[220px] p-5 flex flex-col justify-between shadow-inner">
+                  <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none">
+                    <defs>
+                      <pattern id="grid-pattern-step1" width="30" height="30" patternUnits="userSpaceOnUse">
+                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#86948a" strokeWidth="0.5" />
+                      </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid-pattern-step1)" />
+                  </svg>
+
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="bg-[#171f33]/90 px-3 py-1 rounded-lg text-[11px] text-[#4edea3] border border-[#2d3449] flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#4edea3] animate-ping"></span>
+                      <span>Illustrative Catchment Radius ({formData.radius_km || 10} km)</span>
+                    </div>
+                    <span className="text-[11px] text-[#bbcabf] font-mono">
+                      {formData.lat ? `${formData.lat.toFixed(4)}° N, ${formData.lng?.toFixed(4)}° E` : 'No coordinates'}
+                    </span>
+                  </div>
+
+                  <div className="relative z-10 my-auto flex flex-col items-center justify-center py-4">
+                    <div className="w-10 h-10 rounded-full bg-[#4edea3]/20 border border-[#4edea3] flex items-center justify-center text-[#4edea3] shadow-lg animate-pulse">
+                      <span className="material-symbols-outlined text-[20px]">storefront</span>
+                    </div>
+                    <span className="text-[12px] font-semibold text-[#dae2fd] mt-1">
+                      {formData.target_location ? formData.target_location.split(',')[0] : 'Selected Target Hub'}
+                    </span>
+                  </div>
+
+                  <div className="relative z-10 flex items-center justify-between text-[11px] text-[#bbcabf]">
+                    <span>Map Data: © OpenStreetMap Contributors</span>
+                    <span>Live POI discovery runs upon submission</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ============================================================== */}
+          {/* STEP 2: FINANCIAL & OPERATIONAL INFORMATION                   */}
+          {/* ============================================================== */}
+          {currentStep === 2 && (
+            <div className="flex flex-col gap-6 w-full animate-fadeIn">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 text-[#4edea3] text-[13px] font-medium">
+                  <span className="material-symbols-outlined text-[18px]">payments</span>
+                  <span>Step 2 — Financial &amp; Operational Information (Task 3 §4)</span>
+                </div>
+                <h2 className="text-[28px] md:text-[34px] font-bold text-[#dae2fd] tracking-tight">
+                  Define your investment budget &amp; operating assumptions
+                </h2>
+                <p className="text-[15px] text-[#bbcabf] max-w-3xl leading-relaxed">
+                  Allocate your planned initial capital in PKR (canonical) or USD, and describe your scale, operating model, footprint and target customer audience.
+                </p>
+              </div>
+
+              {/* Budget Configuration Card */}
+              <div className="bg-[#131b2e] border border-[#2d3449]/60 rounded-xl p-6 shadow-sm flex flex-col gap-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <label className="text-[15px] font-semibold text-[#dae2fd] flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#4edea3] text-[20px]">account_balance_wallet</span>
+                    Initial Investment Budget *
+                  </label>
+
+                  {/* Currency Switcher */}
+                  <div className="flex items-center bg-[#171f33] p-1 rounded-xl border border-[#2d3449]">
+                    <button
+                      type="button"
+                      onClick={() => handleCurrencyChange('PKR')}
+                      className={`px-3.5 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
+                        formData.budget_currency === 'PKR'
+                          ? 'bg-[#4edea3] text-[#003824] shadow-sm'
+                          : 'text-[#bbcabf] hover:text-[#dae2fd]'
+                      }`}
+                    >
+                      PKR (Rs.)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleCurrencyChange('USD')}
+                      className={`px-3.5 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
+                        formData.budget_currency === 'USD'
+                          ? 'bg-[#4edea3] text-[#003824] shadow-sm'
+                          : 'text-[#bbcabf] hover:text-[#dae2fd]'
+                      }`}
+                    >
+                      USD ($)
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#bbcabf] font-mono text-[16px]">
+                      {currencyPrefix}
+                    </span>
+                    <input
+                      type="number"
+                      value={formData.budget_amount || ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                        setFormData((p) => ({ ...p, budget_amount: val }));
+                        setErrors((p) => {
+                          const c = { ...p };
+                          delete c.budget_amount;
+                          return c;
+                        });
+                      }}
+                      placeholder="e.g. 500000"
+                      className="w-full bg-[#171f33] border border-[#2d3449] rounded-xl pl-12 pr-4 py-3 text-[18px] font-mono text-[#dae2fd] focus:outline-none focus:border-[#4edea3] transition-colors"
+                    />
+                  </div>
+                  {errors.budget_amount && (
+                    <span className="text-[#ffb4ab] text-[12px]">{errors.budget_amount}</span>
+                  )}
+                  <span className="text-[12px] text-[#bbcabf]">
+                    Acceptable platform range: Rs. 10,000 to Rs. 50,000,000 PKR (or USD equivalent).
+                  </span>
+                </div>
+
+                {/* SBP Conversion Provenance Disclosure */}
+                {formData.budget_currency === 'USD' && (
+                  <div className="p-3 bg-[#171f33] border border-[#2d3449] rounded-xl flex items-center gap-2 text-[12px] text-[#bbcabf]">
+                    <span className="material-symbols-outlined text-[16px] text-[#4cd7f6]">info</span>
+                    <span>
+                      Converted to canonical PKR using State Bank of Pakistan benchmark rate: <strong>Rs. 278.00 / USD</strong> (~Rs. {(budgetNum * EXCHANGE_RATE_USD_TO_PKR).toLocaleString()} PKR).
+                    </span>
+                  </div>
+                )}
+
+                {/* Financial Runway Breakdown Estimator */}
+                {budgetNum > 0 && (
+                  <div className="pt-4 border-t border-[#2d3449]/40 flex flex-col gap-3">
+                    <span className="text-[12px] uppercase tracking-wider font-semibold text-[#bbcabf]">
+                      Estimated Capital Allocation Breakdown (Rule-Based Guidelines)
+                    </span>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col">
+                        <span className="text-[11px] text-[#bbcabf]">Inventory &amp; Production (45%)</span>
+                        <span className="text-[14px] font-bold text-[#dae2fd] font-mono">
+                          {currencyPrefix}{allocInv.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col">
+                        <span className="text-[11px] text-[#bbcabf]">Rent &amp; Lease Reserve (25%)</span>
+                        <span className="text-[14px] font-bold text-[#dae2fd] font-mono">
+                          {currencyPrefix}{allocRent.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col">
+                        <span className="text-[11px] text-[#bbcabf]">Marketing &amp; Digital Launch (18%)</span>
+                        <span className="text-[14px] font-bold text-[#dae2fd] font-mono">
+                          {currencyPrefix}{allocMkt.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col">
+                        <span className="text-[11px] text-[#bbcabf]">Working Capital Buffer (12%)</span>
+                        <span className="text-[14px] font-bold text-[#4edea3] font-mono">
+                          {currencyPrefix}{allocBuf.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Operational Scope & Audience Profiling */}
@@ -993,295 +1331,6 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
           )}
 
           {/* ============================================================== */}
-          {/* STEP 2: BUDGET & LOCATION CATCHMENT                           */}
-          {/* ============================================================== */}
-          {currentStep === 2 && (
-            <div className="flex flex-col gap-6 w-full animate-fadeIn">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2 text-[#4edea3] text-[13px] font-medium">
-                  <span className="material-symbols-outlined text-[18px]">payments</span>
-                  <span>Financial Allocation &amp; Punjab Spatial Catchment (SRS FR-2.3, FR-2.4, FR-2.7)</span>
-                </div>
-                <h2 className="text-[28px] md:text-[34px] font-bold text-[#dae2fd] tracking-tight">
-                  Define your investment budget &amp; commercial location
-                </h2>
-                <p className="text-[15px] text-[#bbcabf] max-w-3xl leading-relaxed">
-                  Allocate your planned initial capital in PKR or USD, choose your target Punjab commercial hub or locality, and set your competitor analysis radius (5–15 km).
-                </p>
-              </div>
-
-              {/* Budget Configuration Card */}
-              <div className="bg-[#131b2e] border border-[#2d3449]/60 rounded-xl p-6 shadow-sm flex flex-col gap-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <label className="text-[15px] font-semibold text-[#dae2fd] flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#4edea3] text-[20px]">account_balance_wallet</span>
-                    Initial Investment Budget *
-                  </label>
-
-                  {/* Currency Switcher */}
-                  <div className="flex items-center bg-[#171f33] p-1 rounded-xl border border-[#2d3449]">
-                    <button
-                      type="button"
-                      onClick={() => handleCurrencyChange('PKR')}
-                      className={`px-3.5 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
-                        formData.budget_currency === 'PKR'
-                          ? 'bg-[#4edea3] text-[#003824] shadow-sm'
-                          : 'text-[#bbcabf] hover:text-[#dae2fd]'
-                      }`}
-                    >
-                      PKR (Rs.)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleCurrencyChange('USD')}
-                      className={`px-3.5 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
-                        formData.budget_currency === 'USD'
-                          ? 'bg-[#4edea3] text-[#003824] shadow-sm'
-                          : 'text-[#bbcabf] hover:text-[#dae2fd]'
-                      }`}
-                    >
-                      USD ($)
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#bbcabf] font-mono text-[16px]">
-                      {currencyPrefix}
-                    </span>
-                    <input
-                      type="number"
-                      value={formData.budget_amount || ''}
-                      onChange={(e) => {
-                        const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                        setFormData((p) => ({ ...p, budget_amount: val }));
-                        setErrors((p) => {
-                          const c = { ...p };
-                          delete c.budget_amount;
-                          return c;
-                        });
-                      }}
-                      placeholder="e.g. 500000"
-                      className="w-full bg-[#171f33] border border-[#2d3449] rounded-xl pl-12 pr-4 py-3 text-[18px] font-mono text-[#dae2fd] focus:outline-none focus:border-[#4edea3] transition-colors"
-                    />
-                  </div>
-                  {errors.budget_amount && (
-                    <span className="text-[#ffb4ab] text-[12px]">{errors.budget_amount}</span>
-                  )}
-                  <span className="text-[12px] text-[#bbcabf]">
-                    Acceptable platform range: Rs. 10,000 to Rs. 50,000,000 PKR (or USD equivalent).
-                  </span>
-                </div>
-
-                {/* SBP Conversion Provenance Disclosure */}
-                {formData.budget_currency === 'USD' && (
-                  <div className="p-3 bg-[#171f33] border border-[#2d3449] rounded-xl flex items-center gap-2 text-[12px] text-[#bbcabf]">
-                    <span className="material-symbols-outlined text-[16px] text-[#4cd7f6]">info</span>
-                    <span>
-                      Converted to canonical PKR using State Bank of Pakistan benchmark rate: <strong>Rs. 278.00 / USD</strong> (~Rs. {(budgetNum * EXCHANGE_RATE_USD_TO_PKR).toLocaleString()} PKR).
-                    </span>
-                  </div>
-                )}
-
-                {/* Financial Runway Breakdown Estimator */}
-                {budgetNum > 0 && (
-                  <div className="pt-4 border-t border-[#2d3449]/40 flex flex-col gap-3">
-                    <span className="text-[12px] uppercase tracking-wider font-semibold text-[#bbcabf]">
-                      Estimated Capital Allocation Breakdown (Rule-Based Guidelines)
-                    </span>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col">
-                        <span className="text-[11px] text-[#bbcabf]">Inventory &amp; Production (45%)</span>
-                        <span className="text-[14px] font-bold text-[#dae2fd] font-mono">
-                          {currencyPrefix}{allocInv.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col">
-                        <span className="text-[11px] text-[#bbcabf]">Rent &amp; Lease Reserve (25%)</span>
-                        <span className="text-[14px] font-bold text-[#dae2fd] font-mono">
-                          {currencyPrefix}{allocRent.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col">
-                        <span className="text-[11px] text-[#bbcabf]">Marketing &amp; Digital Launch (18%)</span>
-                        <span className="text-[14px] font-bold text-[#dae2fd] font-mono">
-                          {currencyPrefix}{allocMkt.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col">
-                        <span className="text-[11px] text-[#bbcabf]">Working Capital Buffer (12%)</span>
-                        <span className="text-[14px] font-bold text-[#4edea3] font-mono">
-                          {currencyPrefix}{allocBuf.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Punjab Commercial Location Selection */}
-              <div className="bg-[#131b2e] border border-[#2d3449]/60 rounded-xl p-6 shadow-sm flex flex-col gap-5">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[15px] font-semibold text-[#dae2fd] flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#4edea3] text-[20px]">pin_drop</span>
-                    Select Punjab Commercial Hub Preset or Enter Custom Locality *
-                  </label>
-                  <p className="text-[12px] text-[#bbcabf]">
-                    Choose from verified commercial clusters across Punjab, Pakistan to attach authoritative coordinates.
-                  </p>
-                </div>
-
-                {/* Hub Presets Chips */}
-                <div className="flex flex-wrap gap-2">
-                  {COMMERCIAL_HUB_PRESETS.map((hub) => {
-                    const isSelected = formData.city === hub.city && formData.target_location.includes(hub.name);
-                    return (
-                      <button
-                        key={hub.name}
-                        type="button"
-                        onClick={() => handleSelectHub(hub)}
-                        className={`px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all border flex items-center gap-1.5 ${
-                          isSelected
-                            ? 'bg-[#222a3d] border-[#4edea3] text-[#4edea3] ring-1 ring-[#4edea3]/30'
-                            : 'bg-[#171f33] border-[#2d3449] text-[#bbcabf] hover:text-[#dae2fd] hover:bg-[#222a3d]/50'
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-[14px]">location_on</span>
-                        <span>{hub.name}</span>
-                        <span className="text-[10px] opacity-60">({hub.city})</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Manual Target Location Entry */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[12px] text-[#bbcabf] font-medium">Specific Locality / Address Description *</label>
-                    <input
-                      type="text"
-                      value={formData.target_location}
-                      onChange={(e) => {
-                        setFormData((p) => ({ ...p, target_location: e.target.value }));
-                        setErrors((p) => {
-                          const c = { ...p };
-                          delete c.target_location;
-                          return c;
-                        });
-                      }}
-                      placeholder="e.g. M.M. Alam Road, Gulberg III, Lahore, Punjab"
-                      className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3]"
-                    />
-                    {errors.target_location && (
-                      <span className="text-[#ffb4ab] text-[12px]">{errors.target_location}</span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[12px] text-[#bbcabf] font-medium">City in Punjab *</label>
-                    <input
-                      type="text"
-                      value={formData.city || ''}
-                      onChange={(e) => setFormData((p) => ({ ...p, city: e.target.value }))}
-                      placeholder="e.g. Lahore, Rawalpindi, Faisalabad, Multan..."
-                      className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3]"
-                    />
-                  </div>
-                </div>
-
-                {/* Coordinate Status */}
-                {formData.lat && formData.lng ? (
-                  <div className="p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3] flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px]">verified</span>
-                    <span>
-                      <strong>Verified Punjab Coordinates:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
-                    </span>
-                  </div>
-                ) : (
-                  <div className="p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b] flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px]">location_searching</span>
-                    <span>
-                      Please select a verified commercial hub above to attach exact spatial coordinates for competitive radar analysis.
-                    </span>
-                  </div>
-                )}
-                {errors.coordinates && (
-                  <span className="text-[#ffb4ab] text-[12px]">{errors.coordinates}</span>
-                )}
-
-                {/* Analysis Radius Slider (5 - 15 km) */}
-                <div className="flex flex-col gap-2 pt-3 border-t border-[#2d3449]/40">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[13px] font-semibold text-[#dae2fd] flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[#4edea3] text-[18px]">radar</span>
-                      Competitor Analysis Catchment Radius:
-                      <span className="text-[#4edea3] font-mono text-[14px]">
-                        {formData.radius_km || 10} km
-                      </span>
-                    </label>
-                    <span className="text-[11px] text-[#bbcabf]">Configurable: 5 km to 15 km (10 km standard default)</span>
-                  </div>
-
-                  <input
-                    type="range"
-                    min="5"
-                    max="15"
-                    step="1"
-                    value={formData.radius_km || 10}
-                    onChange={(e) => setFormData((p) => ({ ...p, radius_km: parseFloat(e.target.value) }))}
-                    className="w-full accent-[#4edea3] bg-[#222a3d] rounded-lg cursor-pointer h-2"
-                  />
-                  <div className="flex justify-between text-[11px] text-[#bbcabf] font-mono">
-                    <span>5 km</span>
-                    <span>10 km (Recommended)</span>
-                    <span>15 km (Max)</span>
-                  </div>
-                  {errors.radius_km && (
-                    <span className="text-[#ffb4ab] text-[12px]">{errors.radius_km}</span>
-                  )}
-                </div>
-
-                {/* Spatial Radar Simulation Preview */}
-                <div className="bg-[#060e20] border border-[#2d3449] rounded-xl relative overflow-hidden min-h-[220px] p-5 flex flex-col justify-between shadow-inner">
-                  <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none">
-                    <defs>
-                      <pattern id="grid-pattern-step2" width="30" height="30" patternUnits="userSpaceOnUse">
-                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#86948a" strokeWidth="0.5" />
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#grid-pattern-step2)" />
-                  </svg>
-
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="bg-[#171f33]/90 px-3 py-1 rounded-lg text-[11px] text-[#4edea3] border border-[#2d3449] flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#4edea3] animate-ping"></span>
-                      <span>Illustrative Catchment Radius ({formData.radius_km || 10} km)</span>
-                    </div>
-                    <span className="text-[11px] text-[#bbcabf] font-mono">
-                      {formData.lat ? `${formData.lat.toFixed(4)}° N, ${formData.lng?.toFixed(4)}° E` : 'No coordinates'}
-                    </span>
-                  </div>
-
-                  <div className="relative z-10 my-auto flex flex-col items-center justify-center py-4">
-                    <div className="w-10 h-10 rounded-full bg-[#4edea3]/20 border border-[#4edea3] flex items-center justify-center text-[#4edea3] shadow-lg animate-pulse">
-                      <span className="material-symbols-outlined text-[20px]">storefront</span>
-                    </div>
-                    <span className="text-[12px] font-semibold text-[#dae2fd] mt-1">
-                      {formData.target_location ? formData.target_location.split(',')[0] : 'Selected Target Hub'}
-                    </span>
-                  </div>
-
-                  <div className="relative z-10 flex items-center justify-between text-[11px] text-[#bbcabf]">
-                    <span>Map Data: © OpenStreetMap Contributors</span>
-                    <span>Live POI discovery runs upon submission</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ============================================================== */}
           {/* STEP 3: REVIEW & FEASIBILITY AUDIT SUBMISSION                 */}
           {/* ============================================================== */}
           {currentStep === 3 && (
@@ -1289,7 +1338,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2 text-[#4edea3] text-[13px] font-medium">
                   <span className="material-symbols-outlined text-[18px]">verified</span>
-                  <span>Review &amp; Final Feasibility Audit (SRS FR-2.1, FR-2.6)</span>
+                  <span>Step 3 — Review &amp; Submission (Task 3 §4)</span>
                 </div>
                 <h2 className="text-[28px] md:text-[34px] font-bold text-[#dae2fd] tracking-tight">
                   Review your business idea before feasibility submission
@@ -1301,12 +1350,12 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
 
               {/* Review Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {/* 1. Idea & Category */}
+                {/* 1. Business Profile */}
                 <div className="bg-[#131b2e] border border-[#2d3449]/60 rounded-xl p-5 shadow-sm flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-bold text-[#dae2fd] flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[#4edea3] text-[16px]">lightbulb</span>
-                      Concept &amp; Commercial Archetype
+                      Business Profile
                     </span>
                     <button
                       type="button"
@@ -1318,31 +1367,74 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   </div>
                   <div className="flex flex-col gap-1.5 text-[12px]">
                     <div>
-                      <span className="text-[#bbcabf]">Venture Title: </span>
+                      <span className="text-[#bbcabf]">Venture Name: </span>
                       <strong className="text-[#dae2fd]">{formData.title || 'Untitled Venture'}</strong>
                     </div>
                     <div>
                       <span className="text-[#bbcabf]">Commercial Category: </span>
                       <strong className="text-[#4edea3]">{formData.category || 'Not selected'}</strong>
                     </div>
-                    {formData.custom_category && (
-                      <div>
-                        <span className="text-[#bbcabf]">Niche Specification: </span>
-                        <span className="text-[#dae2fd]">{formData.custom_category}</span>
-                      </div>
-                    )}
                     <div>
-                      <span className="text-[#bbcabf]">Business Scale: </span>
-                      <span className="text-[#dae2fd] capitalize">{formData.business_scale}</span>
+                      <span className="text-[#bbcabf]">Business Description: </span>
+                      <span className="text-[#dae2fd]">{formData.product_description || 'Not provided'}</span>
                     </div>
                     <div>
-                      <span className="text-[#bbcabf]">Store Model: </span>
-                      <span className="text-[#dae2fd] uppercase">{formData.business_model}</span>
+                      <span className="text-[#bbcabf]">Product Types: </span>
+                      <span className="text-[#dae2fd]">
+                        {formData.product_types.length > 0 ? formData.product_types.join(', ') : 'None specified'}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                {/* 2. Budget & Capital Runway */}
+                {/* 2. Location & Spatial Catchment */}
+                <div className="bg-[#131b2e] border border-[#2d3449]/60 rounded-xl p-5 shadow-sm flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] font-bold text-[#dae2fd] flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[#4edea3] text-[16px]">pin_drop</span>
+                      Location &amp; Catchment Radius
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => goToStep(1)}
+                      className="text-[#4edea3] hover:underline text-[11px]"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="flex flex-col gap-1.5 text-[12px]">
+                    <div>
+                      <span className="text-[#bbcabf]">Province / Country: </span>
+                      <span className="text-[#dae2fd] capitalize">{formData.region || PUNJAB_PROVINCE}, Pakistan</span>
+                    </div>
+                    <div>
+                      <span className="text-[#bbcabf]">District: </span>
+                      <span className="text-[#dae2fd]">{formData.district || 'Not selected'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[#bbcabf]">City: </span>
+                      <span className="text-[#dae2fd]">{formData.city || 'Not selected'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[#bbcabf]">Target Hub: </span>
+                      <strong className="text-[#dae2fd]">{formData.target_location || 'Not entered'}</strong>
+                    </div>
+                    <div>
+                      <span className="text-[#bbcabf]">Spatial Coordinates: </span>
+                      <span className="text-[#dae2fd] font-mono">
+                        {formData.lat && formData.lng
+                          ? `${formData.lat.toFixed(4)}° N, ${formData.lng.toFixed(4)}° E`
+                          : 'Not assigned'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[#bbcabf]">Analysis Radius: </span>
+                      <span className="text-[#4edea3] font-mono font-bold">{formData.radius_km || 10} km</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Budget & Capital Runway */}
                 <div className="bg-[#131b2e] border border-[#2d3449]/60 rounded-xl p-5 shadow-sm flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-bold text-[#dae2fd] flex items-center gap-1.5">
@@ -1383,12 +1475,12 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   </div>
                 </div>
 
-                {/* 3. Location & Spatial Catchment */}
+                {/* 4. Operational Setup */}
                 <div className="bg-[#131b2e] border border-[#2d3449]/60 rounded-xl p-5 shadow-sm flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-bold text-[#dae2fd] flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[#4edea3] text-[16px]">pin_drop</span>
-                      Location &amp; Catchment Radius
+                      <span className="material-symbols-outlined text-[#4edea3] text-[16px]">hub</span>
+                      Operational Setup
                     </span>
                     <button
                       type="button"
@@ -1400,59 +1492,26 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   </div>
                   <div className="flex flex-col gap-1.5 text-[12px]">
                     <div>
-                      <span className="text-[#bbcabf]">Target Hub: </span>
-                      <strong className="text-[#dae2fd]">{formData.target_location || 'Not entered'}</strong>
+                      <span className="text-[#bbcabf]">Business Scale: </span>
+                      <span className="text-[#dae2fd] capitalize">{formData.business_scale}</span>
                     </div>
                     <div>
-                      <span className="text-[#bbcabf]">City: </span>
-                      <span className="text-[#dae2fd]">{formData.city || 'Punjab, Pakistan'}</span>
+                      <span className="text-[#bbcabf]">Store Model: </span>
+                      <span className="text-[#dae2fd] uppercase">{formData.business_model}</span>
                     </div>
                     <div>
-                      <span className="text-[#bbcabf]">Spatial Coordinates: </span>
-                      <span className="text-[#dae2fd] font-mono">
-                        {formData.lat && formData.lng
-                          ? `${formData.lat.toFixed(4)}° N, ${formData.lng.toFixed(4)}° E`
-                          : 'Not assigned'}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[#bbcabf]">Analysis Radius: </span>
-                      <span className="text-[#4edea3] font-mono font-bold">{formData.radius_km || 10} km</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. Catalog & Specifications */}
-                <div className="bg-[#131b2e] border border-[#2d3449]/60 rounded-xl p-5 shadow-sm flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-bold text-[#dae2fd] flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[#4edea3] text-[16px]">inventory_2</span>
-                      Catalog &amp; Attached Files
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => goToStep(1)}
-                      className="text-[#4edea3] hover:underline text-[11px]"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-1.5 text-[12px]">
-                    <div>
-                      <span className="text-[#bbcabf]">Product Types: </span>
-                      <span className="text-[#dae2fd]">
-                        {formData.product_types.length > 0 ? formData.product_types.join(', ') : 'None specified'}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[#bbcabf]">Specification Document: </span>
-                      <span className="text-[#dae2fd]">{uploadedFileName || 'No attachment'}</span>
+                      <span className="text-[#bbcabf]">Storefront Footprint: </span>
+                      <span className="text-[#dae2fd] capitalize">{formData.storefront_footprint}</span>
                     </div>
                     <div>
                       <span className="text-[#bbcabf]">Audience Focus: </span>
                       <span className="text-[#dae2fd]">
                         {formData.target_audience?.gender || 'All'} • {formData.target_audience?.age_group || 'Broad'}
                       </span>
+                    </div>
+                    <div>
+                      <span className="text-[#bbcabf]">Specification Document: </span>
+                      <span className="text-[#dae2fd]">{uploadedFileName || 'No attachment'}</span>
                     </div>
                   </div>
                 </div>

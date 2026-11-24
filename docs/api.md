@@ -20,15 +20,16 @@ List all projects owned by the currently authenticated user.
       {
         "id": "c1f7a0e2-...",
         "title": "Hunza Wild Honey",
-        "category": "Grocery & Gourmet Food",
+        "category": "Grocery / General Stores",
         "custom_category": null,
         "target_location": "Gulberg III, Lahore, Pakistan",
         "city": "Lahore",
-        "budget_amount": 15000,
-        "budget_currency": "USD",
+        "district": "Lahore",
+        "budget_amount": 500000,
+        "budget_currency": "PKR",
         "business_scale": "small",
         "status": "submitted",
-        "current_step": 5,
+        "current_step": 3,
         "created_at": "2026-10-06T10:00:00Z",
         "updated_at": "2026-10-06T10:05:00Z",
         "submitted_at": "2026-10-06T10:05:00Z"
@@ -47,12 +48,13 @@ Initialize a new project draft.
   ```json
   {
     "title": "Organic Skincare Line",
-    "category": "Cosmetics & Skincare",
+    "category": "Pharmacies / Medical Stores",
     "custom_category": null,
     "target_location": "DHA Phase 5, Lahore, Pakistan",
     "city": "Lahore",
-    "budget_amount": 12000,
-    "budget_currency": "USD",
+    "district": "Lahore",
+    "budget_amount": 750000,
+    "budget_currency": "PKR",
     "current_step": 1,
     "target_audience": {
       "age_group": "Young Professionals (25-34)",
@@ -262,7 +264,7 @@ Retrieve regional census demographics and 12-month demand trend observations.
       }
     ],
     "demand_trend": {
-      "category": "Grocery & Gourmet Food",
+      "category": "Grocery / General Stores",
       "region": "PK",
       "trend_series": [{ "month": "2025-10", "index": 78 }],
       "avg_interest": 74.2,

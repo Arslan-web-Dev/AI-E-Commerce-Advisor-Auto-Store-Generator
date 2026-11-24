@@ -10,13 +10,14 @@ const OVERPASS_ENDPOINTS = [
   'https://overpass.kumi.systems/api/interpreter',
 ];
 
+// Overpass `shop` tag regular expressions keyed by the five approved Task 3
+// category names (Task 3 §3). Names must match PREDEFINED_CATEGORIES exactly.
 const CATEGORY_TAG_MAP: Record<string, string> = {
-  'Apparel & Fashion': 'clothes|boutique|shoes|tailor|department_store|fashion',
-  'Consumer Electronics': 'electronics|mobile_phone|computer|telecommunication|hardware',
-  'Cosmetics & Skincare': 'chemist|beauty|perfumery|cosmetics|hairdresser',
-  'Grocery & Gourmet Food': 'supermarket|convenience|grocery|organic|bakery|deli|spices',
-  'Home Decor & Living': 'furniture|interior_decoration|houseware|carpet|curtain|kitchen',
-  'Other Niche Venture': 'yes|general|kiosk|speciality',
+  'Grocery / General Stores': 'supermarket|convenience|grocery|greengrocer|bakery|deli|spices',
+  'Clothing / Footwear': 'clothes|boutique|shoes|shoe|tailor|fashion|bag|jewelry',
+  'Mobile Phones / Accessories': 'mobile_phone|electronics|telecommunication|computer|phone_repair',
+  'Restaurants / Cafes': 'restaurant|cafe|fast_food|food|ice_cream|beverages|coffee',
+  'Pharmacies / Medical Stores': 'chemist|pharmacy|optician|medical_supply|herbalist',
 };
 
 function calculateHaversineDistance(

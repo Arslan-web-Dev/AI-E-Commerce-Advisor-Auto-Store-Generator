@@ -345,6 +345,7 @@ create table if not exists public.projects (
   custom_category      text,
   target_location      text not null,
   city                 text,
+  district             text,
   region               text,
   country              text default 'Pakistan',
   postal_code          text,

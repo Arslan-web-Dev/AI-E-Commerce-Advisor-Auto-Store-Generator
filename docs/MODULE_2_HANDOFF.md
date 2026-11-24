@@ -6,13 +6,11 @@ Module 2 of the **AI-Powered E-Commerce Feasibility Advisor & Auto Store Generat
 
 ### Delivered Components:
 
-1. **Guided Multi-Step Wizard (`src/components/wizard/BusinessIdeaWizard.tsx` & `/wizard`):**
-   - **Step 1: Category & Commercial Vertical**: Predefined commercial vertical cards (Apparel & Fashion, Consumer Electronics, Cosmetics & Skincare, Grocery & Gourmet Food, Home Decor & Living, Other Niche Venture), custom category specifier, vision description input with character limit and prompt optimizer indicator, and keyword pills.
-   - **Step 2: Location & Spatial Catchment**: Target operating hub and city input, fast-select commercial hub chips (Gulberg III, DHA Phase 5/6, Blue Area, F-7/F-10 Markaz, Clifton, Saddar, Anarkali), radar spatial catchment simulation with SVG radar grid, central store node, competitor beacons, and dynamic buffer radius slider (5–25 km).
-   - **Step 3: Budget & Operational Capital Runway**: Capital runway input with live USD/PKR currency toggle, range validation, algorithmic 4-part capital allocation visual (Inventory 45%, Rent & Setup 25%, Marketing 18%, Buffer 12%), operating model selector (D2C Cloud Store vs Hybrid), and storefront footprint picker (Kiosk, Boutique, Commercial Outlet, Flagship).
-   - **Step 4: Target Audience, Scale & Product Scope (SRS FR-2.2)**: Planned business scale (Small, Medium, Large), demographic selectors (age group, gender focus, household income bracket), product type tags, and optional document specification file upload (max 5MB • PDF, CSV, JSON, PNG, JPG).
-   - **Step 5: Review & Final Submission**: Structured parameter review cards, live validation confirmation, and factual submission safeguard.
-   - **Floating Docked Bottom Action Bar**: Sticky action bar with step progress indicator, back/continue controls, "Save Draft" button, and submission CTA with glowing hover aesthetics.
+1. **Guided Three-Step Wizard (`src/components/wizard/BusinessIdeaWizard.tsx` & `/wizard`):**
+   - **Step 1 — Business Profile & Location**: the five approved categories (Grocery / General Stores, Clothing / Footwear, Mobile Phones / Accessories, Restaurants / Cafes, Pharmacies / Medical Stores), business name and vision description with character limit and keyword pills, plus a Punjab location card (fixed province, district select, city select gated on district, Punjab-only commercial hub chips, locality input, coordinates, and a 5–15 km radius slider with spatial radar preview).
+   - **Step 2 — Financial & Operational Information**: capital input with live USD/PKR currency toggle and disclosed SBP benchmark conversion, server-side range validation, algorithmic 4-part capital allocation visual (Inventory 45%, Rent & Setup 25%, Marketing 18%, Buffer 12%), operating model selector (D2C Cloud Store vs Hybrid), storefront footprint picker (Kiosk, Boutique, Commercial Outlet, Flagship), target audience profiling, and optional document specification upload (max 5MB • PDF, CSV, JSON, PNG, JPG).
+   - **Step 3 — Review & Submission**: structured review cards (Business Profile, Location & Catchment Radius, Capital Allocation & Currency, Operational Setup) with per-card edit links, live validation confirmation, and factual submission safeguard.
+   - **Floating Docked Bottom Action Bar**: sticky action bar with step progress indicator, back/continue controls, "Save Draft" button, and submission CTA with glowing hover aesthetics.
 
 2. **Project Portfolio Dashboard (`src/app/projects/page.tsx` & `/projects`):**
    - Displays all business ideas created by the authenticated entrepreneur.
@@ -28,11 +26,13 @@ Module 2 of the **AI-Powered E-Commerce Feasibility Advisor & Auto Store Generat
    - Full breakdown of submitted parameters (category, location, coordinates, radius, budget, audience, footprint, attached catalog).
    - Architectural boundary statement: No fake scores, competitor records, or recommendations are fabricated.
 
-4. **Database Architecture & PostgreSQL Migration (`supabase/migrations/20261006000000_module2_projects_wizard_schema.sql`):**
+4. **Database Architecture & PostgreSQL Migrations (`supabase/migrations/20261006000000_module2_projects_wizard_schema.sql`, `20261124000000_secure_submit_project_rpc.sql`, `20261124020000_module2_wizard_district.sql`):**
    - Dedicated `public.projects` table with enums `public.project_status` and `public.business_scale`.
    - Links submitted projects to `public.feasibility_reports` via foreign key `report_id`.
    - Row-Level Security (RLS) enabled and forced on `public.projects`.
    - RLS policies ensure users can only select, insert, update, or delete their own drafts. Submitted projects are immutable.
+   - Forward-only addition of the `district` column for the Task 3 wizard location fields.
+   - Atomic, idempotent submission through the `SECURITY DEFINER` RPC `submit_project_for_feasibility(p_project_id uuid)` deriving identity from `auth.uid()`.
    - Automatic `updated_at` trigger.
 
 5. **REST API Handlers:**
@@ -55,11 +55,11 @@ Module 2 of the **AI-Powered E-Commerce Feasibility Advisor & Auto Store Generat
 | :--- | :--- | :--- |
 | **FR-2.1: Store Requirement Input** | Predefined commercial categories, target location text, and validated budget in USD/PKR | ✅ Complete |
 | **FR-2.2: Advanced Input Options** | Target audience (age, gender, income), business scale (Small, Medium, Large), product types & upload | ✅ Complete |
-| **FR-2.3: Location & Commercial Hubs** | Seeded Pakistan commercial hubs (Lahore, Karachi, Islamabad) + worldwide city/postal input | ✅ Complete |
-| **FR-2.4: Budget Validation & Currency** | Validation range check, clear formatting, and USD/PKR dual-currency conversion | ✅ Complete |
-| **FR-2.5: Optional Inputs** | Business model (D2C / Hybrid), storefront footprint pills (Kiosk, Boutique, Outlet, Flagship) | ✅ Complete |
-| **FR-2.6: Submission Lifecycle** | Idempotent submission transitions status to `submitted` and creates linked `feasibility_reports` row | ✅ Complete |
-| **FR-2.7: Search Radius** | Dynamic radius slider (5–25 km with 10–15 km standard defaults) | ✅ Complete |
+| **FR-2.3: Location & Commercial Hubs** | Punjab-only seeded commercial hubs resolving district/city/lat/lng; province fixed to Punjab and country to Pakistan, no out-of-province or invented localities | ✅ Complete |
+| **FR-2.4: Budget Validation & Currency** | Server-side range check (PKR Rs. 10,000–50,000,000 / USD $50–$200,000), clear formatting, USD/PKR dual-currency conversion and canonical `budget_pkr` storage | ✅ Complete |
+| **FR-2.5: Optional Inputs** | Business model (D2C / Hybrid / Physical), storefront footprint pills (Kiosk, Boutique, Outlet, Flagship) | ✅ Complete |
+| **FR-2.6: Submission Lifecycle** | Idempotent submission via the `submit_project_for_feasibility` RPC transitions status to `submitted` and creates a linked `feasibility_reports` row | ✅ Complete |
+| **FR-2.7: Search Radius** | Radius slider (5–15 km with a 10 km standard default) | ✅ Complete |
 
 ---
 
@@ -77,6 +77,7 @@ create table public.projects (
   custom_category      text,
   target_location      text not null,
   city                 text,
+  district             text,
   region               text,
   country              text default 'Pakistan',
   postal_code          text,
@@ -110,10 +111,11 @@ create table public.projects (
 
 ## 4. Verification Performed & Results
 
-- **Automated Verification Suite (`scripts/verify-module2.mjs`)**: 31 out of 31 automated assertions passed.
-- **Production Build (`npm run build`)**: Next.js 16.3.8 (Turbopack) successfully compiled all 18 routes with 0 TypeScript errors.
-- **Client & Server Validation**: Validated bounds for USD ($100 to $10,000,000) and PKR (Rs. 10,000 to Rs. 500,000,000).
-- **Tenant Isolation**: Row-Level Security policies and server API checks prevent cross-tenant access.
+- **Automated Verification Suites**: `tests/module2-wizard-project.test.mjs` (6/6) and `tests/task3-wizard-feasibility.test.mjs` (8/8) passed, alongside `tests/module1-auth-rbac.test.mjs` (6/6) and `tests/task2-security-remediation.test.mjs` (6/6).
+- **Type Check & Lint**: `npx tsc --noEmit` passed with 0 errors; `npm run lint` reported 0 errors.
+- **Production Build (`npm run build`)**: Next.js 16.3.8 successfully compiled all routes with 0 TypeScript errors.
+- **Client & Server Validation**: Canonical PKR bounded to Rs. 10,000–50,000,000 (USD $50–$200,000), with server-side rejection of NaN/Infinity/negative values, unsupported categories, non-Punjab districts/cities and out-of-Pakistan coordinates.
+- **Tenant Isolation**: Row-Level Security policies and server API checks prevent cross-tenant access; `owner_id` is always derived server-side.
 
 ---
 
