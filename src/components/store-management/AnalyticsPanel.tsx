@@ -78,15 +78,18 @@ export default function AnalyticsPanel({
         setTrafficSources(behaviorData.trafficSources || []);
         setAbandonment(behaviorData.cartAbandonment || null);
       }
-    } catch (err: any) {
-      setError(err.message || 'Error loading store analytics.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error loading store analytics.');
     } finally {
       setLoading(false);
     }
   }, [storeId, dateRange]);
 
   useEffect(() => {
-    fetchAnalytics();
+    const timer = setTimeout(() => {
+      fetchAnalytics();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchAnalytics]);
 
   // Handler for simulating a sandbox event to test telemetry pipeline
@@ -115,8 +118,8 @@ export default function AnalyticsPanel({
       setSimulationSuccess(`Simulated '${eventType}' event recorded successfully.`);
       fetchAnalytics();
       setTimeout(() => setSimulationSuccess(null), 4000);
-    } catch (err: any) {
-      alert(`Simulation failed: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Simulation failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setSimulatingEvent(false);
     }

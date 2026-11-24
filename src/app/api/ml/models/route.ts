@@ -27,8 +27,9 @@ export async function GET(request: Request) {
     }
     const models = await mlClient.listModels();
     return NextResponse.json({ models });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to fetch models' }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error && err.message ? err.message : 'Failed to fetch models';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -55,7 +56,8 @@ export async function POST(request: Request) {
 
     const res = await mlClient.activateModel(model_id);
     return NextResponse.json(res);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to activate model' }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error && err.message ? err.message : 'Failed to activate model';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

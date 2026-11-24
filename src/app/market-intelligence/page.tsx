@@ -19,6 +19,40 @@ interface DistrictBenchmark {
   economic_drivers: string[];
 }
 
+interface TrendAnalytics {
+  trend_direction: string;
+  average_interest: number;
+  peak_month: string;
+}
+
+interface TrendQueryItem {
+  query: string;
+  value: number;
+}
+
+interface TrendRelatedQueries {
+  top?: TrendQueryItem[];
+  rising?: TrendQueryItem[];
+}
+
+interface TrendsData {
+  analytics?: Record<string, TrendAnalytics>;
+  keywords: string[];
+  interest_over_time: Record<string, number>[];
+  related_queries?: Record<string, TrendRelatedQueries>;
+}
+
+interface DemandAnalysis {
+  composite_demand_index: number;
+  recommendation: string;
+  status: string;
+  score_breakdown: {
+    search_score: number;
+    demographic_score: number;
+    market_room_score: number;
+  };
+}
+
 export default function MarketIntelligencePage() {
   const [activeTab, setActiveTab] = useState<'trends' | 'regional' | 'calculator'>('trends');
 
@@ -27,7 +61,7 @@ export default function MarketIntelligencePage() {
   const [geo, setGeo] = useState('PK');
   const [timeframe, setTimeframe] = useState('today 12-m');
   const [fetchingTrends, setFetchingTrends] = useState(false);
-  const [trendsData, setTrendsData] = useState<any>(null);
+  const [trendsData, setTrendsData] = useState<TrendsData | null>(null);
 
   // Regional benchmarks state
   const [districts, setDistricts] = useState<DistrictBenchmark[]>([]);
@@ -37,7 +71,7 @@ export default function MarketIntelligencePage() {
   const [calcKeyword, setCalcKeyword] = useState('lawn suits');
   const [calcDistrict, setCalcDistrict] = useState('Lahore');
   const [calculating, setCalculating] = useState(false);
-  const [calcResult, setCalcResult] = useState<any>(null);
+  const [calcResult, setCalcResult] = useState<DemandAnalysis | null>(null);
 
   // Fetch regional benchmarks
   useEffect(() => {
@@ -71,8 +105,8 @@ export default function MarketIntelligencePage() {
         const err = await res.json();
         alert(`Failed to fetch trends: ${err.error}`);
       }
-    } catch (err: any) {
-      alert(`Error: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setFetchingTrends(false);
     }
@@ -80,7 +114,14 @@ export default function MarketIntelligencePage() {
 
   // Initial fetch for trends
   useEffect(() => {
-    handleFetchTrends();
+    let cancelled = false;
+    (async () => {
+      if (cancelled) return;
+      await handleFetchTrends();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [handleFetchTrends]);
 
   // Handle demand calculation
@@ -102,8 +143,8 @@ export default function MarketIntelligencePage() {
         const err = await res.json();
         alert(`Calculation failed: ${err.error}`);
       }
-    } catch (err: any) {
-      alert(`Error: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setCalculating(false);
     }
@@ -269,7 +310,7 @@ export default function MarketIntelligencePage() {
             {/* Trajectory Analytics Cards */}
             {trendsData?.analytics && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {Object.entries(trendsData.analytics).map(([kw, meta]: [string, any], idx) => (
+                {Object.entries(trendsData.analytics).map(([kw, meta], idx) => (
                   <div
                     key={kw}
                     className="bg-[#171f33] border border-[#2d3449] rounded-2xl p-5 shadow-lg relative overflow-hidden"
@@ -312,7 +353,7 @@ export default function MarketIntelligencePage() {
             )}
 
             {/* Interest Over Time Interactive Curve (SVG) */}
-            {trendsData?.interest_over_time?.length > 0 && (
+            {trendsData && trendsData.interest_over_time.length > 0 && (
               <div className="bg-[#171f33] border border-[#2d3449] rounded-2xl p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -354,7 +395,7 @@ export default function MarketIntelligencePage() {
                     {/* Data Lines */}
                     {trendsData.keywords.map((kw: string, kwIdx: number) => {
                       const points = trendsData.interest_over_time
-                        .map((entry: any, ptIdx: number) => {
+                        .map((entry, ptIdx) => {
                           const x = 50 + (ptIdx / (trendsData.interest_over_time.length - 1)) * 720;
                           const val = Number(entry[kw] || 0);
                           const y = 200 - (val / 100) * 180;
@@ -384,7 +425,7 @@ export default function MarketIntelligencePage() {
               <div className="bg-[#171f33] border border-[#2d3449] rounded-2xl p-6 space-y-4">
                 <h3 className="text-[16px] font-bold text-[#dae2fd]">Consumer Search Queries &amp; Rising Breakouts</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Object.entries(trendsData.related_queries).map(([kw, val]: [string, any]) => (
+                  {Object.entries(trendsData.related_queries).map(([kw, val]) => (
                     <div key={kw} className="bg-[#131b2e] border border-[#2d3449] rounded-xl p-4 space-y-3">
                       <h4 className="font-bold text-[14px] text-[#4cd7f6]">{kw}</h4>
                       <div>
@@ -392,7 +433,7 @@ export default function MarketIntelligencePage() {
                           Top Search Queries
                         </span>
                         <div className="mt-1 space-y-1">
-                          {val.top?.slice(0, 3).map((q: any, i: number) => (
+                          {val.top?.slice(0, 3).map((q, i) => (
                             <div key={i} className="flex justify-between text-[12px] font-mono text-[#dae2fd]">
                               <span className="truncate pr-2">{q.query}</span>
                               <span className="text-[#4edea3]">{q.value}</span>
@@ -401,13 +442,13 @@ export default function MarketIntelligencePage() {
                         </div>
                       </div>
 
-                      {val.rising?.length > 0 && (
+                      {val.rising && val.rising.length > 0 && (
                         <div className="pt-2 border-t border-[#2d3449]">
                           <span className="text-[11px] font-mono uppercase text-[#bbcabf] font-semibold">
                             Rising Demand Breakouts
                           </span>
                           <div className="mt-1 space-y-1">
-                            {val.rising?.slice(0, 2).map((q: any, i: number) => (
+                            {val.rising?.slice(0, 2).map((q, i) => (
                               <div key={i} className="flex justify-between text-[12px] font-mono text-[#dae2fd]">
                                 <span className="truncate pr-2">{q.query}</span>
                                 <span className="text-[#f59e0b]">+{q.value}%</span>

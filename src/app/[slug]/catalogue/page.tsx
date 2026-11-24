@@ -28,11 +28,24 @@ export default function CataloguePage() {
   const PER_PAGE = 12;
 
   useEffect(() => {
-    setLoading(true);
-    fetch(`/api/storefront/${slug}/products`)
-      .then((r) => r.json())
-      .then((d) => { setProducts(d.products || []); setLoading(false); })
-      .catch(() => setLoading(false));
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/storefront/${slug}/products`);
+        const d = await res.json();
+        if (cancelled) return;
+        setProducts(d.products || []);
+      } catch {
+        // Keep previous products on failure
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }, 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [slug]);
 
   const categories = Array.from(new Set(products.map((p) => p.category || 'General')));

@@ -7,13 +7,33 @@ import RentBudgetGauge from '@/components/feasibility/RentBudgetGauge';
 import SaturationMeter from '@/components/feasibility/SaturationMeter';
 import TrendChart from '@/components/feasibility/TrendChart';
 import CompetitorTable from '@/components/feasibility/CompetitorTable';
+import { Project } from '@/types/project';
+import { DemandTrendPoint } from '@/types/data-collection';
+
+interface FeasibilityRun {
+  score_value?: number;
+  classification?: string;
+  scoring_mode?: string;
+}
+
+interface FeasibilityCompetitor {
+  id?: string;
+  name: string;
+  lat: number;
+  lng: number;
+  distance_km?: number;
+  rating?: number;
+  review_count?: number;
+  category?: string;
+  address?: string;
+}
 
 export default function FeasibilityPage({ params }: { params: Promise<{ id: string }> }) {
   const [projectId, setProjectId] = useState<string | null>(null);
-  const [project, setProject] = useState<any>(null);
-  const [run, setRun] = useState<any>(null);
-  const [competitors, setCompetitors] = useState<any[]>([]);
-  const [trendSeries, setTrendSeries] = useState<any[]>([]);
+  const [project, setProject] = useState<Project | null>(null);
+  const [run, setRun] = useState<FeasibilityRun | null>(null);
+  const [competitors, setCompetitors] = useState<FeasibilityCompetitor[]>([]);
+  const [trendSeries, setTrendSeries] = useState<DemandTrendPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [scoring, setScoring] = useState(false);
@@ -73,8 +93,8 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
           { month: '2026-11', index: 89 },
           { month: '2026-12', index: 94 },
         ]);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load feasibility details.');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to load feasibility details.');
       } finally {
         setLoading(false);
       }
@@ -95,8 +115,8 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setRun(data.data);
-    } catch (err: any) {
-      alert(`Scoring Notice: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Scoring Notice: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setScoring(false);
     }
@@ -232,7 +252,7 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
 
         {/* Competitor Breakdown Table */}
         <div>
-          <CompetitorTable competitors={competitors} projectName={project?.title} />
+          <CompetitorTable competitors={competitors} projectName={project?.title ?? undefined} />
         </div>
       </div>
     </div>

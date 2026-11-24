@@ -69,7 +69,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     return NextResponse.json({ data: result.data });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

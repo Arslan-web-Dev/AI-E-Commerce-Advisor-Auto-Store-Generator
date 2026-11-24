@@ -28,8 +28,8 @@ export default function AnimatedCounter({
     const el = ref.current;
     if (!el) return;
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setDisplay(value.toFixed(decimals));
-      return;
+      const timer = setTimeout(() => setDisplay(value.toFixed(decimals)), 0);
+      return () => clearTimeout(timer);
     }
     const io = new IntersectionObserver(
       (entries) => {

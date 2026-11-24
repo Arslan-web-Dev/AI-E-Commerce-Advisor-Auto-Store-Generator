@@ -10,6 +10,15 @@ import AnalyticsPanel from '@/components/store-management/AnalyticsPanel';
 
 type ActiveTab = 'overview' | 'analytics' | 'products' | 'inventory' | 'orders' | 'customers' | 'payments';
 
+interface StoreRecord {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+  is_published?: boolean;
+  currency?: string;
+}
+
 export default function StoreManagementPage() {
   const params = useParams();
   const router = useRouter();
@@ -20,7 +29,7 @@ export default function StoreManagementPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Store & Data States
-  const [store, setStore] = useState<any>(null);
+  const [store, setStore] = useState<StoreRecord | null>(null);
   const [kpis, setKpis] = useState<StoreOverviewKPIs | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -130,15 +139,22 @@ export default function StoreManagementPage() {
         const payData = await payRes.json();
         setPaymentSettings(payData.settings);
       }
-    } catch (e: any) {
-      setError(e.message || 'An unexpected error occurred loading the store dashboard.');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'An unexpected error occurred loading the store dashboard.');
     } finally {
       setLoading(false);
     }
   }, [projectId, router]);
 
   useEffect(() => {
-    loadStoreData();
+    let cancelled = false;
+    (async () => {
+      if (cancelled) return;
+      await loadStoreData();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [loadStoreData]);
 
   // Flash action notification
@@ -229,8 +245,8 @@ export default function StoreManagementPage() {
 
       setProductModalOpen(false);
       loadStoreData();
-    } catch (err: any) {
-      alert(`Save Failed: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Save Failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setActionLoading(false);
     }
@@ -247,8 +263,8 @@ export default function StoreManagementPage() {
       }
       notifySuccess(`Product "${name}" archived.`);
       loadStoreData();
-    } catch (e: any) {
-      alert(`Error archiving product: ${e.message}`);
+    } catch (e: unknown) {
+      alert(`Error archiving product: ${e instanceof Error ? e.message : String(e)}`);
     }
   };
 
@@ -282,8 +298,8 @@ export default function StoreManagementPage() {
       notifySuccess(data.message || 'Stock updated.');
       setStockModalOpen(false);
       loadStoreData();
-    } catch (err: any) {
-      alert(`Stock Adjustment Failed: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Stock Adjustment Failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setActionLoading(false);
     }
@@ -309,8 +325,8 @@ export default function StoreManagementPage() {
       setSelectedOrder(data.order);
       setTransitionNotes('');
       loadStoreData();
-    } catch (err: any) {
-      alert(`Transition Failed: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Transition Failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setActionLoading(false);
     }
@@ -324,8 +340,8 @@ export default function StoreManagementPage() {
       const html = await res.text();
       setInvoiceHtml(html);
       setInvoiceModalOpen(true);
-    } catch (e: any) {
-      alert(`Invoice error: ${e.message}`);
+    } catch (e: unknown) {
+      alert(`Invoice error: ${e instanceof Error ? e.message : String(e)}`);
     }
   };
 
@@ -364,8 +380,8 @@ export default function StoreManagementPage() {
       if (!res.ok) throw new Error(data.error);
       notifySuccess(`Sample sandbox order #${data.order_number} created.`);
       loadStoreData();
-    } catch (e: any) {
-      alert(`Sample Order Error: ${e.message}`);
+    } catch (e: unknown) {
+      alert(`Sample Order Error: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setActionLoading(false);
     }
@@ -380,8 +396,8 @@ export default function StoreManagementPage() {
       if (!res.ok) throw new Error(data.error);
       notifySuccess(data.is_published ? `Store published! Public URL: /${store.slug}` : 'Store unpublished (draft mode).');
       loadStoreData();
-    } catch (e: any) {
-      alert(`Publish error: ${e.message}`);
+    } catch (e: unknown) {
+      alert(`Publish error: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setActionLoading(false);
     }

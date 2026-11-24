@@ -4,6 +4,16 @@ import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 
+interface StoreProject {
+  title?: string;
+  description?: string;
+}
+
+function pickProject(projects: unknown): StoreProject | undefined {
+  const proj = Array.isArray(projects) ? projects[0] : projects;
+  return proj as StoreProject | undefined;
+}
+
 async function getStoreData(slug: string) {
   const supabase = await createClient();
   const { data: store } = await supabase
@@ -24,7 +34,7 @@ async function getStoreData(slug: string) {
     .limit(8);
 
   const theme = (store.theme_config as Record<string, string>) || {};
-  const proj = Array.isArray(store.projects) ? store.projects[0] : store.projects;
+  const proj = pickProject(store.projects);
 
   return { store, products: products || [], theme, proj };
 }
@@ -33,10 +43,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const data = await getStoreData(slug);
   if (!data) return { title: 'Store Not Found' };
-  const name = data.theme.store_name || (data.proj as any)?.title || slug;
+  const name = data.theme.store_name || data.proj?.title || slug;
   return {
     title: `${name} — Home`,
-    description: data.theme.tagline || (data.proj as any)?.description || `Shop at ${name}`,
+    description: data.theme.tagline || data.proj?.description || `Shop at ${name}`,
   };
 }
 
@@ -45,11 +55,11 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
   const data = await getStoreData(slug);
   if (!data) notFound();
 
-  const { store, products, theme } = data;
+  const { products, theme, proj } = data;
   const primary = theme.primary_color || '#4edea3';
   const bg = theme.bg_color || '#0b1326';
   const textCol = theme.text_color || '#dae2fd';
-  const storeName = theme.store_name || (Array.isArray(store.projects) ? (store.projects[0] as any)?.title : (store.projects as any)?.title) || slug;
+  const storeName = theme.store_name || proj?.title || slug;
   const tagline = theme.tagline || 'Quality products, delivered to your door.';
   const radius = theme.border_radius || '0.5rem';
 

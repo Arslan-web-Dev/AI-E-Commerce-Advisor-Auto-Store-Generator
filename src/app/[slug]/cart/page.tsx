@@ -23,21 +23,24 @@ export default function CartPage() {
   const [radius, setRadius] = useState('0.5rem');
 
   useEffect(() => {
-    // Get storeId from DOM dataset
-    const container = document.querySelector('[data-store-id]') as HTMLElement;
-    if (container) {
-      const id = container.dataset.storeId!;
-      setStoreId(id);
-      try {
-        const stored = JSON.parse(sessionStorage.getItem(`store_cart_${id}`) || '[]');
-        setCart(stored);
-      } catch {}
-    }
-    // Read CSS vars
-    const root = getComputedStyle(document.documentElement);
-    setPrimary(root.getPropertyValue('--store-primary').trim() || '#4edea3');
-    setBg(root.getPropertyValue('--store-bg').trim() || '#0b1326');
-    setRadius(root.getPropertyValue('--store-radius').trim() || '0.5rem');
+    const timer = setTimeout(() => {
+      // Get storeId from DOM dataset
+      const container = document.querySelector('[data-store-id]') as HTMLElement;
+      if (container) {
+        const id = container.dataset.storeId!;
+        setStoreId(id);
+        try {
+          const stored = JSON.parse(sessionStorage.getItem(`store_cart_${id}`) || '[]');
+          setCart(stored);
+        } catch {}
+      }
+      // Read CSS vars
+      const root = getComputedStyle(document.documentElement);
+      setPrimary(root.getPropertyValue('--store-primary').trim() || '#4edea3');
+      setBg(root.getPropertyValue('--store-bg').trim() || '#0b1326');
+      setRadius(root.getPropertyValue('--store-radius').trim() || '0.5rem');
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const save = (newCart: CartItem[]) => {

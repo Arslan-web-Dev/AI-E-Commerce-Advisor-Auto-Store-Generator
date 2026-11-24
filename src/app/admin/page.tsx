@@ -25,6 +25,15 @@ interface AIProviderStatus {
   keyEnvName: string;
 }
 
+interface AdminStore {
+  id: string;
+  slug: string;
+  is_banned?: boolean;
+  is_published?: boolean;
+  store_products?: { count: number }[];
+  store_orders?: { count: number }[];
+}
+
 export default function AdminCommandCenterPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -42,7 +51,7 @@ export default function AdminCommandCenterPage() {
 
   const [auditLogs, setAuditLogs] = useState<SyncAuditLog[]>([]);
   const [aiProviders, setAIProviders] = useState<AIProviderStatus[]>([]);
-  const [stores, setStores] = useState<any[]>([]);
+  const [stores, setStores] = useState<AdminStore[]>([]);
 
   const loadStores = useCallback(async () => {
     try {
@@ -60,8 +69,8 @@ export default function AdminCommandCenterPage() {
       if (res.ok) {
         loadStores();
       }
-    } catch (err: any) {
-      alert(`Suspend toggle failed: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Suspend toggle failed: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -478,7 +487,7 @@ export default function AdminCommandCenterPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#2d3449]/50">
-                      {stores.map((s: any) => (
+                      {stores.map((s) => (
                         <tr key={s.id}>
                           <td className="py-2.5 font-mono text-[#dae2fd]">
                             <a href={`/${s.slug}`} target="_blank" rel="noreferrer" className="text-[#4cd7f6] hover:underline">

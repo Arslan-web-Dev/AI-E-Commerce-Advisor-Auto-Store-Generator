@@ -6,6 +6,14 @@ interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
+interface PaymentSettingsUpsert {
+  store_id: string;
+  cod_enabled?: boolean;
+  stripe_enabled?: boolean;
+  stripe_account_id?: string | null;
+  notes?: string | null;
+}
+
 export async function GET(request: Request, context: RouteContext) {
   const { id: storeId } = await context.params;
   const supabase = await createClient();
@@ -72,7 +80,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     const body = await request.json();
     const { cod_enabled, stripe_enabled, stripe_account_id, notes } = body;
 
-    const upsertData: Record<string, any> = {
+    const upsertData: PaymentSettingsUpsert = {
       store_id: storeId,
     };
 
@@ -96,7 +104,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       providers,
       message: 'Payment configuration updated successfully.',
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || 'Malformed payment settings payload' }, { status: 400 });
+  } catch (e: unknown) {
+    const message = e instanceof Error && e.message ? e.message : 'Malformed payment settings payload';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

@@ -44,7 +44,7 @@ export class GoogleTrendsProvider implements IDemandTrendProvider {
       // Attempt live fetch from Python ML / Market service
       const response = await mlClient.getTrends([input.category], 'PK-PB');
       if (response && response.interest_over_time && response.interest_over_time.length > 0) {
-        const points: DemandTrendPoint[] = response.interest_over_time.map((item: any) => ({
+        const points: DemandTrendPoint[] = response.interest_over_time.map((item: Record<string, unknown>) => ({
           month: String(item.date || item.month || '').slice(0, 7),
           index: Number(item[input.category] ?? item.index ?? 50),
         }));

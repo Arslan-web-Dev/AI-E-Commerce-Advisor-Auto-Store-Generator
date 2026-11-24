@@ -18,9 +18,12 @@ export default function PageTransition() {
       return;
     }
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    setSweeping(true);
-    const t = setTimeout(() => setSweeping(false), 650);
-    return () => clearTimeout(t);
+    const startTimer = setTimeout(() => setSweeping(true), 0);
+    const endTimer = setTimeout(() => setSweeping(false), 650);
+    return () => {
+      clearTimeout(startTimer);
+      clearTimeout(endTimer);
+    };
   }, [pathname]);
 
   return (

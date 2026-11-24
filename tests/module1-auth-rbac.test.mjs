@@ -95,7 +95,7 @@ const uploadCode = fs.readFileSync(uploadRoutePath, 'utf8');
 const attachCode = fs.readFileSync(attachRoutePath, 'utf8');
 
 assert.ok(
-  uploadCode.includes('Storage upload failed') && uploadCode.includes('500'),
+  uploadCode.includes('if (uploadError)') && uploadCode.includes('status: 500'),
   'Upload route must fail closed and return 500 when storage upload fails'
 );
 assert.ok(

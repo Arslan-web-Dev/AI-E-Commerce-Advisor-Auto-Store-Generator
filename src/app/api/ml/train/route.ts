@@ -27,8 +27,9 @@ export async function GET(request: Request) {
   try {
     const job = await mlClient.getTrainingJob(jobId);
     return NextResponse.json({ job });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to get job status' }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error && err.message ? err.message : 'Failed to get job status';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -84,7 +85,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ job });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to start training' }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error && err.message ? err.message : 'Failed to start training';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

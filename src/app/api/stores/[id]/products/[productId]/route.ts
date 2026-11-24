@@ -5,6 +5,21 @@ interface RouteContext {
   params: Promise<{ id: string; productId: string }>;
 }
 
+interface ProductUpdateData {
+  name?: string;
+  price_pkr?: number;
+  compare_at_price_pkr?: number | null;
+  stock?: number;
+  low_stock_threshold?: number;
+  sku?: string | null;
+  description?: string | null;
+  category?: string | null;
+  images?: unknown[];
+  is_active?: boolean;
+  is_archived?: boolean;
+  seo?: Record<string, unknown>;
+}
+
 export async function GET(request: Request, context: RouteContext) {
   const { id: storeId, productId } = await context.params;
   const supabase = await createClient();
@@ -59,7 +74,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   try {
     const body = await request.json();
-    const updateData: Record<string, any> = {};
+    const updateData: ProductUpdateData = {};
 
     if (body.name !== undefined) {
       if (typeof body.name !== 'string' || body.name.trim().length === 0) {
@@ -119,8 +134,9 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     return NextResponse.json({ product: updatedProduct });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || 'Malformed update payload' }, { status: 400 });
+  } catch (e: unknown) {
+    const message = e instanceof Error && e.message ? e.message : 'Malformed update payload';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
 

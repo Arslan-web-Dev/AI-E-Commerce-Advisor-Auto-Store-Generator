@@ -33,20 +33,23 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    const container = document.querySelector('[data-store-id]') as HTMLElement;
-    if (container) {
-      const id = container.dataset.storeId!;
-      setStoreId(id);
-      try {
-        const stored = JSON.parse(sessionStorage.getItem(`store_cart_${id}`) || '[]');
-        setCart(stored);
-        if (stored.length === 0) router.replace(`/${slug}/cart`);
-      } catch {}
-    }
-    const root = getComputedStyle(document.documentElement);
-    setPrimary(root.getPropertyValue('--store-primary').trim() || '#4edea3');
-    setBg(root.getPropertyValue('--store-bg').trim() || '#0b1326');
-    setRadius(root.getPropertyValue('--store-radius').trim() || '0.5rem');
+    const timer = setTimeout(() => {
+      const container = document.querySelector('[data-store-id]') as HTMLElement;
+      if (container) {
+        const id = container.dataset.storeId!;
+        setStoreId(id);
+        try {
+          const stored = JSON.parse(sessionStorage.getItem(`store_cart_${id}`) || '[]');
+          setCart(stored);
+          if (stored.length === 0) router.replace(`/${slug}/cart`);
+        } catch {}
+      }
+      const root = getComputedStyle(document.documentElement);
+      setPrimary(root.getPropertyValue('--store-primary').trim() || '#4edea3');
+      setBg(root.getPropertyValue('--store-bg').trim() || '#0b1326');
+      setRadius(root.getPropertyValue('--store-radius').trim() || '0.5rem');
+    }, 0);
+    return () => clearTimeout(timer);
   }, [slug, router]);
 
   const subtotal = cart.reduce((s, i) => s + i.price_pkr * i.qty, 0);

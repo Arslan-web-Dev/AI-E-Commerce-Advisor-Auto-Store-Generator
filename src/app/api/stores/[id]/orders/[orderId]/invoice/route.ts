@@ -7,6 +7,14 @@ interface RouteContext {
   params: Promise<{ id: string; orderId: string }>;
 }
 
+interface InvoiceOrderItemRow {
+  name: string;
+  sku: string | null;
+  quantity: number;
+  unit_price_pkr: number | string;
+  total_price_pkr: number | string;
+}
+
 export async function GET(request: Request, context: RouteContext) {
   const { id: storeId, orderId } = await context.params;
   const supabase = await createClient();
@@ -59,7 +67,7 @@ export async function GET(request: Request, context: RouteContext) {
       shipping_address: order.shipping_address,
       city: order.city,
     },
-    items: (order.items || []).map((item: any) => ({
+    items: (order.items || []).map((item: InvoiceOrderItemRow) => ({
       name: item.name,
       sku: item.sku || undefined,
       quantity: item.quantity,

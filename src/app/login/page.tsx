@@ -30,9 +30,12 @@ function LoginFormContent() {
   const supabase = createClient();
 
   useEffect(() => {
-    if (searchParams.get('mode') === 'signup') {
-      setAuthMode('signup');
-    }
+    const timer = setTimeout(() => {
+      if (searchParams.get('mode') === 'signup') {
+        setAuthMode('signup');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [searchParams]);
 
   // Handle Email + Password authentication

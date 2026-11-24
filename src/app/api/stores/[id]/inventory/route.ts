@@ -130,7 +130,8 @@ export async function POST(request: Request, context: RouteContext) {
       delta: adjustment.delta,
       message: `Stock updated from ${adjustment.previousStock} to ${adjustment.newStock} units.`,
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || 'Malformed stock adjustment request' }, { status: 400 });
+  } catch (e: unknown) {
+    const message = e instanceof Error && e.message ? e.message : 'Malformed stock adjustment request';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

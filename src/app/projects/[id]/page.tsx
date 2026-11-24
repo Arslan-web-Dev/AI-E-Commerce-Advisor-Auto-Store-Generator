@@ -34,8 +34,8 @@ export default function ProjectDetailPage() {
       } else {
         throw new Error('No signed URL returned from storage service');
       }
-    } catch (err: any) {
-      setAttachmentError(err.message || 'Error downloading attachment');
+    } catch (err: unknown) {
+      setAttachmentError(err instanceof Error ? err.message : 'Error downloading attachment');
     } finally {
       setDownloadingAttachment(false);
     }

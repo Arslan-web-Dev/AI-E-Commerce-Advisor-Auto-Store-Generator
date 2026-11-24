@@ -4,16 +4,45 @@ import { useState, useEffect } from 'react';
 
 type Language = 'en' | 'ur';
 
+type LocalizedText = Record<Language, string>;
+
+interface AdvisoryInsightItem {
+  title: LocalizedText;
+  description: LocalizedText;
+}
+
+interface AdvisoryReport {
+  projects?: {
+    category?: string;
+    target_location?: string;
+  };
+  project_feasibility_runs?: {
+    classification?: string;
+    scoring_mode?: string;
+  };
+  budget_total: number;
+  budget_currency: string;
+  insights: {
+    strengths?: AdvisoryInsightItem[];
+    risks?: AdvisoryInsightItem[];
+    immediate_actions?: AdvisoryInsightItem[];
+  };
+  location_recommendations?: {
+    status?: string;
+    reason: LocalizedText;
+  };
+}
+
 export default function AdvisoryPage({ params }: { params: Promise<{ id: string }> }) {
   const [projectId, setProjectId] = useState<string | null>(null);
-  const [report, setReport] = useState<any>(null);
+  const [report, setReport] = useState<AdvisoryReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [generating, setGenerating] = useState(false);
   const [lang, setLang] = useState<Language>('en');
 
   // Budget states
-  const [allocations, setAllocations] = useState<any>(null);
+  const [allocations, setAllocations] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
     params.then((p) => setProjectId(p.id));
@@ -30,8 +59,8 @@ export default function AdvisoryPage({ params }: { params: Promise<{ id: string 
           setReport(data.data);
           setAllocations(data.data.budget_allocations);
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
@@ -54,8 +83,8 @@ export default function AdvisoryPage({ params }: { params: Promise<{ id: string 
       if (!res.ok) throw new Error(data.error);
       setReport(data.data);
       setAllocations(data.data.budget_allocations);
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : String(err));
     } finally {
       setGenerating(false);
     }
@@ -182,7 +211,7 @@ export default function AdvisoryPage({ params }: { params: Promise<{ id: string 
               <div>
                 <h3 className="text-sm font-bold text-green-700 uppercase tracking-wider mb-3">Strengths</h3>
                 <div className="space-y-4">
-                  {report.insights.strengths?.map((item: any, i: number) => (
+                  {report.insights.strengths?.map((item, i) => (
                     <div key={i} className="p-4 bg-green-50 rounded-lg border border-green-100">
                       <div className="font-semibold text-green-900 mb-1">{item.title[lang]}</div>
                       <div className="text-sm text-green-800">{item.description[lang]}</div>
@@ -196,7 +225,7 @@ export default function AdvisoryPage({ params }: { params: Promise<{ id: string 
               <div>
                 <h3 className="text-sm font-bold text-red-700 uppercase tracking-wider mb-3">Risks</h3>
                 <div className="space-y-4">
-                  {report.insights.risks?.map((item: any, i: number) => (
+                  {report.insights.risks?.map((item, i) => (
                     <div key={i} className="p-4 bg-red-50 rounded-lg border border-red-100">
                       <div className="font-semibold text-red-900 mb-1">{item.title[lang]}</div>
                       <div className="text-sm text-red-800">{item.description[lang]}</div>
@@ -210,7 +239,7 @@ export default function AdvisoryPage({ params }: { params: Promise<{ id: string 
               <div>
                 <h3 className="text-sm font-bold text-blue-700 uppercase tracking-wider mb-3">Immediate Actions</h3>
                 <div className="space-y-4">
-                  {report.insights.immediate_actions?.map((item: any, i: number) => (
+                  {report.insights.immediate_actions?.map((item, i) => (
                     <div key={i} className="p-4 bg-blue-50 rounded-lg border border-blue-100">
                       <div className="font-semibold text-blue-900 mb-1">{item.title[lang]}</div>
                       <div className="text-sm text-blue-800">{item.description[lang]}</div>

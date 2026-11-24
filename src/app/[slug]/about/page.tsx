@@ -2,6 +2,16 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { Metadata } from 'next';
 
+interface StoreProject {
+  title?: string;
+  description?: string;
+}
+
+function pickProject(projects: unknown): StoreProject | undefined {
+  const proj = Array.isArray(projects) ? projects[0] : projects;
+  return proj as StoreProject | undefined;
+}
+
 async function getStore(slug: string) {
   const supabase = await createClient();
   const { data } = await supabase
@@ -18,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const store = await getStore(slug);
   if (!store) return { title: 'Not Found' };
   const theme = (store.theme_config as Record<string, string>) || {};
-  const name = theme.store_name || (Array.isArray(store.projects) ? (store.projects[0] as any)?.title : (store.projects as any)?.title) || slug;
+  const name = theme.store_name || pickProject(store.projects)?.title || slug;
   return { title: `About — ${name}` };
 }
 
@@ -30,9 +40,9 @@ export default async function AboutPage({ params }: { params: Promise<{ slug: st
   const theme = (store.theme_config as Record<string, string>) || {};
   const primary = theme.primary_color || '#4edea3';
   const radius = theme.border_radius || '0.5rem';
-  const storeName = theme.store_name || (Array.isArray(store.projects) ? (store.projects[0] as any)?.title : (store.projects as any)?.title) || slug;
-  const proj = Array.isArray(store.projects) ? store.projects[0] : store.projects;
-  const description = (proj as any)?.description || `Welcome to ${storeName}. We offer quality products with Cash on Delivery across Punjab, Pakistan.`;
+  const proj = pickProject(store.projects);
+  const storeName = theme.store_name || proj?.title || slug;
+  const description = proj?.description || `Welcome to ${storeName}. We offer quality products with Cash on Delivery across Punjab, Pakistan.`;
 
   return (
     <div style={{ maxWidth: '800px' }}>

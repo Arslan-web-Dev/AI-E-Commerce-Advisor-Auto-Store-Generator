@@ -36,11 +36,14 @@ export default function FeatureQualityPanel({ projectId, isSubmitted }: FeatureQ
   }, [projectId]);
 
   useEffect(() => {
-    if (isSubmitted) {
-      loadFeatures();
-    } else {
-      setLoading(false);
-    }
+    const timer = setTimeout(() => {
+      if (isSubmitted) {
+        loadFeatures();
+      } else {
+        setLoading(false);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [isSubmitted, loadFeatures]);
 
   const handleProcessFeatures = async () => {

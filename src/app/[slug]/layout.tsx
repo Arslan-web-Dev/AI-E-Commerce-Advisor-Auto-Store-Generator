@@ -28,6 +28,16 @@ export interface StoreContext {
   project_id: string;
 }
 
+interface ProjectSummary {
+  title?: string;
+  description?: string;
+}
+
+function pickProject(projects: unknown): ProjectSummary | undefined {
+  const proj = Array.isArray(projects) ? projects[0] : projects;
+  return proj as ProjectSummary | undefined;
+}
+
 async function getStore(slug: string): Promise<StoreContext | null> {
   const supabase = await createClient();
   const { data } = await supabase
@@ -38,14 +48,14 @@ async function getStore(slug: string): Promise<StoreContext | null> {
 
   if (!data || !data.is_published || data.is_banned) return null;
 
-  const proj = Array.isArray(data.projects) ? data.projects[0] : data.projects;
+  const proj = pickProject(data.projects);
   const theme = (data.theme_config as StoreTheme) || {};
 
   return {
     id: data.id,
     slug: data.slug,
-    name: theme.store_name || (proj as any)?.title || slug,
-    description: (proj as any)?.description,
+    name: theme.store_name || proj?.title || slug,
+    description: proj?.description,
     theme,
     project_id: data.project_id,
   };

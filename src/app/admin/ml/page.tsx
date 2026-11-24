@@ -32,7 +32,7 @@ interface DatasetItem {
     duplicate_rows: number;
     warnings: string[];
     health_score: number;
-    target_analysis?: any;
+    target_analysis?: unknown;
   };
   is_sample: boolean;
 }
@@ -43,8 +43,8 @@ interface LeaderboardItem {
   description: string;
   rank_score: number;
   cv_score: number;
-  test_metrics: Record<string, any>;
-  hyperparameters: Record<string, any>;
+  test_metrics: Record<string, number>;
+  hyperparameters: Record<string, unknown>;
 }
 
 interface ModelItem {
@@ -53,10 +53,25 @@ interface ModelItem {
   algorithm_key: string;
   problem_type: string;
   target_col: string;
-  metrics: Record<string, any>;
+  metrics: Record<string, number>;
   is_active: boolean;
   file_name: string;
   file_size_bytes?: number;
+}
+
+interface PredictionFactor {
+  factor: string;
+  impact: string;
+  explanation: string;
+}
+
+interface PredictionResult {
+  prediction: string;
+  model_name: string;
+  algorithm: string;
+  confidence_score?: number;
+  class_probabilities?: Record<string, number>;
+  local_explanation_factors?: PredictionFactor[];
 }
 
 export default function MLPipelineAdminPage() {
@@ -115,7 +130,7 @@ export default function MLPipelineAdminPage() {
     runway_months: 14.0
   });
   const [predicting, setPredicting] = useState(false);
-  const [predictionResult, setPredictionResult] = useState<any>(null);
+  const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
 
   // Check auth
   useEffect(() => {
@@ -165,7 +180,14 @@ export default function MLPipelineAdminPage() {
   }, [selectedDataset]);
 
   useEffect(() => {
-    loadData();
+    let cancelled = false;
+    (async () => {
+      if (cancelled) return;
+      await loadData();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [loadData]);
 
   // Handle sample dataset generation
@@ -240,8 +262,8 @@ export default function MLPipelineAdminPage() {
         const err = await res.json();
         alert(`Training failed: ${err.error}`);
       }
-    } catch (err: any) {
-      alert(`Error starting training: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Error starting training: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setTrainingProgress(100);
       setTrainingInProgress(false);
@@ -294,8 +316,8 @@ export default function MLPipelineAdminPage() {
         const err = await res.json();
         alert(`Prediction failed: ${err.error}`);
       }
-    } catch (err: any) {
-      alert(`Inference error: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`Inference error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setPredicting(false);
     }
@@ -1098,7 +1120,7 @@ export default function MLPipelineAdminPage() {
                         Class Probabilities Distribution
                       </span>
                       <div className="space-y-1.5 font-mono text-[11px]">
-                        {Object.entries(predictionResult.class_probabilities).map(([cls, prob]: [string, any]) => (
+                        {Object.entries(predictionResult.class_probabilities).map(([cls, prob]) => (
                           <div key={cls} className="space-y-1">
                             <div className="flex justify-between text-[#dae2fd]">
                               <span>{cls}</span>
@@ -1117,13 +1139,13 @@ export default function MLPipelineAdminPage() {
                   )}
 
                   {/* Local Contributing Factors */}
-                  {predictionResult.local_explanation_factors?.length > 0 && (
+                  {predictionResult.local_explanation_factors && predictionResult.local_explanation_factors.length > 0 && (
                     <div className="space-y-3">
                       <span className="text-[12px] font-mono uppercase text-[#bbcabf] font-semibold">
                         Driving Factors (Explainability)
                       </span>
                       <div className="space-y-2">
-                        {predictionResult.local_explanation_factors.map((f: any, i: number) => (
+                        {predictionResult.local_explanation_factors.map((f, i) => (
                           <div
                             key={i}
                             className={`p-3 rounded-xl border text-[12px] flex items-start gap-2.5 ${

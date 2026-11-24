@@ -10,13 +10,15 @@ export default function Hero3DVisual() {
 
   useEffect(() => {
     // Check for reduced motion preference
-    if (typeof window !== 'undefined') {
-      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      setReducedMotion(mediaQuery.matches);
-      const listener = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-      mediaQuery.addEventListener('change', listener);
-      return () => mediaQuery.removeEventListener('change', listener);
-    }
+    if (typeof window === 'undefined') return;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const listener = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', listener);
+    const timer = setTimeout(() => setReducedMotion(mediaQuery.matches), 0);
+    return () => {
+      clearTimeout(timer);
+      mediaQuery.removeEventListener('change', listener);
+    };
   }, []);
 
   useEffect(() => {
@@ -24,16 +26,17 @@ export default function Hero3DVisual() {
     if (!container || reducedMotion) return;
 
     // Check WebGL availability safely
+    let webglOk = true;
     try {
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (!gl) {
-        setWebglAvailable(false);
-        return;
-      }
+      webglOk = !!gl;
     } catch {
-      setWebglAvailable(false);
-      return;
+      webglOk = false;
+    }
+    if (!webglOk) {
+      const timer = setTimeout(() => setWebglAvailable(false), 0);
+      return () => clearTimeout(timer);
     }
 
     const width = container.clientWidth;
@@ -217,7 +220,7 @@ export default function Hero3DVisual() {
 
     // 4. Animation loop
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);

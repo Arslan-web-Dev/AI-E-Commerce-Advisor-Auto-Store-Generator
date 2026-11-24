@@ -183,7 +183,8 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     return NextResponse.json({ product: newProduct }, { status: 201 });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || 'Malformed product payload' }, { status: 400 });
+  } catch (e: unknown) {
+    const message = e instanceof Error && e.message ? e.message : 'Malformed product payload';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

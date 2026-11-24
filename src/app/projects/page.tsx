@@ -41,7 +41,14 @@ export default function ProjectsListPage() {
   };
 
   useEffect(() => {
-    fetchProjects();
+    let cancelled = false;
+    (async () => {
+      if (cancelled) return;
+      await fetchProjects();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleDeleteDraft = async (id: string, e: React.MouseEvent) => {

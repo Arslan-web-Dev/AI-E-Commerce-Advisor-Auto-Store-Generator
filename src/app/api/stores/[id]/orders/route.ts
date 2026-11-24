@@ -6,6 +6,14 @@ interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
+interface OrderItemInput {
+  product_id?: string | null;
+  name?: string;
+  sku?: string | null;
+  unit_price_pkr?: number | string;
+  quantity?: number | string;
+}
+
 export async function GET(request: Request, context: RouteContext) {
   const { id: storeId } = await context.params;
   const supabase = await createClient();
@@ -99,7 +107,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     // Compute line items totals
     let subtotalPkr = 0;
-    const validatedItems = items.map((item: any) => {
+    const validatedItems = items.map((item: OrderItemInput) => {
       const unitPrice = Math.round(Number(item.unit_price_pkr) || 0);
       const quantity = Math.max(1, Math.round(Number(item.quantity) || 1));
       const lineTotal = unitPrice * quantity;
@@ -158,7 +166,7 @@ export async function POST(request: Request, context: RouteContext) {
     if (orderErr) return NextResponse.json({ error: orderErr.message }, { status: 500 });
 
     // 2. Insert order items
-    const itemsToInsert = validatedItems.map((item: any) => ({
+    const itemsToInsert = validatedItems.map((item) => ({
       order_id: order.id,
       ...item,
     }));
@@ -201,7 +209,8 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     return NextResponse.json({ order, order_number: orderNumber }, { status: 201 });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || 'Malformed order creation payload' }, { status: 400 });
+  } catch (e: unknown) {
+    const message = e instanceof Error && e.message ? e.message : 'Malformed order creation payload';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

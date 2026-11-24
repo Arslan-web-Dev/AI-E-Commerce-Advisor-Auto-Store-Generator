@@ -2,6 +2,41 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+interface LeafletMap {
+  setView(center: [number, number], zoom: number): LeafletMap;
+  remove(): void;
+}
+
+interface LeafletLayer {
+  addTo(map: LeafletMap): this;
+}
+
+interface LeafletMarker extends LeafletLayer {
+  bindPopup(html: string): this;
+  openPopup(): this;
+}
+
+interface LeafletIconOptions {
+  html: string;
+  className?: string;
+  iconSize?: [number, number];
+  iconAnchor?: [number, number];
+}
+
+interface LeafletStatic {
+  map(el: HTMLElement): LeafletMap;
+  tileLayer(url: string, options: Record<string, unknown>): LeafletLayer;
+  divIcon(options: LeafletIconOptions): unknown;
+  marker(latlng: [number, number], options: { icon: unknown }): LeafletMarker;
+  circle(latlng: [number, number], options: Record<string, unknown>): LeafletLayer;
+}
+
+declare global {
+  interface Window {
+    L?: LeafletStatic;
+  }
+}
+
 interface Competitor {
   name: string;
   lat: number;
@@ -21,7 +56,7 @@ interface Props {
 
 export default function CompetitorMap({ centerLat, centerLng, radiusKm = 10, competitors = [], height = '400px' }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
+  const mapInstanceRef = useRef<LeafletMap | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
@@ -36,8 +71,9 @@ export default function CompetitorMap({ centerLat, centerLng, radiusKm = 10, com
       script.crossOrigin = '';
       script.onload = () => setMapLoaded(true);
       document.head.appendChild(script);
-    } else if ((window as any).L) {
-      setMapLoaded(true);
+    } else if (window.L) {
+      const timer = setTimeout(() => setMapLoaded(true), 0);
+      return () => clearTimeout(timer);
     } else {
       existingScript.addEventListener('load', () => setMapLoaded(true));
     }
@@ -45,7 +81,7 @@ export default function CompetitorMap({ centerLat, centerLng, radiusKm = 10, com
 
   useEffect(() => {
     if (!mapLoaded || !mapRef.current) return;
-    const L = (window as any).L;
+    const L = window.L;
     if (!L) return;
 
     if (mapInstanceRef.current) {

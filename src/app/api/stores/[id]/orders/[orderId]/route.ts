@@ -1,15 +1,23 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import {
+  ALLOWED_STATUS_TRANSITIONS,
   canTransitionOrder,
   shouldDecrementStockOnTransition,
   shouldRestoreStockOnTransition,
   appendStatusHistory,
 } from '@/lib/store-management/orders';
-import { OrderStatus } from '@/types/store-management';
+import { OrderStatus, OrderStatusHistoryItem } from '@/types/store-management';
 
 interface RouteContext {
   params: Promise<{ id: string; orderId: string }>;
+}
+
+interface OrderUpdateFields {
+  status: OrderStatus;
+  status_history: OrderStatusHistoryItem[];
+  fulfillment_status?: 'fulfilled' | 'cancelled' | 'returned';
+  payment_status?: string;
 }
 
 export async function GET(request: Request, context: RouteContext) {
@@ -88,7 +96,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         {
           error: `Invalid transition: cannot move order from '${currentStatus}' to '${targetStatus}'.`,
           currentStatus,
-          allowedTransitions: (canTransitionOrder as any)[currentStatus] || [],
+          allowedTransitions: ALLOWED_STATUS_TRANSITIONS[currentStatus] || [],
         },
         { status: 400 }
       );
@@ -157,7 +165,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       notes
     );
 
-    const updateFields: Record<string, any> = {
+    const updateFields: OrderUpdateFields = {
       status: targetStatus,
       status_history: updatedHistory,
     };
@@ -188,7 +196,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       order: updatedOrder,
       message: `Order #${order.order_number} transitioned to '${targetStatus}'.`,
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || 'Malformed status update request' }, { status: 400 });
+  } catch (e: unknown) {
+    const message = e instanceof Error && e.message ? e.message : 'Malformed status update request';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

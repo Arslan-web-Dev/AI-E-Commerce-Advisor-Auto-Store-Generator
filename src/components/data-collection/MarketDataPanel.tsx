@@ -70,11 +70,14 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
   }, [projectId]);
 
   useEffect(() => {
-    if (isSubmitted) {
-      loadData();
-    } else {
-      setLoading(false);
-    }
+    const timer = setTimeout(() => {
+      if (isSubmitted) {
+        loadData();
+      } else {
+        setLoading(false);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [projectId, isSubmitted, loadData]);
 
   const handleTriggerCollection = async (forceDemo = false) => {

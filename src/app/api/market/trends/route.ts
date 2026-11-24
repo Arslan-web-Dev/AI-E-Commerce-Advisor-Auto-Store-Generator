@@ -38,7 +38,8 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({ trends });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to fetch Google Trends' }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error && err.message ? err.message : 'Failed to fetch Google Trends';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

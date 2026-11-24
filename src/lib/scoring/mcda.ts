@@ -1,4 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import { EngineeredVector } from '@/types/feature-processing';
 
 export const DEFAULT_MCDA_CONFIG = {
   version: 'v1.0-mcda',
@@ -21,8 +22,16 @@ export function classifyScore(score: number): Classification {
   return 'Not Feasible';
 }
 
-export function calculateProvisionalMCDA(engineeredVector: any, config = DEFAULT_MCDA_CONFIG) {
-  const explanations: any[] = [];
+export interface MCDAExplanation {
+  feature: string;
+  value: number;
+  weight: number;
+  contribution: number;
+  note: string;
+}
+
+export function calculateProvisionalMCDA(engineeredVector: EngineeredVector, config = DEFAULT_MCDA_CONFIG) {
+  const explanations: MCDAExplanation[] = [];
   let score = 0;
   let totalWeightUsed = 0;
 

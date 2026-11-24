@@ -1,6 +1,10 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
 
+// Store sitemaps are tenant-specific and depend on request-time params (`slug`).
+// Prevent static prerendering, which would invoke this handler without params.
+export const dynamic = 'force-dynamic';
+
 export default async function sitemap({ params }: { params: Promise<{ slug: string }> }): Promise<MetadataRoute.Sitemap> {
   const { slug } = await params;
   const supabase = await createClient();

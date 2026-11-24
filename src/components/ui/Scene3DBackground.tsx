@@ -17,20 +17,19 @@ export default function Scene3DBackground() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) {
-      setEnabled(false);
-      return;
-    }
-    try {
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (!gl) {
-        setEnabled(false);
-        return;
+    let webglOk = true;
+    if (!reduced) {
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        webglOk = !!gl;
+      } catch {
+        webglOk = false;
       }
-    } catch {
-      setEnabled(false);
-      return;
+    }
+    if (reduced || !webglOk) {
+      const timer = setTimeout(() => setEnabled(false), 0);
+      return () => clearTimeout(timer);
     }
 
     const container = containerRef.current;

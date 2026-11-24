@@ -24,6 +24,23 @@ interface Variant {
   availability: string;
 }
 
+interface WizardSession {
+  answers?: Partial<Answers>;
+  current_step: number;
+}
+
+interface CompiledManifest {
+  template_id: string;
+  manifest_version: string;
+  variants: Record<string, string>;
+  missing_requirements: string[];
+  disabled_integration_sections: string[];
+}
+
+interface CompiledDraft {
+  manifest: CompiledManifest;
+}
+
 // ─── Step definitions ────────────────────────────────────────────────────────
 const STEP_1_OPTIONS: { value: StylePref; label: string; description: string; icon: string }[] = [
   { value: 'elegant', label: 'Boutique Elegant', description: 'Refined, minimal, luxury feel', icon: 'diamond' },
@@ -61,8 +78,8 @@ export default function StorefrontWizardPage({ params }: { params: Promise<{ id:
   const [step, setStep] = useState<Step>(1);
   const [answers, setAnswers] = useState<Answers>({ optional_features: [] });
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [session, setSession] = useState<any>(null);
-  const [compiledDraft, setCompiledDraft] = useState<any>(null);
+  const [session, setSession] = useState<WizardSession | null>(null);
+  const [compiledDraft, setCompiledDraft] = useState<CompiledDraft | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [compiling, setCompiling] = useState(false);
@@ -99,8 +116,8 @@ export default function StorefrontWizardPage({ params }: { params: Promise<{ id:
           }
         }
         if (variantsData.data) setVariants(variantsData.data);
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : String(e));
       } finally {
         setLoading(false);
       }
@@ -126,8 +143,8 @@ export default function StorefrontWizardPage({ params }: { params: Promise<{ id:
       if (!res.ok) throw new Error(data.error);
       setSession(data.data.session);
       setStep(nextStep);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setSaving(false);
     }
@@ -150,8 +167,8 @@ export default function StorefrontWizardPage({ params }: { params: Promise<{ id:
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || data.violations?.join('; '));
       setCompiledDraft(data.data);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setCompiling(false);
     }
