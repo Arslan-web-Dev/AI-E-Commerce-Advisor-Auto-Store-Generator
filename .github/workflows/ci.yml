@@ -62,6 +62,11 @@ jobs:
   ml-tests:
     name: Python ML Pipeline Tests
     runs-on: ubuntu-latest
+    # Test-only secret: the ML service fails closed at import time when
+    # ML_SERVICE_API_KEY is unset (see ml-service/config.py). This is a
+    # CI placeholder, never a production value, and it is not committed to .env.
+    env:
+      ML_SERVICE_API_KEY: ci-test-only-key-not-a-real-secret-0123456789abcdef
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
