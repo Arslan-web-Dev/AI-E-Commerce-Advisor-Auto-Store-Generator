@@ -94,15 +94,23 @@ assert.strictEqual(isWithinPakistan(40.7128, -74.0060), false, 'New York must be
 
 console.log('PASS: Pakistan geographic coordinate bounds (23.5-37.2° N, 60.8-77.9° E) validated.');
 
-// 4. Testing Commercial Hub Presets Integrity
-console.log('\n[4/6] Verifying Commercial Hub Presets in src/types/project.ts...');
+// 4. Testing Commercial Hub Presets Integrity (national geo dataset)
+console.log('\n[4/6] Verifying Commercial Hub Presets in src/lib/geo/pakistan-geography.ts...');
 const projectTypesPath = path.resolve('src/types/project.ts');
 assert.ok(fs.existsSync(projectTypesPath), 'src/types/project.ts must exist');
 
 const projectTypesCode = fs.readFileSync(projectTypesPath, 'utf8');
-assert.ok(projectTypesCode.includes('COMMERCIAL_HUB_PRESETS'), 'Must export COMMERCIAL_HUB_PRESETS');
+assert.ok(
+  projectTypesCode.includes('COMMERCIAL_HUB_PRESETS'),
+  'src/types/project.ts must re-export COMMERCIAL_HUB_PRESETS from the national dataset'
+);
 
-const hubMatches = projectTypesCode.match(/lat:\s*([0-9.]+),\s*lng:\s*([0-9.]+)/g);
+const geoPath = path.resolve('src/lib/geo/pakistan-geography.ts');
+assert.ok(fs.existsSync(geoPath), 'src/lib/geo/pakistan-geography.ts must exist');
+const geoCode = fs.readFileSync(geoPath, 'utf8');
+assert.ok(geoCode.includes('COMMERCIAL_HUB_PRESETS'), 'National dataset must export COMMERCIAL_HUB_PRESETS');
+
+const hubMatches = geoCode.match(/lat:\s*([0-9.]+),\s*lng:\s*([0-9.]+)/g);
 assert.ok(hubMatches && hubMatches.length >= 7, 'Must have at least 7 verified commercial hub presets');
 
 for (const match of hubMatches) {

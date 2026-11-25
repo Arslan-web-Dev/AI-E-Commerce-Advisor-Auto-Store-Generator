@@ -4,10 +4,14 @@ import {
   DemandTrendQueryInput,
   IDemandTrendProvider,
   DataProvenance,
+  CoverageUnavailableError,
 } from '../../../types/data-collection';
 import { mlClient } from '../../ml-client';
+import { getRegion, PAKISTAN_COUNTRY_CODE } from '../../geo/pakistan-geography';
 
-// Seasonal 12-month relative search volume pattern in Pakistan (0-100 scale) as fallback.
+// Punjab-derived seasonal 12-month relative search volume pattern (0-100 scale).
+// This is Punjab *coverage* data: it must never be presented as another region's
+// local trend (see the coverage guard in `getDemandTrends`).
 // Keys are the five approved Task 3 category names (Task 3 §3) and must match
 // PREDEFINED_CATEGORIES exactly.
 const CATEGORY_TREND_CURVES: Record<string, { baseline: number[]; slope: 'growing' | 'stable' | 'declining' }> = {
@@ -45,9 +49,14 @@ export class GoogleTrendsProvider implements IDemandTrendProvider {
   provenance: DataProvenance = 'external_api';
 
   async getDemandTrends(input: DemandTrendQueryInput): Promise<DemandTrendRecord> {
+    const region = getRegion(input.region);
+    // Google Trends geo: the requested region's ISO 3166-2 code when recognised,
+    // otherwise the national Pakistan code. Never a fixed Punjab code.
+    const geoCode = region?.code ?? PAKISTAN_COUNTRY_CODE;
+
     try {
-      // Attempt live fetch from Python ML / Market service
-      const response = await mlClient.getTrends([input.category], 'PK-PB');
+      // Live fetch from the nationwide-capable Python ML / Market service.
+      const response = await mlClient.getTrends([input.category], geoCode);
       if (response && response.interest_over_time && response.interest_over_time.length > 0) {
         const points: DemandTrendPoint[] = response.interest_over_time.map((item: Record<string, unknown>) => ({
           month: String(item.date || item.month || '').slice(0, 7),
@@ -65,7 +74,7 @@ export class GoogleTrendsProvider implements IDemandTrendProvider {
         return {
           project_id: '',
           category: input.category,
-          region: response.geo || input.region || 'PK-PB',
+          region: response.geo || geoCode,
           trend_series: points,
           avg_interest: avgInterest,
           trend_slope: slope,
@@ -78,7 +87,17 @@ export class GoogleTrendsProvider implements IDemandTrendProvider {
       console.warn('Live Pytrends fetch failed, falling back to calibrated seasonal benchmark:', err);
     }
 
-    // Graceful fallback to verified seasonal Punjab patterns
+    // The curated curves below are Punjab coverage data. They may only be used
+    // for a region with verified coverage (currently Punjab). Any other region
+    // gets an explicit coverage-unavailable signal rather than Punjab trends.
+    if (!region || !region.analysis_enabled) {
+      throw new CoverageUnavailableError(
+        `No verified demand-trend coverage for "${input.region || 'unrecognised region'}". ` +
+          'Live search-trend data was unavailable and Punjab seasonal benchmarks are not substituted for other regions.'
+      );
+    }
+
+    // Graceful fallback to verified seasonal Punjab patterns (Punjab coverage).
     const curve = CATEGORY_TREND_CURVES[input.category] || FALLBACK_TREND_CURVE;
     const points: DemandTrendPoint[] = [];
     const today = new Date();
@@ -102,7 +121,7 @@ export class GoogleTrendsProvider implements IDemandTrendProvider {
     return {
       project_id: '',
       category: input.category,
-      region: input.region || 'PK',
+      region: region.code,
       trend_series: points,
       avg_interest: avgInterest,
       trend_slope: curve.slope,

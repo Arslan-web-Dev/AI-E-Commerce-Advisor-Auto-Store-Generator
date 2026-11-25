@@ -277,7 +277,9 @@ export default function ProjectDetailPage() {
                 </p>
               </div>
               <div className="text-[12px] text-[#86948a] font-mono pt-2 border-t border-[#2d3449]/60">
-                Coordinates: {Number(project.lat || 31.5204).toFixed(4)}° N, {Number(project.lng || 74.3587).toFixed(4)}° E
+                {project.lat != null && project.lng != null
+                  ? `Coordinates: ${Number(project.lat).toFixed(4)}° N, ${Number(project.lng).toFixed(4)}° E`
+                  : 'Coordinates not provided for this location'}
               </div>
             </div>
 

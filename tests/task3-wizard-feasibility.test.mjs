@@ -49,7 +49,7 @@ for (const cat of TASK3_CATEGORIES) {
 }
 const categoryBlock = projectTypesCode.slice(
   projectTypesCode.indexOf('export const PREDEFINED_CATEGORIES'),
-  projectTypesCode.indexOf('export const PUNJAB_PROVINCE')
+  projectTypesCode.indexOf('export const AGE_GROUP_OPTIONS')
 );
 const categoryCount = (categoryBlock.match(/name: '/g) || []).length;
 assert.strictEqual(categoryCount, 5, 'There must be exactly five predefined categories');
@@ -97,11 +97,41 @@ assert.ok(
 );
 console.log('PASS: Legacy six-category keys no longer appear in application source.');
 
-// 4. Punjab-only district/city dataset with server-side membership checks
-console.log('\n[4/8] Verifying Punjab district/city dataset and validation...');
-assert.ok(projectTypesCode.includes('PUNJAB_PROVINCE'), 'Must export PUNJAB_PROVINCE');
-assert.ok(projectTypesCode.includes('PUNJAB_DISTRICTS'), 'Must export PUNJAB_DISTRICTS');
-assert.ok(projectTypesCode.includes('PUNJAB_CITIES'), 'Must export PUNJAB_CITIES');
+// 4. Nationwide geographic identity with region-aware validation
+console.log('\n[4/8] Verifying the national geographic dataset and region-aware validation...');
+const geoPath = path.resolve('src/lib/geo/pakistan-geography.ts');
+assert.ok(fs.existsSync(geoPath), 'The national geographic dataset module must exist');
+const geoCode = fs.readFileSync(geoPath, 'utf8');
+for (const symbol of ['PAKISTAN_REGIONS', 'PAKISTAN_REGION_NAMES', 'PAKISTAN_BOUNDS', 'buildCoverageSnapshot']) {
+  assert.ok(geoCode.includes(`export const ${symbol}`) || geoCode.includes(symbol), `Dataset must export ${symbol}`);
+}
+for (const region of [
+  'Punjab',
+  'Sindh',
+  'Khyber Pakhtunkhwa',
+  'Balochistan',
+  'Islamabad Capital Territory',
+  'Azad Jammu and Kashmir',
+  'Gilgit-Baltistan',
+]) {
+  assert.ok(geoCode.includes(`name: '${region}'`), `National dataset must recognise the region "${region}"`);
+}
+assert.ok(
+  geoCode.includes("coverage: 'verified'") && geoCode.includes("coverage: 'none'"),
+  'Dataset must separate verified coverage from recognised-but-uncovered regions'
+);
+
+// types re-export the national dataset; geographic identity is no longer Punjab-only
+assert.ok(
+  projectTypesCode.includes("from '@/lib/geo/pakistan-geography'"),
+  'src/types/project.ts must re-export the national geographic dataset'
+);
+assert.ok(
+  !projectTypesCode.includes('PUNJAB_PROVINCE') &&
+  !projectTypesCode.includes('PUNJAB_DISTRICTS') &&
+  !projectTypesCode.includes('PUNJAB_CITIES'),
+  'The retired Punjab-only identity exports must be gone from src/types/project.ts'
+);
 assert.ok(
   projectTypesCode.includes("district: string | null") && projectTypesCode.includes("district: string"),
   'Project and ProjectFormData must both carry a district field'
@@ -109,22 +139,34 @@ assert.ok(
 
 const validationCode = fs.readFileSync(path.resolve('src/lib/validation/project.ts'), 'utf8');
 assert.ok(
-  validationCode.includes('ALLOWED_CATEGORY_NAMES') && validationCode.includes('ALLOWED_DISTRICT_NAMES'),
-  'Validation must derive allowed categories and districts from the canonical datasets'
+  validationCode.includes('ALLOWED_CATEGORY_NAMES'),
+  'Validation must derive allowed categories from the canonical dataset'
+);
+assert.ok(
+  validationCode.includes('PAKISTAN_REGION_NAMES'),
+  'Validation must accept every recognised province/administrative region of Pakistan'
+);
+assert.ok(
+  validationCode.includes('isRecognisedDistrict') && validationCode.includes('isRecognisedCity'),
+  'Validation must use the region-aware district/city recognition helpers'
 );
 assert.ok(
   validationCode.includes('does not belong to district'),
   'Validation must reject a city that does not belong to the selected district'
 );
 assert.ok(
-  validationCode.includes('lat < 23.5 || lat > 37.2 || lng < 60.8 || lng > 77.9'),
-  'Validation must enforce the Pakistan coordinate bounding box'
+  validationCode.includes('PAKISTAN_BOUNDS.minLat') &&
+  validationCode.includes('PAKISTAN_BOUNDS.maxLat') &&
+  validationCode.includes('PAKISTAN_BOUNDS.minLng') &&
+  validationCode.includes('PAKISTAN_BOUNDS.maxLng'),
+  'Validation must enforce the Pakistan coordinate bounding box via the shared PAKISTAN_BOUNDS'
 );
 assert.ok(
-  validationCode.includes('Only Punjab province is supported'),
-  'Validation must restrict the province to Punjab'
+  !validationCode.includes('Only Punjab province is supported') &&
+  !validationCode.includes('ALLOWED_DISTRICT_NAMES'),
+  'Validation must not restrict selection to Punjab or to a Punjab-only district allow-list'
 );
-console.log('PASS: District/city are validated against the Punjab dataset, including membership.');
+console.log('PASS: Geographic identity is national; recognition is decoupled from Punjab-only coverage.');
 
 // 5. Canonical PKR budget with strict numeric validation
 console.log('\n[5/8] Verifying canonical PKR budget validation...');
@@ -180,8 +222,12 @@ assert.ok(
   'PATCH must persist the wizard district field'
 );
 assert.ok(
-  createRouteCode.includes('district: body.district'),
+  createRouteCode.includes('const district = body.district'),
   'POST must persist the wizard district field'
+);
+assert.ok(
+  createRouteCode.includes('buildCoverageSnapshot') && updateRouteCode.includes('buildCoverageSnapshot'),
+  'Both POST and PATCH must persist a coverage snapshot in the existing metadata JSONB'
 );
 console.log('PASS: Drafts persist securely; owner_id is server-derived and ownership is enforced.');
 

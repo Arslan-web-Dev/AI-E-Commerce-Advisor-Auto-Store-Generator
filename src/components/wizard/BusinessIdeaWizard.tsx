@@ -7,9 +7,6 @@ import {
   Project,
   ProjectFormData,
   PREDEFINED_CATEGORIES,
-  COMMERCIAL_HUB_PRESETS,
-  PUNJAB_PROVINCE,
-  PUNJAB_DISTRICTS,
   AGE_GROUP_OPTIONS,
   GENDER_OPTIONS,
   INCOME_LEVEL_OPTIONS,
@@ -19,6 +16,15 @@ import {
   BudgetCurrency,
   BusinessModel,
 } from '@/types/project';
+import {
+  PAKISTAN_REGIONS,
+  DEFAULT_REGION_NAME,
+  getRegion,
+  getDistrict,
+  getCitiesForDistrict,
+  getHubPresetsForRegion,
+} from '@/lib/geo/pakistan-geography';
+import type { CommercialHubPreset } from '@/lib/geo/pakistan-geography';
 import { validateProjectStep, validateCompleteProject } from '@/lib/validation/project';
 
 interface BusinessIdeaWizardProps {
@@ -46,7 +52,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
     target_location: '',
     city: '',
     district: '',
-    region: 'Punjab',
+    region: DEFAULT_REGION_NAME,
     country: 'Pakistan',
     postal_code: '',
     lat: undefined,
@@ -111,7 +117,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
           target_location: p.target_location || '',
           city: p.city || '',
           district: p.district || '',
-          region: p.region || 'Punjab',
+          region: p.region || DEFAULT_REGION_NAME,
           country: p.country || 'Pakistan',
           postal_code: p.postal_code || '',
           lat: p.lat ?? undefined,
@@ -162,7 +168,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
           title:
             formData.title ||
             (formData.category
-              ? `${formData.category} - ${formData.city || formData.target_location.split(',')[0] || 'Punjab'} Venture`
+              ? `${formData.category} - ${formData.city || formData.target_location.split(',')[0] || formData.region || 'Pakistan'} Venture`
               : 'New Business Concept'),
         };
 
@@ -327,8 +333,8 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
     }
   };
 
-  // Punjab Commercial Hub selector
-  const handleSelectHub = (hub: (typeof COMMERCIAL_HUB_PRESETS)[0]) => {
+  // Verified commercial hub selector (coverage-backed preset)
+  const handleSelectHub = (hub: CommercialHubPreset) => {
     setFormData((prev) => ({
       ...prev,
       target_location: `${hub.name}, Pakistan`,
@@ -444,9 +450,13 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
     showToast('Attachment removed from draft', 'success');
   };
 
-  // District / City cascading selectors (Task 3 §4 location constraints)
-  const selectedDistrict = PUNJAB_DISTRICTS.find((d) => d.name === formData.district) || null;
-  const cityOptions = selectedDistrict ? selectedDistrict.cities : [];
+  // Region / District / City cascading selectors (national, Pakistan-wide; Task 3 §4)
+  const selectedRegion = getRegion(formData.region);
+  const regionDistricts = selectedRegion?.districts ?? [];
+  const districtCurated = getDistrict(formData.region, formData.district);
+  const cityOptions = getCitiesForDistrict(formData.region, formData.district);
+  const regionHubs = getHubPresetsForRegion(formData.region);
+  const regionHasCoverage = selectedRegion?.analysis_enabled === true;
 
   // Financial allocations
   const budgetNum = Number(formData.budget_amount) || 0;
@@ -504,7 +514,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#171f33] border border-[#2d3449]">
               <span className="w-2 h-2 rounded-full bg-[#4edea3] animate-pulse"></span>
               <span className="text-[11px] font-semibold text-[#bbcabf] uppercase tracking-wider">
-                Punjab Market Engine Active
+                Pakistan Market Engine Active
               </span>
             </div>
 
@@ -549,7 +559,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   <p className="text-[12px] text-[#bbcabf]">3-Step Intelligent Business Creation</p>
                 </div>
                 <span className="hidden sm:inline bg-[#4edea3]/10 border border-[#4edea3]/30 text-[#4edea3] text-[11px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                  Punjab SME Launchpad
+                  Pakistan SME Launchpad
                 </span>
               </div>
 
@@ -628,10 +638,10 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   <span>Step 1 — Business Profile &amp; Location (Task 3 §4)</span>
                 </div>
                 <h2 className="text-[28px] md:text-[34px] font-bold text-[#dae2fd] tracking-tight">
-                  What business are you planning to establish in Punjab?
+                  What business are you planning to establish in Pakistan?
                 </h2>
                 <p className="text-[15px] text-[#bbcabf] max-w-3xl leading-relaxed">
-                  Provide your business name and description, select one of the five approved categories, and choose a supported Punjab district, city and commercial location.
+                  Provide your business name and description, select one of the five approved categories, and choose a province / region, district, city and commercial location.
                 </p>
               </div>
 
@@ -792,42 +802,31 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                 </div>
               </div>
 
-              {/* Punjab Business Location: Province / District / City (Task 3 §4) */}
+              {/* National Business Location: Region / District / City (Task 3 §4; Pakistan-wide) */}
               <div className="bg-[#131b2e] border border-[#2d3449]/60 rounded-xl p-6 shadow-sm flex flex-col gap-5">
                 <div className="flex flex-col gap-1">
                   <label className="text-[15px] font-semibold text-[#dae2fd] flex items-center gap-2">
                     <span className="material-symbols-outlined text-[#4edea3] text-[20px]">pin_drop</span>
-                    Punjab Business Location *
+                    Business Location (Pakistan) *
                   </label>
                   <p className="text-[12px] text-[#bbcabf]">
-                    Country is fixed to Pakistan and province to Punjab. Select a district and city, then attach a verified commercial hub to capture coordinates.
+                    Country is fixed to Pakistan. Select a province or administrative region, then a district and city. Verified feasibility data currently covers Punjab; every other recognised region stays selectable and is analysed on a best-effort, clearly-labelled basis.
                   </p>
                 </div>
 
-                {/* Province (fixed) / District / City */}
+                {/* Region / District / City */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[12px] text-[#bbcabf] font-medium">Province (Fixed)</label>
-                    <input
-                      type="text"
-                      value={PUNJAB_PROVINCE}
-                      readOnly
-                      aria-readonly="true"
-                      className="bg-[#0e1626] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#86948a] cursor-not-allowed"
-                    />
-                    {errors.region && <span className="text-[#ffb4ab] text-[12px]">{errors.region}</span>}
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label htmlFor="wizard-district" className="text-[12px] text-[#bbcabf] font-medium">District *</label>
+                    <label htmlFor="wizard-region" className="text-[12px] text-[#bbcabf] font-medium">Province / Region *</label>
                     <select
-                      id="wizard-district"
-                      value={formData.district || ''}
+                      id="wizard-region"
+                      value={formData.region || ''}
                       onChange={(e) => {
-                        const district = e.target.value;
-                        setFormData((p) => ({ ...p, district, city: '', target_location: '', lat: undefined, lng: undefined }));
+                        const region = e.target.value;
+                        setFormData((p) => ({ ...p, region, district: '', city: '', target_location: '', lat: undefined, lng: undefined }));
                         setErrors((p) => {
                           const c = { ...p };
+                          delete c.region;
                           delete c.district;
                           delete c.city;
                           delete c.coordinates;
@@ -836,65 +835,206 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                       }}
                       className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3]"
                     >
-                      <option value="">Select Punjab district...</option>
-                      {PUNJAB_DISTRICTS.map((d) => (
-                        <option key={d.name} value={d.name}>
-                          {d.name}
+                      <option value="">Select province / region...</option>
+                      {PAKISTAN_REGIONS.map((r) => (
+                        <option key={r.code} value={r.name}>
+                          {r.name} ({r.code})
                         </option>
                       ))}
                     </select>
+                    {errors.region && <span className="text-[#ffb4ab] text-[12px]">{errors.region}</span>}
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="wizard-district" className="text-[12px] text-[#bbcabf] font-medium">District *</label>
+                    {selectedRegion?.district_registry_complete ? (
+                      <select
+                        id="wizard-district"
+                        value={formData.district || ''}
+                        onChange={(e) => {
+                          const district = e.target.value;
+                          setFormData((p) => ({ ...p, district, city: '', target_location: '', lat: undefined, lng: undefined }));
+                          setErrors((p) => {
+                            const c = { ...p };
+                            delete c.district;
+                            delete c.city;
+                            delete c.coordinates;
+                            return c;
+                          });
+                        }}
+                        className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3]"
+                      >
+                        <option value="">Select district...</option>
+                        {regionDistricts.map((d) => (
+                          <option key={d.name} value={d.name}>
+                            {d.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        id="wizard-district"
+                        type="text"
+                        list="wizard-district-options"
+                        value={formData.district || ''}
+                        disabled={!selectedRegion}
+                        placeholder={selectedRegion ? 'Enter district...' : 'Select region first'}
+                        onChange={(e) => {
+                          const district = e.target.value;
+                          setFormData((p) => ({ ...p, district, city: '', lat: undefined, lng: undefined }));
+                          setErrors((p) => {
+                            const c = { ...p };
+                            delete c.district;
+                            delete c.city;
+                            delete c.coordinates;
+                            return c;
+                          });
+                        }}
+                        className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3] disabled:opacity-50"
+                      />
+                    )}
+                    <datalist id="wizard-district-options">
+                      {regionDistricts.map((d) => (
+                        <option key={d.name} value={d.name} />
+                      ))}
+                    </datalist>
                     {errors.district && <span className="text-[#ffb4ab] text-[12px]">{errors.district}</span>}
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="wizard-city" className="text-[12px] text-[#bbcabf] font-medium">City *</label>
-                    <select
-                      id="wizard-city"
-                      value={formData.city || ''}
-                      disabled={!selectedDistrict}
-                      onChange={(e) => {
-                        setFormData((p) => ({ ...p, city: e.target.value }));
-                        setErrors((p) => {
-                          const c = { ...p };
-                          delete c.city;
-                          return c;
-                        });
-                      }}
-                      className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3] disabled:opacity-50"
-                    >
-                      <option value="">{selectedDistrict ? 'Select city...' : 'Select district first'}</option>
+                    <label htmlFor="wizard-city" className="text-[12px] text-[#bbcabf] font-medium">City / Tehsil *</label>
+                    {cityOptions.length > 0 ? (
+                      <select
+                        id="wizard-city"
+                        value={formData.city || ''}
+                        disabled={!districtCurated}
+                        onChange={(e) => {
+                          setFormData((p) => ({ ...p, city: e.target.value }));
+                          setErrors((p) => {
+                            const c = { ...p };
+                            delete c.city;
+                            return c;
+                          });
+                        }}
+                        className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3] disabled:opacity-50"
+                      >
+                        <option value="">{districtCurated ? 'Select city...' : 'Select district first'}</option>
+                        {cityOptions.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        id="wizard-city"
+                        type="text"
+                        list="wizard-city-options"
+                        value={formData.city || ''}
+                        disabled={!selectedRegion}
+                        placeholder={selectedRegion ? 'Enter city / tehsil...' : 'Select region first'}
+                        onChange={(e) => {
+                          setFormData((p) => ({ ...p, city: e.target.value }));
+                          setErrors((p) => {
+                            const c = { ...p };
+                            delete c.city;
+                            return c;
+                          });
+                        }}
+                        className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3] disabled:opacity-50"
+                      />
+                    )}
+                    <datalist id="wizard-city-options">
                       {cityOptions.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
+                        <option key={c} value={c} />
                       ))}
-                    </select>
+                    </datalist>
                     {errors.city && <span className="text-[#ffb4ab] text-[12px]">{errors.city}</span>}
                   </div>
                 </div>
 
-                {/* Hub Presets Chips */}
-                <div className="flex flex-wrap gap-2">
-                  {COMMERCIAL_HUB_PRESETS.map((hub) => {
-                    const isSelected = formData.city === hub.city && formData.target_location.includes(hub.name);
-                    return (
-                      <button
-                        key={hub.name}
-                        type="button"
-                        onClick={() => handleSelectHub(hub)}
-                        className={`px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all border flex items-center gap-1.5 ${
-                          isSelected
-                            ? 'bg-[#222a3d] border-[#4edea3] text-[#4edea3] ring-1 ring-[#4edea3]/30'
-                            : 'bg-[#171f33] border-[#2d3449] text-[#bbcabf] hover:text-[#dae2fd] hover:bg-[#222a3d]/50'
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-[14px]">location_on</span>
-                        <span>{hub.name}</span>
-                        <span className="text-[10px] opacity-60">({hub.city})</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                {/* Coverage badge — separates geographic identity from data coverage */}
+                {selectedRegion && (
+                  <div
+                    className={`p-3 rounded-xl text-[12px] flex items-start gap-2 border ${
+                      regionHasCoverage
+                        ? 'bg-[#10b981]/15 border-[#10b981]/40 text-[#4edea3]'
+                        : 'bg-[#d97706]/15 border-[#d97706]/40 text-[#f59e0b]'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      {regionHasCoverage ? 'verified' : 'info'}
+                    </span>
+                    <span>
+                      <strong>
+                        {selectedRegion.name} — data coverage:{' '}
+                        {selectedRegion.coverage === 'verified' ? 'Verified' : selectedRegion.coverage === 'limited' ? 'Limited' : 'Not yet available'}.
+                      </strong>{' '}
+                      {selectedRegion.source_note}
+                      {!regionHasCoverage && ' Recognised locations remain selectable; Punjab data is never substituted as local evidence.'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Hub Presets Chips (only for regions with verified hub coverage) */}
+                {regionHubs.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {regionHubs.map((hub) => {
+                      const isSelected = formData.city === hub.city && formData.target_location.includes(hub.name);
+                      return (
+                        <button
+                          key={hub.name}
+                          type="button"
+                          onClick={() => handleSelectHub(hub)}
+                          className={`px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all border flex items-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-[#222a3d] border-[#4edea3] text-[#4edea3] ring-1 ring-[#4edea3]/30'
+                              : 'bg-[#171f33] border-[#2d3449] text-[#bbcabf] hover:text-[#dae2fd] hover:bg-[#222a3d]/50'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[14px]">location_on</span>
+                          <span>{hub.name}</span>
+                          <span className="text-[10px] opacity-60">({hub.city})</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Manual coordinates for regions without verified hub presets (enables the
+                    nationwide OpenStreetMap provider where coordinates are supplied) */}
+                {selectedRegion && regionHubs.length === 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="wizard-lat" className="text-[12px] text-[#bbcabf] font-medium">Latitude (optional)</label>
+                      <input
+                        id="wizard-lat"
+                        type="number"
+                        step="0.0001"
+                        value={formData.lat ?? ''}
+                        onChange={(e) =>
+                          setFormData((p) => ({ ...p, lat: e.target.value === '' ? undefined : Number(e.target.value) }))
+                        }
+                        placeholder="e.g. 24.8607"
+                        className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3]"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="wizard-lng" className="text-[12px] text-[#bbcabf] font-medium">Longitude (optional)</label>
+                      <input
+                        id="wizard-lng"
+                        type="number"
+                        step="0.0001"
+                        value={formData.lng ?? ''}
+                        onChange={(e) =>
+                          setFormData((p) => ({ ...p, lng: e.target.value === '' ? undefined : Number(e.target.value) }))
+                        }
+                        placeholder="e.g. 67.0011"
+                        className="bg-[#171f33] border border-[#2d3449] rounded-xl px-4 py-2.5 text-[13px] text-[#dae2fd] focus:outline-none focus:border-[#4edea3]"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Manual Target Location Entry */}
                 <div className="flex flex-col gap-1.5">
@@ -924,14 +1064,22 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   <div className="p-3 bg-[#10b981]/15 border border-[#10b981]/40 rounded-xl text-[12px] text-[#4edea3] flex items-center gap-2">
                     <span className="material-symbols-outlined text-[18px]">verified</span>
                     <span>
-                      <strong>Verified Punjab Coordinates:</strong> {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || 'Punjab'}, Pakistan)
+                      <strong>{regionHasCoverage ? 'Verified hub coordinates:' : 'Coordinates provided:'}</strong>{' '}
+                      {formData.lat.toFixed(4)}° N, {formData.lng.toFixed(4)}° E ({formData.city || formData.district || selectedRegion?.name || 'Pakistan'}, Pakistan)
                     </span>
                   </div>
-                ) : (
+                ) : regionHasCoverage ? (
                   <div className="p-3 bg-[#d97706]/15 border border-[#d97706]/40 rounded-xl text-[12px] text-[#f59e0b] flex items-center gap-2">
                     <span className="material-symbols-outlined text-[18px]">location_searching</span>
                     <span>
                       Please select a verified commercial hub above to attach exact spatial coordinates for competitive radar analysis.
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-[#222a3d] border border-[#2d3449] rounded-xl text-[12px] text-[#bbcabf] flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">public</span>
+                    <span>
+                      No verified coordinates are bundled for this region. Coordinates are optional; providing them enables the nationwide OpenStreetMap competitor scan. Verified local feasibility data is not yet available for this region.
                     </span>
                   </div>
                 )}
@@ -1405,7 +1553,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   <div className="flex flex-col gap-1.5 text-[12px]">
                     <div>
                       <span className="text-[#bbcabf]">Province / Country: </span>
-                      <span className="text-[#dae2fd] capitalize">{formData.region || PUNJAB_PROVINCE}, Pakistan</span>
+                      <span className="text-[#dae2fd] capitalize">{formData.region || DEFAULT_REGION_NAME}, Pakistan</span>
                     </div>
                     <div>
                       <span className="text-[#bbcabf]">District: </span>
@@ -1625,7 +1773,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
         {/* Micro Trust Stamp */}
         <div className="w-full bg-[#060e20] py-1 px-4 text-center border-t border-[#2d3449]/40">
           <span className="text-[#bbcabf] text-[11px]">
-            Punjab Commercial Feasibility Engine • OpenStreetMap POI Radar • Continuous 0.00–1.00 Viability Evaluation
+            Pakistan Commercial Feasibility Engine • OpenStreetMap POI Radar • Continuous 0.00–1.00 Viability Evaluation
           </span>
         </div>
       </aside>

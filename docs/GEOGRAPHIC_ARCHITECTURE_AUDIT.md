@@ -190,3 +190,35 @@ Adding a province must require **no rewrite** of the wizard, auth, projects DB, 
 | Five categories / PKR / budget bounds / 3 steps / drafts / RLS / RPC | ✅ | ✅ unchanged |
 
 **This criterion is NOT claimed as satisfied until the implementation and tests demonstrate it.** No implementation has been performed in this audit.
+
+---
+
+## 11. Implementation status (delivered)
+
+The corrected architecture was implemented and verified. Nationwide **identity** is
+demonstrated by automated tests; verified **coverage** remains Punjab-first.
+
+**Decisions applied**
+
+1. **Geography storage** — one centrally maintained, version-controlled national dataset in [`src/lib/geo/pakistan-geography.ts`](../src/lib/geo/pakistan-geography.ts) (country → province/administrative territory → district → city, with optional tehsil/locality). No records are fabricated: non-Punjab regions carry an explicitly partial, well-established district subset flagged `district_registry_complete: false`. The helpers (`getRegion`, `isRecognised*`, `buildCoverageSnapshot`, …) are the stable seam a future DB-backed registry can implement behind without rewriting the wizard, validation, APIs or providers.
+2. **Coverage persistence** — no new columns or tables. Coverage snapshots are written to the existing `projects.metadata.geo` JSONB (`{ country, region, region_code, district, city, coverage, analysis_enabled, supported_categories, source_note, captured_at }`) on create and refreshed on geographic update. Identity and coverage stay separate concepts.
+3. **Identity vs coverage** — every recognised region is selectable regardless of coverage. Punjab is `coverage: 'verified'` / `analysis_enabled: true`; Sindh, Khyber Pakhtunkhwa, Balochistan, Islamabad Capital Territory, Azad Jammu and Kashmir and Gilgit-Baltistan are recognised with `coverage: 'none'` and `supported_categories: []`.
+
+**Files changed**
+
+- New: `src/lib/geo/pakistan-geography.ts`; `tests/geography-pakistan.test.mjs`.
+- Types/validation: `src/types/project.ts` (re-exports the national dataset; `PUNJAB_*` retired), `src/lib/validation/project.ts` (region-aware, `PAKISTAN_BOUNDS`, coordinates mandatory only where coverage exists).
+- APIs: `src/app/api/projects/route.ts`, `src/app/api/projects/[id]/route.ts` (canonicalise/infer region, never default to Punjab; persist coverage snapshot), `src/app/api/market/demand-analysis/route.ts` (no `PUNJAB_DISTRICT_BENCHMARKS[0]` fallback → `coverage.status: 'unavailable'`), `src/app/api/market/regional/route.ts` (coverage status on every response).
+- Providers/orchestrator: `src/types/data-collection.ts` (`CoverageUnavailableError`), `src/lib/data-collection/orchestrator.ts` (no Lahore coordinate/city defaults; maps `CoverageUnavailableError` → provider status `'unavailable'`), `src/lib/providers/trends/google-trends.ts` (uses the region's ISO code; throws `CoverageUnavailableError` instead of applying Punjab seasonal curves elsewhere).
+- UI: `src/components/wizard/BusinessIdeaWizard.tsx` (dynamic province → district → city cascade, coverage badge, optional coordinates for non-Punjab), `src/app/projects/[id]/feasibility/page.tsx` (map/gauge only when coverage + coordinates exist; honest notices, no demo Lahore fixtures), `src/app/projects/[id]/page.tsx` (no coordinate fallback), `src/app/market-intelligence/page.tsx` (all regions listed, coverage labelled).
+
+**Migrations:** none required. Per decision 2 the geography is code-versioned and coverage uses the existing `metadata` JSONB; `regional_market_statistics` already models province/district/tehsil for future verified rows. No RLS change; Task 2 security and the one-argument submission RPC are unchanged.
+
+**Verification:** `node tests/geography-pakistan.test.mjs` (7/7), `node tests/task3-wizard-feasibility.test.mjs` (8/8), `node tests/module2-wizard-project.test.mjs` (6/6), `node tests/module1-auth-rbac.test.mjs` (6/6), `node tests/task2-security-remediation.test.mjs` (6/6), `scripts/verify-module3.mjs` (53/53), `npx tsc --noEmit` (0 errors), `npm run lint` (0 errors), `npm run build` (success), `python ml-service/test_pipeline.py` (pass).
+
+**Remaining limitations**
+
+- Verified feasibility coverage is Punjab-only; other regions return clearly labelled `unavailable` coverage rather than substituted Punjab data.
+- Non-Punjab regions carry a partial, non-authoritative district/city subset (`district_registry_complete: false`) and accept user-provided district/city text; a complete authoritative registry per region is future work (see §8).
+- Commercial hub presets remain Punjab-only (no verified coordinates elsewhere); uncovered locations stay selectable without a preset.
+- Cosmetic Punjab labels in the ML admin UI, ML service strings, storefront templates and the cron rent seed were intentionally left in place (labelled datasets/templates, outside the approved correction scope).

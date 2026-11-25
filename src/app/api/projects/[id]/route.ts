@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { validateProjectFields } from '@/lib/validation/project';
 import { convertUsdToPkr } from '@/lib/currency/exchange-rate';
+import {
+  buildCoverageSnapshot,
+  canonicalRegionName,
+  getRegionForDistrict,
+  PAKISTAN_BOUNDS,
+  PAKISTAN_COUNTRY,
+} from '@/lib/geo/pakistan-geography';
 
 export const dynamic = 'force-dynamic';
 
@@ -122,8 +129,16 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (body.target_location !== undefined) updates.target_location = String(body.target_location).trim();
     if (body.city !== undefined) updates.city = body.city;
     if (body.district !== undefined) updates.district = body.district ? String(body.district).trim() : null;
-    if (body.region !== undefined) updates.region = body.region;
-    if (body.country !== undefined) updates.country = 'Pakistan'; // Platform strictly locked to Pakistan
+
+    // Resolve the region nationally: canonicalise an explicit value (name or ISO
+    // code) or infer it from a recognised district. NEVER default to Punjab.
+    if (body.region !== undefined) {
+      updates.region = canonicalRegionName(String(body.region)) ?? null;
+    } else if (body.district !== undefined && body.district) {
+      const inferred = getRegionForDistrict(String(body.district).trim());
+      if (inferred) updates.region = inferred.name;
+    }
+    if (body.country !== undefined) updates.country = PAKISTAN_COUNTRY; // Platform strictly locked to Pakistan
     if (body.postal_code !== undefined) updates.postal_code = body.postal_code;
 
     // Validate coordinates if being updated
@@ -131,7 +146,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       const lat = Number(body.lat);
       const lng = Number(body.lng);
       if (Number.isFinite(lat) && Number.isFinite(lng)) {
-        if (lat < 23.5 || lat > 37.2 || lng < 60.8 || lng > 77.9) {
+        if (
+          lat < PAKISTAN_BOUNDS.minLat ||
+          lat > PAKISTAN_BOUNDS.maxLat ||
+          lng < PAKISTAN_BOUNDS.minLng ||
+          lng > PAKISTAN_BOUNDS.maxLng
+        ) {
           return NextResponse.json(
             { error: 'Coordinates must be located within Pakistan territory (Lat: 23.5–37.2, Lng: 60.8–77.9).' },
             { status: 400 }
@@ -178,6 +198,26 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (body.product_file_size !== undefined) updates.product_file_size = body.product_file_size;
     if (body.current_step !== undefined) updates.current_step = Number(body.current_step);
     if (body.metadata !== undefined) updates.metadata = body.metadata;
+
+    // Refresh the geographic coverage snapshot in `metadata` whenever any
+    // geographic identity field changes. Identity stays national; coverage is a
+    // separate, non-restrictive concept stored alongside it (no new columns).
+    if (body.region !== undefined || body.district !== undefined || body.city !== undefined) {
+      const nextRegion =
+        updates.region !== undefined ? (updates.region as string | null) : existingProject.region;
+      const nextDistrict =
+        updates.district !== undefined ? (updates.district as string | null) : existingProject.district;
+      const nextCity =
+        updates.city !== undefined ? (updates.city as string | null) : existingProject.city;
+      const baseMetadata =
+        (updates.metadata as Record<string, unknown> | undefined) ??
+        (existingProject.metadata as Record<string, unknown> | undefined) ??
+        {};
+      updates.metadata = {
+        ...baseMetadata,
+        geo: buildCoverageSnapshot({ region: nextRegion, district: nextDistrict, city: nextCity }),
+      };
+    }
 
     // Never allow updating owner_id from request body
     delete updates.owner_id;

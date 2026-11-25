@@ -1,14 +1,22 @@
 import {
   PREDEFINED_CATEGORIES,
-  PUNJAB_PROVINCE,
-  PUNJAB_DISTRICTS,
-  PUNJAB_CITIES,
   BudgetCurrency,
   BusinessScale,
   BusinessModel,
   StorefrontFootprint,
   ProjectFormData,
 } from '@/types/project';
+import {
+  PAKISTAN_COUNTRY,
+  PAKISTAN_BOUNDS,
+  PAKISTAN_REGION_NAMES,
+  canonicalRegionName,
+  getDistrict,
+  getRegion,
+  getRegionForDistrict,
+  isRecognisedDistrict,
+  isRecognisedCity,
+} from '@/lib/geo/pakistan-geography';
 
 export interface ValidationResult {
   valid: boolean;
@@ -16,10 +24,28 @@ export interface ValidationResult {
 }
 
 const ALLOWED_CATEGORY_NAMES = PREDEFINED_CATEGORIES.map((c) => c.name);
-const ALLOWED_DISTRICT_NAMES = PUNJAB_DISTRICTS.map((d) => d.name);
 
 function isProvided(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
+}
+
+function asTrimmedString(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+/**
+ * Resolve the region (province/administrative territory) for a payload.
+ *
+ * Prefers an explicitly selected region; otherwise infers it from a recognised
+ * district. Inferring keeps valid records workable if `region` is omitted, while
+ * an unrecognised region name is never silently replaced by Punjab.
+ */
+function resolveRegionName(data: Partial<ProjectFormData> | Record<string, unknown>): string | null {
+  const explicit = canonicalRegionName(asTrimmedString(data.region));
+  if (explicit) return explicit;
+  const district = asTrimmedString(data.district);
+  if (district) return getRegionForDistrict(district)?.name ?? null;
+  return null;
 }
 
 /**
@@ -28,6 +54,12 @@ function isProvided(value: unknown): boolean {
  * Validates only the fields that are actually supplied, so partial drafts can be
  * persisted while every supplied value is still validated on the server (Task 3
  * §6 and §8: draft updates must not bypass server validation).
+ *
+ * Geographic scope is national (all of Pakistan). Recognition is decoupled from
+ * data coverage: a recognised region/district/city is accepted even when no
+ * verified feasibility data exists for it. Punjab remains the fully-supported
+ * region. Omission of a geographic value is allowed here (drafts); completeness
+ * is enforced per step in `validateProjectStep`.
  *
  * A neutral `budget_amount` of 0 is treated as "not yet entered" rather than a
  * rejected value, because 0 is the wizard's documented neutral default. Negative,
@@ -51,14 +83,18 @@ export function validateProjectFields(
     errors.product_description = 'Product description cannot exceed 2000 characters.';
   }
 
-  // Province (fixed Punjab) and country (fixed Pakistan)
-  if (typeof data.region === 'string' && data.region.trim() !== '' && data.region.trim() !== PUNJAB_PROVINCE) {
-    errors.region = 'Only Punjab province is supported for this feasibility scope.';
+  // Region (province / administrative territory) — any recognised region of
+  // Pakistan is accepted regardless of its data coverage.
+  const regionInput = asTrimmedString(data.region);
+  if (regionInput !== '' && !canonicalRegionName(regionInput)) {
+    errors.region = `Unsupported region. Must be a recognised province or administrative region of Pakistan: ${PAKISTAN_REGION_NAMES.join(', ')}.`;
   }
+
+  // Country — fixed to Pakistan (national scope)
   if (
     typeof data.country === 'string' &&
     data.country.trim() !== '' &&
-    data.country.trim().toLowerCase() !== 'pakistan'
+    data.country.trim().toLowerCase() !== PAKISTAN_COUNTRY.toLowerCase()
   ) {
     errors.country = 'The platform supports commercial feasibility analysis only within Pakistan.';
   }
@@ -73,19 +109,36 @@ export function validateProjectFields(
     }
   }
 
-  // District and City — validated against the authoritative Punjab dataset
-  const district = typeof data.district === 'string' ? data.district.trim() : '';
-  const city = typeof data.city === 'string' ? data.city.trim() : '';
-  if (district !== '' && !ALLOWED_DISTRICT_NAMES.includes(district)) {
-    errors.district = `Unsupported district. Must be one of: ${ALLOWED_DISTRICT_NAMES.join(', ')}`;
+  // District and City — validated against the selected region when it has a
+  // curated registry; user-provided text is accepted for recognised regions
+  // without one (recognition must not be coupled to coverage).
+  const regionName = resolveRegionName(data);
+  const district = asTrimmedString(data.district);
+  const city = asTrimmedString(data.city);
+
+  if (district !== '') {
+    if (!regionName) {
+      errors.district =
+        'Unrecognised district. Select a recognised province/region of Pakistan first.';
+    } else if (!isRecognisedDistrict(regionName, district)) {
+      const region = getRegion(regionName);
+      errors.district =
+        region && region.district_registry_complete
+          ? `Unsupported district for ${region.name}. Must be one of: ${region.districts.map((d) => d.name).join(', ')}.`
+          : `Unrecognised district for ${regionName}.`;
+    }
   }
-  if (city !== '' && !PUNJAB_CITIES.includes(city)) {
-    errors.city = `Unsupported city. Must be one of: ${PUNJAB_CITIES.join(', ')}`;
-  }
-  if (district !== '' && city !== '' && !errors.district && !errors.city) {
-    const match = PUNJAB_DISTRICTS.find((d) => d.name === district);
-    if (match && !match.cities.includes(city)) {
-      errors.city = `City "${city}" does not belong to district "${district}".`;
+
+  if (city !== '') {
+    if (!regionName) {
+      errors.city = 'Unrecognised city. Select a recognised province/region of Pakistan first.';
+    } else if (!isRecognisedCity(regionName, district, city)) {
+      const districtRecord = district ? getDistrict(regionName, district) : null;
+      if (districtRecord) {
+        errors.city = `Unsupported city for ${districtRecord.name}. Must be one of: ${districtRecord.cities.join(', ')}.`;
+      } else {
+        errors.city = `City "${city}" does not belong to district "${district}" in ${regionName}.`;
+      }
     }
   }
 
@@ -95,8 +148,13 @@ export function validateProjectFields(
     const lng = Number(data.lng);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       errors.coordinates = 'Coordinates must be finite numbers.';
-    } else if (lat < 23.5 || lat > 37.2 || lng < 60.8 || lng > 77.9) {
-      errors.coordinates = 'Coordinates must be located within Pakistan territory (Lat: 23.5–37.2, Lng: 60.8–77.9).';
+    } else if (
+      lat < PAKISTAN_BOUNDS.minLat ||
+      lat > PAKISTAN_BOUNDS.maxLat ||
+      lng < PAKISTAN_BOUNDS.minLng ||
+      lng > PAKISTAN_BOUNDS.maxLng
+    ) {
+      errors.coordinates = `Coordinates must be located within Pakistan territory (Lat: ${PAKISTAN_BOUNDS.minLat}–${PAKISTAN_BOUNDS.maxLat}, Lng: ${PAKISTAN_BOUNDS.minLng}–${PAKISTAN_BOUNDS.maxLng}).`;
     }
   }
 
@@ -167,6 +225,12 @@ export function validateProjectFields(
  * Step 1 — Business Profile & Location
  * Step 2 — Financial & Operational Information
  * Step 3 (and 5, legacy alias) — complete review before submission
+ *
+ * Geographic completeness is national: a region and a district/city are required,
+ * but coordinates are only mandatory for regions that carry verified coverage
+ * (Punjab). For recognised regions without verified local data the project may
+ * still be submitted; analysis providers report "coverage unavailable" instead of
+ * substituting Punjab observations.
  */
 export function validateProjectStep(
   step: number,
@@ -183,18 +247,29 @@ export function validateProjectStep(
       errors.category = 'Please select one of the five approved business categories.';
     }
     if (!(typeof data.target_location === 'string' && data.target_location.trim() !== '') && !errors.target_location) {
-      errors.target_location = 'Please enter the target locality or address in Punjab.';
+      errors.target_location = 'Please enter the target locality or address in Pakistan.';
     }
+
+    const regionName = resolveRegionName(data);
+    if (!regionName && !errors.region) {
+      errors.region = 'Please select a province or administrative region of Pakistan.';
+    }
+
     if (!(typeof data.district === 'string' && data.district.trim() !== '') && !errors.district) {
-      errors.district = 'Please select a district in Punjab.';
+      errors.district = 'Please select or enter a district.';
     }
     if (!(typeof data.city === 'string' && data.city.trim() !== '') && !errors.city) {
-      errors.city = 'Please select a city in Punjab.';
+      errors.city = 'Please select or enter a city / tehsil.';
     }
-    const hasCoordinates =
-      isProvided(data.lat) && isProvided(data.lng);
-    if (!hasCoordinates && !errors.coordinates) {
-      errors.coordinates = 'Please select a verified commercial hub to attach Punjab coordinates.';
+
+    // Coordinates are required only where verified coverage exists (Punjab hubs).
+    // Uncovered recognised regions may be submitted without coordinates.
+    const region = getRegion(regionName);
+    const regionHasCoverage = region?.analysis_enabled === true;
+    const hasCoordinates = isProvided(data.lat) && isProvided(data.lng);
+    if (regionHasCoverage && !hasCoordinates && !errors.coordinates) {
+      errors.coordinates =
+        'Please select a verified commercial hub, or provide coordinates, for this region.';
     }
   }
 

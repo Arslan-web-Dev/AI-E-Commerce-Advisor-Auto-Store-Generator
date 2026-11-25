@@ -15,8 +15,26 @@ export async function POST(request: Request) {
     }
 
     const matchedDistrict = PUNJAB_DISTRICT_BENCHMARKS.find(
-      (d) => d.district.toLowerCase() === district.toLowerCase()
-    ) || PUNJAB_DISTRICT_BENCHMARKS[0];
+      (d) => d.district.toLowerCase() === String(district).toLowerCase()
+    );
+
+    // Coverage honesty: verified demand-analysis benchmarks currently exist for
+    // the Punjab corpus only. Never substitute another district's (e.g. Lahore's)
+    // benchmarks for an uncovered location.
+    if (!matchedDistrict) {
+      return NextResponse.json(
+        {
+          analysis: null,
+          coverage: {
+            status: 'unavailable',
+            district: String(district),
+            source_note:
+              'Verified demand-analysis coverage is currently Punjab-only. No benchmark data exists for this district, and another district\u2019s benchmarks are not substituted.',
+          },
+        },
+        { status: 200 }
+      );
+    }
 
     const result = await mlClient.getMarketDemandAnalysis(
       primary_keyword,

@@ -129,54 +129,27 @@ export const PREDEFINED_CATEGORIES: StoreCategoryOption[] = [
   }
 ];
 
-export const PUNJAB_PROVINCE = 'Punjab';
+// Geographic IDENTITY is maintained in a single, version-controlled national
+// dataset (src/lib/geo/pakistan-geography.ts) covering all of Pakistan, with
+// Punjab as the initial verified-data coverage region. These re-exports keep the
+// existing import surface stable; add new regions in the dataset, not here.
+export {
+  PAKISTAN_COUNTRY,
+  PAKISTAN_COUNTRY_CODE,
+  DEFAULT_REGION_NAME,
+  PAKISTAN_BOUNDS,
+  PAKISTAN_REGIONS,
+  PAKISTAN_REGION_NAMES,
+  PAKISTAN_REGION_CODES,
+  COMMERCIAL_HUB_PRESETS,
+} from '@/lib/geo/pakistan-geography';
 
-export interface PunjabDistrict {
-  name: string;
-  cities: string[];
-}
-
-// Authoritative launch coverage for the wizard's District/City selectors.
-// These districts and cities are taken from the verified Punjab commercial hub
-// presets below; the list is intentionally limited to locations for which
-// coordinates are available and is NOT a claim of complete Punjab coverage.
-export const PUNJAB_DISTRICTS: PunjabDistrict[] = [
-  { name: 'Lahore', cities: ['Lahore'] },
-  { name: 'Rawalpindi', cities: ['Rawalpindi'] },
-  { name: 'Faisalabad', cities: ['Faisalabad'] },
-  { name: 'Multan', cities: ['Multan'] },
-  { name: 'Gujranwala', cities: ['Gujranwala'] },
-  { name: 'Sialkot', cities: ['Sialkot'] },
-  { name: 'Bahawalpur', cities: ['Bahawalpur'] }
-];
-
-export const PUNJAB_CITIES: string[] = PUNJAB_DISTRICTS.flatMap((d) => d.cities);
-
-export interface CommercialHubPreset {
-  name: string;
-  district: string;
-  city: string;
-  lat: number;
-  lng: number;
-  label: string;
-}
-
-// Punjab-only commercial hub presets (Task 3 §4 location constraints).
-// Non-Punjab locations (Islamabad federal capital, Karachi/Sindh) were removed
-// because the wizard scope is strictly Punjab province.
-export const COMMERCIAL_HUB_PRESETS: CommercialHubPreset[] = [
-  { name: 'Gulberg III, Lahore', district: 'Lahore', city: 'Lahore', lat: 31.5204, lng: 74.3587, label: 'Lahore Retail & Fashion Hub' },
-  { name: 'DHA Phase 5 & 6, Lahore', district: 'Lahore', city: 'Lahore', lat: 31.4722, lng: 74.4093, label: 'Lahore Affluent Residential Commercial' },
-  { name: 'Anarkali & Mall Road, Lahore', district: 'Lahore', city: 'Lahore', lat: 31.5657, lng: 74.3142, label: 'Lahore Historic Central Bazaar' },
-  { name: 'Model Town / Johar Town, Lahore', district: 'Lahore', city: 'Lahore', lat: 31.4697, lng: 74.2728, label: 'Lahore High-Density Suburban Hub' },
-  { name: 'Clock Tower / D-Ground, Faisalabad', district: 'Faisalabad', city: 'Faisalabad', lat: 31.4187, lng: 73.0791, label: 'Faisalabad Textile & Wholesale Hub' },
-  { name: 'Saddar Commercial, Rawalpindi', district: 'Rawalpindi', city: 'Rawalpindi', lat: 33.5973, lng: 73.0479, label: 'Rawalpindi Central Business District' },
-  { name: 'Bahria Town Commercial, Rawalpindi', district: 'Rawalpindi', city: 'Rawalpindi', lat: 33.5186, lng: 73.1094, label: 'Rawalpindi Modern Retail Corridor' },
-  { name: 'Hussain Agahi & Cantt, Multan', district: 'Multan', city: 'Multan', lat: 30.1984, lng: 71.4687, label: 'South Punjab Trade Hub' },
-  { name: 'Model Town / GT Road, Gujranwala', district: 'Gujranwala', city: 'Gujranwala', lat: 32.1877, lng: 74.1945, label: 'Gujranwala Manufacturing & Retail Strip' },
-  { name: 'Paris Road / Shahab Pura, Sialkot', district: 'Sialkot', city: 'Sialkot', lat: 32.4945, lng: 74.5229, label: 'Sialkot Export & Commercial Center' },
-  { name: 'Circular Road, Bahawalpur', district: 'Bahawalpur', city: 'Bahawalpur', lat: 29.3956, lng: 71.6836, label: 'Bahawalpur City Center' },
-];
+export type {
+  PakistanRegion,
+  GeoDistrict,
+  GeoCoverageStatus,
+  CommercialHubPreset,
+} from '@/lib/geo/pakistan-geography';
 
 export const AGE_GROUP_OPTIONS = [
   'All Ages / General Demographic',

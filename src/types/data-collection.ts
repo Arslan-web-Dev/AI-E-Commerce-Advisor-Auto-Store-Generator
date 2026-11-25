@@ -156,3 +156,22 @@ export interface ICostEstimateProvider {
   provenance: DataProvenance;
   getCostEstimates(input: CostEstimateQueryInput): Promise<CostEstimateRecord[]>;
 }
+
+/**
+ * Thrown by a provider when the requested geography has **no verified coverage**
+ * and no legitimate substitute exists.
+ *
+ * Providers must throw this instead of substituting another region's data (for
+ * example Punjab benchmarks / Lahore coordinates / Punjab seasonal trends for a
+ * non-Punjab location). The data-collection orchestrator maps it to a
+ * `ProviderRunStatus` of `'unavailable'` — distinct from `'failed'` — so the UI
+ * can honestly label the gap instead of showing fabricated local evidence.
+ */
+export class CoverageUnavailableError extends Error {
+  readonly code = 'coverage_unavailable';
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'CoverageUnavailableError';
+  }
+}

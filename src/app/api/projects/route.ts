@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { validateProjectFields } from '@/lib/validation/project';
 import { convertUsdToPkr } from '@/lib/currency/exchange-rate';
+import {
+  buildCoverageSnapshot,
+  canonicalRegionName,
+  getRegionForDistrict,
+  PAKISTAN_BOUNDS,
+  PAKISTAN_COUNTRY,
+} from '@/lib/geo/pakistan-geography';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,7 +91,12 @@ export async function POST(request: NextRequest) {
       const parsedLat = Number(body.lat);
       const parsedLng = Number(body.lng);
       if (Number.isFinite(parsedLat) && Number.isFinite(parsedLng)) {
-        if (parsedLat >= 23.5 && parsedLat <= 37.2 && parsedLng >= 60.8 && parsedLng <= 77.9) {
+        if (
+          parsedLat >= PAKISTAN_BOUNDS.minLat &&
+          parsedLat <= PAKISTAN_BOUNDS.maxLat &&
+          parsedLng >= PAKISTAN_BOUNDS.minLng &&
+          parsedLng <= PAKISTAN_BOUNDS.maxLng
+        ) {
           lat = parsedLat;
           lng = parsedLng;
         } else {
@@ -105,6 +117,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const district = body.district ? String(body.district).trim() : null;
+
+    // Resolve the region (province / administrative territory) nationally.
+    // Prefer an explicitly selected region (name or ISO code); otherwise infer it
+    // from a recognised district. NEVER silently default to Punjab.
+    const regionName =
+      canonicalRegionName(body.region ? String(body.region) : null) ||
+      (district ? getRegionForDistrict(district)?.name ?? null : null);
+
+    // Persist a coverage snapshot inside the existing `projects.metadata` JSONB.
+    // Geographic identity and data coverage stay separate; no new columns/tables.
+    const metadata: Record<string, unknown> =
+      body.metadata && typeof body.metadata === 'object' ? { ...body.metadata } : {};
+    metadata.geo = buildCoverageSnapshot({ region: regionName, district, city: parsedCity });
+
     const newProject = {
       owner_id: user.id, // Strictly derived from server session
       title: body.title ? String(body.title).trim() : `${category} Venture`,
@@ -112,9 +139,9 @@ export async function POST(request: NextRequest) {
       custom_category: body.custom_category || null,
       target_location: targetLocation,
       city: parsedCity,
-      district: body.district ? String(body.district).trim() : null,
-      region: body.region || 'Punjab',
-      country: 'Pakistan',
+      district,
+      region: regionName,
+      country: PAKISTAN_COUNTRY,
       postal_code: body.postal_code || null,
       lat,
       lng,
@@ -132,6 +159,7 @@ export async function POST(request: NextRequest) {
       product_description: body.product_description || '',
       product_types: Array.isArray(body.product_types) ? body.product_types : [],
       current_step: body.current_step ? Number(body.current_step) : 1,
+      metadata,
       status: 'draft',
     };
 

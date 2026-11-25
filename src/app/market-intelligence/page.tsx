@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { PAKISTAN_REGIONS } from '@/lib/geo/pakistan-geography';
 
 interface DistrictBenchmark {
   district: string;
@@ -53,6 +54,14 @@ interface DemandAnalysis {
   };
 }
 
+interface CoverageInfo {
+  status: string;
+  district?: string;
+  scope?: string;
+  source?: string;
+  source_note?: string;
+}
+
 export default function MarketIntelligencePage() {
   const [activeTab, setActiveTab] = useState<'trends' | 'regional' | 'calculator'>('trends');
 
@@ -69,9 +78,10 @@ export default function MarketIntelligencePage() {
 
   // Demand calculator state
   const [calcKeyword, setCalcKeyword] = useState('lawn suits');
-  const [calcDistrict, setCalcDistrict] = useState('Lahore');
+  const [calcDistrict, setCalcDistrict] = useState('');
   const [calculating, setCalculating] = useState(false);
   const [calcResult, setCalcResult] = useState<DemandAnalysis | null>(null);
+  const [calcCoverage, setCalcCoverage] = useState<CoverageInfo | null>(null);
 
   // Fetch regional benchmarks
   useEffect(() => {
@@ -80,9 +90,13 @@ export default function MarketIntelligencePage() {
         const res = await fetch('/api/market/regional');
         if (res.ok) {
           const data = await res.json();
-          setDistricts(data.districts || []);
-          if (data.districts?.length > 0) {
-            setSelectedDistrict(data.districts[0]);
+          const list: DistrictBenchmark[] = data.districts || [];
+          setDistricts(list);
+          if (list.length > 0) {
+            setSelectedDistrict(list[0]);
+            // Default the calculator to an actually-available district instead of
+            // hard-coding a Punjab district name.
+            setCalcDistrict((current) => current || list[0].district);
           }
         }
       } catch {
@@ -138,7 +152,8 @@ export default function MarketIntelligencePage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setCalcResult(data.analysis);
+        setCalcResult(data.analysis ?? null);
+        setCalcCoverage(data.coverage ?? null);
       } else {
         const err = await res.json();
         alert(`Calculation failed: ${err.error}`);
@@ -173,7 +188,7 @@ export default function MarketIntelligencePage() {
                 <span className="text-[12px] font-mono text-[#bbcabf]">Market Intelligence</span>
               </div>
               <h1 className="text-[16px] font-bold text-[#dae2fd] leading-tight">
-                Google Trends &amp; Punjab Regional Market Analysis
+                Google Trends &amp; Pakistan Regional Market Analysis
               </h1>
             </div>
           </div>
@@ -221,7 +236,7 @@ export default function MarketIntelligencePage() {
             }`}
           >
             <span className="material-symbols-outlined text-[18px]">location_city</span>
-            <span>Punjab District Demographics &amp; Rent</span>
+            <span>District Demographics &amp; Rent</span>
             <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-[#171f33] text-[#bbcabf]">
               {districts.length} Districts
             </span>
@@ -270,7 +285,12 @@ export default function MarketIntelligencePage() {
                     className="w-full bg-[#131b2e] border border-[#2d3449] rounded-xl px-3 py-2 text-[13px] text-[#dae2fd] focus:border-[#4cd7f6] outline-none"
                   >
                     <option value="PK">Pakistan (Entire)</option>
-                    <option value="PK-PB">Punjab Province</option>
+                    {PAKISTAN_REGIONS.map((region) => (
+                      <option key={region.code} value={region.code}>
+                        {region.name}
+                        {region.coverage === 'verified' ? ' — verified coverage' : ' — coverage pending'}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -471,7 +491,7 @@ export default function MarketIntelligencePage() {
             {/* Left Column: District List */}
             <div className="lg:col-span-4 space-y-3">
               <h4 className="text-[12px] font-mono uppercase text-[#bbcabf] font-semibold">
-                Major Commercial Districts (Punjab)
+                Major Commercial Districts (verified coverage)
               </h4>
               <div className="space-y-2">
                 {districts.map((d) => (
@@ -732,6 +752,16 @@ export default function MarketIntelligencePage() {
                       </div>
                     </div>
                   </div>
+
+                  {calcCoverage?.source_note && (
+                    <p className="text-[11px] text-[#bbcabf] leading-relaxed">{calcCoverage.source_note}</p>
+                  )}
+                </div>
+              ) : calcCoverage?.status === 'unavailable' ? (
+                <div className="bg-[#f59e0b15] border border-[#f59e0b]/40 rounded-xl p-6 text-[13px] text-[#f59e0b] leading-relaxed">
+                  <strong>Coverage unavailable:</strong>{' '}
+                  {calcCoverage.source_note ||
+                    'Verified demand-analysis coverage is currently Punjab-only, and another district\u2019s benchmarks are not substituted.'}
                 </div>
               ) : (
                 <div className="bg-[#131b2e] border border-[#2d3449] rounded-xl p-12 text-center text-[#bbcabf] text-[13px]">

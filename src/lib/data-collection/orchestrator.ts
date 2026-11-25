@@ -7,7 +7,9 @@ import {
   DemandTrendRecord,
   CostEstimateRecord,
   ProviderStatusDetail,
+  CoverageUnavailableError,
 } from '@/types/data-collection';
+import { PAKISTAN_COUNTRY_CODE } from '@/lib/geo/pakistan-geography';
 
 export interface OrchestrationResult {
   success: boolean;
@@ -94,6 +96,15 @@ export async function runDataCollection(
   const runId = run.id;
   const providers = getProviderBundle(options?.forceDemo);
 
+  // Geographic identity for this run. No silent Punjab defaults: a missing
+  // region stays missing, and a missing coordinate disables coordinate-bound
+  // providers rather than substituting Lahore.
+  const regionName: string | null = project.region || null;
+  const lat = project.lat != null ? Number(project.lat) : NaN;
+  const lng = project.lng != null ? Number(project.lng) : NaN;
+  const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng);
+  const locationLabel = project.city || project.district || 'this location';
+
   const providersStatus: CollectionRun['providers_status'] = {};
 
   let competitors: CompetitorRecord[] = [];
@@ -103,49 +114,64 @@ export async function runDataCollection(
 
   // 4. Concurrently execute independent providers with individual failure handling
   const [compResult, regionalResult, trendResult, costResult] = await Promise.allSettled([
-    // A. Competitors (with auto-fallback to demo on live network/API failure)
+    // A. Competitors — nationwide OpenStreetMap POI radar (requires coordinates).
+    // With auto-fallback to demo on live network/API failure.
     (async () => {
       const start = Date.now();
+      if (!hasCoordinates) {
+        return {
+          records: [] as CompetitorRecord[],
+          provider: providers.competitorProvider.name,
+          provenance: providers.competitorProvider.provenance,
+          latency: Date.now() - start,
+          unavailable: true,
+          warning: `No verified coordinates are available for ${locationLabel}. The nationwide OpenStreetMap POI radar requires coordinates; no other region's coordinates were substituted.`,
+        };
+      }
       try {
         const records = await providers.competitorProvider.getCompetitors({
           category: project.category,
-          lat: Number(project.lat || 31.5204),
-          lng: Number(project.lng || 74.3587),
+          lat,
+          lng,
           radiusKm: Number(project.radius_km || 10),
-          city: project.city || 'Lahore',
+          city: project.city || undefined,
         });
         return {
           records,
           provider: providers.competitorProvider.name,
           provenance: providers.competitorProvider.provenance,
           latency: Date.now() - start,
+          unavailable: false,
+          warning: undefined as string | undefined,
         };
       } catch (err: unknown) {
         // Fallback to Demo Competitor Provider if live external provider fails
         const demoComp = new DemoCompetitorProvider();
         const demoRecords = await demoComp.getCompetitors({
           category: project.category,
-          lat: Number(project.lat || 31.5204),
-          lng: Number(project.lng || 74.3587),
+          lat,
+          lng,
           radiusKm: Number(project.radius_km || 10),
-          city: project.city || 'Lahore',
+          city: project.city || undefined,
         });
         return {
           records: demoRecords,
           provider: demoComp.name,
           provenance: demoComp.provenance,
           latency: Date.now() - start,
+          unavailable: false,
           warning: `Live provider failed (${err instanceof Error ? err.message : String(err)}). Reverted to demo provider.`,
         };
       }
     })(),
 
-    // B. Regional Demographics
+    // B. Regional Demographics — nationwide provider (city-specific where known,
+    // otherwise an explicitly national urban estimate).
     (async () => {
       const start = Date.now();
       const records = await providers.regionalStatsProvider.getRegionalStats({
-        city: project.city || 'Lahore',
-        region: project.region || undefined,
+        city: project.city || project.district || 'Pakistan',
+        region: regionName || undefined,
         country: project.country || 'Pakistan',
       });
       return {
@@ -156,12 +182,13 @@ export async function runDataCollection(
       };
     })(),
 
-    // C. Demand & Search Trends
+    // C. Demand & Search Trends — nationwide Google Trends geo (region-aware).
+    // May throw CoverageUnavailableError for regions without verified coverage.
     (async () => {
       const start = Date.now();
       const record = await providers.demandTrendProvider.getDemandTrends({
         category: project.category,
-        region: 'PK',
+        region: regionName || PAKISTAN_COUNTRY_CODE,
       });
       return {
         record,
@@ -171,12 +198,12 @@ export async function runDataCollection(
       };
     })(),
 
-    // D. Cost Estimates
+    // D. Cost Estimates — national SME cost benchmark model (no Punjab default).
     (async () => {
       const start = Date.now();
       const records = await providers.costEstimateProvider.getCostEstimates({
         category: project.category,
-        city: project.city || 'Lahore',
+        city: project.city || '',
         area: project.target_location,
         footprint: project.storefront_footprint || 'boutique',
         budgetAmount: Number(project.budget_amount) || 15000,
@@ -193,19 +220,31 @@ export async function runDataCollection(
 
   // Process Competitor Result
   if (compResult.status === 'fulfilled') {
-    competitors = compResult.value.records.map((c) => ({
-      ...c,
-      project_id: projectId,
-      run_id: runId,
-    }));
-    providersStatus.competitors = {
-      status: 'completed',
-      provider: compResult.value.provider,
-      provenance: compResult.value.provenance,
-      item_count: competitors.length,
-      latency_ms: compResult.value.latency,
-      error: compResult.value.warning,
-    };
+    const comp = compResult.value;
+    if (comp.unavailable) {
+      providersStatus.competitors = {
+        status: 'unavailable',
+        provider: comp.provider,
+        provenance: comp.provenance,
+        item_count: 0,
+        latency_ms: comp.latency,
+        error: comp.warning,
+      };
+    } else {
+      competitors = comp.records.map((c) => ({
+        ...c,
+        project_id: projectId,
+        run_id: runId,
+      }));
+      providersStatus.competitors = {
+        status: 'completed',
+        provider: comp.provider,
+        provenance: comp.provenance,
+        item_count: competitors.length,
+        latency_ms: comp.latency,
+        error: comp.warning,
+      };
+    }
   } else {
     providersStatus.competitors = {
       status: 'failed',
@@ -253,6 +292,14 @@ export async function runDataCollection(
       provenance: trendResult.value.provenance,
       item_count: demandTrend.trend_series.length,
       latency_ms: trendResult.value.latency,
+    };
+  } else if (trendResult.reason instanceof CoverageUnavailableError) {
+    providersStatus.trends = {
+      status: 'unavailable',
+      provider: providers.demandTrendProvider.name,
+      provenance: providers.demandTrendProvider.provenance,
+      item_count: 0,
+      error: trendResult.reason.message,
     };
   } else {
     providersStatus.trends = {
