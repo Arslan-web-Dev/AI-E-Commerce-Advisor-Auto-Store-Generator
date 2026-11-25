@@ -108,49 +108,69 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
   const hasData = competitors.length > 0 || observations.length > 0 || demandTrend !== null || costEstimates.length > 0;
   const isDemo = competitors.some((c) => c.provenance === 'synthetic_demo') || latestRun?.providers_status?.competitors?.provenance === 'synthetic_demo';
 
-  const renderProvenanceBadge = (prov: string) => {
-    switch (prov) {
-      case 'unavailable':
-        return (
-          <span className="bg-[#bbcabf]/10 text-[#bbcabf] border border-[#2d3449] px-2 py-0.5 rounded text-[10px] font-semibold">
-            Not collected
-          </span>
-        );
+  const renderFreshnessBadge = (freshness?: string, provenance?: string) => {
+    const key = freshness || provenance || 'unavailable';
+    switch (key) {
+      case 'live':
       case 'external_api':
         return (
           <span className="bg-[#4edea3]/15 text-[#4edea3] border border-[#4edea3]/30 px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-[#4edea3]"></span>
-            <span>Live External API</span>
+            <span>Live observation</span>
+          </span>
+        );
+      case 'cached':
+        return (
+          <span className="bg-[#4cd7f6]/15 text-[#4cd7f6] border border-[#4cd7f6]/30 px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#4cd7f6]"></span>
+            <span>Cached (fresh)</span>
+          </span>
+        );
+      case 'stale_cache':
+        return (
+          <span className="bg-[#d97706]/15 text-[#d97706] border border-[#d97706]/30 px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#d97706]"></span>
+            <span>Stale cache</span>
+          </span>
+        );
+      case 'verified_benchmark':
+      case 'licensed_dataset':
+        return (
+          <span className="bg-[#4cd7f6]/15 text-[#4cd7f6] border border-[#4cd7f6]/30 px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#4cd7f6]"></span>
+            <span>Verified benchmark</span>
+          </span>
+        );
+      case 'manual_estimate':
+        return (
+          <span className="bg-[#bbcabf]/15 text-[#bbcabf] border border-[#2d3449] px-2 py-0.5 rounded text-[10px] font-semibold">
+            Manual estimate
           </span>
         );
       case 'synthetic_demo':
         return (
           <span className="bg-[#d97706]/15 text-[#d97706] border border-[#d97706]/30 px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-[#d97706]"></span>
-            <span>Demo Data</span>
+            <span>Synthetic demo</span>
           </span>
         );
-      case 'licensed_dataset':
+      case 'unavailable':
         return (
-          <span className="bg-[#4cd7f6]/15 text-[#4cd7f6] border border-[#4cd7f6]/30 px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#4cd7f6]"></span>
-            <span>Licensed Dataset</span>
-          </span>
-        );
-      case 'manual_estimate':
-        return (
-          <span className="bg-[#bbcabf]/15 text-[#bbcabf] border border-[#2d3449] px-2 py-0.5 rounded text-[10px] font-semibold">
-            Manual Estimate
+          <span className="bg-[#bbcabf]/10 text-[#bbcabf] border border-[#2d3449] px-2 py-0.5 rounded text-[10px] font-semibold">
+            Unavailable
           </span>
         );
       default:
         return (
           <span className="bg-[#bbcabf]/15 text-[#bbcabf] border border-[#2d3449] px-2 py-0.5 rounded text-[10px] font-semibold">
-            Unverified Source
+            Unverified source
           </span>
         );
     }
   };
+
+  const renderProvenanceBadge = (prov: string, freshness?: string) =>
+    renderFreshnessBadge(freshness, prov);
 
   return (
     <div className="w-full bg-[#131b2e] border border-[#2d3449]/70 rounded-2xl p-6 md:p-8 shadow-xl flex flex-col gap-6">
@@ -196,7 +216,7 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
               )}
             </div>
             <p className="text-[12px] text-[#bbcabf]">
-              OpenStreetMap Overpass POIs • Curated regional estimates • Synthetic demand curves • SME rent estimates
+              Live/cached OSM POIs • Regional estimates • Google Trends (with stale-cache fallback) • Rent cache (analysis reads cache only)
             </p>
           </div>
         </div>
@@ -241,7 +261,10 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
           <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold text-[#bbcabf] uppercase">Competitors (OSM)</span>
-              {renderProvenanceBadge(latestRun.providers_status.competitors?.provenance || 'unavailable')}
+              {renderProvenanceBadge(
+                latestRun.providers_status.competitors?.provenance || 'unavailable',
+                latestRun.providers_status.competitors?.freshness
+              )}
             </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-[20px] font-bold text-[#dae2fd]">
@@ -254,12 +277,18 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
                 Latency: {latestRun.providers_status.competitors.latency_ms}ms
               </span>
             )}
+            {latestRun.providers_status.competitors?.attribution && (
+              <span className="text-[10px] text-[#86948a]">{latestRun.providers_status.competitors.attribution}</span>
+            )}
           </div>
 
           <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold text-[#bbcabf] uppercase">Regional reference estimates</span>
-              {renderProvenanceBadge(latestRun.providers_status.regional_stats?.provenance || 'unavailable')}
+              {renderProvenanceBadge(
+                latestRun.providers_status.regional_stats?.provenance || 'unavailable',
+                latestRun.providers_status.regional_stats?.freshness
+              )}
             </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-[20px] font-bold text-[#dae2fd]">
@@ -267,13 +296,16 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
               </span>
               <span className="text-[11px] text-[#bbcabf]">regional metrics</span>
             </div>
-            <span className="text-[10px] text-[#86948a] font-mono">Static references; verify source/date</span>
+            <span className="text-[10px] text-[#86948a] font-mono">Manual estimates; verify source/date</span>
           </div>
 
           <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold text-[#bbcabf] uppercase">Search Trends</span>
-              {renderProvenanceBadge(latestRun.providers_status.trends?.provenance || 'unavailable')}
+              {renderProvenanceBadge(
+                latestRun.providers_status.trends?.provenance || 'unavailable',
+                latestRun.providers_status.trends?.freshness
+              )}
             </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-[20px] font-bold text-[#dae2fd]">
@@ -281,19 +313,34 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
               </span>
               <span className="text-[11px] text-[#bbcabf] capitalize">({demandTrend?.trend_slope || 'N/A'})</span>
             </div>
-            <span className="text-[10px] text-[#86948a] font-mono">12-Mo Synthetic Estimate</span>
+            <span className="text-[10px] text-[#86948a] font-mono">
+              {demandTrend?.freshness === 'live'
+                ? '12-mo live Google Trends'
+                : demandTrend?.freshness === 'cached'
+                ? '12-mo cached Trends'
+                : demandTrend?.freshness === 'stale_cache'
+                ? '12-mo stale Trends cache'
+                : demandTrend
+                ? '12-mo labelled fallback'
+                : latestRun.providers_status.trends?.status === 'unavailable'
+                ? 'Coverage unavailable'
+                : 'Not collected'}
+            </span>
           </div>
 
           <div className="bg-[#171f33] p-3 rounded-xl border border-[#2d3449] flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold text-[#bbcabf] uppercase">Cost Baseline</span>
-              {renderProvenanceBadge(latestRun.providers_status.costs?.provenance || 'unavailable')}
+              {renderProvenanceBadge(
+                latestRun.providers_status.costs?.provenance || 'unavailable',
+                latestRun.providers_status.costs?.freshness
+              )}
             </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-[20px] font-bold text-[#dae2fd]">{costEstimates.length}</span>
               <span className="text-[11px] text-[#bbcabf]">cost categories</span>
             </div>
-            <span className="text-[10px] text-[#86948a] font-mono">Rent Cache &amp; COD Model</span>
+            <span className="text-[10px] text-[#86948a] font-mono">Rent cache only (no live scrape)</span>
           </div>
         </div>
       )}
@@ -394,8 +441,8 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
                       <td className="py-3 px-4 text-[#dae2fd]">
                         {c.rating ? `⭐ ${c.rating}` : '—'}
                       </td>
-                      <td className="py-3 px-4 text-[#bbcabf]">{c.price_level || 'Moderate'}</td>
-                      <td className="py-3 px-4">{renderProvenanceBadge(c.provenance)}</td>
+                      <td className="py-3 px-4 text-[#bbcabf]">{c.price_level || '—'}</td>
+                      <td className="py-3 px-4">{renderProvenanceBadge(c.provenance, c.freshness)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -427,7 +474,7 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
               <div key={i} className="bg-[#171f33] p-5 rounded-xl border border-[#2d3449] flex flex-col justify-between gap-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[12px] font-bold text-[#bbcabf] uppercase tracking-wider">{title}</span>
-                  {renderProvenanceBadge(obs.provenance)}
+                  {renderProvenanceBadge(obs.provenance, obs.freshness)}
                 </div>
                 <div>
                   <span className="text-[32px] font-bold text-[#dae2fd]">{formattedVal}</span>
@@ -455,10 +502,11 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
             <div>
               <h3 className="text-[16px] font-bold text-[#dae2fd]">
-                12-Month Search Trajectory (Pakistan)
+                12-Month Search Trajectory
               </h3>
               <p className="text-[12px] text-[#bbcabf]">
-                Normalized relative interest index (0–100) for {demandTrend?.category || 'selected vertical'}.
+                Normalized relative interest index (0–100) for {demandTrend?.category || 'selected vertical'}
+                {demandTrend?.actual_geo_scope ? ` · geo ${demandTrend.actual_geo_scope}` : ''}.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -466,7 +514,7 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
               <span className="bg-[#4edea3]/20 text-[#4edea3] text-[11px] font-bold px-2.5 py-0.5 rounded-full capitalize">
                 {demandTrend?.trend_slope || 'Stable'}
               </span>
-              {demandTrend && renderProvenanceBadge(demandTrend.provenance)}
+              {demandTrend && renderProvenanceBadge(demandTrend.provenance, demandTrend.freshness)}
             </div>
           </div>
 
@@ -518,11 +566,13 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
               <div key={i} className="bg-[#171f33] p-5 rounded-xl border border-[#2d3449] flex flex-col justify-between gap-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-[#bbcabf] uppercase tracking-wider">{title}</span>
-                  {renderProvenanceBadge(cost.provenance)}
+                  {renderProvenanceBadge(cost.provenance, cost.freshness)}
                 </div>
                 <div>
                   <div className="text-[20px] font-bold text-[#4edea3]">
-                    {prefix}{cost.amount_min.toLocaleString()} – {prefix}{cost.amount_max.toLocaleString()}
+                    {cost.freshness === 'unavailable'
+                      ? 'Unavailable'
+                      : `${prefix}${cost.amount_min.toLocaleString()} – ${prefix}${cost.amount_max.toLocaleString()}`}
                   </div>
                   <span className="text-[11px] text-[#bbcabf] capitalize">Basis: {cost.period_or_unit}</span>
                 </div>

@@ -3,71 +3,59 @@
 ## 1. Provider Inventory & Contracts
 
 ### A. OpenStreetMap Overpass API (Competitor Discovery)
-- **Primary Endpoint**: `https://overpass-api.de/api/interpreter`
-- **Secondary / Alternate Endpoint**: `https://maps.mail.ru/osm/tools/overpass/api/interpreter`
-- **Method**: HTTP POST with Overpass QL query:
-  ```overpass
-  [out:json][timeout:15];
-  (
-    node["shop"~"clothes|boutique|shoes"](around:10000, 31.5204, 74.3587);
-    way["shop"~"clothes|boutique|shoes"](around:10000, 31.5204, 74.3587);
-  );
-  out center 30;
-  ```
-- **Authentication**: Public, no API key required.
-- **Licensing & Terms**: Open Database License (ODbL). Attribution required: *"© OpenStreetMap contributors"*.
-- **Rate Limits & Hygiene**: Up to 2 concurrent connections per IP. 15-second query timeouts.
-- **Fallback**: When unreachable or rate-limited, the system falls back to `CompetitorDemoProvider` with provenance `synthetic_demo`.
+- **Primary Endpoint**: `OVERPASS_API_URL` or `https://overpass-api.de/api/interpreter`
+- **Alternate Endpoints**: `https://maps.mail.ru/osm/tools/overpass/api/interpreter`, `https://overpass.kumi.systems/api/interpreter`
+- **Method**: HTTP POST with Overpass QL. Each approved category maps to the relevant `shop=*` and `amenity=*` values. Restaurants/cafes and pharmacies are not queried as shops only.
+- **Radius**: Project radius, clamped to 1–15 km.
+- **Records**: Name (or `Unnamed business`), coordinates, OSM type/id, tags, category, Haversine distance, address when present. Ratings and review counts are stored only when OSM actually provides a valid rating. Review counts are not invented.
+- **Deduping**: Stable OSM identity (`type/id`), not business name.
+- **Resilience**: Per-request timeout, bounded exponential backoff, and failover across endpoints.
+- **Cache**: Successful live responses are stored in `competitor_query_cache` for seven days. The cache key includes category, rounded coordinates, radius, and query version. Concurrent requests for the same key share one live fetch. A cache outage does not fail collection.
+- **Authentication**: Public Overpass, no API key. Usage stays within public Overpass terms (bounded queries, identifying User-Agent, no bypass of rate limits).
+- **Licensing**: Open Database License (ODbL). Attribution: *"© OpenStreetMap contributors"*.
+- **Failure**: All endpoints failing returns a provider `failed` status. Synthetic competitors are used only when demo mode is explicit (`force_demo` or `FORCE_DEMO_DATA=true`) and are labelled `synthetic_demo`.
 
 ### B. Regional Statistics & Demographic Data (embedded estimates)
-- **Current implementation**: Embedded city reference values with citations; no live PBS/PTA request or versioned licensed dataset is loaded by this provider.
-- **Metrics Collected**:
-  - `population`: Regional census projection.
-  - `internet_penetration_pct`: Regional broadband/cellular penetration rate.
-  - `ecommerce_growth_rate_pct`: Estimated annual sector expansion index.
-- **Provenance**: `manual_estimate`; values and source dates require validation before decision use.
-- **Fallback**: An embedded national urban estimate is used for unsupported cities and must be treated as low-confidence.
+- **Current implementation**: Embedded city reference values with citations. This provider does not call a live PBS or PTA API.
+- **Metrics**: `population`, `internet_penetration_pct`, `ecommerce_growth_rate_pct`.
+- **Provenance**: `manual_estimate`.
 
-### C. Category Demand & Search Trends (synthetic curve)
-- **Current implementation**: In-code category seasonality curve, not Google Trends or Pytrends.
-- **Unit**: Synthetic illustrative index (`0–100`), not observed search interest or absolute unit sales.
-- **Provenance**: `synthetic_demo`; do not use as measured market demand.
+### C. Category Demand & Search Trends (Google Trends / Pytrends)
+- **Current implementation**: `GoogleTrendsProvider` calls the Python ML service (`/market/trends`), which uses Pytrends when installed.
+- **Geography**: Recognised province ISO 3166-2 code, otherwise Pakistan-wide `PK`. The requested scope is stored separately from the actual data scope.
+- **Cache**: Successful live responses are cached for 24 hours. If live retrieval fails, a stale cached payload may be returned and is flagged `is_stale` / freshness `stale_cache`.
+- **Punjab-only fallback**: Seasonal demonstration curves are used only for regions with verified coverage (Punjab) and are labelled `synthetic_demo`. They are not applied to other Pakistani regions. Those regions receive `unavailable` coverage when live and stale data are both missing.
+- **Empirical baseline**: If Pytrends is unavailable and no cache exists, the ML service may return `source: empirical_market_baseline`. That is not a live Google Trends observation.
 
 ### D. SME Commercial Cost Benchmarks & Rent Cache
-- **Current implementation**: Attempts an owner-authenticated `rent_cache` lookup and uses embedded city defaults when no row is available. This is a benchmark model, not a verified live rent feed.
-- **Cost Categories**:
-  - `setup`: Fit-out, electrical, display shelving, signage.
-  - `rent_monthly`: Derived from footprint square footage and `rent_per_sqft_pkr`.
-  - `marketing_initial`: Launch advertising, Meta/Google ads CAC baseline.
-  - `logistics_per_order`: Courier Cash on Delivery (COD) rate average.
-- **Provenance**: `manual_estimate`; sources, sample size, and observation date should be shown where a cache row exists.
+- **Analysis reads `rent_cache` only.** It does not scrape rent websites during a feasibility request.
+- **Lookup order**: exact area, then a nearby area in the same city/district within 12 km, then a city/district record, otherwise unavailable. Another district is never substituted silently.
+- **Scheduled writer**: `GET /api/cron/rent-cache` requires `CRON_SECRET` and upserts Punjab manual estimates with min, max, average, sample size, currency, source, confidence, and timestamp. Those rows are `manual_estimate`, not observed market averages.
+- **Cost categories**: `setup`, `rent_monthly`, `marketing_initial`, `logistics_per_order`.
+- **Missing rent**: `rent_monthly` is returned as unavailable (`0`–`0`) rather than a borrowed city rate.
 
 ---
 
 ## 2. Environment Variables
 
 ```bash
-# ==============================================================================
-# Module 3: Data Collection & Provider Configuration
-# ==============================================================================
-
-# OpenStreetMap Overpass Endpoint (Leave blank to use default public interpreter)
 OVERPASS_API_URL=https://overpass-api.de/api/interpreter
 OVERPASS_API_TIMEOUT_MS=12000
-
-# Force Demo Mode for testing and offline environments ('true' | 'false')
 FORCE_DEMO_DATA=false
-
-# Google Places / External Geocoding (Optional future upgrade; not required for OSM)
-GOOGLE_PLACES_API_KEY=
+CRON_SECRET=change-me-to-a-long-random-cron-secret
+ML_SERVICE_URL=http://127.0.0.1:8000
+ML_SERVICE_API_KEY=your-secure-ml-service-api-key-here
 ```
 
 ---
 
-## 3. Data Provenance Classification
+## 3. Data Provenance and Freshness
 
-Every persisted market record contains an explicit `provenance` value:
-- `external_api`: Verifiable live record returned by an authoritative external API.
-- `synthetic_demo`: Deterministic synthetic record generated for development or fallback when external APIs are offline.
-- `licensed_dataset`: Sourced from an established published census or open government dataset.
-- `manual_estimate`: Derived from documented SME benchmark heuristics and equations.
+Persisted records use `provenance`:
+
+- `external_api`: Observation returned by a permitted external API.
+- `synthetic_demo`: Deterministic demonstration or empirical baseline.
+- `licensed_dataset`: Published census or open government dataset.
+- `manual_estimate`: Documented estimate, not a live average.
+
+Collection status also reports `freshness`: `live`, `cached`, `stale_cache`, `verified_benchmark`, `manual_estimate`, `synthetic_demo`, `unavailable`.

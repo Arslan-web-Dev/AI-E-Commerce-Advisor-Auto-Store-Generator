@@ -148,6 +148,8 @@ export interface GoogleTrendsResult {
     latest_value: number;
   }>;
   is_cached: boolean;
+  /** True when a previously cached payload is returned after its TTL expired because live retrieval failed. */
+  is_stale?: boolean;
   fetched_at: string;
 }
 

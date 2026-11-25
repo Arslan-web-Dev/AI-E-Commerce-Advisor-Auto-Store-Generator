@@ -137,6 +137,8 @@ Upload an optional product specification document (PDF, CSV, JSON, PNG, JPG; max
 ### `POST /api/projects/[id]/collect`
 Initiate or retry external and benchmark data collection across competitors, demographics, trends, and cost models.
 
+Successful live competitor responses are cached for seven days (`competitor_query_cache`). A live Overpass failure stays `failed` and is not replaced with synthetic competitors. Set `force_demo: true` only when you want explicitly labelled `synthetic_demo` results. If another provider fails, successful providers are kept and the run status is `partial`.
+
 - **Authentication**: Required (Project owner or system admin)
 - **Request Body (Optional)**:
   ```json
@@ -144,44 +146,56 @@ Initiate or retry external and benchmark data collection across competitors, dem
     "force_demo": false
   }
   ```
+- **Provider status values**: `pending`, `running`, `completed`, `partial`, `failed`, `unavailable`
+- **Freshness values**: `live`, `cached`, `stale_cache`, `verified_benchmark`, `manual_estimate`, `synthetic_demo`, `unavailable`
 - **Response `200 OK`**:
   ```json
   {
-    "message": "Data collection completed successfully across all providers",
+    "message": "Data collection completed with partial provider coverage",
     "success": true,
     "run_id": "93f8e02d-...",
-    "status": "completed",
+    "status": "partial",
     "providers_status": {
       "competitors": {
         "status": "completed",
         "provider": "overpass_osm",
         "provenance": "external_api",
+        "freshness": "cached",
         "item_count": 14,
-        "latency_ms": 1280
+        "latency_ms": 40,
+        "attribution": "© OpenStreetMap contributors",
+        "requested_geo_scope": "31.5204,74.3587 r=10km",
+        "actual_geo_scope": "31.5204,74.3587",
+        "retrieved_at": "2026-11-18T10:00:00Z"
       },
       "regional_stats": {
         "status": "completed",
         "provider": "curated_regional_reference_estimates",
         "provenance": "manual_estimate",
+        "freshness": "manual_estimate",
         "item_count": 3
       },
       "trends": {
-        "status": "completed",
-        "provider": "synthetic_category_trend_curve",
-        "provenance": "synthetic_demo",
-        "item_count": 12
+        "status": "unavailable",
+        "provider": "google_pytrends_market_service",
+        "provenance": "external_api",
+        "freshness": "unavailable",
+        "item_count": 0,
+        "error": "No verified demand-trend coverage for the requested region."
       },
       "costs": {
-        "status": "completed",
+        "status": "partial",
         "provider": "sme_cost_benchmark_model",
         "provenance": "manual_estimate",
-        "item_count": 4
+        "freshness": "unavailable",
+        "item_count": 4,
+        "warning": "No rent_cache coverage for the requested geography."
       }
     },
     "summary": {
       "competitor_count": 14,
       "market_metric_count": 3,
-      "has_trend_data": true,
+      "has_trend_data": false,
       "cost_estimate_count": 4
     }
   }
@@ -222,16 +236,16 @@ Retrieve paginated competitor POIs discovered for the project.
     "competitors": [
       {
         "id": "...",
-        "name": "Al-Fatah Gourmet Mart",
+        "name": "Unnamed business",
         "category": "supermarket",
         "provider": "overpass_osm",
         "provenance": "external_api",
+        "freshness": "live",
         "lat": 31.5204,
         "lng": 74.3587,
         "distance_km": 0.42,
-        "rating": 4.5,
-        "price_level": "Moderate",
         "address": "Gulberg III, Lahore",
+        "attribution": "© OpenStreetMap contributors",
         "retrieved_at": "2026-10-06T10:00:00Z"
       }
     ],
@@ -265,11 +279,15 @@ Retrieve regional census demographics and 12-month demand trend observations.
     ],
     "demand_trend": {
       "category": "Grocery / General Stores",
-      "region": "PK",
+      "region": "PK-PB",
+      "requested_geo_scope": "PK-PB",
+      "actual_geo_scope": "PK-PB",
       "trend_series": [{ "month": "2025-10", "index": 78 }],
       "avg_interest": 74.2,
       "trend_slope": "stable",
-      "provenance": "external_api"
+      "provenance": "external_api",
+      "freshness": "cached",
+      "is_stale": false
     }
   }
   ```
@@ -290,12 +308,26 @@ Retrieve category-specific commercial setup, monthly rent, marketing, and logist
         "amount_max": 240000,
         "currency": "PKR",
         "period_or_unit": "per_month",
-        "assumptions": "Commercial rent benchmarked at Rs. 220/sq.ft for 250 sq.ft footprint.",
-        "provenance": "manual_estimate"
+        "assumptions": "Commercial rent from rent_cache (exact match). Source geography: Gulberg, Lahore. Provenance: manual_estimate.",
+        "provenance": "manual_estimate",
+        "freshness": "manual_estimate"
       }
     ]
   }
   ```
+
+When rent coverage is missing, `rent_monthly` is returned with `amount_min` and `amount_max` of `0`, `freshness: "unavailable"`, and an assumptions note. Analysis does not scrape live rent and does not substitute another city's cache row.
+
+---
+
+### `GET /api/cron/rent-cache`
+Scheduled job that upserts aggregated Punjab commercial rent **estimates** into `rent_cache`.
+
+- **Authentication**: Server-only `CRON_SECRET`. Send `Authorization: Bearer <CRON_SECRET>` or `x-cron-secret: <CRON_SECRET>`.
+- **Behaviour**: Writes `manual_estimate` rows (min, max, average, sample size, currency, source, confidence, coordinates). It does not scrape websites. The service-role key stays on the server.
+- **Response `200 OK`**: `{ "ok": true, "updated": 12, "provenance": "manual_estimate", "coverage": "Punjab" }`
+- **Response `401 Unauthorized`**: Missing or wrong cron secret.
+- **Response `503`**: `CRON_SECRET` or the Supabase service-role client is not configured.
 
 ---
 

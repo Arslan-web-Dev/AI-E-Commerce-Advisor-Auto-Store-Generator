@@ -4,17 +4,23 @@ import {
   DemandTrendQueryInput,
   IDemandTrendProvider,
   DataProvenance,
+  DataFreshness,
   CoverageUnavailableError,
 } from '../../../types/data-collection';
-import { mlClient } from '../../ml-client';
+import { mlClient, GoogleTrendsResult } from '../../ml-client';
 import { getRegion, PAKISTAN_COUNTRY_CODE } from '../../geo/pakistan-geography';
 
-// Punjab-derived seasonal 12-month relative search volume pattern (0-100 scale).
-// This is Punjab *coverage* data: it must never be presented as another region's
-// local trend (see the coverage guard in `getDemandTrends`).
-// Keys are the five approved Task 3 category names (Task 3 §3) and must match
-// PREDEFINED_CATEGORIES exactly.
-const CATEGORY_TREND_CURVES: Record<string, { baseline: number[]; slope: 'growing' | 'stable' | 'declining' }> = {
+/**
+ * Punjab-only seasonal demonstration curves.
+ * Used solely when:
+ *   1. live + fresh/stale cache retrieval both fail, AND
+ *   2. the requested region has verified coverage (Punjab).
+ * Never applied as local evidence for other Pakistani regions.
+ */
+const PUNJAB_CATEGORY_TREND_CURVES: Record<
+  string,
+  { baseline: number[]; slope: 'growing' | 'stable' | 'declining' }
+> = {
   'Grocery / General Stores': {
     baseline: [65, 62, 88, 98, 72, 68, 64, 66, 70, 75, 85, 89],
     slope: 'stable',
@@ -37,12 +43,88 @@ const CATEGORY_TREND_CURVES: Record<string, { baseline: number[]; slope: 'growin
   },
 };
 
-// Neutral fallback used only if an unrecognised category name reaches the
-// provider. Any recognised (approved) category always resolves to its own curve.
-const FALLBACK_TREND_CURVE = {
-  baseline: [50, 52, 51, 55, 53, 54, 52, 56, 58, 60, 59, 62],
-  slope: 'stable' as const,
-};
+/** @deprecated Prefer PUNJAB_CATEGORY_TREND_CURVES — kept for Task 3 tests. */
+export const CATEGORY_TREND_CURVES = PUNJAB_CATEGORY_TREND_CURVES;
+
+export function validateMonthlyTrendPoints(points: DemandTrendPoint[]): DemandTrendPoint[] {
+  const valid = points.filter((p) => {
+    if (!p.month || !/^\d{4}-\d{2}$/.test(p.month)) return false;
+    if (!Number.isFinite(p.index) || p.index < 0 || p.index > 100) return false;
+    return true;
+  });
+
+  // Collapse duplicate months by keeping the last observation.
+  const byMonth = new Map<string, DemandTrendPoint>();
+  for (const point of valid) {
+    byMonth.set(point.month, point);
+  }
+  return Array.from(byMonth.values()).sort((a, b) => a.month.localeCompare(b.month));
+}
+
+function mapTrendSeries(
+  response: GoogleTrendsResult,
+  category: string
+): DemandTrendPoint[] {
+  const points: DemandTrendPoint[] = response.interest_over_time.map((item) => {
+    const monthRaw = String(item.date || item.month || '').slice(0, 7);
+    const index = Number(item[category] ?? item.index);
+    return { month: monthRaw, index: Number.isFinite(index) ? index : NaN };
+  });
+  return validateMonthlyTrendPoints(points);
+}
+
+function slopeFromAnalytics(
+  analytics: GoogleTrendsResult['analytics'][string] | undefined
+): 'growing' | 'stable' | 'declining' {
+  if (!analytics) return 'stable';
+  if (analytics.trend_direction === 'rising' || analytics.trend_direction === 'rapidly_rising') {
+    return 'growing';
+  }
+  if (analytics.trend_direction === 'falling' || analytics.trend_direction === 'rapidly_falling') {
+    return 'declining';
+  }
+  return 'stable';
+}
+
+function buildPunjabSyntheticFallback(
+  category: string,
+  regionCode: string
+): DemandTrendRecord {
+  const curve = PUNJAB_CATEGORY_TREND_CURVES[category];
+  if (!curve) {
+    throw new CoverageUnavailableError(
+      `No verified demand-trend coverage for category "${category}" in Punjab.`
+    );
+  }
+
+  const points: DemandTrendPoint[] = [];
+  const today = new Date();
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    points.push({
+      month: monthStr,
+      index: Math.min(100, Math.max(0, curve.baseline[11 - i])),
+    });
+  }
+
+  const sum = points.reduce((acc, p) => acc + p.index, 0);
+  return {
+    project_id: '',
+    category,
+    region: regionCode,
+    trend_series: points,
+    avg_interest: Math.round((sum / points.length) * 10) / 10,
+    trend_slope: curve.slope,
+    provider: 'punjab_seasonal_benchmark_fallback',
+    provenance: 'synthetic_demo',
+    freshness: 'synthetic_demo',
+    requested_geo_scope: regionCode,
+    actual_geo_scope: 'PK-PB',
+    retrieved_at: new Date().toISOString(),
+    is_stale: false,
+  };
+}
 
 export class GoogleTrendsProvider implements IDemandTrendProvider {
   name = 'google_pytrends_market_service';
@@ -50,84 +132,60 @@ export class GoogleTrendsProvider implements IDemandTrendProvider {
 
   async getDemandTrends(input: DemandTrendQueryInput): Promise<DemandTrendRecord> {
     const region = getRegion(input.region);
-    // Google Trends geo: the requested region's ISO 3166-2 code when recognised,
-    // otherwise the national Pakistan code. Never a fixed Punjab code.
+    const requestedScope = region?.code ?? (input.region || PAKISTAN_COUNTRY_CODE);
+    // Prefer province ISO-3166-2 when recognised; otherwise Pakistan-wide.
     const geoCode = region?.code ?? PAKISTAN_COUNTRY_CODE;
 
     try {
-      // Live fetch from the nationwide-capable Python ML / Market service.
-      const response = await mlClient.getTrends([input.category], geoCode);
-      if (response && response.interest_over_time && response.interest_over_time.length > 0) {
-        const points: DemandTrendPoint[] = response.interest_over_time.map((item: Record<string, unknown>) => ({
-          month: String(item.date || item.month || '').slice(0, 7),
-          index: Number(item[input.category] ?? item.index ?? 50),
-        }));
+      const response = await mlClient.getTrends([input.category], geoCode, 'today 12-m');
+      const points = mapTrendSeries(response, input.category);
 
+      if (points.length >= 6) {
         const analytics = response.analytics?.[input.category];
-        const avgInterest = analytics?.average_interest ?? 50;
-        const slope = analytics?.trend_direction === 'rising' || analytics?.trend_direction === 'rapidly_rising'
-          ? 'growing'
-          : analytics?.trend_direction === 'falling' || analytics?.trend_direction === 'rapidly_falling'
-          ? 'declining'
-          : 'stable';
+        const avgInterest =
+          analytics?.average_interest ??
+          Math.round((points.reduce((a, p) => a + p.index, 0) / points.length) * 10) / 10;
+
+        const isEmpirical = response.source === 'empirical_market_baseline';
+        const freshness: DataFreshness = isEmpirical
+          ? 'synthetic_demo'
+          : response.is_stale
+          ? 'stale_cache'
+          : response.is_cached
+          ? 'cached'
+          : 'live';
+
+        const provenance: DataProvenance = isEmpirical ? 'synthetic_demo' : 'external_api';
 
         return {
           project_id: '',
           category: input.category,
           region: response.geo || geoCode,
-          trend_series: points,
+          trend_series: points.slice(-12),
           avg_interest: avgInterest,
-          trend_slope: slope,
+          trend_slope: slopeFromAnalytics(analytics),
           provider: this.name,
-          provenance: 'external_api',
-          retrieved_at: new Date().toISOString(),
+          provenance,
+          freshness,
+          requested_geo_scope: requestedScope,
+          actual_geo_scope: response.geo || geoCode,
+          retrieved_at: response.fetched_at || new Date().toISOString(),
+          cache_retrieved_at: response.is_cached || response.is_stale ? new Date().toISOString() : undefined,
+          is_stale: Boolean(response.is_stale),
         };
       }
     } catch (err) {
-      console.warn('Live Pytrends fetch failed, falling back to calibrated seasonal benchmark:', err);
+      console.warn('Live/stale Pytrends retrieval failed:', err);
     }
 
-    // The curated curves below are Punjab coverage data. They may only be used
-    // for a region with verified coverage (currently Punjab). Any other region
-    // gets an explicit coverage-unavailable signal rather than Punjab trends.
-    if (!region || !region.analysis_enabled) {
-      throw new CoverageUnavailableError(
-        `No verified demand-trend coverage for "${input.region || 'unrecognised region'}". ` +
-          'Live search-trend data was unavailable and Punjab seasonal benchmarks are not substituted for other regions.'
-      );
+    // Punjab seasonal curves only for verified Punjab coverage.
+    if (region?.analysis_enabled) {
+      return buildPunjabSyntheticFallback(input.category, region.code);
     }
 
-    // Graceful fallback to verified seasonal Punjab patterns (Punjab coverage).
-    const curve = CATEGORY_TREND_CURVES[input.category] || FALLBACK_TREND_CURVE;
-    const points: DemandTrendPoint[] = [];
-    const today = new Date();
-
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const monthStr = `${year}-${month}`;
-
-      const rawVal = curve.baseline[11 - i];
-      points.push({
-        month: monthStr,
-        index: Math.min(100, Math.max(10, rawVal)),
-      });
-    }
-
-    const sum = points.reduce((acc, p) => acc + p.index, 0);
-    const avgInterest = Math.round((sum / points.length) * 10) / 10;
-
-    return {
-      project_id: '',
-      category: input.category,
-      region: region.code,
-      trend_series: points,
-      avg_interest: avgInterest,
-      trend_slope: curve.slope,
-      provider: 'seasonal_benchmark_fallback',
-      provenance: 'synthetic_demo',
-      retrieved_at: new Date().toISOString(),
-    };
+    throw new CoverageUnavailableError(
+      `No verified demand-trend coverage for "${input.region || 'unrecognised region'}". ` +
+        'Live search-trend data was unavailable and Punjab seasonal benchmarks are not substituted for other regions.'
+    );
   }
 }

@@ -28,7 +28,7 @@ Do not treat a UI screen, file, migration, or prompt as proof that a requirement
 
 Copy `.env.example` to `.env.local`, then set the Supabase URL, public publishable key (or legacy anon key), and service-role key. Keep service-role and GitHub tokens server-only; never commit `.env.local` or expose these values to browser code.
 
-For a local run, set `FORCE_DEMO_DATA=true` only when you explicitly want the synthetic demonstration providers. Set it to `false` for the configured provider bundle. In either mode, check the provenance labels before using analysis results. The current trend and regional adapters remain synthetic/estimated even when forced demo mode is off.
+For a local run, set `FORCE_DEMO_DATA=true` only when you explicitly want the synthetic demonstration providers. Set it to `false` for the configured provider bundle. In either mode, check the provenance and freshness labels before using analysis results. Competitor collection uses OpenStreetMap Overpass with a seven-day cache. Demand trends call the Python ML service (Google Trends / Pytrends) and fall back to a labelled Punjab seasonal curve only for verified Punjab coverage. Set `CRON_SECRET` before calling `GET /api/cron/rent-cache`; that job writes labelled Punjab rent estimates into `rent_cache` and does not scrape live listings. Regional demographic figures remain manual estimates.
 
 ### Apply the database schema
 

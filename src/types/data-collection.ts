@@ -4,6 +4,19 @@ export type DataProvenance =
   | 'licensed_dataset'
   | 'manual_estimate';
 
+/**
+ * How the observation was obtained relative to a live request.
+ * Never conflate synthetic/estimated values with live market observations.
+ */
+export type DataFreshness =
+  | 'live'
+  | 'cached'
+  | 'stale_cache'
+  | 'verified_benchmark'
+  | 'manual_estimate'
+  | 'synthetic_demo'
+  | 'unavailable';
+
 export type ProviderRunStatus =
   | 'pending'
   | 'running'
@@ -11,6 +24,10 @@ export type ProviderRunStatus =
   | 'partial'
   | 'failed'
   | 'unavailable';
+
+export type ConfidenceLevel = 'high' | 'medium' | 'low' | 'none';
+
+export type RentMatchLevel = 'exact' | 'nearby' | 'city' | 'district' | 'estimated' | 'unavailable';
 
 export interface CompetitorRecord {
   id?: string;
@@ -20,6 +37,7 @@ export interface CompetitorRecord {
   category: string;
   provider: string;
   provenance: DataProvenance;
+  freshness?: DataFreshness;
   lat: number;
   lng: number;
   distance_km: number;
@@ -29,6 +47,8 @@ export interface CompetitorRecord {
   address?: string;
   raw_data?: Record<string, unknown>;
   retrieved_at: string;
+  cache_retrieved_at?: string;
+  attribution?: string;
 }
 
 export interface MarketObservation {
@@ -42,6 +62,7 @@ export interface MarketObservation {
   period_year: number;
   provider: string;
   provenance: DataProvenance;
+  freshness?: DataFreshness;
   source_citation?: string;
   retrieved_at: string;
 }
@@ -62,7 +83,12 @@ export interface DemandTrendRecord {
   trend_slope: 'growing' | 'stable' | 'declining';
   provider: string;
   provenance: DataProvenance;
+  freshness?: DataFreshness;
+  requested_geo_scope?: string;
+  actual_geo_scope?: string;
   retrieved_at: string;
+  cache_retrieved_at?: string;
+  is_stale?: boolean;
 }
 
 export interface CostEstimateRecord {
@@ -77,16 +103,80 @@ export interface CostEstimateRecord {
   assumptions?: string;
   provider: string;
   provenance: DataProvenance;
+  freshness?: DataFreshness;
   retrieved_at: string;
+}
+
+export interface RentLookupResult {
+  status: 'found' | 'unavailable';
+  match_level: RentMatchLevel;
+  requested_geography: {
+    city?: string;
+    area?: string;
+    district?: string;
+    province?: string;
+    lat?: number;
+    lng?: number;
+  };
+  source_geography: {
+    city?: string;
+    area?: string;
+    district?: string;
+    province?: string;
+    lat?: number;
+    lng?: number;
+  } | null;
+  distance_km?: number;
+  rent_per_sqft_pkr?: number;
+  rent_min_pkr?: number;
+  rent_max_pkr?: number;
+  rent_avg_pkr?: number;
+  currency: 'PKR';
+  sample_size?: number;
+  source?: string;
+  provenance: DataProvenance | 'unavailable';
+  freshness: DataFreshness;
+  confidence: ConfidenceLevel;
+  retrieved_at?: string;
+  notes?: string;
 }
 
 export interface ProviderStatusDetail {
   status: ProviderRunStatus;
   provider: string;
   provenance: DataProvenance;
+  freshness?: DataFreshness;
   item_count: number;
   error?: string;
+  warning?: string;
   latency_ms?: number;
+  requested_geo_scope?: string;
+  actual_geo_scope?: string;
+  retrieved_at?: string;
+  cache_retrieved_at?: string;
+  confidence?: ConfidenceLevel;
+  attribution?: string;
+}
+
+/**
+ * Consistent typed result envelope returned by every Module 3 provider path.
+ */
+export interface TypedProviderResult<T> {
+  provider: string;
+  status: ProviderRunStatus;
+  provenance: DataProvenance;
+  freshness: DataFreshness;
+  requested_geo_scope: string;
+  actual_geo_scope: string;
+  retrieved_at: string;
+  cache_retrieved_at?: string;
+  item_count: number;
+  latency_ms: number;
+  confidence: ConfidenceLevel;
+  error?: string;
+  warning?: string;
+  attribution?: string;
+  data: T | null;
 }
 
 export interface CollectionRun {
@@ -146,6 +236,10 @@ export interface CostEstimateQueryInput {
   category: string;
   city: string;
   area?: string;
+  district?: string;
+  province?: string;
+  lat?: number;
+  lng?: number;
   footprint: string;
   budgetAmount: number;
   budgetCurrency: 'USD' | 'PKR';

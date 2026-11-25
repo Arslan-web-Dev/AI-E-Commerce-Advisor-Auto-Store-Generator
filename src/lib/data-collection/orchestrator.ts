@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getProviderBundle, DemoCompetitorProvider } from '@/lib/providers';
 import {
   CollectionRun,
@@ -6,10 +7,16 @@ import {
   MarketObservation,
   DemandTrendRecord,
   CostEstimateRecord,
-  ProviderStatusDetail,
   CoverageUnavailableError,
+  DataFreshness,
+  ProviderStatusDetail,
 } from '@/types/data-collection';
 import { PAKISTAN_COUNTRY_CODE } from '@/lib/geo/pakistan-geography';
+import { getCompetitorsWithCache } from '@/lib/data-collection/competitor-cache';
+import { OVERPASS_ATTRIBUTION, clampRadiusKm } from '@/lib/providers/competitors/overpass';
+
+const STUCK_RUNNING_MS = 5 * 60 * 1000;
+const ACTIVE_RUN_GUARD_MS = 40 * 1000;
 
 export interface OrchestrationResult {
   success: boolean;
@@ -23,6 +30,10 @@ export interface OrchestrationResult {
     cost_estimate_count: number;
   };
   error?: string;
+}
+
+function asStatusDetail(partial: ProviderStatusDetail): ProviderStatusDetail {
+  return partial;
 }
 
 export async function runDataCollection(
@@ -47,63 +58,100 @@ export async function runDataCollection(
     throw new Error('Access denied: You do not own this project');
   }
 
-  // 2. Concurrency / Idempotency Guard
+  // 2. Concurrency / idempotency: reclaim stuck runs, avoid duplicate active work
   const { data: existingRuns } = await supabase
     .from('project_collection_runs')
     .select('*')
     .eq('project_id', projectId)
-    .eq('status', 'running')
+    .in('status', ['running', 'pending'])
     .order('started_at', { ascending: false })
-    .limit(1);
+    .limit(5);
+
+  const now = Date.now();
+  let runId: string | null = null;
 
   if (existingRuns && existingRuns.length > 0) {
-    const activeRun = existingRuns[0];
-    const startedAt = new Date(activeRun.started_at).getTime();
-    const now = Date.now();
-    // If running for less than 40 seconds, don't duplicate
-    if (now - startedAt < 40000) {
-      return {
-        success: true,
-        run_id: activeRun.id,
-        status: 'partial',
-        providers_status: activeRun.providers_status || {},
-        summary: {
-          competitor_count: 0,
-          market_metric_count: 0,
-          has_trend_data: false,
-          cost_estimate_count: 0,
-        },
-      };
+    for (const activeRun of existingRuns) {
+      const startedAt = new Date(activeRun.started_at || activeRun.created_at).getTime();
+      const age = now - startedAt;
+
+      if (activeRun.status === 'running' && age < ACTIVE_RUN_GUARD_MS) {
+        return {
+          success: true,
+          run_id: activeRun.id,
+          status: 'partial',
+          providers_status: activeRun.providers_status || {},
+          summary: {
+            competitor_count: 0,
+            market_metric_count: 0,
+            has_trend_data: false,
+            cost_estimate_count: 0,
+          },
+        };
+      }
+
+      if (activeRun.status === 'running' && age >= STUCK_RUNNING_MS) {
+        await supabase
+          .from('project_collection_runs')
+          .update({
+            status: 'failed',
+            completed_at: new Date().toISOString(),
+            providers_status: {
+              ...(activeRun.providers_status || {}),
+              _system: {
+                status: 'failed',
+                provider: 'orchestrator',
+                provenance: 'manual_estimate',
+                item_count: 0,
+                error: 'Collection run marked failed after exceeding the stuck-running timeout.',
+              },
+            },
+          })
+          .eq('id', activeRun.id);
+        continue;
+      }
+
+      // Claim the newest pending (or reclaimable running) run created by submit RPC.
+      if (!runId && (activeRun.status === 'pending' || activeRun.status === 'running')) {
+        runId = activeRun.id;
+        await supabase
+          .from('project_collection_runs')
+          .update({
+            status: 'running',
+            started_at: new Date().toISOString(),
+            providers_status: {},
+          })
+          .eq('id', runId);
+      }
     }
   }
 
-  // 3. Create new collection run record
-  const { data: run, error: runError } = await supabase
-    .from('project_collection_runs')
-    .insert({
-      project_id: projectId,
-      status: 'running',
-      providers_status: {},
-      started_at: new Date().toISOString(),
-    })
-    .select('id')
-    .single();
+  if (!runId) {
+    const { data: run, error: runError } = await supabase
+      .from('project_collection_runs')
+      .insert({
+        project_id: projectId,
+        status: 'running',
+        providers_status: {},
+        started_at: new Date().toISOString(),
+      })
+      .select('id')
+      .single();
 
-  if (runError || !run) {
-    throw new Error(`Failed to initialize collection run: ${runError?.message}`);
+    if (runError || !run) {
+      throw new Error(`Failed to initialize collection run: ${runError?.message}`);
+    }
+    runId = run.id;
   }
 
-  const runId = run.id;
   const providers = getProviderBundle(options?.forceDemo);
 
-  // Geographic identity for this run. No silent Punjab defaults: a missing
-  // region stays missing, and a missing coordinate disables coordinate-bound
-  // providers rather than substituting Lahore.
   const regionName: string | null = project.region || null;
   const lat = project.lat != null ? Number(project.lat) : NaN;
   const lng = project.lng != null ? Number(project.lng) : NaN;
   const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng);
   const locationLabel = project.city || project.district || 'this location';
+  const radiusKm = clampRadiusKm(Number(project.radius_km || 10));
 
   const providersStatus: CollectionRun['providers_status'] = {};
 
@@ -112,10 +160,17 @@ export async function runDataCollection(
   let demandTrend: DemandTrendRecord | null = null;
   let costEstimates: CostEstimateRecord[] = [];
 
-  // 4. Concurrently execute independent providers with individual failure handling
+  // Shared competitor cache writes use the admin client when available;
+  // cache outages must not break live collection.
+  let cacheClient: ReturnType<typeof createAdminClient> | null = null;
+  try {
+    cacheClient = createAdminClient();
+  } catch {
+    cacheClient = null;
+  }
+
   const [compResult, regionalResult, trendResult, costResult] = await Promise.allSettled([
-    // A. Competitors — nationwide OpenStreetMap POI radar (requires coordinates).
-    // With auto-fallback to demo on live network/API failure.
+    // A. Competitors
     (async () => {
       const start = Date.now();
       if (!hasCoordinates) {
@@ -123,50 +178,85 @@ export async function runDataCollection(
           records: [] as CompetitorRecord[],
           provider: providers.competitorProvider.name,
           provenance: providers.competitorProvider.provenance,
+          freshness: 'unavailable' as DataFreshness,
           latency: Date.now() - start,
           unavailable: true,
           warning: `No verified coordinates are available for ${locationLabel}. The nationwide OpenStreetMap POI radar requires coordinates; no other region's coordinates were substituted.`,
+          attribution: OVERPASS_ATTRIBUTION,
+          requested_geo_scope: locationLabel,
+          actual_geo_scope: 'none',
+          retrieved_at: new Date().toISOString(),
         };
       }
-      try {
-        const records = await providers.competitorProvider.getCompetitors({
-          category: project.category,
-          lat,
-          lng,
-          radiusKm: Number(project.radius_km || 10),
-          city: project.city || undefined,
-        });
+
+      const queryInput = {
+        category: project.category,
+        lat,
+        lng,
+        radiusKm,
+        city: project.city || undefined,
+      };
+
+      if (options?.forceDemo) {
+        const demoComp = new DemoCompetitorProvider();
+        const demoRecords = await demoComp.getCompetitors(queryInput);
         return {
-          records,
+          records: demoRecords.map((r) => ({ ...r, freshness: 'synthetic_demo' as const })),
+          provider: demoComp.name,
+          provenance: demoComp.provenance,
+          freshness: 'synthetic_demo' as DataFreshness,
+          latency: Date.now() - start,
+          unavailable: false,
+          warning: 'Explicit demo mode enabled. Results are synthetic_demo.',
+          attribution: undefined as string | undefined,
+          requested_geo_scope: `${lat.toFixed(4)},${lng.toFixed(4)} r=${radiusKm}km`,
+          actual_geo_scope: `${lat.toFixed(4)},${lng.toFixed(4)}`,
+          retrieved_at: new Date().toISOString(),
+          cache_retrieved_at: undefined as string | undefined,
+        };
+      }
+
+      try {
+        const hit = await getCompetitorsWithCache(
+          cacheClient as never,
+          queryInput,
+          (input) => providers.competitorProvider.getCompetitors(input)
+        );
+        return {
+          records: hit.records,
           provider: providers.competitorProvider.name,
           provenance: providers.competitorProvider.provenance,
+          freshness: hit.freshness,
           latency: Date.now() - start,
           unavailable: false,
           warning: undefined as string | undefined,
+          attribution: OVERPASS_ATTRIBUTION,
+          requested_geo_scope: `${lat.toFixed(4)},${lng.toFixed(4)} r=${radiusKm}km`,
+          actual_geo_scope: `${lat.toFixed(4)},${lng.toFixed(4)}`,
+          retrieved_at: hit.retrieved_at,
+          cache_retrieved_at: hit.cache_retrieved_at,
         };
       } catch (err: unknown) {
-        // Fallback to Demo Competitor Provider if live external provider fails
-        const demoComp = new DemoCompetitorProvider();
-        const demoRecords = await demoComp.getCompetitors({
-          category: project.category,
-          lat,
-          lng,
-          radiusKm: Number(project.radius_km || 10),
-          city: project.city || undefined,
-        });
+        // Do NOT silently substitute synthetic competitors for a live failure.
         return {
-          records: demoRecords,
-          provider: demoComp.name,
-          provenance: demoComp.provenance,
+          records: [] as CompetitorRecord[],
+          provider: providers.competitorProvider.name,
+          provenance: providers.competitorProvider.provenance,
+          freshness: 'unavailable' as DataFreshness,
           latency: Date.now() - start,
           unavailable: false,
-          warning: `Live provider failed (${err instanceof Error ? err.message : String(err)}). Reverted to demo provider.`,
+          failed: true,
+          warning: err instanceof Error ? err.message : String(err),
+          attribution: OVERPASS_ATTRIBUTION,
+          requested_geo_scope: `${lat.toFixed(4)},${lng.toFixed(4)} r=${radiusKm}km`,
+          actual_geo_scope: 'none',
+          retrieved_at: new Date().toISOString(),
+          cache_retrieved_at: undefined as string | undefined,
         };
       }
     })(),
 
-    // B. Regional Demographics — nationwide provider (city-specific where known,
-    // otherwise an explicitly national urban estimate).
+    // B. Regional demographics
     (async () => {
       const start = Date.now();
       const records = await providers.regionalStatsProvider.getRegionalStats({
@@ -178,12 +268,17 @@ export async function runDataCollection(
         records,
         provider: providers.regionalStatsProvider.name,
         provenance: providers.regionalStatsProvider.provenance,
+        freshness: providers.regionalStatsProvider.provenance === 'manual_estimate'
+          ? ('manual_estimate' as DataFreshness)
+          : ('verified_benchmark' as DataFreshness),
         latency: Date.now() - start,
+        requested_geo_scope: regionName || project.city || 'Pakistan',
+        actual_geo_scope: records[0]?.geography || regionName || 'Pakistan',
+        retrieved_at: new Date().toISOString(),
       };
     })(),
 
-    // C. Demand & Search Trends — nationwide Google Trends geo (region-aware).
-    // May throw CoverageUnavailableError for regions without verified coverage.
+    // C. Demand trends
     (async () => {
       const start = Date.now();
       const record = await providers.demandTrendProvider.getDemandTrends({
@@ -192,19 +287,28 @@ export async function runDataCollection(
       });
       return {
         record,
-        provider: providers.demandTrendProvider.name,
-        provenance: providers.demandTrendProvider.provenance,
+        provider: record.provider || providers.demandTrendProvider.name,
+        provenance: record.provenance,
+        freshness: record.freshness || (record.provenance === 'external_api' ? 'live' : 'synthetic_demo'),
         latency: Date.now() - start,
+        requested_geo_scope: record.requested_geo_scope || regionName || PAKISTAN_COUNTRY_CODE,
+        actual_geo_scope: record.actual_geo_scope || record.region,
+        retrieved_at: record.retrieved_at,
+        cache_retrieved_at: record.cache_retrieved_at,
       };
     })(),
 
-    // D. Cost Estimates — national SME cost benchmark model (no Punjab default).
+    // D. Cost estimates (rent_cache read only)
     (async () => {
       const start = Date.now();
       const records = await providers.costEstimateProvider.getCostEstimates({
         category: project.category,
         city: project.city || '',
         area: project.target_location,
+        district: project.district || project.city || undefined,
+        province: regionName || undefined,
+        lat: hasCoordinates ? lat : undefined,
+        lng: hasCoordinates ? lng : undefined,
         footprint: project.storefront_footprint || 'boutique',
         budgetAmount: Number(project.budget_amount) || 15000,
         budgetCurrency: project.budget_currency || 'PKR',
@@ -213,129 +317,196 @@ export async function runDataCollection(
         records,
         provider: providers.costEstimateProvider.name,
         provenance: providers.costEstimateProvider.provenance,
+        freshness: 'manual_estimate' as DataFreshness,
         latency: Date.now() - start,
+        requested_geo_scope: `${project.city || ''}|${project.district || ''}|${regionName || ''}`,
+        actual_geo_scope: records.find((r) => r.cost_type === 'rent_monthly')?.assumptions?.includes('Source geography')
+          ? 'rent_cache'
+          : 'estimate_model',
+        retrieved_at: new Date().toISOString(),
       };
     })(),
   ]);
 
-  // Process Competitor Result
+  // Process Competitor Result — preserve successful data independently
   if (compResult.status === 'fulfilled') {
-    const comp = compResult.value;
+    const comp = compResult.value as {
+      records: CompetitorRecord[];
+      provider: string;
+      provenance: CompetitorRecord['provenance'];
+      freshness: DataFreshness;
+      latency: number;
+      unavailable?: boolean;
+      failed?: boolean;
+      warning?: string;
+      attribution?: string;
+      requested_geo_scope: string;
+      actual_geo_scope: string;
+      retrieved_at: string;
+      cache_retrieved_at?: string;
+    };
+
     if (comp.unavailable) {
-      providersStatus.competitors = {
+      providersStatus.competitors = asStatusDetail({
         status: 'unavailable',
         provider: comp.provider,
         provenance: comp.provenance,
+        freshness: 'unavailable',
         item_count: 0,
         latency_ms: comp.latency,
         error: comp.warning,
-      };
+        attribution: comp.attribution,
+        requested_geo_scope: comp.requested_geo_scope,
+        actual_geo_scope: comp.actual_geo_scope,
+        retrieved_at: comp.retrieved_at,
+      });
+    } else if (comp.failed) {
+      providersStatus.competitors = asStatusDetail({
+        status: 'failed',
+        provider: comp.provider,
+        provenance: comp.provenance,
+        freshness: 'unavailable',
+        item_count: 0,
+        latency_ms: comp.latency,
+        error: comp.warning,
+        attribution: comp.attribution,
+        requested_geo_scope: comp.requested_geo_scope,
+        actual_geo_scope: comp.actual_geo_scope,
+        retrieved_at: comp.retrieved_at,
+      });
     } else {
       competitors = comp.records.map((c) => ({
         ...c,
         project_id: projectId,
-        run_id: runId,
+        run_id: runId!,
       }));
-      providersStatus.competitors = {
+      providersStatus.competitors = asStatusDetail({
         status: 'completed',
         provider: comp.provider,
         provenance: comp.provenance,
+        freshness: comp.freshness,
         item_count: competitors.length,
         latency_ms: comp.latency,
-        error: comp.warning,
-      };
+        warning: comp.warning,
+        attribution: comp.attribution,
+        requested_geo_scope: comp.requested_geo_scope,
+        actual_geo_scope: comp.actual_geo_scope,
+        retrieved_at: comp.retrieved_at,
+        cache_retrieved_at: comp.cache_retrieved_at,
+      });
     }
   } else {
-    providersStatus.competitors = {
+    providersStatus.competitors = asStatusDetail({
       status: 'failed',
       provider: providers.competitorProvider.name,
       provenance: providers.competitorProvider.provenance,
+      freshness: 'unavailable',
       item_count: 0,
       error: compResult.reason?.message || 'Competitor provider failed',
-    };
+    });
   }
 
-  // Process Regional Result
   if (regionalResult.status === 'fulfilled') {
     marketObservations = regionalResult.value.records.map((m) => ({
       ...m,
       project_id: projectId,
-      run_id: runId,
+      run_id: runId!,
+      freshness: regionalResult.value.freshness,
     }));
-    providersStatus.regional_stats = {
+    providersStatus.regional_stats = asStatusDetail({
       status: 'completed',
       provider: regionalResult.value.provider,
       provenance: regionalResult.value.provenance,
+      freshness: regionalResult.value.freshness,
       item_count: marketObservations.length,
       latency_ms: regionalResult.value.latency,
-    };
+      requested_geo_scope: regionalResult.value.requested_geo_scope,
+      actual_geo_scope: regionalResult.value.actual_geo_scope,
+      retrieved_at: regionalResult.value.retrieved_at,
+    });
   } else {
-    providersStatus.regional_stats = {
+    providersStatus.regional_stats = asStatusDetail({
       status: 'failed',
       provider: providers.regionalStatsProvider.name,
       provenance: providers.regionalStatsProvider.provenance,
       item_count: 0,
       error: regionalResult.reason?.message || 'Regional stats provider failed',
-    };
+    });
   }
 
-  // Process Demand Trend Result
   if (trendResult.status === 'fulfilled') {
     demandTrend = {
       ...trendResult.value.record,
       project_id: projectId,
-      run_id: runId,
+      run_id: runId!,
     };
-    providersStatus.trends = {
+    providersStatus.trends = asStatusDetail({
       status: 'completed',
       provider: trendResult.value.provider,
       provenance: trendResult.value.provenance,
+      freshness: trendResult.value.freshness,
       item_count: demandTrend.trend_series.length,
       latency_ms: trendResult.value.latency,
-    };
+      requested_geo_scope: trendResult.value.requested_geo_scope,
+      actual_geo_scope: trendResult.value.actual_geo_scope,
+      retrieved_at: trendResult.value.retrieved_at,
+      cache_retrieved_at: trendResult.value.cache_retrieved_at,
+      warning:
+        trendResult.value.provenance === 'synthetic_demo'
+          ? 'Synthetic/demo trend series — not a live Google Trends observation.'
+          : undefined,
+    });
   } else if (trendResult.reason instanceof CoverageUnavailableError) {
-    providersStatus.trends = {
+    providersStatus.trends = asStatusDetail({
       status: 'unavailable',
       provider: providers.demandTrendProvider.name,
       provenance: providers.demandTrendProvider.provenance,
+      freshness: 'unavailable',
       item_count: 0,
       error: trendResult.reason.message,
-    };
+    });
   } else {
-    providersStatus.trends = {
+    providersStatus.trends = asStatusDetail({
       status: 'failed',
       provider: providers.demandTrendProvider.name,
       provenance: providers.demandTrendProvider.provenance,
+      freshness: 'unavailable',
       item_count: 0,
       error: trendResult.reason?.message || 'Demand trend provider failed',
-    };
+    });
   }
 
-  // Process Cost Estimate Result
   if (costResult.status === 'fulfilled') {
     costEstimates = costResult.value.records.map((e) => ({
       ...e,
       project_id: projectId,
-      run_id: runId,
+      run_id: runId!,
     }));
-    providersStatus.costs = {
-      status: 'completed',
+    const rentRow = costEstimates.find((e) => e.cost_type === 'rent_monthly');
+    const rentUnavailable = rentRow?.freshness === 'unavailable';
+    providersStatus.costs = asStatusDetail({
+      status: rentUnavailable ? 'partial' : 'completed',
       provider: costResult.value.provider,
       provenance: costResult.value.provenance,
+      freshness: rentRow?.freshness || costResult.value.freshness,
       item_count: costEstimates.length,
       latency_ms: costResult.value.latency,
-    };
+      requested_geo_scope: costResult.value.requested_geo_scope,
+      actual_geo_scope: costResult.value.actual_geo_scope,
+      retrieved_at: costResult.value.retrieved_at,
+      warning: rentUnavailable ? rentRow?.assumptions : undefined,
+    });
   } else {
-    providersStatus.costs = {
+    providersStatus.costs = asStatusDetail({
       status: 'failed',
       provider: providers.costEstimateProvider.name,
       provenance: providers.costEstimateProvider.provenance,
       item_count: 0,
       error: costResult.reason?.message || 'Cost estimate provider failed',
-    };
+    });
   }
 
-  // 5. Persist records in PostgreSQL
+  // 5. Persist successful provider data independently
   try {
     if (competitors.length > 0) {
       await supabase.from('project_competitors').insert(competitors);
@@ -350,13 +521,14 @@ export async function runDataCollection(
       await supabase.from('project_cost_estimates').insert(costEstimates);
     }
 
-    // 6. Sync summary into linked feasibility_reports row if exists
     if (project.report_id) {
       const qualityScore =
         (competitors.length > 0 ? 0.35 : 0) +
         (marketObservations.length > 0 ? 0.25 : 0) +
         (demandTrend ? 0.25 : 0) +
-        (costEstimates.length > 0 ? 0.15 : 0);
+        (costEstimates.some((c) => c.cost_type === 'rent_monthly' && c.freshness !== 'unavailable')
+          ? 0.15
+          : 0);
 
       await supabase
         .from('feasibility_reports')
@@ -371,16 +543,19 @@ export async function runDataCollection(
     console.error('Error persisting data collection records:', persistErr);
   }
 
-  // 7. Compute overall run outcome
-  const successfulCount = [
-    providersStatus.competitors?.status === 'completed',
-    providersStatus.regional_stats?.status === 'completed',
-    providersStatus.trends?.status === 'completed',
-    providersStatus.costs?.status === 'completed',
-  ].filter(Boolean).length;
+  const providerOutcomes = [
+    providersStatus.competitors?.status,
+    providersStatus.regional_stats?.status,
+    providersStatus.trends?.status,
+    providersStatus.costs?.status,
+  ];
 
+  const completedCount = providerOutcomes.filter((s) => s === 'completed').length;
+  const usableCount = providerOutcomes.filter((s) => s === 'completed' || s === 'partial').length;
+
+  // Preserve successful provider data even when another provider is unavailable/failed.
   const runOutcome: 'completed' | 'partial' | 'failed' =
-    successfulCount === 4 ? 'completed' : successfulCount > 0 ? 'partial' : 'failed';
+    completedCount === 4 ? 'completed' : usableCount > 0 ? 'partial' : 'failed';
 
   await supabase
     .from('project_collection_runs')

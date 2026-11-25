@@ -1,68 +1,78 @@
-# Module 3: Data Collection and Provider Integration — Specification & Architecture
+# Module 3: Smart Data Aggregation — Specification & Implementation Status
 
-> **Current implementation note (19 November 2026):** The provider inventory below is a target specification, not proof that every source is connected. Overpass is the live external adapter. Regional figures are embedded `manual_estimate` values, the category demand curve is `synthetic_demo`, and cost outputs are estimates. This module is partial until provider provenance and source coverage are verified.
+> **Task 4 status (25 November 2026):** Module 3 (FR-3.1–FR-3.7) is implemented with honest provenance, seven-day competitor cache, secure rent-cache cron, nearest/city rent fallback, Google Trends live/cached/stale paths, and typed provider health. Acceptance evidence lives in `tests/module3-smart-aggregation.test.mjs` and `scripts/verify-module3.mjs`. Live Overpass / Pytrends / Supabase runtime checks remain environment-dependent and are marked unverified unless executed against configured services.
 
-## 1. Overview & Objectives
+## 1. Objectives
 
-Module 3 implements **Smart Data Aggregation & Provider Integration** for the **AI E-Commerce Advisor & Auto Store Generator**. When an authenticated entrepreneur submits a business idea in Module 2, Module 3 orchestrates and aggregates market data from external APIs and configured providers:
+When an authenticated entrepreneur submits a business idea, Module 3 aggregates:
 
-1. **Nearby Competitor POIs (SRS FR-3.1)**: Discovers existing businesses in the target category within the chosen radius (10–15 km) using OpenStreetMap Overpass API, with deterministic demo fallback.
-2. **Regional Statistics & Demographics (SRS FR-3.2)**: Collects regional population, internet penetration rates, and e-commerce growth metrics for the target city/province.
-3. **Demand & Trend Series (SRS FR-3.2)**: Gathers 12-month category interest indicators and relative trend trajectories.
-4. **Cost Baselines & Unit Economics (SRS FR-3.3)**: Aggregates category-specific commercial rent (via `rent_cache`), physical setup estimates, initial marketing CAC, and per-order courier logistics baselines.
-5. **Data Provenance & Operational Integrity**: Every persisted record explicitly stores its provenance (`external_api`, `synthetic_demo`, `licensed_dataset`, `manual_estimate`). Missing credentials or external downtime trigger graceful fallback to visibly labeled demo records without crashing or faking live results.
-6. **Preservation of Module Boundaries**: Module 3 collects and persists clean source data. It does NOT compute the final feasibility score, perform feature engineering, generate recommendations, or train ML models.
+1. Nearby competitor POIs via OpenStreetMap Overpass (FR-3.1 / FR-3.2)
+2. Regional demographic reference estimates (manual / curated)
+3. 12-month demand trends via Google Trends / Pytrends (FR-3.5)
+4. Cost baselines including rent_cache lookup only (FR-3.3 / FR-3.4)
 
----
+Every result distinguishes:
 
-## 2. SRS Requirements Traceability
+| Freshness / provenance | Meaning |
+| --- | --- |
+| `live` / `external_api` | Fresh observation from an external provider |
+| `cached` | Successful response reused within TTL |
+| `stale_cache` | Expired cache returned because live retrieval failed |
+| `verified_benchmark` / `licensed_dataset` | Curated verified corpus |
+| `manual_estimate` | Explicit human/expert estimate — not a live average |
+| `synthetic_demo` | Deterministic demo / empirical baseline |
+| `unavailable` | No lawful/technical coverage; nothing invented |
 
-| Requirement ID | Description | Module 3 Implementation | State |
-| :--- | :--- | :--- | :--- |
-| **FR-3.1** | Competitor Data Collection: nearby businesses by location & category | Overpass OSM API query with bounding circle & category shop tags + local demo provider | ✅ Fully In Scope |
-| **FR-3.2** | Market & Demand Data: population, internet penetration, search trend series | Embedded regional estimates + synthetic category curve; live PBS/PTA and Google Trends connections remain outstanding | ⚠️ Partial |
-| **FR-3.3** | Cost Data Collection: setup, marketing, logistics, and rent estimates | Commercial `rent_cache` lookup + SME retail cost model (setup, marketing, logistics) | ✅ Fully In Scope |
-| **Operational** | Quota handling, timeouts, retry, partial success | Independent provider execution via `Promise.allSettled`, 10s timeouts, partial status | ✅ Fully In Scope |
-| **Security** | API keys in env, RLS, tenant isolation | Server-side only keys (`OVERPASS_API_URL`, etc.), forced PostgreSQL RLS on all data | ✅ Fully In Scope |
-| **Provenance** | Visible "Demo Data" tags and provenance tracking | Explicit provenance column on all tables, UI badges for `external_api` vs `synthetic_demo` | ✅ Fully In Scope |
+## 2. Requirement coverage
 
----
+| ID | Requirement | Implementation | Evidence |
+| --- | --- | --- | --- |
+| **FR-3.1** | Category-mapped Overpass POIs | `src/lib/providers/competitors/overpass.ts` — shop + amenity tags, Haversine distance, OSM id dedupe, unnamed handling, no fabricated ratings | `tests/module3-smart-aggregation.test.mjs` |
+| **FR-3.2** | Timeout / retry / alternate endpoint + 7-day cache | Overpass backoff + endpoints; `competitor_query_cache` + `competitor-cache.ts` | migration `20261125010000_*`, tests |
+| **FR-3.3** | Scheduled aggregated rent cache | Secure `/api/cron/rent-cache` writes `rent_cache` as `manual_estimate` | cron route + cron-auth |
+| **FR-3.4** | Exact → nearby → city/district rent fallback | `rent-lookup.ts`; never substitutes Lahore for Karachi etc. | unit assertions in module3 test |
+| **FR-3.5** | 12-month Pakistan Pytrends + stale fallback | Next.js provider + `ml-service/trends/google_trends.py` | tests + Python cache flags |
+| **FR-3.6** | Typed payload + provider health | `TypedProviderResult`, expanded `ProviderStatusDetail`, orchestrator partial outcomes | types + orchestrator |
+| **FR-3.7** | Lawful sources / attribution / no invented live data | OSM attribution, estimate labels, no silent demo fallback | UI + providers |
 
-## 3. Provider Contracts & Fallback Strategy
+## 3. Provider inventory
 
-### A. Competitor Provider (`ICompetitorProvider`)
-- **Live Provider**: OpenStreetMap Overpass API (`https://overpass-api.de/api/interpreter`). Queries nodes/ways tagged with relevant `shop` values within the project's coordinate and radius buffer.
-- **Failover / Backup Endpoint**: `https://maps.mail.ru/osm/tools/overpass/api/interpreter`.
-- **Demo Provider**: Deterministic POI generator using seed hash of `(category, city, lat, lng)` producing realistic local store names, coordinate offsets, and distance metrics tagged as `synthetic_demo`.
+### Competitors (`OverpassCompetitorProvider`)
+- Endpoints: env primary + mail.ru + kumi.systems
+- Categories use both `shop=*` and `amenity=*` where appropriate
+- Radius clamped to 1–15 km
+- Cache: SHA-256 key of category + rounded lat/lng + radius + query version; TTL 7 days
+- Failed live requests do **not** become synthetic competitors unless `force_demo` / `FORCE_DEMO_DATA`
 
-### B. Regional Demographics Provider (`IRegionalStatsProvider`)
-- **Live / Open Data Provider**: Pakistan Bureau of Statistics (PBS) 2023/2024 census projections & PTA digital indicators.
-- **Demo Provider**: Deterministic population and penetration indicators tagged as `synthetic_demo`.
+### Demand trends (`GoogleTrendsProvider`)
+- Calls ML service `/market/trends`
+- Freshness: live / cached / stale_cache / synthetic_demo
+- Punjab seasonal curves only when region has `analysis_enabled`
+- Other regions → `CoverageUnavailableError` when live+stale fail
 
-### C. Demand Trends Provider (`IDemandTrendProvider`)
-- **Live / Trend Provider**: Google Trends / Pytrends 12-month search interest index (`0–100`) for the target commercial vertical in region `PK`.
-- **Demo Provider**: Deterministic seasonal search interest curve tagged as `synthetic_demo`.
+### Rent / costs (`BenchmarkCostEstimateProvider`)
+- Reads `rent_cache` only
+- Match levels: exact, nearby (≤12 km same city/district), city/district, unavailable
+- Cron seeds Punjab estimates labelled `manual_estimate`
 
-### D. Cost Estimate Provider (`ICostEstimateProvider`)
-- **Live / Cache Provider**: Reads area commercial rent per sq. ft. from PostgreSQL `rent_cache` and applies SME industry cost equations.
-- **Demo Provider**: Documented commercial cost benchmarks tagged as `manual_estimate`.
+## 4. Orchestration & security
 
----
+- `runDataCollection` claims pending runs created by `submit_project_for_feasibility`
+- Reclaims stuck `running` runs after 5 minutes
+- `Promise.allSettled` preserves successful providers on partial failure
+- Ownership checked against `projects.owner_id` (admin override explicit)
+- Cron requires `CRON_SECRET` via Bearer or `x-cron-secret`
+- Service-role key never sent to the browser
 
-## 4. Database Schema (`supabase/migrations/20261006010000_module3_data_collection_schema.sql`)
+## 5. Migrations
 
-- `public.project_collection_runs`: Tracks run lifecycle (`pending`, `running`, `completed`, `partial`, `failed`), timestamps, and per-provider statuses.
-- `public.project_competitors`: Individual POI records with name, coordinates, distance, rating, review count, price level, provider, and provenance.
-- `public.project_market_observations`: Regional metrics (population, internet penetration, growth rate).
-- `public.project_demand_trends`: 12-month interest index series, average interest, and slope.
-- `public.project_cost_estimates`: Setup, rent, marketing, and logistics range estimates.
+| Migration | Purpose |
+| --- | --- |
+| `20261006010000_module3_data_collection_schema.sql` | Collection runs + observation tables + RLS |
+| `20261125010000_module3_smart_aggregation.sql` | `competitor_query_cache` + rent_cache enrichment |
 
----
+Rollback for Task 4 migration is documented in the SQL file header.
 
-## 5. REST API Endpoints
+## 6. APIs
 
-- `POST /api/projects/[id]/collect`: Initiate a data collection run (idempotent; returns existing run if already executing).
-- `GET /api/projects/[id]/collection`: Get current collection run status & summary.
-- `GET /api/projects/[id]/competitors`: Paginated list of discovered competitors with provenance.
-- `GET /api/projects/[id]/market-data`: Regional demographic and trend indicators.
-- `GET /api/projects/[id]/costs`: Category and location cost estimates.
+See [api.md](api.md) for `/collect`, `/collection`, competitor/market/cost routes, and `/api/cron/rent-cache`.

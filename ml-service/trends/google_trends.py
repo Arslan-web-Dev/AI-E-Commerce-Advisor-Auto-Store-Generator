@@ -3,7 +3,7 @@ import json
 import hashlib
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
 import pandas as pd
 from config import CACHE_DIR
@@ -15,39 +15,62 @@ except ImportError:
     PYTRENDS_AVAILABLE = False
 
 CACHE_FILE = CACHE_DIR / "trends_cache.json"
+DEFAULT_TTL_HOURS = 24
+
 
 def _get_cache_key(keywords: List[str], geo: str, timeframe: str) -> str:
     sorted_kw = ",".join(sorted([k.strip().lower() for k in keywords]))
     raw = f"{sorted_kw}|{geo}|{timeframe}"
     return hashlib.md5(raw.encode()).hexdigest()
 
-def _read_cache(cache_key: str) -> Optional[Dict[str, Any]]:
+
+def _load_cache_file() -> Dict[str, Any]:
     if not CACHE_FILE.exists():
-        return None
+        return {}
     try:
         with open(CACHE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-            entry = data.get(cache_key)
-            if entry:
-                expires_at = datetime.fromisoformat(entry["expires_at"])
-                if datetime.now() < expires_at:
-                    return entry["payload"]
+            return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _read_cache(cache_key: str, allow_stale: bool = False) -> Optional[Tuple[Dict[str, Any], bool]]:
+    """
+    Returns (payload, is_stale) when a usable cache entry exists.
+    Fresh hits prefer expires_at in the future. Stale hits are returned only
+    when allow_stale=True and a payload still exists.
+    """
+    data = _load_cache_file()
+    entry = data.get(cache_key)
+    if not entry or not isinstance(entry, dict):
+        return None
+    payload = entry.get("payload")
+    if not isinstance(payload, dict):
+        return None
+    try:
+        expires_at = datetime.fromisoformat(entry["expires_at"])
     except Exception:
         return None
+
+    if datetime.now() < expires_at:
+        return payload, False
+    if allow_stale:
+        return payload, True
     return None
 
-def _write_cache(cache_key: str, payload: Dict[str, Any], ttl_hours: int = 24):
+
+def _write_cache(cache_key: str, payload: Dict[str, Any], ttl_hours: int = DEFAULT_TTL_HOURS):
     try:
-        data = {}
-        if CACHE_FILE.exists():
-            with open(CACHE_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
+        data = _load_cache_file()
         expires_at = (datetime.now() + timedelta(hours=ttl_hours)).isoformat()
-        data[cache_key] = {"expires_at": expires_at, "payload": payload}
+        data[cache_key] = {"expires_at": expires_at, "payload": payload, "stored_at": datetime.now().isoformat()}
+        CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(CACHE_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f)
     except Exception:
         pass
+
 
 def fetch_google_trends(
     keywords: List[str],
@@ -56,31 +79,33 @@ def fetch_google_trends(
     category: int = 0
 ) -> Dict[str, Any]:
     """
-    Fetches real Google Trends interest over time and related queries for keywords in Pakistan / Punjab.
-    Includes caching and rate-limiting resilience.
+    Fetches Google Trends interest over time for keywords.
+    Cache policy: fresh 24h cache first; on live failure, return stale cache
+    when available. Never invent observations as live_google_trends.
     """
     cache_key = _get_cache_key(keywords, geo, timeframe)
-    cached = _read_cache(cache_key)
+    cached = _read_cache(cache_key, allow_stale=False)
     if cached:
-        cached["is_cached"] = True
-        return cached
+        payload, _is_stale = cached
+        result = dict(payload)
+        result["is_cached"] = True
+        result["is_stale"] = False
+        return result
 
     clean_keywords = [k.strip() for k in keywords if k.strip()][:5]
     if not clean_keywords:
         raise ValueError("At least one valid search keyword must be provided.")
 
-    interest_data = []
-    related_queries_map = {}
-    related_topics_map = {}
+    interest_data: List[Dict[str, Any]] = []
+    related_queries_map: Dict[str, Any] = {}
     source = "live_google_trends"
+    live_error: Optional[str] = None
 
     if PYTRENDS_AVAILABLE:
         try:
-            # Connect to Google Trends with realistic timeout and retries
             pytrend = TrendReq(hl='en-US', tz=300, timeout=(10, 25), retries=2, backoff_factor=1.5)
             pytrend.build_payload(kw_list=clean_keywords, cat=category, timeframe=timeframe, geo=geo)
 
-            # 1. Interest Over Time
             iot_df = pytrend.interest_over_time()
             if not iot_df.empty:
                 for date_idx, row in iot_df.iterrows():
@@ -90,7 +115,6 @@ def fetch_google_trends(
                             entry[kw] = int(row[kw])
                     interest_data.append(entry)
 
-            # 2. Related Queries
             try:
                 rq_dict = pytrend.related_queries()
                 for kw, val in rq_dict.items():
@@ -104,15 +128,28 @@ def fetch_google_trends(
             except Exception:
                 pass
 
+            if not interest_data:
+                live_error = "empty_interest_over_time"
         except Exception as e:
-            # Fallback if Google Trends throttles or geo query is temporarily restricted
-            source = "empirical_market_baseline"
-            interest_data, related_queries_map = _generate_empirical_trends(clean_keywords, timeframe)
+            live_error = str(e)
     else:
+        live_error = "pytrends_unavailable"
+
+    # Prefer stale cache over inventing live observations.
+    if live_error or not interest_data:
+        stale = _read_cache(cache_key, allow_stale=True)
+        if stale:
+            payload, _ = stale
+            result = dict(payload)
+            result["is_cached"] = True
+            result["is_stale"] = True
+            result["stale_reason"] = live_error or "empty_live_response"
+            return result
+
+        # Last resort: clearly labelled empirical baseline (never as live).
         source = "empirical_market_baseline"
         interest_data, related_queries_map = _generate_empirical_trends(clean_keywords, timeframe)
 
-    # Calculate trends trajectory, slope, and peak month
     analytics = _analyze_trend_trajectories(interest_data, clean_keywords)
 
     result = {
@@ -124,16 +161,18 @@ def fetch_google_trends(
         "related_queries": related_queries_map,
         "analytics": analytics,
         "is_cached": False,
+        "is_stale": False,
         "fetched_at": datetime.now().isoformat()
     }
 
-    _write_cache(cache_key, result, ttl_hours=24)
+    # Only persist genuine live Google Trends payloads into the fresh cache.
+    if source == "live_google_trends" and interest_data:
+        _write_cache(cache_key, result, ttl_hours=DEFAULT_TTL_HOURS)
+
     return result
 
+
 def _analyze_trend_trajectories(interest_data: List[Dict[str, Any]], keywords: List[str]) -> Dict[str, Any]:
-    """
-    Computes slope, trend direction, average interest, and peak seasonal month for each keyword.
-    """
     trajectories = {}
     if not interest_data:
         return trajectories
@@ -146,23 +185,20 @@ def _analyze_trend_trajectories(interest_data: List[Dict[str, Any]], keywords: L
         x = np.arange(len(series))
         y = series.values
 
-        # Linear fit slope
         if len(x) > 1:
-            slope, intercept = np.polyfit(x, y, 1)
+            slope, _intercept = np.polyfit(x, y, 1)
         else:
             slope = 0.0
 
         avg_val = float(series.mean())
         max_idx = int(series.argmax())
         peak_date = df.iloc[max_idx]["date"] if "date" in df.columns else "N/A"
-        
-        # Parse month for seasonality
+
         try:
             peak_month = datetime.strptime(peak_date, "%Y-%m-%d").strftime("%B")
         except Exception:
             peak_month = "N/A"
 
-        # Direction classification
         if slope > 0.35:
             direction = "rapidly_rising"
         elif slope > 0.08:
@@ -185,24 +221,26 @@ def _analyze_trend_trajectories(interest_data: List[Dict[str, Any]], keywords: L
 
     return trajectories
 
+
 def _generate_empirical_trends(keywords: List[str], timeframe: str) -> tuple:
     """
-    Provides empirical baseline curves for Pakistan e-commerce retail categories
-    when Google Trends rate limits live scraping.
+    Deterministic empirical baseline curves used only when live + stale cache
+    are unavailable. Callers must treat source as empirical_market_baseline.
     """
     weeks = 52
     end_date = datetime.now()
     dates = [(end_date - timedelta(weeks=weeks - i)).strftime("%Y-%m-%d") for i in range(weeks)]
-    
+
     interest_data = []
-    np.random.seed(int(time.time()) % 1000)
+    # Deterministic seed from keywords so results are reproducible, not random noise.
+    seed = int(hashlib.md5(",".join(sorted(keywords)).encode()).hexdigest()[:8], 16) % (2**31)
+    rng = np.random.default_rng(seed)
 
     for i, d in enumerate(dates):
         entry = {"date": d}
         t = i / weeks
         for kw in keywords:
-            # Baseline with mild seasonal curve (e.g. Eid/Summer peaks)
-            base = 45.0 + 15.0 * np.sin(2 * np.pi * t) + np.random.normal(0, 4.0)
+            base = 45.0 + 15.0 * np.sin(2 * np.pi * t) + float(rng.normal(0, 2.0))
             entry[kw] = int(max(5, min(100, base)))
         interest_data.append(entry)
 
@@ -211,12 +249,12 @@ def _generate_empirical_trends(keywords: List[str], timeframe: str) -> tuple:
         related[kw] = {
             "top": [
                 {"query": f"best {kw} online pakistan", "value": 100},
-                {"query": f"{kw} price in lahore", "value": 85},
+                {"query": f"{kw} price in pakistan", "value": 85},
                 {"query": f"buy {kw} cash on delivery", "value": 72}
             ],
             "rising": [
                 {"query": f"new {kw} 2026 collection", "value": 250},
-                {"query": f"{kw} wholesale rawalpindi", "value": 180}
+                {"query": f"{kw} wholesale pakistan", "value": 180}
             ]
         }
 

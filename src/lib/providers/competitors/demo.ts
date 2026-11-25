@@ -113,6 +113,7 @@ export class DemoCompetitorProvider implements ICompetitorProvider {
         category: input.category,
         provider: this.name,
         provenance: this.provenance,
+        freshness: 'synthetic_demo',
         lat,
         lng,
         distance_km: Math.round(dist * 100) / 100,
@@ -123,6 +124,7 @@ export class DemoCompetitorProvider implements ICompetitorProvider {
         raw_data: {
           synthetic_seed: seed,
           simulation_mode: true,
+          synthetic_demo: true,
         },
         retrieved_at: new Date().toISOString(),
       });
