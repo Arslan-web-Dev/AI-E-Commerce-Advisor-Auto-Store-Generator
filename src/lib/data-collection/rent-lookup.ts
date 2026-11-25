@@ -1,4 +1,4 @@
-import { RentLookupResult, ConfidenceLevel, DataProvenance } from '@/types/data-collection';
+import type { RentLookupResult, ConfidenceLevel, DataProvenance } from '@/types/data-collection';
 import { haversineDistanceKm, isValidCoordinate } from '@/lib/geo/distance';
 
 export const NEARBY_RENT_MAX_KM = 12;
@@ -17,6 +17,7 @@ export interface RentCacheRow {
   sample_size?: number | null;
   source?: string | null;
   scraped_at?: string | null;
+  recorded_at?: string | null;
   confidence?: string | null;
   provenance?: string | null;
   notes?: string | null;
@@ -100,8 +101,57 @@ function toResult(
     provenance,
     freshness: provenance === 'manual_estimate' ? 'manual_estimate' : 'cached',
     confidence,
-    retrieved_at: row.scraped_at || undefined,
+    retrieved_at:
+      provenance === 'manual_estimate'
+        ? row.recorded_at || row.scraped_at || undefined
+        : row.scraped_at || undefined,
+    retrieved_at_kind: provenance === 'manual_estimate' ? 'manual_estimate_recorded' : 'observation',
     notes: row.notes || undefined,
+  };
+}
+
+/**
+ * Build an honest city/district aggregate from cached area estimates instead of
+ * presenting one arbitrary area row as city-wide coverage.
+ */
+function cityAggregateRow(rows: RentCacheRow[], input: RentLookupInput): RentCacheRow | null {
+  const usable = rows.filter((row) => Number.isFinite(Number(row.rent_avg_pkr ?? row.rent_per_sqft_pkr)));
+  if (usable.length === 0) return null;
+
+  let weightSum = 0;
+  let weightedValue = 0;
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  const provenances = new Set<string>();
+
+  for (const row of usable) {
+    const avg = Number(row.rent_avg_pkr ?? row.rent_per_sqft_pkr);
+    const weight = Math.max(1, Number(row.sample_size ?? 1));
+    weightSum += weight;
+    weightedValue += avg * weight;
+    const rowMin = row.rent_min_pkr != null ? Number(row.rent_min_pkr) : avg;
+    const rowMax = row.rent_max_pkr != null ? Number(row.rent_max_pkr) : avg;
+    if (Number.isFinite(rowMin)) min = Math.min(min, rowMin);
+    if (Number.isFinite(rowMax)) max = Math.max(max, rowMax);
+    if (row.provenance) provenances.add(row.provenance);
+  }
+
+  const average = Math.round((weightedValue / weightSum) * 100) / 100;
+  const provenance = provenances.size === 1 ? [...provenances][0] : 'manual_estimate';
+
+  return {
+    city: input.city || '',
+    area: 'city/district aggregate',
+    district: input.district || input.city,
+    province: input.province,
+    rent_per_sqft_pkr: average,
+    rent_min_pkr: Number.isFinite(min) ? min : average,
+    rent_max_pkr: Number.isFinite(max) ? max : average,
+    rent_avg_pkr: average,
+    sample_size: weightSum,
+    source: 'rent_cache aggregated area estimates',
+    provenance,
+    notes: `Computed from ${usable.length} cached area estimate(s); not a single-area observation.`,
   };
 }
 
@@ -149,11 +199,10 @@ export function lookupRentFromRows(
     );
   }
 
-  // 1. Exact area match within the same city/district.
-  if (area) {
-    const exact = scoped.find(
-      (row) => norm(row.area) === area && (norm(row.city) === city || !city)
-    );
+  // 1. Exact area match requires a named city. A district-only request must
+  //    not label an arbitrary city's area row as an exact match.
+  if (area && city) {
+    const exact = scoped.find((row) => norm(row.area) === area && norm(row.city) === city);
     if (exact) {
       return toResult(exact, input, 'exact');
     }
@@ -175,16 +224,11 @@ export function lookupRentFromRows(
     }
   }
 
-  // 3. City / district-level record (prefer area named like the city, else first city row).
-  const cityLevel =
-    scoped.find((row) => norm(row.area) === city || norm(row.area) === 'city center' || norm(row.area) === 'all') ||
-    scoped.find((row) => norm(row.district || row.city) === district) ||
-    scoped[0];
-
-  if (cityLevel) {
-    const matchLevel =
-      norm(cityLevel.district || cityLevel.city) === district && !area ? 'district' : 'city';
-    return toResult(cityLevel, input, matchLevel, undefined, 'low');
+  // 3. City/district aggregate computed from all scoped area estimates.
+  const aggregate = cityAggregateRow(scoped, input);
+  if (aggregate) {
+    const matchLevel = !city && district ? 'district' : 'city';
+    return toResult(aggregate, input, matchLevel, undefined, 'low');
   }
 
   return unavailable(input, 'No valid rent source matched the requested geography.');

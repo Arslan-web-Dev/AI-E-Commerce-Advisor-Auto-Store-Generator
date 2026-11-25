@@ -1,4 +1,4 @@
-import {
+import type {
   CompetitorRecord,
   CompetitorQueryInput,
   ICompetitorProvider,
@@ -88,7 +88,7 @@ export function buildOverpassQuery(
     (
       ${clauses.join('\n      ')}
     );
-    out center 50;
+    out center;
   `;
 }
 
@@ -143,7 +143,9 @@ export function parseOverpassElements(
   for (const el of elements) {
     const lat = el.lat ?? el.center?.lat;
     const lng = el.lon ?? el.center?.lon;
-    if (!isValidCoordinate(lat, lng)) continue;
+    if (typeof lat !== 'number' || typeof lng !== 'number' || !isValidCoordinate(lat, lng)) {
+      continue;
+    }
 
     const identity = osmIdentityKey(el.type, el.id);
     if (!identity) continue;
@@ -159,7 +161,7 @@ export function parseOverpassElements(
 
     const osmCategory = tags.shop || tags.amenity || input.category;
     const distanceKm = haversineDistanceKm(input.lat, input.lng, lat, lng);
-    if (distanceKm > clampRadiusKm(input.radiusKm) + 0.5) continue;
+    if (distanceKm > clampRadiusKm(input.radiusKm)) continue;
 
     const rating = parseOptionalRating(tags);
 
@@ -230,34 +232,34 @@ export class OverpassCompetitorProvider implements ICompetitorProvider {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'User-Agent': 'AIECommerceFeasibilityAdvisor/2.0 (Academic FYP; COMSATS University)',
-            },
-            body: `data=${encodeURIComponent(query)}`,
-            signal: controller.signal,
-          });
+          try {
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'AIECommerceFeasibilityAdvisor/2.0 (Academic FYP; COMSATS University)',
+              },
+              body: `data=${encodeURIComponent(query)}`,
+              signal: controller.signal,
+            });
 
-          clearTimeout(timeoutId);
+            if (!response.ok) {
+              throw new Error(`Overpass HTTP ${response.status}: ${response.statusText}`);
+            }
 
-          if (response.status === 429 || response.status === 504 || response.status >= 500) {
-            throw new Error(`Overpass HTTP ${response.status}: ${response.statusText}`);
+            const data = (await response.json()) as { elements?: OverpassElement[] };
+            if (!data || !Array.isArray(data.elements)) {
+              throw new Error('Overpass response missing elements array');
+            }
+
+            return parseOverpassElements(data.elements, input, {
+              retrievedAt: new Date().toISOString(),
+              provider: this.name,
+            });
+          } finally {
+            // Always clear the request timer, including aborted/failed requests.
+            clearTimeout(timeoutId);
           }
-          if (!response.ok) {
-            throw new Error(`Overpass HTTP ${response.status}: ${response.statusText}`);
-          }
-
-          const data = (await response.json()) as { elements?: OverpassElement[] };
-          if (!data || !Array.isArray(data.elements)) {
-            throw new Error('Overpass response missing elements array');
-          }
-
-          return parseOverpassElements(data.elements, input, {
-            retrievedAt: new Date().toISOString(),
-            provider: this.name,
-          });
         } catch (err: unknown) {
           lastError = err instanceof Error ? err : new Error(String(err));
           // Retry same endpoint on transient failures; otherwise move on.

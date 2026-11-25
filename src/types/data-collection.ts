@@ -138,6 +138,7 @@ export interface RentLookupResult {
   freshness: DataFreshness;
   confidence: ConfidenceLevel;
   retrieved_at?: string;
+  retrieved_at_kind?: 'observation' | 'manual_estimate_recorded';
   notes?: string;
 }
 

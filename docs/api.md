@@ -137,7 +137,7 @@ Upload an optional product specification document (PDF, CSV, JSON, PNG, JPG; max
 ### `POST /api/projects/[id]/collect`
 Initiate or retry external and benchmark data collection across competitors, demographics, trends, and cost models.
 
-Successful live competitor responses are cached for seven days (`competitor_query_cache`). A live Overpass failure stays `failed` and is not replaced with synthetic competitors. Set `force_demo: true` only when you want explicitly labelled `synthetic_demo` results. If another provider fails, successful providers are kept and the run status is `partial`.
+Successful live competitor responses are cached for seven days (`competitor_query_cache`). On live failure, an expired real cache row may be returned as `stale_cache`; if none exists the provider stays `failed` and is not replaced with synthetic competitors. Set `force_demo: true` only when you want explicitly labelled `synthetic_demo` results. If another provider fails, successful providers are kept and the run status is `partial`. In-progress runs return `status: "running"` with `success: false` rather than a false success.
 
 - **Authentication**: Required (Project owner or system admin)
 - **Request Body (Optional)**:

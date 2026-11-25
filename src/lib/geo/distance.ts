@@ -20,7 +20,7 @@ export function haversineDistanceKm(
   return Math.round(R * c * 100) / 100;
 }
 
-export function isValidCoordinate(lat: unknown, lng: unknown): lat is number {
+export function isValidCoordinate(lat: unknown, lng: unknown): boolean {
   if (typeof lat !== 'number' || typeof lng !== 'number') return false;
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
   if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return false;

@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { CompetitorQueryInput, CompetitorRecord, DataFreshness } from '@/types/data-collection';
+import type { CompetitorQueryInput, CompetitorRecord, DataFreshness } from '@/types/data-collection';
 import {
   OVERPASS_ATTRIBUTION,
   OVERPASS_QUERY_VERSION,
@@ -13,7 +13,7 @@ const inflight = new Map<string, Promise<CompetitorCacheHit>>();
 
 export interface CompetitorCacheHit {
   records: CompetitorRecord[];
-  freshness: Extract<DataFreshness, 'live' | 'cached'>;
+  freshness: Extract<DataFreshness, 'live' | 'cached' | 'stale_cache'>;
   cache_key: string;
   retrieved_at: string;
   cache_retrieved_at?: string;
@@ -55,11 +55,12 @@ type SupabaseLike = {
 function stampCachedRecords(
   payload: CompetitorRecord[],
   cacheRetrievedAt: string,
-  originalRetrievedAt: string
+  originalRetrievedAt: string,
+  freshness: 'cached' | 'stale_cache'
 ): CompetitorRecord[] {
   return payload.map((record) => ({
     ...record,
-    freshness: 'cached' as const,
+    freshness,
     cache_retrieved_at: cacheRetrievedAt,
     retrieved_at: originalRetrievedAt,
     attribution: record.attribution || OVERPASS_ATTRIBUTION,
@@ -72,18 +73,21 @@ function stampCachedRecords(
  */
 export async function readCompetitorCache(
   supabase: SupabaseLike | null,
-  input: CompetitorQueryInput
+  input: CompetitorQueryInput,
+  options?: { allowStale?: boolean }
 ): Promise<CompetitorCacheHit | null> {
   if (!supabase) return null;
   const cacheKey = buildCompetitorCacheKey(input);
   const nowIso = new Date().toISOString();
+  const minExpiresAt = options?.allowStale ? '1970-01-01T00:00:00.000Z' : nowIso;
+  const freshness = options?.allowStale ? ('stale_cache' as const) : ('cached' as const);
 
   try {
     const { data, error } = await supabase
       .from('competitor_query_cache')
       .select('payload, retrieved_at, expires_at, item_count, provenance')
       .eq('cache_key', cacheKey)
-      .gt('expires_at', nowIso)
+      .gt('expires_at', minExpiresAt)
       .maybeSingle();
 
     if (error || !data) return null;
@@ -93,8 +97,8 @@ export async function readCompetitorCache(
     // empty is a valid observation (no POIs found) and may be reused.
     const retrievedAt = String(data.retrieved_at || nowIso);
     return {
-      records: stampCachedRecords(payload, nowIso, retrievedAt),
-      freshness: 'cached',
+      records: stampCachedRecords(payload, nowIso, retrievedAt, freshness),
+      freshness,
       cache_key: cacheKey,
       retrieved_at: retrievedAt,
       cache_retrieved_at: nowIso,
@@ -148,7 +152,9 @@ export async function writeCompetitorCache(
 
 /**
  * Fetch competitors with seven-day cache + in-process single-flight.
- * Live failures are rethrown — callers must not invent synthetic data.
+ * On live failure, a previously cached real observation may be returned as
+ * `stale_cache`; if none exists the error is rethrown. Callers must not invent
+ * synthetic competitor data.
  */
 export async function getCompetitorsWithCache(
   supabase: SupabaseLike | null,
@@ -168,24 +174,32 @@ export async function getCompetitorsWithCache(
     const again = await readCompetitorCache(supabase, input);
     if (again) return again;
 
-    const live = await fetchLive(input);
-    const retrievedAt = live[0]?.retrieved_at || new Date().toISOString();
-    const stamped = live.map((r) => ({
-      ...r,
-      freshness: 'live' as const,
-      retrieved_at: retrievedAt,
-      attribution: r.attribution || OVERPASS_ATTRIBUTION,
-    }));
+    try {
+      const live = await fetchLive(input);
+      const retrievedAt = live[0]?.retrieved_at || new Date().toISOString();
+      const stamped = live.map((r) => ({
+        ...r,
+        freshness: 'live' as const,
+        retrieved_at: retrievedAt,
+        attribution: r.attribution || OVERPASS_ATTRIBUTION,
+      }));
 
-    await writeCompetitorCache(supabase, input, stamped, retrievedAt);
+      await writeCompetitorCache(supabase, input, stamped, retrievedAt);
 
-    return {
-      records: stamped,
-      freshness: 'live',
-      cache_key: cacheKey,
-      retrieved_at: retrievedAt,
-      from_cache: false,
-    };
+      return {
+        records: stamped,
+        freshness: 'live',
+        cache_key: cacheKey,
+        retrieved_at: retrievedAt,
+        from_cache: false,
+      };
+    } catch (liveError) {
+      // A previous real observation is preferable to inventing data, but it
+      // must be labelled stale and never presented as a live result.
+      const stale = await readCompetitorCache(supabase, input, { allowStale: true });
+      if (stale) return stale;
+      throw liveError;
+    }
   })();
 
   inflight.set(cacheKey, promise);

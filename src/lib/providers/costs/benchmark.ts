@@ -66,10 +66,12 @@ export class BenchmarkCostEstimateProvider implements ICostEstimateProvider {
         `Source geography: ${rentLookup!.source_geography?.area || ''}, ${rentLookup!.source_geography?.city || ''}` +
         `${rentLookup!.distance_km != null ? ` (~${rentLookup!.distance_km} km from request)` : ''}. ` +
         `Provenance: ${rentLookup!.provenance}; confidence: ${rentLookup!.confidence}; ` +
-        `source: ${rentLookup!.source || 'n/a'}; retrieved: ${rentLookup!.retrieved_at || 'n/a'}. ` +
+        `source: ${rentLookup!.source || 'n/a'}; ` +
+        `${rentLookup!.retrieved_at_kind === 'manual_estimate_recorded' ? 'estimate recorded' : 'retrieved'}: ` +
+        `${rentLookup!.retrieved_at || 'n/a'}. ` +
         `Rs. ${rentPerSqftPkr}/sq.ft × ${sqft} sq.ft.`
       : `No rent_cache coverage for ${input.city || input.area || 'requested geography'}. ` +
-        'Monthly rent is omitted rather than substituting another region's data.';
+        "Monthly rent is omitted rather than substituting another region's data.";
 
     const records: CostEstimateRecord[] = [
       {
@@ -125,7 +127,13 @@ export class BenchmarkCostEstimateProvider implements ICostEstimateProvider {
         period_or_unit: 'per_month',
         assumptions: rentAssumptions,
         provider: this.name,
-        provenance: rentLookup!.provenance === 'manual_estimate' ? 'manual_estimate' : this.provenance,
+        provenance:
+          rentLookup!.provenance === 'external_api' ||
+          rentLookup!.provenance === 'licensed_dataset' ||
+          rentLookup!.provenance === 'synthetic_demo' ||
+          rentLookup!.provenance === 'manual_estimate'
+            ? rentLookup!.provenance
+            : this.provenance,
         freshness: rentLookup!.freshness,
         retrieved_at: rentLookup!.retrieved_at || now,
       });

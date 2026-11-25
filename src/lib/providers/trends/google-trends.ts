@@ -1,13 +1,14 @@
-import {
+import type {
   DemandTrendRecord,
   DemandTrendPoint,
   DemandTrendQueryInput,
   IDemandTrendProvider,
   DataProvenance,
   DataFreshness,
-  CoverageUnavailableError,
 } from '../../../types/data-collection';
-import { mlClient, GoogleTrendsResult } from '../../ml-client';
+import { CoverageUnavailableError } from '../../../types/data-collection';
+import { mlClient } from '../../ml-client';
+import type { GoogleTrendsResult } from '../../ml-client';
 import { getRegion, PAKISTAN_COUNTRY_CODE } from '../../geo/pakistan-geography';
 
 /**
@@ -120,7 +121,7 @@ function buildPunjabSyntheticFallback(
     provenance: 'synthetic_demo',
     freshness: 'synthetic_demo',
     requested_geo_scope: regionCode,
-    actual_geo_scope: 'PK-PB',
+    actual_geo_scope: regionCode,
     retrieved_at: new Date().toISOString(),
     is_stale: false,
   };
@@ -132,8 +133,19 @@ export class GoogleTrendsProvider implements IDemandTrendProvider {
 
   async getDemandTrends(input: DemandTrendQueryInput): Promise<DemandTrendRecord> {
     const region = getRegion(input.region);
-    const requestedScope = region?.code ?? (input.region || PAKISTAN_COUNTRY_CODE);
-    // Prefer province ISO-3166-2 when recognised; otherwise Pakistan-wide.
+    const requestedRegion = input.region?.trim() || '';
+    const isPakistanWide = /^(pk|pakistan|pakistan[- ]?wide)$/i.test(requestedRegion);
+
+    // Never silently widen an unrecognised locality to national trends: that
+    // would report Pakistan-wide data as if it were local evidence.
+    if (!region && !isPakistanWide) {
+      throw new CoverageUnavailableError(
+        `No verified demand-trend coverage for "${requestedRegion || 'unspecified region'}". ` +
+          'Recognise the region or request Pakistan-wide coverage explicitly.'
+      );
+    }
+
+    const requestedScope = region?.code ?? PAKISTAN_COUNTRY_CODE;
     const geoCode = region?.code ?? PAKISTAN_COUNTRY_CODE;
 
     try {
@@ -146,7 +158,22 @@ export class GoogleTrendsProvider implements IDemandTrendProvider {
           analytics?.average_interest ??
           Math.round((points.reduce((a, p) => a + p.index, 0) / points.length) * 10) / 10;
 
+        const actualScope = String(response.geo || geoCode).toUpperCase();
+        const expectedScope = (isPakistanWide ? PAKISTAN_COUNTRY_CODE : geoCode).toUpperCase();
+        if (actualScope !== expectedScope) {
+          throw new CoverageUnavailableError(
+            `Trend provider returned ${actualScope} for a ${expectedScope} request; ` +
+              'the response was not accepted as regional evidence.'
+          );
+        }
+
         const isEmpirical = response.source === 'empirical_market_baseline';
+        if (isEmpirical && !region?.analysis_enabled) {
+          throw new CoverageUnavailableError(
+            `Empirical benchmark data is not verified local coverage for "${requestedRegion}".`
+          );
+        }
+
         const freshness: DataFreshness = isEmpirical
           ? 'synthetic_demo'
           : response.is_stale
@@ -164,17 +191,18 @@ export class GoogleTrendsProvider implements IDemandTrendProvider {
           trend_series: points.slice(-12),
           avg_interest: avgInterest,
           trend_slope: slopeFromAnalytics(analytics),
-          provider: this.name,
+          provider: isEmpirical ? 'empirical_market_baseline_fallback' : this.name,
           provenance,
           freshness,
           requested_geo_scope: requestedScope,
-          actual_geo_scope: response.geo || geoCode,
+          actual_geo_scope: actualScope,
           retrieved_at: response.fetched_at || new Date().toISOString(),
           cache_retrieved_at: response.is_cached || response.is_stale ? new Date().toISOString() : undefined,
           is_stale: Boolean(response.is_stale),
         };
       }
     } catch (err) {
+      if (err instanceof CoverageUnavailableError) throw err;
       console.warn('Live/stale Pytrends retrieval failed:', err);
     }
 

@@ -53,6 +53,9 @@ export async function GET(request: Request) {
     provenance: 'manual_estimate',
     confidence: seed.confidence,
     notes: seed.notes,
+    // Legacy `scraped_at` is required by the original schema; `recorded_at`
+    // is the honest timestamp for a curated estimate.
+    recorded_at: collectedAt,
     scraped_at: collectedAt,
   }));
 

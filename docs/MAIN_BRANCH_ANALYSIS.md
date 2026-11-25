@@ -8,6 +8,8 @@
 **Working branch while writing this report:** `fix/complete-module-1-module-2` (report file only; no commits to `main`).
 
 > Scope: factual audit of the committed `main` branch. It does **not** describe the uncommitted remediation work already present in the working tree. All statements below are tied to files at commit `545c7c6`.
+>
+> **Superseded for Task 4:** the Module 3 persistence/idempotency finding in §2.1 was addressed by `20261125120000_module3_persistence_hardening.sql` and the orchestrator hardening. See `docs/module-3-data-collection.md` for the current Module 3 status; the line numbers and conclusions below remain historical evidence for commit `545c7c6`.
 
 ---
 

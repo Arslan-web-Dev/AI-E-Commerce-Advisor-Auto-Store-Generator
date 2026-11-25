@@ -165,12 +165,22 @@ export async function POST(request: NextRequest, context: RouteContext) {
       .single();
     finalProject = refreshedProj;
 
-    // 3. Initiate Module 3 Data Collection for the submitted project (Handoff)
+    // 3. Initiate Module 3 Data Collection only for a new submission. The
+    //    idempotent RPC reports repeat submissions; rerunning collection here
+    //    would create duplicate active runs and duplicate observation rows.
     let collectionResult = null;
-    try {
-      collectionResult = await runDataCollection(id, user.id);
-    } catch (collErr) {
-      console.warn('Initial data collection handoff notice:', collErr);
+    if (rpcData.already_submitted === true) {
+      collectionResult = {
+        success: true,
+        status: 'partial',
+        error: 'Project was already submitted; no duplicate collection run was created.',
+      };
+    } else {
+      try {
+        collectionResult = await runDataCollection(id, user.id);
+      } catch (collErr) {
+        console.warn('Initial data collection handoff notice:', collErr);
+      }
     }
 
     return NextResponse.json({

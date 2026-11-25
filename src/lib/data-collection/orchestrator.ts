@@ -21,7 +21,7 @@ const ACTIVE_RUN_GUARD_MS = 40 * 1000;
 export interface OrchestrationResult {
   success: boolean;
   run_id: string;
-  status: 'completed' | 'partial' | 'failed';
+  status: 'completed' | 'partial' | 'failed' | 'running';
   providers_status: CollectionRun['providers_status'];
   summary: {
     competitor_count: number;
@@ -58,7 +58,7 @@ export async function runDataCollection(
     throw new Error('Access denied: You do not own this project');
   }
 
-  // 2. Concurrency / idempotency: reclaim stuck runs, avoid duplicate active work
+  // 2. Concurrency / idempotency: reclaim stuck runs and atomically claim one run.
   const { data: existingRuns } = await supabase
     .from('project_collection_runs')
     .select('*')
@@ -68,7 +68,7 @@ export async function runDataCollection(
     .limit(5);
 
   const now = Date.now();
-  let runId: string | null = null;
+  let runId: string | undefined;
 
   if (existingRuns && existingRuns.length > 0) {
     for (const activeRun of existingRuns) {
@@ -77,9 +77,9 @@ export async function runDataCollection(
 
       if (activeRun.status === 'running' && age < ACTIVE_RUN_GUARD_MS) {
         return {
-          success: true,
+          success: false,
           run_id: activeRun.id,
-          status: 'partial',
+          status: 'running',
           providers_status: activeRun.providers_status || {},
           summary: {
             competitor_count: 0,
@@ -87,6 +87,7 @@ export async function runDataCollection(
             has_trend_data: false,
             cost_estimate_count: 0,
           },
+          error: 'A data collection run is already in progress. Retry after it completes.',
         };
       }
 
@@ -107,21 +108,29 @@ export async function runDataCollection(
               },
             },
           })
-          .eq('id', activeRun.id);
+          .eq('id', activeRun.id)
+          .eq('status', 'running');
         continue;
       }
 
-      // Claim the newest pending (or reclaimable running) run created by submit RPC.
-      if (!runId && (activeRun.status === 'pending' || activeRun.status === 'running')) {
-        runId = activeRun.id;
-        await supabase
+      // Conditional claim: only one caller can transition a given run to running.
+      if (activeRun.status === 'pending' || activeRun.status === 'running') {
+        const { data: claimed } = await supabase
           .from('project_collection_runs')
           .update({
             status: 'running',
             started_at: new Date().toISOString(),
             providers_status: {},
           })
-          .eq('id', runId);
+          .eq('id', activeRun.id)
+          .eq('status', activeRun.status)
+          .select('id')
+          .maybeSingle();
+
+        if (claimed?.id) {
+          runId = claimed.id;
+          break;
+        }
       }
     }
   }
@@ -136,12 +145,55 @@ export async function runDataCollection(
         started_at: new Date().toISOString(),
       })
       .select('id')
-      .single();
+      .maybeSingle();
 
     if (runError || !run) {
-      throw new Error(`Failed to initialize collection run: ${runError?.message}`);
+      // The unique partial index can reject a racing insert. Claim the winner
+      // instead of reporting a false failure.
+      const { data: winner } = await supabase
+        .from('project_collection_runs')
+        .select('id')
+        .eq('project_id', projectId)
+        .in('status', ['pending', 'running'])
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!winner) {
+        throw new Error(`Failed to initialize collection run: ${runError?.message || 'unknown error'}`);
+      }
+
+      const { data: claimed } = await supabase
+        .from('project_collection_runs')
+        .update({ status: 'running', started_at: new Date().toISOString(), providers_status: {} })
+        .eq('id', winner.id)
+        .eq('status', 'pending')
+        .select('id')
+        .maybeSingle();
+
+      if (!claimed?.id) {
+        return {
+          success: false,
+          run_id: winner.id,
+          status: 'running',
+          providers_status: {},
+          summary: {
+            competitor_count: 0,
+            market_metric_count: 0,
+            has_trend_data: false,
+            cost_estimate_count: 0,
+          },
+          error: 'A data collection run is already in progress. Retry after it completes.',
+        };
+      }
+      runId = claimed.id;
+    } else {
+      runId = run.id;
     }
-    runId = run.id;
+  }
+
+  if (!runId) {
+    throw new Error('Failed to acquire a collection run');
   }
 
   const providers = getProviderBundle(options?.forceDemo);
@@ -378,7 +430,7 @@ export async function runDataCollection(
       competitors = comp.records.map((c) => ({
         ...c,
         project_id: projectId,
-        run_id: runId!,
+        run_id: runId,
       }));
       providersStatus.competitors = asStatusDetail({
         status: 'completed',
@@ -410,7 +462,7 @@ export async function runDataCollection(
     marketObservations = regionalResult.value.records.map((m) => ({
       ...m,
       project_id: projectId,
-      run_id: runId!,
+      run_id: runId,
       freshness: regionalResult.value.freshness,
     }));
     providersStatus.regional_stats = asStatusDetail({
@@ -438,7 +490,7 @@ export async function runDataCollection(
     demandTrend = {
       ...trendResult.value.record,
       project_id: projectId,
-      run_id: runId!,
+      run_id: runId,
     };
     providersStatus.trends = asStatusDetail({
       status: 'completed',
@@ -480,7 +532,7 @@ export async function runDataCollection(
     costEstimates = costResult.value.records.map((e) => ({
       ...e,
       project_id: projectId,
-      run_id: runId!,
+      run_id: runId,
     }));
     const rentRow = costEstimates.find((e) => e.cost_type === 'rent_monthly');
     const rentUnavailable = rentRow?.freshness === 'unavailable';
@@ -506,20 +558,26 @@ export async function runDataCollection(
     });
   }
 
-  // 5. Persist successful provider data independently
+  // 5. Persist successful provider data independently. A persistence failure
+  //    is a real failure: never report collected data that was not stored.
+  const persistenceErrors: string[] = [];
   try {
-    if (competitors.length > 0) {
-      await supabase.from('project_competitors').insert(competitors);
-    }
-    if (marketObservations.length > 0) {
-      await supabase.from('project_market_observations').insert(marketObservations);
-    }
-    if (demandTrend) {
-      await supabase.from('project_demand_trends').insert(demandTrend);
-    }
-    if (costEstimates.length > 0) {
-      await supabase.from('project_cost_estimates').insert(costEstimates);
-    }
+    const replaceRunRows = async (table: string, rows: unknown[]) => {
+      const { error: deleteError } = await supabase.from(table).delete().eq('run_id', runId);
+      if (deleteError) {
+        throw new Error(`${table} clear failed: ${deleteError.message}`);
+      }
+      if (rows.length === 0) return;
+      const { error: insertError } = await supabase.from(table).insert(rows);
+      if (insertError) {
+        throw new Error(`${table} insert failed: ${insertError.message}`);
+      }
+    };
+
+    await replaceRunRows('project_competitors', competitors);
+    await replaceRunRows('project_market_observations', marketObservations);
+    await replaceRunRows('project_demand_trends', demandTrend ? [demandTrend] : []);
+    await replaceRunRows('project_cost_estimates', costEstimates);
 
     if (project.report_id) {
       const qualityScore =
@@ -530,7 +588,7 @@ export async function runDataCollection(
           ? 0.15
           : 0);
 
-      await supabase
+      const { error: reportError } = await supabase
         .from('feasibility_reports')
         .update({
           competitors: competitors.slice(0, 30),
@@ -538,9 +596,52 @@ export async function runDataCollection(
           data_quality: Math.round(qualityScore * 100) / 100,
         })
         .eq('id', project.report_id);
+
+      if (reportError) {
+        persistenceErrors.push(`feasibility_reports update failed: ${reportError.message}`);
+      }
     }
   } catch (persistErr) {
-    console.error('Error persisting data collection records:', persistErr);
+    persistenceErrors.push(persistErr instanceof Error ? persistErr.message : String(persistErr));
+  }
+
+  const summary = {
+    competitor_count: competitors.length,
+    market_metric_count: marketObservations.length,
+    has_trend_data: !!demandTrend,
+    cost_estimate_count: costEstimates.length,
+  };
+
+  if (persistenceErrors.length > 0) {
+    const error = `Failed to persist Module 3 records: ${persistenceErrors.join('; ')}`;
+    console.error(error);
+    await supabase
+      .from('project_collection_runs')
+      .update({
+        status: 'failed',
+        providers_status: {
+          ...providersStatus,
+          _system: {
+            status: 'failed',
+            provider: 'orchestrator',
+            provenance: 'manual_estimate',
+            item_count: 0,
+            error,
+          },
+        },
+        completed_at: new Date().toISOString(),
+      })
+      .eq('id', runId)
+      .eq('status', 'running');
+
+    return {
+      success: false,
+      run_id: runId,
+      status: 'failed',
+      providers_status: providersStatus,
+      summary,
+      error,
+    };
   }
 
   const providerOutcomes = [
@@ -557,25 +658,33 @@ export async function runDataCollection(
   const runOutcome: 'completed' | 'partial' | 'failed' =
     completedCount === 4 ? 'completed' : usableCount > 0 ? 'partial' : 'failed';
 
-  await supabase
+  const { error: finalizeError } = await supabase
     .from('project_collection_runs')
     .update({
       status: runOutcome,
       providers_status: providersStatus,
       completed_at: new Date().toISOString(),
     })
-    .eq('id', runId);
+    .eq('id', runId)
+    .eq('status', 'running');
+
+  if (finalizeError) {
+    const error = `Failed to finalize collection run: ${finalizeError.message}`;
+    return {
+      success: false,
+      run_id: runId,
+      status: 'failed',
+      providers_status: providersStatus,
+      summary,
+      error,
+    };
+  }
 
   return {
     success: runOutcome !== 'failed',
     run_id: runId,
     status: runOutcome,
     providers_status: providersStatus,
-    summary: {
-      competitor_count: competitors.length,
-      market_metric_count: marketObservations.length,
-      has_trend_data: !!demandTrend,
-      cost_estimate_count: costEstimates.length,
-    },
+    summary,
   };
 }

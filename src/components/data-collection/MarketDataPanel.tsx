@@ -107,6 +107,11 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
 
   const hasData = competitors.length > 0 || observations.length > 0 || demandTrend !== null || costEstimates.length > 0;
   const isDemo = competitors.some((c) => c.provenance === 'synthetic_demo') || latestRun?.providers_status?.competitors?.provenance === 'synthetic_demo';
+  const providerStatuses = Object.values(latestRun?.providers_status ?? {});
+  const hasLiveObservation = providerStatuses.some((s) => s?.freshness === 'live');
+  const hasManualEstimate = providerStatuses.some(
+    (s) => s?.freshness === 'manual_estimate' || s?.provenance === 'manual_estimate'
+  );
 
   const renderFreshnessBadge = (freshness?: string, provenance?: string) => {
     const key = freshness || provenance || 'unavailable';
@@ -592,7 +597,14 @@ export default function MarketDataPanel({ projectId, isSubmitted }: MarketDataPa
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[#4edea3] text-[18px]">verified</span>
           <span>
-            Data records stored in PostgreSQL with verifiable provenance. {isDemo ? '⚠️ Demo mode active.' : 'Authoritative open data active.'}
+            Data records stored in PostgreSQL with verifiable provenance.{' '}
+            {isDemo
+              ? '⚠️ Demo mode active.'
+              : hasLiveObservation
+              ? 'Live provider observations included.'
+              : hasManualEstimate
+              ? 'Curated estimates only — no live provider observations.'
+              : 'No live provider observations available.'}
           </span>
         </div>
         <span className="font-mono text-[11px] text-[#86948a]">Ready for Module 4 (Feature Engineering)</span>

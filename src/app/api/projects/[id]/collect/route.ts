@@ -47,6 +47,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
           ? 'Data collection completed successfully across all providers'
           : result.status === 'partial'
           ? 'Data collection completed with partial provider coverage'
+          : result.status === 'running'
+          ? 'Data collection is already running for this project'
           : 'Data collection failed',
       ...result,
     });

@@ -28,6 +28,7 @@ console.log('1. Checking Module 3 File Deliverables...');
 const requiredFiles = [
   'supabase/migrations/20261006010000_module3_data_collection_schema.sql',
   'supabase/migrations/20261125010000_module3_smart_aggregation.sql',
+  'supabase/migrations/20261125120000_module3_persistence_hardening.sql',
   'src/types/data-collection.ts',
   'src/lib/providers/competitors/overpass.ts',
   'src/lib/providers/competitors/demo.ts',
@@ -64,12 +65,19 @@ const task4Sql = fs.readFileSync(
   path.join(rootDir, 'supabase/migrations/20261125010000_module3_smart_aggregation.sql'),
   'utf-8'
 );
+const hardeningSql = fs.readFileSync(
+  path.join(rootDir, 'supabase/migrations/20261125120000_module3_persistence_hardening.sql'),
+  'utf-8'
+);
 
 assert(migrationSql.includes('project_collection_runs'), 'Table project_collection_runs defined');
 assert(migrationSql.includes('project_competitors'), 'Table project_competitors defined');
 assert(task4Sql.includes('competitor_query_cache'), 'competitor_query_cache migration present');
 assert(task4Sql.includes('rent_min_pkr'), 'rent_cache enrichment columns present');
 assert(task4Sql.includes('Rollback guidance'), 'Migration includes rollback guidance');
+assert(hardeningSql.includes('freshness'), 'Per-record freshness columns present');
+assert(hardeningSql.includes('recorded_at'), 'Manual estimate timestamp column present');
+assert(hardeningSql.includes('uq_collection_runs_active_project'), 'Active run uniqueness guard present');
 
 console.log('\n3. Checking provider robustness...');
 const overpassCode = fs.readFileSync(path.join(rootDir, 'src/lib/providers/competitors/overpass.ts'), 'utf-8');
@@ -78,15 +86,19 @@ assert(overpassCode.includes('amenity'), 'Amenity tag queries present');
 assert(overpassCode.includes('osmIdentityKey'), 'OSM identity dedupe present');
 assert(overpassCode.includes('Unnamed business'), 'Honest unnamed POI handling');
 assert(overpassCode.includes('MAX_PROJECT_RADIUS_KM = 15'), '15 km radius cap present');
+assert(!overpassCode.includes('out center 50'), 'No silent Overpass result cap');
 
 const trendsCode = fs.readFileSync(path.join(rootDir, 'src/lib/providers/trends/google-trends.ts'), 'utf-8');
 assert(trendsCode.includes('stale_cache'), 'Trends stale-cache freshness present');
 assert(trendsCode.includes('CoverageUnavailableError'), 'Coverage unavailable signalling present');
+assert(trendsCode.includes('isPakistanWide'), 'Unrecognised regions cannot silently widen to national scope');
 
 const orchCode = fs.readFileSync(path.join(rootDir, 'src/lib/data-collection/orchestrator.ts'), 'utf-8');
 assert(orchCode.includes('getCompetitorsWithCache'), 'Orchestrator uses seven-day competitor cache');
 assert(orchCode.includes('Do NOT silently substitute synthetic competitors'), 'No silent demo fallback');
 assert(orchCode.includes('STUCK_RUNNING_MS'), 'Stuck-running recovery present');
+assert(orchCode.includes('replaceRunRows'), 'Repeat runs replace observation rows');
+assert(orchCode.includes('persistenceErrors'), 'Persistence failures are surfaced');
 
 const cronCode = fs.readFileSync(path.join(rootDir, 'src/app/api/cron/rent-cache/route.ts'), 'utf-8');
 assert(cronCode.includes('assertCronAuthorized'), 'Rent cron is authorized');

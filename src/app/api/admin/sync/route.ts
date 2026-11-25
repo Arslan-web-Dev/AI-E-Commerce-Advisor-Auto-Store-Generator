@@ -52,10 +52,12 @@ export async function POST(request: NextRequest) {
       console.error('[Config Fetch Error]:', configError.message);
     }
 
-    // Rent cache aggregated snapshot (city, area, rent_per_sqft_pkr, sample_size)
+    // Rent cache snapshot with explicit provenance. These rows are curated
+    // estimates unless another source is recorded; the export must not hide
+    // that distinction from reviewers.
     const { data: rentRows } = await adminSupabase
       .from('rent_cache')
-      .select('city, area, rent_per_sqft_pkr, sample_size, scraped_at')
+      .select('city, area, rent_per_sqft_pkr, sample_size, scraped_at, recorded_at, provenance, confidence, notes')
       .limit(100);
 
     const timestamp = new Date().toISOString();
@@ -76,7 +78,10 @@ export async function POST(request: NextRequest) {
           };
           return acc;
         }, {}),
-        rent_cache_snapshot: rentRows || [],
+        rent_cache_snapshot: {
+          note: 'Curated rent estimates are labelled manual_estimate; scraped_at is a legacy column and recorded_at is the curation timestamp when present.',
+          rows: rentRows || [],
+        },
       },
     };
 
