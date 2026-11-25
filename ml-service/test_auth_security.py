@@ -53,7 +53,8 @@ def test_protected_routes_registered():
         "/train",
         "/predict",
         "/market/trends",
-        "/market/demand-analysis"
+        "/market/demand-analysis",
+        "/training-policy"
     ]
     
     app_routes = {route.path: route for route in main.app.routes}
@@ -75,17 +76,17 @@ def test_cors_security():
     print(f"PASS: ML service CORS allowlist is strictly restricted: {ALLOWED_ORIGINS}")
 
 def test_disallowed_default_keys():
-    """Verify that known placeholder secrets are rejected."""
+    """Every known placeholder must be rejected with HTTP 403."""
     from config import DISALLOWED_DEFAULT_SECRETS
-    for placeholder in DISALLOWED_DEFAULT_SECRETS:
+    for placeholder in sorted(DISALLOWED_DEFAULT_SECRETS):
         try:
             main.verify_api_key(placeholder)
-            # If the current active key is NOT this placeholder, it should be rejected
-            if placeholder != ML_SERVICE_API_KEY:
-                pass
-        except HTTPException:
-            pass
-    print("PASS: Known default placeholder keys are disallowed.")
+            raise AssertionError(f"FAIL: placeholder key '{placeholder}' was accepted")
+        except HTTPException as exc:
+            assert exc.status_code == 403, (
+                f"FAIL: placeholder '{placeholder}' returned {exc.status_code}, expected 403"
+            )
+    print("PASS: Known default placeholder keys are strictly rejected with HTTP 403.")
 
 if __name__ == "__main__":
     print("\n================ ML SERVICE SECURITY & AUTH TESTS ================")

@@ -1,27 +1,34 @@
-import {
+import type {
   CompetitorRecord,
   MarketObservation,
   DemandTrendRecord,
   CostEstimateRecord,
   DataProvenance,
 } from '@/types/data-collection';
-import {
+import type { Project } from '@/types/project';
+import type {
   DomainCompletenessSummary,
   ProvenanceBreakdown,
   DataCompleteness,
 } from '@/types/feature-processing';
+import { isUsableDemandTrend } from './trend-validity';
 
 export interface CleanedDataset {
   competitors: CompetitorRecord[];
   population: number | null;
-  internet_penetration_pct: number;
-  ecommerce_growth_rate_pct: number;
+  /** Null when no in-range observation exists; never silently benchmark-filled. */
+  internet_penetration_pct: number | null;
+  ecommerce_growth_rate_pct: number | null;
   demand_trend: DemandTrendRecord | null;
+  /** PKR/sq.ft from a labelled rent_cache record; null means no sourced rent. */
+  rent_per_sqft: number | null;
+  /** False when the rent cost row is explicitly unavailable or invalid. */
+  rent_available: boolean;
   costs: {
-    setup: number;
-    rent_monthly: number;
-    marketing_initial: number;
-    logistics_per_order: number;
+    setup: number | null;
+    rent_monthly: number | null;
+    marketing_initial: number | null;
+    logistics_per_order: number | null;
     currency: 'USD' | 'PKR';
   };
   quality_score: number;
@@ -31,16 +38,29 @@ export interface CleanedDataset {
   provenance_summary: ProvenanceBreakdown;
 }
 
-const DEFAULT_INTERNET_PENETRATION = 54.3; // PBS / PTA Pakistan Benchmark
-const DEFAULT_ECOMMERCE_GROWTH = 18.5;     // State Bank / Commerce Ministry Benchmark
 const PKR_TO_USD_RATE = 278;
+type TrendProject = Pick<Project, 'city' | 'district' | 'region' | 'lat' | 'lng' | 'target_location'>;
+
+function finiteInRange(value: unknown, min: number, max: number): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
+}
+
+function validCostMidpoint(record: CostEstimateRecord | undefined): number | null {
+  if (!record) return null;
+  const { amount_min, amount_max } = record;
+  if (!finiteInRange(amount_min, 0, Number.MAX_SAFE_INTEGER)) return null;
+  if (!finiteInRange(amount_max, 0, Number.MAX_SAFE_INTEGER)) return null;
+  if (amount_min > amount_max) return null;
+  return (amount_min + amount_max) / 2;
+}
 
 export function cleanAndValidateData(
   competitors: CompetitorRecord[],
   observations: MarketObservation[],
   trends: DemandTrendRecord | null,
   costs: CostEstimateRecord[],
-  targetCurrency: 'USD' | 'PKR' = 'PKR'
+  targetCurrency: 'USD' | 'PKR' = 'PKR',
+  project: TrendProject | null = null
 ): CleanedDataset {
   let imputations_count = 0;
   let score = 0;
@@ -51,7 +71,7 @@ export function cleanAndValidateData(
   );
   const compMissingFields: string[] = [];
   if (validCompetitors.length === 0) compMissingFields.push('competitors_empty');
-  
+
   const competitorsQuality = validCompetitors.length > 0 ? 25 : 5;
   score += competitorsQuality;
 
@@ -62,41 +82,43 @@ export function cleanAndValidateData(
 
   const demoMissingFields: string[] = [];
   let population: number | null = null;
-  if (popObs && popObs.metric_value > 0) {
+  if (popObs && finiteInRange(popObs.metric_value, 1, Number.MAX_SAFE_INTEGER)) {
     population = Math.round(popObs.metric_value);
     score += 15;
   } else {
     demoMissingFields.push('population_missing');
   }
 
-  let internet_penetration_pct: number;
-  if (netObs && netObs.metric_value > 0) {
-    internet_penetration_pct = Number(netObs.metric_value);
+  let internet_penetration_pct: number | null = null;
+  if (netObs && finiteInRange(netObs.metric_value, 0, 100)) {
+    internet_penetration_pct = netObs.metric_value;
     score += 5;
   } else {
-    internet_penetration_pct = DEFAULT_INTERNET_PENETRATION;
     imputations_count++;
-    demoMissingFields.push('internet_penetration_imputed');
+    demoMissingFields.push('internet_penetration_unavailable');
   }
 
-  let ecommerce_growth_rate_pct: number;
-  if (ecomObs && ecomObs.metric_value > 0) {
-    ecommerce_growth_rate_pct = Number(ecomObs.metric_value);
+  let ecommerce_growth_rate_pct: number | null = null;
+  if (ecomObs && finiteInRange(ecomObs.metric_value, 0, 100)) {
+    ecommerce_growth_rate_pct = ecomObs.metric_value;
     score += 5;
   } else {
-    ecommerce_growth_rate_pct = DEFAULT_ECOMMERCE_GROWTH;
     imputations_count++;
-    demoMissingFields.push('ecommerce_growth_imputed');
+    demoMissingFields.push('ecommerce_growth_unavailable');
   }
 
-  // 3. Process Demand Trends Domain (Max 25 pts)
+  // 3. Process Demand Trends Domain (Max 25 pts). Stale and cross-region
+  // observations are retained for audit but score no quality points.
   const trendsMissingFields: string[] = [];
   let trendsQuality = 0;
-  if (trends && trends.trend_series && trends.trend_series.length >= 6) {
+  const usableTrend = isUsableDemandTrend(trends, project);
+  if (usableTrend && trends && trends.trend_series && trends.trend_series.length >= 6) {
     trendsQuality = 25;
-  } else if (trends) {
+  } else if (usableTrend && trends) {
     trendsQuality = 15;
     trendsMissingFields.push('trend_series_short');
+  } else if (trends) {
+    trendsMissingFields.push('demand_trend_unusable_scope_or_freshness');
   } else {
     trendsMissingFields.push('demand_trend_unavailable');
   }
@@ -109,38 +131,55 @@ export function cleanAndValidateData(
   const mktRecord = costs.find((c) => c.cost_type === 'marketing_initial');
   const logRecord = costs.find((c) => c.cost_type === 'logistics_per_order');
 
+  const setupMidpoint = validCostMidpoint(setupRecord);
+  const rentMidpoint = validCostMidpoint(rentRecord);
+  const mktMidpoint = validCostMidpoint(mktRecord);
+  const logMidpoint = validCostMidpoint(logRecord);
+
   let costsQuality = 0;
-  if (setupRecord) costsQuality += 8; else costsMissingFields.push('setup_missing');
-  if (rentRecord) costsQuality += 9; else costsMissingFields.push('rent_missing');
-  if (mktRecord) costsQuality += 4; else costsMissingFields.push('marketing_missing');
-  if (logRecord) costsQuality += 4; else costsMissingFields.push('logistics_missing');
+  if (setupMidpoint !== null) costsQuality += 8; else costsMissingFields.push('setup_missing_or_invalid');
+  if (rentMidpoint !== null) costsQuality += 9; else costsMissingFields.push('rent_missing_or_invalid');
+  if (mktMidpoint !== null) costsQuality += 4; else costsMissingFields.push('marketing_missing_or_invalid');
+  if (logMidpoint !== null) costsQuality += 4; else costsMissingFields.push('logistics_missing_or_invalid');
   score += costsQuality;
 
-  // Helper to convert cost amounts to target currency
-  const convertAmount = (rec?: CostEstimateRecord, fallbackDefault = 0): number => {
-    if (!rec) {
-      imputations_count++;
-      return fallbackDefault;
-    }
-    const val = (rec.amount_min + rec.amount_max) / 2;
-    if (rec.currency === targetCurrency) return val;
-    if (rec.currency === 'USD' && targetCurrency === 'PKR') return val * PKR_TO_USD_RATE;
-    if (rec.currency === 'PKR' && targetCurrency === 'USD') return val / PKR_TO_USD_RATE;
-    return val;
+  // Helper to convert valid cost amounts to the target currency. Invalid and
+  // missing amounts stay null; no benchmark is substituted as a local cost.
+  const convertAmount = (midpoint: number | null, currency: CostEstimateRecord['currency'] | undefined): number | null => {
+    if (midpoint === null || !currency) return null;
+    if (currency === targetCurrency) return midpoint;
+    if (currency === 'USD' && targetCurrency === 'PKR') return midpoint * PKR_TO_USD_RATE;
+    if (currency === 'PKR' && targetCurrency === 'USD') return midpoint / PKR_TO_USD_RATE;
+    return null;
   };
-
-  const defaultSetup = targetCurrency === 'PKR' ? 350000 : 1250;
-  const defaultRent = targetCurrency === 'PKR' ? 120000 : 450;
-  const defaultMkt = targetCurrency === 'PKR' ? 80000 : 300;
-  const defaultLog = targetCurrency === 'PKR' ? 350 : 1.5;
 
   const normalizedCosts = {
-    setup: convertAmount(setupRecord, defaultSetup),
-    rent_monthly: convertAmount(rentRecord, defaultRent),
-    marketing_initial: convertAmount(mktRecord, defaultMkt),
-    logistics_per_order: convertAmount(logRecord, defaultLog),
+    setup: convertAmount(setupMidpoint, setupRecord?.currency),
+    rent_monthly: convertAmount(rentMidpoint, rentRecord?.currency),
+    marketing_initial: convertAmount(mktMidpoint, mktRecord?.currency),
+    logistics_per_order: convertAmount(logMidpoint, logRecord?.currency),
     currency: targetCurrency,
   };
+
+  // Rent provenance must remain explicit. The BenchmarkCostEstimateProvider
+  // embeds the sourced PKR/sq.ft value in the rent cost assumptions. Parsing it
+  // keeps the feature traceable to rent_cache rather than inventing a rate.
+  const rentPerSqftMatch = rentRecord?.assumptions?.match(
+    /Rs\.\s*([0-9]+(?:\.[0-9]+)?)\s*\/\s*sq\.?\s*ft/i
+  );
+  const rentPerSqftPkr = rentPerSqftMatch ? Number(rentPerSqftMatch[1]) : null;
+  // The parsed cache rate is PKR/sq.ft. Keep the whole feature record in one
+  // currency so the UI never labels a PKR number as USD.
+  const rentPerSqft =
+    rentPerSqftPkr !== null && targetCurrency === 'USD'
+      ? rentPerSqftPkr / PKR_TO_USD_RATE
+      : rentPerSqftPkr;
+  const rentAvailable = Boolean(
+    rentMidpoint !== null &&
+    rentMidpoint > 0 &&
+    rentRecord &&
+    rentRecord.freshness !== 'unavailable'
+  );
 
   // Compute Provenance Breakdown
   const provenances: DataProvenance[] = [
@@ -191,7 +230,11 @@ export function cleanAndValidateData(
       available: observations.length > 0,
       item_count: observations.length,
       provenance: popObs?.provenance || 'unavailable',
-      quality_pct: Math.round((((population ? 15 : 0) + 10) / 25) * 100),
+      quality_pct: Math.round(
+        (((population !== null ? 15 : 0) +
+          (internet_penetration_pct !== null ? 5 : 0) +
+          (ecommerce_growth_rate_pct !== null ? 5 : 0)) / 25) * 100
+      ),
       missing_fields: demoMissingFields,
     },
     trends: {
@@ -210,12 +253,17 @@ export function cleanAndValidateData(
     },
   };
 
+  // Any missing or invalid cost component was not imputed from a benchmark.
+  imputations_count += costsMissingFields.length;
+
   return {
     competitors: validCompetitors,
     population,
     internet_penetration_pct,
     ecommerce_growth_rate_pct,
     demand_trend: trends,
+    rent_per_sqft: rentPerSqft,
+    rent_available: rentAvailable,
     costs: normalizedCosts,
     quality_score: Math.min(100, Math.max(0, score)),
     data_completeness: completeness,

@@ -3,10 +3,11 @@ interface Props {
   rentMax: number;
   budget: number;
   area?: string;
+  currency?: 'PKR' | 'USD';
   confidence?: 'low' | 'medium' | 'high';
 }
 
-export default function RentBudgetGauge({ rentMin, rentMax, budget, area, confidence = 'medium' }: Props) {
+export default function RentBudgetGauge({ rentMin, rentMax, budget, area, currency = 'PKR', confidence = 'medium' }: Props) {
   const avg = (rentMin + rentMax) / 2;
   const ratio = budget > 0 ? Math.min((avg / budget) * 100, 150) : 100;
 
@@ -70,11 +71,11 @@ export default function RentBudgetGauge({ rentMin, rentMax, budget, area, confid
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', fontSize: '0.8rem' }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ opacity: 0.6, marginBottom: '0.1rem' }}>Est. Rent</p>
-          <p style={{ fontWeight: 700, color: '#dae2fd' }}>PKR {avg.toLocaleString('en-PK')}</p>
+          <p style={{ fontWeight: 700, color: '#dae2fd' }}>{currency} {avg.toLocaleString('en-PK')}</p>
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{ opacity: 0.6, marginBottom: '0.1rem' }}>Your Budget</p>
-          <p style={{ fontWeight: 700, color: '#4edea3' }}>PKR {budget.toLocaleString('en-PK')}</p>
+          <p style={{ fontWeight: 700, color: '#4edea3' }}>{currency} {budget.toLocaleString('en-PK')}</p>
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{ opacity: 0.6, marginBottom: '0.1rem' }}>Rent % of Budget</p>

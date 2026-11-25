@@ -1,10 +1,9 @@
 """
-Punjab Retail & SME Business Feasibility Dataset Generator
-Generates realistic, representative sample datasets based on empirical benchmarks from:
-- Pakistan Bureau of Statistics (PBS 2023 Census & Household Integrated Economic Survey)
-- Punjab Development Statistics 2023
-- Punjab commercial real estate rental averages (Lahore, Rawalpindi, Faisalabad, Multan, Gujranwala, Sialkot, etc.)
-- SME failure/success empirical factors in Pakistan retail commerce
+Synthetic Punjab retail sandbox dataset generator (pipeline validation ONLY).
+
+District rent, purchasing-power and logistics anchors are illustrative fixture
+parameters, not a verified empirical dataset. The generated rule labels have no
+supervisor approval (OI-6); see docs/module-4-label-approval-proposal.md.
 """
 
 import numpy as np
@@ -24,20 +23,27 @@ DISTRICT_DATA = {
     "Sheikhupura": {"pop_urban": 1420000, "urban_rate": 35.1, "rent_mean": 100.0, "rent_std": 22.0, "ppi": 64.0, "comp_mean": 11, "logistics": 7.8},
 }
 
+# Five approved priority categories (Task 3 §3). The legacy six-category list
+# from the earlier sandbox is deliberately removed; no unapproved category may
+# be generated or accepted at inference time.
 CATEGORIES = {
-    "Fashion & Apparel": {"margin_base": 0.42, "capital_min": 1000000, "capital_max": 8000000, "burn_ratio": 0.12},
-    "Electronics & Mobile": {"margin_base": 0.18, "capital_min": 1500000, "capital_max": 12000000, "burn_ratio": 0.08},
-    "Grocery & Gourmet": {"margin_base": 0.15, "capital_min": 800000, "capital_max": 6000000, "burn_ratio": 0.14},
-    "Health & Beauty": {"margin_base": 0.38, "capital_min": 700000, "capital_max": 5000000, "burn_ratio": 0.10},
-    "Home & Living": {"margin_base": 0.35, "capital_min": 1200000, "capital_max": 9000000, "burn_ratio": 0.09},
-    "Specialty Crafts": {"margin_base": 0.45, "capital_min": 500000, "capital_max": 4000000, "burn_ratio": 0.07},
+    "Grocery / General Stores": {"margin_base": 0.15, "capital_min": 800000, "capital_max": 6000000, "burn_ratio": 0.14},
+    "Clothing / Footwear": {"margin_base": 0.42, "capital_min": 1000000, "capital_max": 8000000, "burn_ratio": 0.12},
+    "Mobile Phones / Accessories": {"margin_base": 0.18, "capital_min": 1500000, "capital_max": 12000000, "burn_ratio": 0.08},
+    "Restaurants / Cafes": {"margin_base": 0.35, "capital_min": 1200000, "capital_max": 9000000, "burn_ratio": 0.09},
+    "Pharmacies / Medical Stores": {"margin_base": 0.38, "capital_min": 700000, "capital_max": 5000000, "burn_ratio": 0.10},
 }
 
 AUDIENCES = ["Mass Market", "Middle Income", "Premium & Affluent", "Youth & Students"]
 
 def generate_punjab_feasibility_dataset(num_samples: int = 1500, random_seed: int = 42) -> pd.DataFrame:
     """
-    Synthesizes a realistic, empirically grounded dataset of Punjab retail feasibility evaluations.
+    Synthetic sandbox rows for pipeline validation ONLY.
+
+    The rule-generated label formula and weights below are preserved verbatim
+    from the pre-Task-5 generator. They have NO supervisor approval record
+    (OI-6 is open), so targets produced here must never train a production
+    feasibility model. See docs/module-4-label-approval-proposal.md.
     """
     np.random.seed(random_seed)
     districts = list(DISTRICT_DATA.keys())
@@ -68,7 +74,9 @@ def generate_punjab_feasibility_dataset(num_samples: int = 1500, random_seed: in
         
         runway_months = round(capital_pkr / max(burn_budget_pkr, 10000.0), 1)
 
-        # Calculate a realistic underlying feasibility continuous score (0.0 to 1.0)
+        # UNAPPROVED rule-label formula (OI-6). Preserved verbatim; do not
+        # silently change weights or thresholds. Calculate a synthetic
+        # continuous score (0.0 to 1.0) for sandbox validation only.
         # Financial health factor (0.35 weight)
         fin_factor = min(1.0, max(0.0, (runway_months - 4.0) / 14.0))
         

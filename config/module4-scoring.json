@@ -1,0 +1,14 @@
+{
+  "version": "v1.0-srs-fr4.4",
+  "low_risk_min": 0.75,
+  "moderate_risk_min": 0.55,
+  "high_risk_min": 0.35,
+  "bands": [
+    { "level": "low", "label": "Low risk", "min_inclusive": 0.75, "max_exclusive": 1.0000000001 },
+    { "level": "moderate", "label": "Moderate", "min_inclusive": 0.55, "max_exclusive": 0.75 },
+    { "level": "high", "label": "High", "min_inclusive": 0.35, "max_exclusive": 0.55 },
+    { "level": "critical", "label": "Critical", "min_inclusive": 0.0, "max_exclusive": 0.35 }
+  ],
+  "limited_data_disclaimer": "Estimate based on a model trained on limited data",
+  "provisional_disclaimer": "Provisional MCDA index, not a calibrated probability from a supervised model."
+}

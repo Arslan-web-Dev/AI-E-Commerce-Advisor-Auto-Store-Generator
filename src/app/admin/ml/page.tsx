@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { APPROVED_CATEGORIES } from '@/types/project';
 import Reveal from '@/components/ui/Reveal';
 
 interface ColumnMeta {
@@ -47,6 +48,22 @@ interface LeaderboardItem {
   hyperparameters: Record<string, unknown>;
 }
 
+interface CvSummary {
+  strategy?: string;
+  cv_folds?: number;
+  primary_metric?: string;
+  mean_cv_score?: number;
+  std_cv_score?: number;
+  aggregated_metrics?: Record<string, { mean: number; std: number }>;
+}
+
+interface LabelPolicy {
+  status: 'BLOCKED' | 'APPROVED';
+  oi_id: string;
+  reason: string;
+  documented_proposal: string;
+}
+
 interface ModelItem {
   model_id: string;
   name: string;
@@ -66,12 +83,29 @@ interface PredictionFactor {
 }
 
 interface PredictionResult {
-  prediction: string;
+  prediction: string | number;
   model_name: string;
   algorithm: string;
+  feasibility_score?: number | null;
+  risk_level?: 'low' | 'moderate' | 'high' | 'critical' | null;
   confidence_score?: number;
   class_probabilities?: Record<string, number>;
   local_explanation_factors?: PredictionFactor[];
+  artifact_version?: string | null;
+  threshold_version?: string;
+  label_approval_status?: 'BLOCKED' | 'APPROVED';
+  disclaimer?: string;
+}
+
+interface PredictionContext {
+  sandbox_only?: boolean;
+  project_report_persisted?: boolean;
+  threshold_version_applied?: string;
+}
+
+/** Regression runs do not report F1/accuracy/precision/recall. */
+function formatMetric(value: unknown): string {
+  return typeof value === 'number' && Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : 'N/A';
 }
 
 export default function MLPipelineAdminPage() {
@@ -107,7 +141,10 @@ export default function MLPipelineAdminPage() {
     best_model_name: string;
     leaderboard: LeaderboardItem[];
     global_importances: Array<{ feature: string; importance: number }>;
+    cv_metrics?: CvSummary;
+    label_approval_status?: string;
   } | null>(null);
+  const [labelPolicy, setLabelPolicy] = useState<LabelPolicy | null>(null);
 
   // Models state
   const [models, setModels] = useState<ModelItem[]>([]);
@@ -116,7 +153,7 @@ export default function MLPipelineAdminPage() {
   // Predictor Sandbox State
   const [predictInputs, setPredictInputs] = useState({
     district: 'Lahore',
-    business_category: 'Fashion & Apparel',
+    business_category: 'Clothing / Footwear',
     target_audience: 'Middle Income',
     initial_capital_pkr: 3500000,
     monthly_burn_budget_pkr: 250000,
@@ -131,6 +168,7 @@ export default function MLPipelineAdminPage() {
   });
   const [predicting, setPredicting] = useState(false);
   const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
+  const [predictionContext, setPredictionContext] = useState<PredictionContext | null>(null);
 
   // Check auth
   useEffect(() => {
@@ -146,12 +184,9 @@ export default function MLPipelineAdminPage() {
         .eq('id', user.id)
         .maybeSingle();
 
-      if (profile?.role === 'admin') {
-        setIsAdmin(true);
-      } else {
-        // Fallback or preview allowed
-        setIsAdmin(true);
-      }
+      // No preview fallback: the server enforces admin on every ML route, and
+      // the client must not present a privileged UI to a non-admin.
+      setIsAdmin(profile?.role === 'admin');
       setLoading(false);
     }
     checkAuth();
@@ -173,6 +208,12 @@ export default function MLPipelineAdminPage() {
       if (modRes.ok) {
         const modData = await modRes.json();
         setModels(modData.models || []);
+      }
+
+      const policyRes = await fetch('/api/ml/policy');
+      if (policyRes.ok) {
+        const policyData = await policyRes.json();
+        setLabelPolicy(policyData.policy?.label_policy ?? null);
       }
     } catch {
       // safe ignore
@@ -294,6 +335,7 @@ export default function MLPipelineAdminPage() {
   const handleRunPredict = async () => {
     setPredicting(true);
     setPredictionResult(null);
+    setPredictionContext(null);
 
     // Calculate runway months dynamically
     const inputs = {
@@ -312,6 +354,7 @@ export default function MLPipelineAdminPage() {
       if (res.ok) {
         const data = await res.json();
         setPredictionResult(data.prediction);
+        setPredictionContext(data.context ?? null);
       } else {
         const err = await res.json();
         alert(`Prediction failed: ${err.error}`);
@@ -364,9 +407,9 @@ export default function MLPipelineAdminPage() {
               <span className="material-symbols-outlined text-[16px]">trending_up</span>
               <span>Market Intelligence</span>
             </Link>
-            <div className="px-3 py-1 rounded-full bg-[#10b981]/15 text-[#4edea3] text-[11px] font-semibold font-mono border border-[#4edea3]/30 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#4edea3] animate-pulse"></span>
-              <span>FastAPI 8000: Active</span>
+            <div className="px-3 py-1 rounded-full bg-[#f59e0b]/15 text-[#f59e0b] text-[11px] font-semibold font-mono border border-[#f59e0b]/30 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+              <span>{labelPolicy?.status === 'BLOCKED' ? 'OI-6: BLOCKED' : labelPolicy ? 'OI-6: APPROVED' : 'Policy: unavailable'}</span>
             </div>
           </div>
         </div>
@@ -443,7 +486,7 @@ export default function MLPipelineAdminPage() {
               <div>
                 <h3 className="text-[15px] font-bold text-[#dae2fd]">Dataset Repository</h3>
                 <p className="text-[12px] text-[#bbcabf]">
-                  Upload historical SME retail feasibility records or use the verified Punjab benchmark dataset.
+                  Upload an explicitly labelled dataset, or load the synthetic sandbox. Sandbox labels are unapproved for production use.
                 </p>
               </div>
 
@@ -455,7 +498,7 @@ export default function MLPipelineAdminPage() {
                   className="px-3.5 py-2 rounded-xl bg-[#222a3d] hover:bg-[#2d3449] border border-[#2d3449] text-[12px] font-semibold text-[#4cd7f6] flex items-center gap-2 transition-all disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-[18px]">sync_alt</span>
-                  <span>{generatingSample ? 'Generating...' : 'Load Punjab Sample (1,500 rows)'}</span>
+                  <span>{generatingSample ? 'Generating...' : 'Load Sandbox Sample (unapproved labels)'}</span>
                 </button>
 
                 <label className="px-3.5 py-2 rounded-xl bg-[#10b981] hover:bg-[#4edea3] text-[#003824] text-[12px] font-bold flex items-center gap-2 cursor-pointer transition-all shadow-md">
@@ -479,7 +522,7 @@ export default function MLPipelineAdminPage() {
                 <h4 className="text-[12px] font-mono uppercase text-[#bbcabf] font-semibold">Available Datasets</h4>
                 {datasets.length === 0 ? (
                   <div className="bg-[#171f33] border border-[#2d3449] rounded-xl p-6 text-center text-[#bbcabf] text-[13px]">
-                    No datasets available yet. Click &quot;Load Punjab Sample&quot; to begin.
+                    No datasets available yet. Upload a labelled CSV/XLSX or load the unapproved sandbox sample.
                   </div>
                 ) : (
                   datasets.map((ds) => (
@@ -628,11 +671,19 @@ export default function MLPipelineAdminPage() {
         {/* ================= TAB 2: TRAINING STUDIO ================= */}
         {activeTab === 'training' && (
           <div className="space-y-6">
+            {labelPolicy?.status === 'BLOCKED' && (
+              <div className="p-4 rounded-xl bg-[#f59e0b15] border border-[#f59e0b44] text-[12px] text-[#f59e0b] leading-relaxed">
+                <strong>OI-6 BLOCKED:</strong> {labelPolicy.reason}{' '}
+                Review the documented proposal at <code>{labelPolicy.documented_proposal}</code>.
+                Training <code>feasibility_class</code> or <code>feasibility_score</code> is rejected server-side.
+                Generic sandbox targets may be used to validate the pipeline but must not be deployed as production feasibility models.
+              </div>
+            )}
             <div className="bg-[#171f33] border border-[#2d3449] rounded-2xl p-6 space-y-6">
               <div>
                 <h3 className="text-[18px] font-bold text-[#dae2fd]">Multi-Model Training Studio</h3>
                 <p className="text-[13px] text-[#bbcabf]">
-                  Train multiple machine learning algorithms simultaneously with automated cross-validation, hyperparameter tuning, and zero data leakage.
+                  Compare candidate algorithms with fold-local preprocessing. Feasibility labels remain gated by OI-6; generic sandbox targets are allowed for pipeline validation only.
                 </p>
               </div>
 
@@ -805,8 +856,8 @@ export default function MLPipelineAdminPage() {
                     </div>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full bg-[#10b981]/15 text-[#4edea3] text-[12px] font-mono font-semibold border border-[#4edea3]/30">
-                    Auto-Promoted to Production
+                  <span className="px-3 py-1 rounded-full bg-[#f59e0b]/15 text-[#f59e0b] text-[12px] font-mono font-semibold border border-[#f59e0b]/30">
+                    Candidate only — activation is explicit
                   </span>
                 </div>
 
@@ -835,25 +886,40 @@ export default function MLPipelineAdminPage() {
                           </td>
                           <td className="py-2.5 px-3 text-[#dae2fd]">{item.name}</td>
                           <td className="py-2.5 px-3 font-mono text-[#4edea3]">
-                            {(item.test_metrics.f1 * 100).toFixed(1)}%
+                            {formatMetric(item.test_metrics.f1)}
                           </td>
                           <td className="py-2.5 px-3 font-mono text-[#bbcabf]">
-                            {(item.cv_score * 100).toFixed(1)}%
+                            {formatMetric(item.cv_score)}
                           </td>
                           <td className="py-2.5 px-3 font-mono text-[#bbcabf]">
-                            {(item.test_metrics.accuracy * 100).toFixed(1)}%
+                            {formatMetric(item.test_metrics.accuracy)}
                           </td>
                           <td className="py-2.5 px-3 font-mono text-[#bbcabf]">
-                            {(item.test_metrics.precision * 100).toFixed(1)}%
+                            {formatMetric(item.test_metrics.precision)}
                           </td>
                           <td className="py-2.5 px-3 font-mono text-[#bbcabf]">
-                            {(item.test_metrics.recall * 100).toFixed(1)}%
+                            {formatMetric(item.test_metrics.recall)}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+                {lastResults.cv_metrics && (
+                  <p className="text-[11px] text-[#bbcabf] font-mono mt-3 leading-relaxed">
+                    Validation: {lastResults.cv_metrics.strategy ?? 'k-fold'} ·{' '}
+                    {lastResults.cv_metrics.cv_folds ?? '?'} folds ·{' '}
+                    primary metric {lastResults.cv_metrics.primary_metric ?? 'n/a'} ·{' '}
+                    mean {lastResults.cv_metrics.mean_cv_score?.toFixed(4) ?? 'n/a'} ±{' '}
+                    {lastResults.cv_metrics.std_cv_score?.toFixed(4) ?? 'n/a'}.{' '}
+                    Preprocessing is fitted inside each fold; holdout metrics are candidate-selection metrics, not a calibrated production estimate.
+                  </p>
+                )}
+                {lastResults.label_approval_status && (
+                  <p className="text-[11px] text-[#f59e0b] font-mono mt-2">
+                    Label approval state: {lastResults.label_approval_status}
+                  </p>
+                )}
               </div>
             )}
 
@@ -967,14 +1033,7 @@ export default function MLPipelineAdminPage() {
                     onChange={(e) => setPredictInputs({ ...predictInputs, business_category: e.target.value })}
                     className="w-full bg-[#131b2e] border border-[#2d3449] rounded-xl px-3 py-2 text-[12px] text-[#dae2fd]"
                   >
-                    {[
-                      'Fashion & Apparel',
-                      'Electronics & Mobile',
-                      'Grocery & Gourmet',
-                      'Health & Beauty',
-                      'Home & Living',
-                      'Specialty Crafts'
-                    ].map((c) => (
+                    {APPROVED_CATEGORIES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1085,8 +1144,14 @@ export default function MLPipelineAdminPage() {
               <div>
                 <h3 className="text-[16px] font-bold text-[#dae2fd]">Prediction &amp; Explainability Factors</h3>
                 <p className="text-[12px] text-[#bbcabf]">
-                  Audit model inference, confidence intervals, and local contributing factors.
+                  Audit sandbox inference, reported confidence where available, and documented local context factors.
                 </p>
+                {predictionContext?.sandbox_only && (
+                  <p className="text-[11px] text-[#f59e0b] font-mono mt-1">
+                    SANDBOX ONLY · No project feasibility report is persisted by this endpoint.
+                    {' · '}Thresholds applied: {predictionContext.threshold_version_applied ?? predictionResult?.threshold_version ?? 'N/A'}
+                  </p>
+                )}
               </div>
 
               {predictionResult ? (
@@ -1100,6 +1165,13 @@ export default function MLPipelineAdminPage() {
                       </h4>
                       <p className="text-[11px] text-[#bbcabf] font-mono mt-0.5">
                         Model: {predictionResult.model_name} ({predictionResult.algorithm})
+                      </p>
+                      <p className="text-[11px] text-[#bbcabf] font-mono mt-0.5">
+                        Score: {predictionResult.feasibility_score ?? 'N/A'} · Risk: {predictionResult.risk_level ?? 'N/A'} · Artifact: {predictionResult.artifact_version ?? 'N/A'}
+                      </p>
+                      <p className="text-[11px] text-[#f59e0b] font-mono mt-0.5">
+                        {predictionResult.disclaimer ?? 'Estimate based on a model trained on limited data'}
+                        {' · '}Labels: {predictionResult.label_approval_status ?? 'BLOCKED'}
                       </p>
                     </div>
 
@@ -1142,7 +1214,7 @@ export default function MLPipelineAdminPage() {
                   {predictionResult.local_explanation_factors && predictionResult.local_explanation_factors.length > 0 && (
                     <div className="space-y-3">
                       <span className="text-[12px] font-mono uppercase text-[#bbcabf] font-semibold">
-                        Driving Factors (Explainability)
+                        Local Context Factors (rule-based, not SHAP)
                       </span>
                       <div className="space-y-2">
                         {predictionResult.local_explanation_factors.map((f, i) => (
@@ -1151,15 +1223,17 @@ export default function MLPipelineAdminPage() {
                             className={`p-3 rounded-xl border text-[12px] flex items-start gap-2.5 ${
                               f.impact === 'positive'
                                 ? 'bg-[#059669]/10 border-[#4edea3]/30 text-[#dae2fd]'
-                                : 'bg-[#93000a]/15 border-[#ffb4ab]/30 text-[#dae2fd]'
+                                : f.impact === 'negative'
+                                  ? 'bg-[#93000a]/15 border-[#ffb4ab]/30 text-[#dae2fd]'
+                                  : 'bg-[#222a3d]/40 border-[#2d3449] text-[#dae2fd]'
                             }`}
                           >
                             <span
                               className={`material-symbols-outlined text-[18px] flex-shrink-0 mt-0.5 ${
-                                f.impact === 'positive' ? 'text-[#4edea3]' : 'text-[#ffb4ab]'
+                                f.impact === 'positive' ? 'text-[#4edea3]' : f.impact === 'negative' ? 'text-[#ffb4ab]' : 'text-[#bbcabf]'
                               }`}
                             >
-                              {f.impact === 'positive' ? 'check_circle' : 'warning'}
+                              {f.impact === 'positive' ? 'check_circle' : f.impact === 'negative' ? 'warning' : 'info'}
                             </span>
                             <div>
                               <span className="font-bold text-[#dae2fd]">{f.factor}:</span>{' '}

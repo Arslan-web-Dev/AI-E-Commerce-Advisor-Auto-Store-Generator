@@ -24,28 +24,26 @@ The pipeline evaluates multiple algorithms simultaneously on the same hold-out a
 6. **Support Vector Classifier (SVC)**: Non-linear radial basis margin boundary classifier.
 7. **K-Nearest Neighbors (KNN)**: Distance metric neighborhood classifier.
 
-### Zero Data Leakage Guarantee
-- Preprocessing pipeline (`ColumnTransformer`) fits strictly on training folds:
+### Leakage controls (tested, not a blanket guarantee)
+- Preprocessing (`ColumnTransformer`) is fitted strictly inside each CV fold and on the final training split:
   - Numeric columns: `SimpleImputer(strategy='median')` followed by `StandardScaler()`.
   - Categorical columns: `SimpleImputer(strategy='most_frequent')` followed by `OneHotEncoder(handle_unknown='ignore')`.
-- Target column and any collinear duplicates are completely isolated prior to feature extraction.
+- Only the requested target and its explicitly mapped companion target are removed. Unrelated columns whose names contain `score` remain features.
+- A legacy committed bundle that exposed `feasibility_score` at 100% importance is not trusted; activation now rejects leaky, unversioned or unapproved feasibility artifacts.
+- Historical rule-generated labels are unapproved (OI-6). See `docs/module-4-label-approval-proposal.md`.
 
 ### Model Comparison & Leaderboard
 - Evaluates candidate algorithms using **Stratified K-Fold Cross-Validation** (Classification) or **K-Fold** (Regression).
 - Computes comprehensive validation metrics:
   - Classification: Test F1, Precision, Recall, Accuracy, ROC-AUC, Confusion Matrix, and CV Mean & Std Dev.
   - Regression: $R^2$, MAE, MSE, RMSE, Explained Variance.
-- Automatically serializes and saves the best-performing model pipeline (`.joblib`) into `ml-service/artifacts/`.
-- Allows administrators to compare models and switch or rollback active inference models with one click.
+- Serializes the best-performing candidate pipeline with an artifact version, dataset fingerprint, CV/holdout metrics and provenance into `ml-service/artifacts/`.
+- Candidate selection does **not** auto-promote. Activation is an explicit admin action and is refused for unversioned, leaky or OI-6-unapproved feasibility bundles.
+- `feasibility_class` / `feasibility_score` training fails closed while OI-6 is blocked; generic sandbox targets may validate the pipeline only.
 
-### Feature Attribution & Explainability
-- **Global Feature Importance:** Computes normalized feature impact weights across transformed features.
-- **Local Prediction Drivers:** Identifies positive and negative contributing factors for every individual feasibility prediction:
-  - Capital Runway (months of burn buffer)
-  - Commercial Rent Burden vs. regional benchmark
-  - Consumer Search Momentum
-  - Competitor Saturation within 1km radius
-  - Regional Purchasing Power Index (PPI)
+### Feature attribution and explainability
+- **Global feature importance:** normalized model-derived importances are returned only when an artifact provides them.
+- **Local context factors:** documented rule-based factors (capital runway, rent burden, search momentum, competitor saturation and purchasing power) with positive/negative/unavailable impact. These are explicitly marked as `not SHAP`; missing inputs are reported as unavailable rather than imputed into an explanation.
 
 ---
 
@@ -85,10 +83,10 @@ Synthesizes:
 ## 3. UI Dashboards
 
 1. **ML Pipeline Studio (`/admin/ml`)**:
-   - Dataset Manager: Upload CSV/XLSX, load 1,500-record Punjab retail sample, data quality health score, missing values, column distribution stats.
-   - Training Studio: Target selection, candidate algorithm selector, K-Fold CV controls, live training progress.
-   - Model Leaderboard: Algorithm ranking by Test F1, CV score, accuracy, precision, recall, active model badge, and promotion controls.
-   - Predictor Sandbox: Live feasibility evaluation with instant predicted class, confidence, and explainability factors.
+   - Dataset Manager: CSV/XLSX upload, synthetic Punjab sandbox sample, data quality health score, missing values and column distribution stats. It is not a verified outcome dataset.
+   - Training Studio: target selection, candidate selector, K-Fold CV controls and training progress. OI-6 status is displayed; feasibility targets are rejected by the server while blocked.
+   - Model Leaderboard: candidate ranking by held-out and CV metrics with explicit “candidate only — activation is explicit” status. No automatic production promotion.
+   - Predictor Sandbox: admin-only model audit with score/risk/artifact version, reported confidence where available, exact limited-data disclaimer, label-approval status and non-SHAP local context factors. It does not write project reports.
 2. **Market Intelligence Explorer (`/market-intelligence`)**:
    - Google Trends Explorer: Multi-keyword search, Pakistan/Punjab geo selection, interactive SVG line chart, trajectory analytics, related queries.
    - Punjab District Benchmarks: Complete commercial profile, population, urbanization, rent spectrum (min, avg, max), primary retail hubs, economic drivers.

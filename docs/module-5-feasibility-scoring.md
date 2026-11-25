@@ -5,22 +5,25 @@ Module 5 evaluates the business idea against the processed market features gener
 
 This module fulfills SRS requirements **FR-5.1** (Feasibility Model), **FR-5.2** (Score Classification), and **FR-5.3** (Model Updating backend).
 
-**Important Note on AI Modeling**: As documented in `docs/module-5-model-readiness.md`, no historical dataset with actual ground-truth business outcomes exists. Therefore, the system uses a **Provisional MCDA (Multi-Criteria Decision Analysis) Index** rather than a supervised ML model. We explicitly label this index as a non-calibrated score to maintain integrity and prevent false claims of predictive probability.
+**Important Note on AI Modeling**: As documented in `docs/module-5-model-readiness.md` and `docs/module-4-label-approval-proposal.md`, no supervisor-approved rule-label decision and no historical dataset with actual ground-truth business outcomes exists. Therefore, the system uses a **Provisional MCDA (Multi-Criteria Decision Analysis) Index** rather than a supervised ML model. We explicitly label this index as a non-calibrated score to maintain integrity and prevent false claims of predictive probability. Task 5 FR-4 infrastructure is described in `docs/module-4-ml-pipeline.md`; OI-6 keeps supervised feasibility training blocked.
 
 ## 2. Scoring Modes
 1. **`provisional_mcda` (Active)**: A transparent heuristic index based on weighted Module 4 features. It normalizes inputs between [0, 1].
 2. **`supervised_model` (Inactive/Future)**: A true supervised machine learning model. This mode requires a registered active model trained on labeled data.
 3. **`unavailable`**: If the Module 4 processing run yields `data_completeness = 'unavailable'` or quality is too low (< 40%), the score is aborted rather than generating misleading results.
 
-## 3. Score Classification (FR-5.2)
-Based on the computed score [0.00 - 1.00], the system strictly classifies feasibility without overlaps:
+## 3. Score classification (FR-4.4 / legacy FR-5.2)
 
-| Score Range   | SRS Classification  | Interpretation / Suggested Decision |
-|---------------|---------------------|-------------------------------------|
-| 0.75 – 1.00   | High Feasibility    | Proceed                             |
-| 0.55 – 0.74   | Medium Feasibility  | Proceed with Caution                |
-| 0.35 – 0.54   | Low Feasibility     | Adjust Budget / Category            |
-| 0.00 – 0.34   | Not Feasible        | Reject / Change Plan                |
+The same validated SRS contract (`v1.0-srs-fr4.4`) is used by TypeScript, Python, customer UI and admin UI. Scores are rounded to two decimals before classification. Every report stores an explicit `risk_level` alongside the historical feasibility vocabulary.
+
+| Score Range | `risk_level` | Risk label | Feasibility classification | Interpretation |
+| --- | --- | --- | --- | --- |
+| 0.75 – 1.00 | `low` | Low risk | High Feasibility | Proceed |
+| 0.55 – 0.74 | `moderate` | Moderate | Medium Feasibility | Proceed with caution |
+| 0.35 – 0.54 | `high` | High | Low Feasibility | Adjust budget/category |
+| 0.00 – 0.34 | `critical` | Critical | Not Feasible | Reject/change plan |
+
+Thresholds are admin-controlled through `POST /api/admin/scoring-thresholds`, validated for range/order/version and stored immutably per version. Invalid configuration fails closed with HTTP 422.
 
 ## 4. Provisional MCDA Weights
 The MCDA algorithm currently uses the following default weights (`v1.0-mcda`):
@@ -42,5 +45,12 @@ The system includes a `model_registry` table that allows Admins to version, regi
 - All scoring APIs strictly require authentication and enforce Row Level Security (RLS) on `project_feasibility_runs`.
 - Features are consumed exclusively from trusted `project_processing_runs`. The API rejects client-supplied raw features to prevent manipulation.
 
-## 7. Next Steps
-Once real-world user data and business outcomes are collected over several months, an Admin can export the `project_features` combined with success labels to train an XGBoost/Random Forest model, register it via the Admin API, and activate `supervised_model` inference.
+## 7. Next steps
+
+Supervised inference requires three things, none of which is currently claimed:
+
+1. a recorded OI-6 decision on the rule-generated label formula and weights;
+2. an outcome-labelled dataset with documented provenance and leakage-safe evaluation;
+3. a versioned serving-ready artifact activated explicitly by an admin.
+
+Until then, `provisional_mcda` remains the only customer-facing mode. The admin ML sandbox may train generic targets to validate the pipeline, but it never writes project feasibility reports. See `docs/deferred-supervised-training.md` and `docs/module-4-ml-pipeline.md`.

@@ -1,5 +1,15 @@
-import { SupabaseClient } from '@supabase/supabase-js';
-import { EngineeredVector } from '@/types/feature-processing';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { EngineeredVector } from '@/types/feature-processing';
+import type { RiskThresholds } from '@/lib/ml/scoring-contract';
+import {
+  DEFAULT_RISK_THRESHOLDS,
+  LIMITED_DATA_DISCLAIMER,
+  PROVISIONAL_DISCLAIMER,
+  classifyFeasibility,
+  classifyRisk,
+  riskThresholdsFromConfig,
+  roundFeasibilityScore,
+} from '@/lib/ml/scoring-contract';
 
 export const DEFAULT_MCDA_CONFIG = {
   version: 'v1.0-mcda',
@@ -15,118 +25,221 @@ export const DEFAULT_MCDA_CONFIG = {
 export type ScoringMode = 'supervised_model' | 'provisional_mcda' | 'unavailable';
 export type Classification = 'High Feasibility' | 'Medium Feasibility' | 'Low Feasibility' | 'Not Feasible';
 
-export function classifyScore(score: number): Classification {
-  if (score >= 0.75) return 'High Feasibility';
-  if (score >= 0.55) return 'Medium Feasibility';
-  if (score >= 0.35) return 'Low Feasibility';
-  return 'Not Feasible';
+/** Backwards-compatible classifier that now uses the SRS threshold contract. */
+export function classifyScore(
+  score: number,
+  thresholds: RiskThresholds = DEFAULT_RISK_THRESHOLDS
+): Classification {
+  return classifyFeasibility(score, thresholds);
 }
 
 export interface MCDAExplanation {
   feature: string;
-  value: number;
+  /** Null is explicit: the source was unavailable or out of scope. */
+  value: number | null;
   weight: number;
   contribution: number;
   note: string;
+  available: boolean;
 }
 
-export function calculateProvisionalMCDA(engineeredVector: EngineeredVector, config = DEFAULT_MCDA_CONFIG) {
+export interface MCDAResult {
+  score: number | null;
+  explanations: MCDAExplanation[];
+  missing_drivers: string[];
+  version: string;
+  mode: ScoringMode;
+}
+
+/**
+ * Provisional index over *available* drivers only. Missing drivers contribute
+ * zero weight and are disclosed; they are never replaced with neutral values.
+ */
+export function calculateProvisionalMCDA(
+  engineeredVector: EngineeredVector,
+  config = DEFAULT_MCDA_CONFIG
+): MCDAResult {
   const explanations: MCDAExplanation[] = [];
+  const missing_drivers: string[] = [];
   let score = 0;
   let totalWeightUsed = 0;
 
-  // 1. Budget Ratio
-  const budgetVal = engineeredVector.norm_budget_ratio ?? 0;
-  const budgetWeight = config.weights.budget_ratio;
-  score += budgetVal * budgetWeight;
-  totalWeightUsed += budgetWeight;
-  explanations.push({
-    feature: 'Budget Coverage',
-    value: budgetVal,
-    weight: budgetWeight,
-    contribution: budgetVal * budgetWeight,
-    note: budgetVal === 0 ? 'Missing or zero budget ratio.' : 'Sufficient budget improves feasibility.',
-  });
+  const addDriver = (
+    feature: string,
+    value: number | null,
+    weight: number,
+    availableNote: string,
+    unavailableNote: string
+  ) => {
+    if (value === null || !Number.isFinite(value)) {
+      missing_drivers.push(feature);
+      explanations.push({
+        feature,
+        value: null,
+        weight,
+        contribution: 0,
+        note: unavailableNote,
+        available: false,
+      });
+      return;
+    }
+    const bounded = Math.max(0, Math.min(1, value));
+    score += bounded * weight;
+    totalWeightUsed += weight;
+    explanations.push({
+      feature,
+      value: bounded,
+      weight,
+      contribution: bounded * weight,
+      note: availableNote,
+      available: true,
+    });
+  };
 
-  // 2. Average Demand
-  const demandVal = engineeredVector.norm_avg_demand ?? 0;
-  const demandWeight = config.weights.avg_demand;
-  score += demandVal * demandWeight;
-  totalWeightUsed += demandWeight;
-  explanations.push({
-    feature: 'Average Demand',
-    value: demandVal,
-    weight: demandWeight,
-    contribution: demandVal * demandWeight,
-    note: 'Based on search volume trends.',
-  });
+  addDriver(
+    'Budget Coverage',
+    engineeredVector.norm_budget_ratio ?? null,
+    config.weights.budget_ratio,
+    'Sufficient budget improves feasibility.',
+    'Budget ratio unavailable; excluded from the index.'
+  );
+  addDriver(
+    'Average Demand',
+    engineeredVector.norm_avg_demand ?? null,
+    config.weights.avg_demand,
+    'Based on an in-scope search volume trend.',
+    'In-scope demand trend unavailable; excluded from the index.'
+  );
+  const saturation = engineeredVector.norm_category_saturation;
+  addDriver(
+    'Market Saturation (Inverse)',
+    saturation === null || saturation === undefined ? null : Math.max(0, 1.0 - saturation),
+    config.weights.category_saturation_inverse,
+    'Lower saturation increases feasibility.',
+    'Saturation unavailable; excluded from the index.'
+  );
+  const trendScore = engineeredVector.trend_slope_score;
+  addDriver(
+    'Demand Trend',
+    trendScore === null || trendScore === undefined ? null : (trendScore + 1.0) / 2.0,
+    config.weights.trend_slope,
+    trendScore !== null && trendScore !== undefined && trendScore > 0 ? 'Growing trend.' :
+      trendScore !== null && trendScore !== undefined && trendScore < 0 ? 'Declining trend.' : 'Stable trend.',
+    'Trend direction unavailable; excluded from the index.'
+  );
+  addDriver(
+    'E-commerce Growth',
+    engineeredVector.norm_ecommerce_growth ?? null,
+    config.weights.ecommerce_growth,
+    'Macro market growth factor.',
+    'Growth observation unavailable; excluded from the index.'
+  );
 
-  // 3. Category Saturation (Inverse)
-  let satVal = 0.5; // default if missing
-  let satNote = 'Saturation missing, applying neutral penalty.';
-  if (engineeredVector.norm_category_saturation !== undefined && engineeredVector.norm_category_saturation !== null) {
-    satVal = Math.max(0, 1.0 - engineeredVector.norm_category_saturation);
-    satNote = 'Lower saturation increases feasibility.';
+  if (totalWeightUsed <= 0) {
+    return {
+      score: null,
+      explanations,
+      missing_drivers,
+      version: config.version,
+      mode: 'unavailable' as ScoringMode,
+    };
   }
-  const satWeight = config.weights.category_saturation_inverse;
-  score += satVal * satWeight;
-  totalWeightUsed += satWeight;
-  explanations.push({
-    feature: 'Market Saturation (Inverse)',
-    value: satVal,
-    weight: satWeight,
-    contribution: satVal * satWeight,
-    note: satNote,
-  });
 
-  // 4. Trend Slope
-  let trendVal = 0.5; // default stable
-  let trendNote = 'Stable trend.';
-  if (engineeredVector.trend_slope_score !== undefined) {
-    trendVal = (engineeredVector.trend_slope_score + 1.0) / 2.0; // [-1, 1] -> [0, 1]
-    if (engineeredVector.trend_slope_score > 0) trendNote = 'Growing trend.';
-    else if (engineeredVector.trend_slope_score < 0) trendNote = 'Declining trend.';
-  }
-  const trendWeight = config.weights.trend_slope;
-  score += trendVal * trendWeight;
-  totalWeightUsed += trendWeight;
-  explanations.push({
-    feature: 'Demand Trend',
-    value: trendVal,
-    weight: trendWeight,
-    contribution: trendVal * trendWeight,
-    note: trendNote,
-  });
-
-  // 5. E-commerce Growth
-  const growthVal = engineeredVector.norm_ecommerce_growth ?? 0.5;
-  const growthWeight = config.weights.ecommerce_growth;
-  score += growthVal * growthWeight;
-  totalWeightUsed += growthWeight;
-  explanations.push({
-    feature: 'E-commerce Growth',
-    value: growthVal,
-    weight: growthWeight,
-    contribution: growthVal * growthWeight,
-    note: 'Macro market growth factor.',
-  });
-
-  // Normalize if weights didn't sum to exactly 1.0
-  const finalScore = totalWeightUsed > 0 ? score / totalWeightUsed : 0;
-  
-  // Ensure [0, 1] bounds
-  const boundedScore = Math.max(0, Math.min(1.0, finalScore));
-
+  const boundedScore = Math.max(0, Math.min(1, score / totalWeightUsed));
   return {
     score: boundedScore,
     explanations,
+    missing_drivers,
     version: config.version,
     mode: 'provisional_mcda' as ScoringMode,
   };
 }
 
-export async function processFeasibility(supabase: SupabaseClient, projectId: string, processingRunId: string) {
-  // 1. Fetch processing run and features
+/** Reads and validates FR-4.8 thresholds; invalid configuration fails closed. */
+export async function loadScoringThresholds(
+  supabase: SupabaseClient
+): Promise<{ thresholds?: RiskThresholds; error?: string; status?: number }> {
+  const { data, error } = await supabase
+    .from('system_config')
+    .select('payload')
+    .eq('config_key', 'scoring_thresholds')
+    .maybeSingle();
+
+  if (error) {
+    return { error: `Unable to read scoring thresholds: ${error.message}`, status: 500 };
+  }
+  if (!data) {
+    return { thresholds: DEFAULT_RISK_THRESHOLDS };
+  }
+  try {
+    return {
+      thresholds: riskThresholdsFromConfig(
+        data.payload,
+        DEFAULT_RISK_THRESHOLDS.version
+      ),
+    };
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : 'Invalid scoring threshold configuration.',
+      status: 422,
+    };
+  }
+}
+
+function buildUnavailableReport(
+  projectId: string,
+  processingRunId: string,
+  thresholds: RiskThresholds,
+  reason: string,
+  missingDrivers: string[] = []
+) {
+  const disclaimer = `${LIMITED_DATA_DISCLAIMER} ${PROVISIONAL_DISCLAIMER}`;
+  return {
+    project_id: projectId,
+    processing_run_id: processingRunId,
+    scoring_mode: 'unavailable',
+    score_value: null,
+    classification: null,
+    risk_level: null,
+    model_version: 'unavailable',
+    threshold_version: thresholds.version,
+    status: 'completed',
+    evaluation_metrics: {
+      status: 'not_applicable',
+      reason: 'No score was computed; no supervised model was trained or evaluated.',
+    },
+    training_provenance: {
+      scoring_mode: 'unavailable',
+      label_approval_status: 'BLOCKED',
+      oi_id: 'OI-6',
+      artifact: null,
+    },
+    disclaimer,
+    explanations: {
+      reason,
+      missing_drivers: missingDrivers,
+      configuration_version: DEFAULT_MCDA_CONFIG.version,
+      threshold_version: thresholds.version,
+      risk_label: null,
+      disclaimer,
+      label_approval_status: 'BLOCKED',
+    },
+  };
+}
+
+function hasEssentialScoringDrivers(vector: EngineeredVector): boolean {
+  // Budget coverage and an in-scope demand observation are required. Without
+  // them a weighted index would be driven only by peripheral assumptions.
+  return vector.norm_budget_ratio != null && vector.norm_avg_demand != null;
+}
+
+export async function processFeasibility(
+  supabase: SupabaseClient,
+  projectId: string,
+  processingRunId: string
+) {
+  // 1. Fetch processing run and features. An owner of two projects must not be
+  // able to attach a run from project A to a score row for project B.
   const { data: run, error: runErr } = await supabase
     .from('project_processing_runs')
     .select('*')
@@ -135,6 +248,9 @@ export async function processFeasibility(supabase: SupabaseClient, projectId: st
 
   if (runErr || !run) {
     return { error: 'Processing run not found', status: 404 };
+  }
+  if (run.project_id !== projectId) {
+    return { error: 'Processing run does not belong to this project.', status: 403 };
   }
 
   if (run.status !== 'completed' && run.status !== 'partial') {
@@ -151,17 +267,20 @@ export async function processFeasibility(supabase: SupabaseClient, projectId: st
     return { error: 'Features not found for this run.', status: 404 };
   }
 
-  // 2. Evaluate if data is sufficient for ANY score
-  if (run.data_completeness === 'unavailable' || run.quality_score < 40) {
-    // Cannot produce a defensible score
-    const result = {
-      project_id: projectId,
-      processing_run_id: processingRunId,
-      scoring_mode: 'unavailable',
-      status: 'completed',
-      explanations: { reason: 'Data quality is too poor or essential features are unavailable.' },
-    };
+  const thresholdResult = await loadScoringThresholds(supabase);
+  if (!thresholdResult.thresholds) {
+    return { error: thresholdResult.error, status: thresholdResult.status };
+  }
+  const thresholds = thresholdResult.thresholds;
 
+  // 2. Evaluate if data is sufficient for ANY score.
+  if (run.data_completeness === 'unavailable' || run.quality_score < 40) {
+    const result = buildUnavailableReport(
+      projectId,
+      processingRunId,
+      thresholds,
+      'Data quality is too poor or essential features are unavailable.'
+    );
     const { data: inserted, error: insertErr } = await supabase
       .from('project_feasibility_runs')
       .insert(result)
@@ -171,25 +290,73 @@ export async function processFeasibility(supabase: SupabaseClient, projectId: st
     return { data: inserted, error: insertErr };
   }
 
-  // 3. Supervised Model Readiness Check
-  // We statically know supervised_model is unavailable per step 1, but we could check the model_registry if we wanted to support dynamic switching.
-  // We'll proceed with provisional_mcda.
-  const { score, explanations, version, mode } = calculateProvisionalMCDA(features.engineered_vector);
-  const classification = classifyScore(score);
+  // OI-6 is open: supervised feasibility inference is intentionally disabled.
+  const vector = features.engineered_vector as EngineeredVector;
+  const { score, explanations, missing_drivers, version, mode } = calculateProvisionalMCDA(vector);
+  if (
+    mode === 'unavailable' ||
+    score === null ||
+    !hasEssentialScoringDrivers(vector)
+  ) {
+    const missing = Array.from(
+      new Set([
+        ...missing_drivers,
+        ...(!hasEssentialScoringDrivers(vector)
+          ? ['Budget Coverage / Average Demand']
+          : []),
+      ])
+    );
+    const result = buildUnavailableReport(
+      projectId,
+      processingRunId,
+      thresholds,
+      'Essential budget or in-scope demand drivers are unavailable; no score was computed.',
+      missing
+    );
+    const { data: inserted, error: insertErr } = await supabase
+      .from('project_feasibility_runs')
+      .insert(result)
+      .select()
+      .single();
+
+    return { data: inserted, error: insertErr };
+  }
+
+  const roundedScore = roundFeasibilityScore(score);
+  const risk = classifyRisk(roundedScore, thresholds);
+  const classification = classifyFeasibility(roundedScore, thresholds);
 
   const result = {
     project_id: projectId,
     processing_run_id: processingRunId,
     scoring_mode: mode,
-    score_value: parseFloat(score.toFixed(4)),
+    score_value: roundedScore,
     classification,
+    risk_level: risk.level,
+    model_version: `provisional_mcda:${version}`,
+    threshold_version: thresholds.version,
     status: 'completed',
+    evaluation_metrics: {
+      status: 'not_applicable',
+      reason: 'Provisional MCDA index; no supervised model was trained or evaluated.',
+    },
+    training_provenance: {
+      scoring_mode: mode,
+      label_approval_status: 'BLOCKED',
+      oi_id: 'OI-6',
+      artifact: null,
+    },
+    disclaimer: `${LIMITED_DATA_DISCLAIMER} ${PROVISIONAL_DISCLAIMER}`,
     explanations: {
       factors: explanations,
+      missing_drivers,
       configuration_version: version,
+      threshold_version: thresholds.version,
+      risk_label: risk.label,
       data_quality: run.quality_score,
       completeness: run.data_completeness,
-      disclaimer: 'This score is a Provisional MCDA Index based on heuristic weighting. It is NOT a calibrated probability from a supervised ML model.'
+      disclaimer: `${LIMITED_DATA_DISCLAIMER} ${PROVISIONAL_DISCLAIMER}`,
+      label_approval_status: 'BLOCKED',
     },
   };
 

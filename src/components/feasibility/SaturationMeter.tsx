@@ -1,5 +1,10 @@
 interface Props {
-  score: number; // 0-100
+  /** Normalised 0-100 display index derived from competitors per 100k residents. */
+  score: number;
+  /** Raw documented unit: competitors per 100,000 residents. */
+  saturationPer100k?: number;
+  /** Raw documented unit: competitors per square kilometre. */
+  competitorDensityPerKm2?: number;
   competitorCount?: number;
   radiusKm?: number;
 }
@@ -20,7 +25,13 @@ function getBand(score: number): Band {
   return BANDS[3];
 }
 
-export default function SaturationMeter({ score, competitorCount, radiusKm = 10 }: Props) {
+export default function SaturationMeter({
+  score,
+  saturationPer100k,
+  competitorDensityPerKm2,
+  competitorCount,
+  radiusKm = 10,
+}: Props) {
   const clamped = Math.max(0, Math.min(100, score));
   const band = getBand(clamped);
   const pct = clamped;
@@ -78,18 +89,33 @@ export default function SaturationMeter({ score, competitorCount, radiusKm = 10 
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', fontSize: '0.8rem' }}>
         <div style={{ textAlign: 'center', padding: '0.5rem', backgroundColor: '#0d1829', borderRadius: '0.375rem' }}>
-          <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Saturation Score</p>
+          <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Normalised index</p>
           <p style={{ fontWeight: 800, fontSize: '1.25rem', color: band.color }}>{clamped}</p>
         </div>
+        {saturationPer100k != null && (
+          <div style={{ textAlign: 'center', padding: '0.5rem', backgroundColor: '#0d1829', borderRadius: '0.375rem' }}>
+            <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Competitors / 100k residents</p>
+            <p style={{ fontWeight: 800, fontSize: '1.25rem', color: '#dae2fd' }}>{saturationPer100k.toFixed(2)}</p>
+          </div>
+        )}
+        {competitorDensityPerKm2 != null && (
+          <div style={{ textAlign: 'center', padding: '0.5rem', backgroundColor: '#0d1829', borderRadius: '0.375rem' }}>
+            <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Competitors / km²</p>
+            <p style={{ fontWeight: 800, fontSize: '1.25rem', color: '#dae2fd' }}>{competitorDensityPerKm2.toFixed(4)}</p>
+          </div>
+        )}
         {competitorCount != null && (
           <div style={{ textAlign: 'center', padding: '0.5rem', backgroundColor: '#0d1829', borderRadius: '0.375rem' }}>
-            <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Competitors ({radiusKm}km)</p>
+            <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Observed competitors ({radiusKm}km)</p>
             <p style={{ fontWeight: 800, fontSize: '1.25rem', color: '#dae2fd' }}>{competitorCount}</p>
           </div>
         )}
       </div>
+      <p style={{ fontSize: '0.68rem', opacity: 0.6, margin: '0.6rem 0 0 0' }}>
+        Normalised index = min(100, competitors per 100k residents × 10), displayed for the meter only.
+      </p>
     </div>
   );
 }

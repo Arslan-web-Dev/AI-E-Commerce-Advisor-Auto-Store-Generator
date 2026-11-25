@@ -1,5 +1,7 @@
+import json
 import os
 from pathlib import Path
+from typing import Any, Dict
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -13,6 +15,40 @@ load_dotenv(BASE_DIR / ".env")
 DATASETS_DIR = BASE_DIR / "data" / "datasets"
 ARTIFACTS_DIR = BASE_DIR / "artifacts"
 CACHE_DIR = BASE_DIR / "data" / "cache"
+SCORING_CONFIG_PATH = REPO_ROOT / "config" / "module4-scoring.json"
+LABEL_POLICY_PATH = BASE_DIR / "config" / "label_approval.json"
+
+with open(SCORING_CONFIG_PATH, "r", encoding="utf-8") as _scoring_file:
+    SCORING_CONFIG = json.load(_scoring_file)
+
+
+def validate_risk_thresholds(payload: Any) -> Dict[str, Any]:
+    """Validate an admin-supplied FR-4.4 threshold contract; fail closed."""
+    if not isinstance(payload, dict):
+        raise ValueError("Risk thresholds must be a JSON object.")
+    version = payload.get("version")
+    if not isinstance(version, str) or not version.strip():
+        raise ValueError("Risk thresholds require a non-empty version.")
+    boundaries: Dict[str, float] = {}
+    for key in ("low_risk_min", "moderate_risk_min", "high_risk_min"):
+        value = payload.get(key)
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            raise ValueError(f"{key} must be a number in [0, 1].")
+        value = float(value)
+        if not 0 <= value <= 1:
+            raise ValueError(f"{key} must be in [0, 1].")
+        boundaries[key] = value
+    if not (
+        boundaries["low_risk_min"]
+        > boundaries["moderate_risk_min"]
+        > boundaries["high_risk_min"]
+        > 0
+    ):
+        raise ValueError(
+            "Risk thresholds must be strictly ordered: "
+            "low_risk_min > moderate_risk_min > high_risk_min > 0."
+        )
+    return {"version": version.strip(), **boundaries}
 
 DATASETS_DIR.mkdir(parents=True, exist_ok=True)
 ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -29,6 +65,7 @@ DISALLOWED_DEFAULT_SECRETS = {
     "secret",
     "placeholder",
     "your-ml-api-key-here",
+    "your-secure-ml-service-api-key-here",
     "123456",
 }
 
@@ -42,8 +79,8 @@ if not raw_key:
 
 if raw_key.lower() in DISALLOWED_DEFAULT_SECRETS:
     raise RuntimeError(
-        f"FAIL-CLOSED SECURITY ERROR: ML_SERVICE_API_KEY cannot use known default/placeholder value '{raw_key}'. "
-        "Please provide a secure, unique secret in your environment configuration."
+        "FAIL-CLOSED SECURITY ERROR: ML_SERVICE_API_KEY uses a known default/placeholder value. "
+        "Never echo configured secrets; provide a secure, unique secret in your environment configuration."
     )
 
 if ENVIRONMENT == "production" and len(raw_key) < 32:

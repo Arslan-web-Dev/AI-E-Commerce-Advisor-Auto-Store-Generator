@@ -4,22 +4,43 @@ import { mlClient } from '@/lib/ml-client';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+async function requireAdmin() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (authError || !user) {
+    return { supabase: null, userId: null, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) } as const;
   }
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+  if (profileError) {
+    return {
+      supabase: null,
+      userId: null,
+      response: NextResponse.json({ error: 'Unable to verify administrator access' }, { status: 500 }),
+    } as const;
+  }
   if (profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden. Admin role required.' }, { status: 403 });
+    return {
+      supabase: null,
+      userId: null,
+      response: NextResponse.json({ error: 'Forbidden. Admin role required.' }, { status: 403 }),
+    } as const;
   }
+  return { supabase, userId: user.id, response: null } as const;
+}
 
-  const { searchParams } = new URL(request.url);
-  const jobId = searchParams.get('job_id');
+export async function GET(request: Request) {
+  const auth = await requireAdmin();
+  if (auth.response) return auth.response;
 
+  const jobId = new URL(request.url).searchParams.get('job_id');
   if (!jobId) {
     return NextResponse.json({ error: 'job_id query parameter is required' }, { status: 400 });
   }
@@ -34,17 +55,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  if (profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden. Admin role required.' }, { status: 403 });
-  }
+  const auth = await requireAdmin();
+  if (auth.response) return auth.response;
+  const { supabase, userId } = auth;
 
   try {
     const body = await request.json();
@@ -52,6 +65,26 @@ export async function POST(request: Request) {
 
     if (!dataset_id || !target_column || !problem_type) {
       return NextResponse.json({ error: 'dataset_id, target_column, and problem_type are required' }, { status: 400 });
+    }
+    if (problem_type !== 'classification' && problem_type !== 'regression') {
+      return NextResponse.json({ error: 'problem_type must be classification or regression' }, { status: 400 });
+    }
+
+    // The Python service owns the OI-6 gate. Check it before starting a job so
+    // the admin console receives an actionable error rather than a failed job.
+    const policy = await mlClient.getTrainingPolicy();
+    const normalizedTarget = String(target_column).toLowerCase();
+    if (
+      policy.label_policy.status !== 'APPROVED' &&
+      (normalizedTarget === 'feasibility_class' || normalizedTarget === 'feasibility_score')
+    ) {
+      return NextResponse.json(
+        {
+          error: 'Training blocked by OI-6: no supervisor-approved rule-label formula and weights are recorded.',
+          policy: policy.label_policy,
+        },
+        { status: 422 }
+      );
     }
 
     const job = await mlClient.startTraining({
@@ -63,24 +96,48 @@ export async function POST(request: Request) {
       test_size: test_size || 0.2,
     });
 
-    // Sync best model to model_registry in Supabase if completed
-    if (job?.results?.best_model_id && job?.results?.best_model_name) {
-      try {
-        await supabase.from('model_registry').insert({
-          name: job.results.best_model_name,
-          version: `v1.${Date.now().toString().slice(-4)}`,
-          scoring_mode: 'supervised_model',
-          is_active: true,
-          configuration: {
-            algorithm: job.results.best_algorithm,
-            problem_type: job.problem_type,
-            test_f1: job.results.best_score,
-            cv_mean: job.results.leaderboard?.[0]?.cv_score,
-            dataset_id: job.dataset_id,
-          },
-        });
-      } catch (dbSyncErr) {
-        console.warn('Could not sync to model_registry table:', dbSyncErr);
+    // Persist truthful artifact metadata. Supervised artifacts are never
+    // auto-active because OI-6 may still be open and activation is explicit.
+    if (job?.results?.best_model_id) {
+      const results = job.results;
+      const { error: syncError } = await supabase.from('model_registry').insert({
+        name: results.best_model_name || 'ML candidate',
+        version: results.artifact_version || `unversioned-${job.job_id}`,
+        scoring_mode: 'supervised_model',
+        is_active: false,
+        configuration: {
+          python_model_id: results.best_model_id,
+          algorithm: results.best_algorithm,
+          problem_type: job.problem_type,
+          dataset_id: job.dataset_id,
+          feature_names: results.feature_names || [],
+        },
+        evaluation_metrics: {
+          holdout: results.test_metrics || {},
+          cross_validation: results.cv_metrics || {},
+          test_metrics: results.test_metrics || {},
+          cv_metrics: results.cv_metrics || {},
+        },
+        validation_metrics: results.test_metrics || {},
+        cv_metrics: results.cv_metrics || {},
+        training_dataset_ref: job.dataset_id,
+        artifact_path: results.artifact_path,
+        artifact_version: results.artifact_version,
+        dataset_fingerprint: results.dataset_fingerprint,
+        label_approval_status: results.label_approval_status || 'BLOCKED',
+        training_provenance: {
+          dataset_id: job.dataset_id,
+          target_column: job.target_column,
+          disclaimer: policy.limited_data_disclaimer,
+        },
+        created_by: userId,
+      });
+
+      if (syncError) {
+        return NextResponse.json(
+          { error: `Training completed but registry sync failed: ${syncError.message}`, job },
+          { status: 500 }
+        );
       }
     }
 

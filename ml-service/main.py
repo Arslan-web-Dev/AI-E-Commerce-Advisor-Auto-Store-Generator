@@ -1,8 +1,8 @@
 import os
 import uuid
 import json
-import shutil
 import secrets
+import hashlib
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import pandas as pd
@@ -21,11 +21,21 @@ from config import (
     ML_SERVICE_HOST,
     ML_SERVICE_API_KEY,
     ALLOWED_ORIGINS,
+    MAX_FILE_SIZE_BYTES,
+    SCORING_CONFIG,
+    validate_risk_thresholds,
 )
 from datasets.manager import inspect_dataset
 from datasets.sample_dataset_generator import save_sample_dataset
 from models.trainer import train_and_compare_models
 from models.explainability import compute_local_prediction_factors
+from models.label_policy import (
+    APPROVED_MODULE4_CATEGORIES,
+    LabelApprovalBlocked,
+    assert_training_allowed,
+    artifact_ready_for_serving,
+    load_label_policy,
+)
 from trends.google_trends import fetch_google_trends
 from trends.market_analytics import compute_market_demand_analysis
 
@@ -65,6 +75,14 @@ TRAINING_JOBS: Dict[str, Dict[str, Any]] = {}
 DATASETS_STORE: Dict[str, Dict[str, Any]] = {}
 ACTIVE_MODEL_ID: Optional[str] = None
 
+def _fingerprint_file(path: str) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 # Pre-load existing datasets and artifacts on startup
 def _init_storage():
     global ACTIVE_MODEL_ID
@@ -86,10 +104,13 @@ def _init_storage():
                 **report
             }
 
+    # Legacy/unversioned artifacts are not serving-ready. In particular the
+    # committed gradient-boosting bundle leaked feasibility_score and must never
+    # become the active production model after a restart.
     for f in ARTIFACTS_DIR.glob("*.joblib"):
         try:
             bundle = joblib.load(f)
-            if not ACTIVE_MODEL_ID:
+            if not ACTIVE_MODEL_ID and artifact_ready_for_serving(bundle):
                 ACTIVE_MODEL_ID = bundle.get("model_id")
         except Exception:
             pass
@@ -109,6 +130,7 @@ class TrainRequest(BaseModel):
 class PredictRequest(BaseModel):
     model_id: Optional[str] = None
     input_features: Dict[str, Any]
+    risk_thresholds: Optional[Dict[str, Any]] = None
 
 class MarketDemandRequest(BaseModel):
     primary_keyword: str
@@ -126,7 +148,24 @@ def health_check():
         "service": "Punjab E-Commerce ML & Market Intelligence Engine",
         "active_model_id": ACTIVE_MODEL_ID,
         "datasets_count": len(DATASETS_STORE),
-        "artifacts_count": len(list(ARTIFACTS_DIR.glob("*.joblib")))
+        "artifact_count": len(list(ARTIFACTS_DIR.glob("*.joblib"))),
+        "label_approval_status": load_label_policy()["status"],
+    }
+
+
+@app.get("/training-policy", dependencies=[Depends(verify_api_key)])
+def get_training_policy():
+    """Server-side OI-6 gate state and the approved product taxonomy."""
+    return {
+        "label_policy": load_label_policy(),
+        "approved_categories": list(APPROVED_MODULE4_CATEGORIES),
+        "risk_thresholds": {
+            "version": SCORING_CONFIG["version"],
+            "low_risk_min": SCORING_CONFIG["low_risk_min"],
+            "moderate_risk_min": SCORING_CONFIG["moderate_risk_min"],
+            "high_risk_min": SCORING_CONFIG["high_risk_min"],
+        },
+        "limited_data_disclaimer": SCORING_CONFIG["limited_data_disclaimer"],
     }
 
 # ----------------- DATASET ENDPOINTS -----------------
@@ -144,13 +183,27 @@ async def upload_dataset(
     ext = Path(file.filename).suffix.lower()
     if ext not in [".csv", ".xlsx", ".xls"]:
         raise HTTPException(status_code=400, detail="Only CSV and Excel (.xlsx, .xls) files are supported.")
+    if file.size is not None and file.size > MAX_FILE_SIZE_BYTES:
+        raise HTTPException(status_code=413, detail="Dataset exceeds the 50 MB upload limit.")
 
     ds_id = str(uuid.uuid4())[:8]
     saved_filename = f"{ds_id}_{file.filename}"
     saved_path = DATASETS_DIR / saved_filename
 
+    # Enforce the cap while streaming; `file.size` may be absent on chunked
+    # requests and must not be trusted as the only boundary.
+    written = 0
     with open(saved_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            written += len(chunk)
+            if written > MAX_FILE_SIZE_BYTES:
+                buffer.close()
+                saved_path.unlink(missing_ok=True)
+                raise HTTPException(status_code=413, detail="Dataset exceeds the 50 MB upload limit.")
+            buffer.write(chunk)
 
     report = inspect_dataset(saved_path, target_col=target_column)
     display_name = name or file.filename.rsplit(".", 1)[0].replace("_", " ").title()
@@ -181,7 +234,7 @@ def generate_sample_dataset():
     report = inspect_dataset(sample_file)
     entry = {
         "id": ds_id,
-        "name": "Punjab Retail Feasibility (1,50000 Samples)",
+        "name": "Unapproved synthetic feasibility sandbox (150,000 samples)",
         "file_name": sample_file.name,
         "file_path": str(sample_file),
         "file_size_bytes": sample_file.stat().st_size,
@@ -211,13 +264,19 @@ def _run_training_job_task(job_id: str, req: TrainRequest):
         TRAINING_JOBS[job_id]["progress_pct"] = 35.0
         TRAINING_JOBS[job_id]["current_step"] = "Executing candidate algorithms and cross-validation"
 
+        policy_decision = assert_training_allowed(req.target_column, ds_entry)
         results = train_and_compare_models(
             df=df,
             target_col=req.target_column,
             problem_type=req.problem_type,
             candidate_algorithms=req.candidate_algorithms,
+            validation_strategy=req.validation_strategy,
             cv_folds=req.cv_folds or 5,
-            test_size=req.test_size or 0.2
+            test_size=req.test_size or 0.2,
+            dataset_fingerprint=_fingerprint_file(file_path),
+            dataset_ref=req.dataset_id,
+            dataset_info=ds_entry,
+            training_provenance=policy_decision,
         )
 
         TRAINING_JOBS[job_id]["status"] = "completed"
@@ -225,8 +284,9 @@ def _run_training_job_task(job_id: str, req: TrainRequest):
         TRAINING_JOBS[job_id]["current_step"] = "Completed successfully"
         TRAINING_JOBS[job_id]["results"] = results
         TRAINING_JOBS[job_id]["best_model_id"] = results["best_model_id"]
-        
-        ACTIVE_MODEL_ID = results["best_model_id"]
+        # Never auto-promote. Activation is an explicit admin action enforced by
+        # `artifact_ready_for_serving` (version, metrics, no target leakage,
+        # OI-6 approval for rule-generated labels).
 
     except Exception as e:
         TRAINING_JOBS[job_id]["status"] = "failed"
@@ -237,6 +297,21 @@ def _run_training_job_task(job_id: str, req: TrainRequest):
 def start_training(req: TrainRequest, background_tasks: BackgroundTasks):
     if req.dataset_id not in DATASETS_STORE:
         raise HTTPException(status_code=404, detail="Dataset not found.")
+    if req.problem_type not in {"classification", "regression"}:
+        raise HTTPException(status_code=400, detail="problem_type must be 'classification' or 'regression'.")
+    if req.cv_folds is not None and req.cv_folds < 2:
+        raise HTTPException(status_code=422, detail="cv_folds must be at least 2.")
+    if req.test_size is not None and not 0 < req.test_size < 1:
+        raise HTTPException(status_code=422, detail="test_size must be between 0 and 1.")
+
+    try:
+        assert_training_allowed(req.target_column, DATASETS_STORE[req.dataset_id])
+    except LabelApprovalBlocked as exc:
+        raise HTTPException(status_code=422, detail={
+            "error": str(exc),
+            "policy": exc.policy,
+            "target_column": exc.target_col,
+        }) from exc
 
     job_id = str(uuid.uuid4())
     TRAINING_JOBS[job_id] = {
@@ -273,7 +348,11 @@ def list_models():
                 "algorithm_key": bundle["algorithm_key"],
                 "problem_type": bundle["problem_type"],
                 "target_col": bundle["target_col"],
+                "artifact_version": bundle.get("artifact_version"),
+                "cv_metrics": bundle.get("cv_metrics"),
+                "label_approval_status": bundle.get("label_approval_status", "BLOCKED"),
                 "metrics": bundle["metrics"],
+                "serving_ready": artifact_ready_for_serving(bundle),
                 "is_active": (bundle["model_id"] == ACTIVE_MODEL_ID),
                 "file_size_bytes": f.stat().st_size,
                 "file_name": f.name
@@ -304,27 +383,78 @@ def get_model(model_id: str):
 @app.post("/models/{model_id}/activate", dependencies=[Depends(verify_api_key)])
 def activate_model(model_id: str):
     global ACTIVE_MODEL_ID
-    found = False
+    target = None
     for f in ARTIFACTS_DIR.glob("*.joblib"):
         try:
             bundle = joblib.load(f)
             if bundle.get("model_id") == model_id:
-                found = True
+                target = bundle
                 break
         except Exception:
             pass
 
-    if not found:
+    if not target:
         raise HTTPException(status_code=404, detail="Model artifact not found.")
+    if not artifact_ready_for_serving(target):
+        raise HTTPException(
+            status_code=422,
+            detail="Artifact is not serving-ready: missing version/metrics, target leakage, or unapproved labels.",
+        )
 
     ACTIVE_MODEL_ID = model_id
     return {"status": "success", "active_model_id": ACTIVE_MODEL_ID}
 
 # ----------------- PREDICTION & INFERENCE -----------------
 
+PREDICTION_NUMERIC_LIMITS = {
+    "initial_capital_pkr": (1.0, 1e12),
+    "monthly_burn_budget_pkr": (1.0, 1e12),
+    "commercial_rent_sqft_pkr": (0.0, 1e7),
+    "competitor_density_1km": (0.0, 100000.0),
+    "online_search_interest": (0.0, 100.0),
+    "urbanization_rate": (0.0, 100.0),
+    "purchasing_power_index": (0.0, 100.0),
+    "logistics_accessibility_score": (0.0, 10.0),
+    "digital_payment_adoption_pct": (0.0, 100.0),
+    "runway_months": (0.0, 1200.0),
+}
+
+
+def validate_prediction_features(features: Dict[str, Any]) -> None:
+    """Mirror the Next.js sandbox validation at the service boundary."""
+    for key, (lower, upper) in PREDICTION_NUMERIC_LIMITS.items():
+        if key not in features:
+            continue
+        value = features[key]
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            raise HTTPException(status_code=422, detail=f"{key} must be a finite number.")
+        if not lower <= float(value) <= upper:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{key} must be between {lower} and {upper}.",
+            )
+
+
 @app.post("/predict", dependencies=[Depends(verify_api_key)])
 def predict_feasibility(req: PredictRequest):
     global ACTIVE_MODEL_ID
+    category = req.input_features.get("business_category")
+    if category is not None and category not in APPROVED_MODULE4_CATEGORIES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unapproved business_category '{category}'. Use one of the five approved categories.",
+        )
+    validate_prediction_features(req.input_features)
+
+    try:
+        applied_thresholds = (
+            validate_risk_thresholds(req.risk_thresholds)
+            if req.risk_thresholds is not None
+            else SCORING_CONFIG
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
     target_model_id = req.model_id or ACTIVE_MODEL_ID
     if not target_model_id:
         raise HTTPException(
@@ -344,6 +474,14 @@ def predict_feasibility(req: PredictRequest):
 
     if not target_bundle:
         raise HTTPException(status_code=404, detail="Model artifact could not be loaded.")
+
+    # A stale, unversioned or OI-6-unapproved bundle must not serve predictions
+    # even when an explicit model_id is supplied to the sandbox endpoint.
+    if not artifact_ready_for_serving(target_bundle):
+        raise HTTPException(
+            status_code=422,
+            detail="Model artifact is not serving-ready (version, CV metrics, leakage and OI-6 gate are required).",
+        )
 
     pipeline = target_bundle["pipeline"]
     input_df = pd.DataFrame([req.input_features])
@@ -371,16 +509,43 @@ def predict_feasibility(req: PredictRequest):
         confidence_score=confidence
     )
 
+    numeric_score = None
+    if isinstance(raw_pred, (int, float)) and not isinstance(raw_pred, bool) and 0 <= float(raw_pred) <= 1:
+        numeric_score = round(float(raw_pred), 2)
+
+    risk_level = None
+    if numeric_score is not None:
+        if numeric_score >= applied_thresholds["low_risk_min"]:
+            risk_level = "low"
+        elif numeric_score >= applied_thresholds["moderate_risk_min"]:
+            risk_level = "moderate"
+        elif numeric_score >= applied_thresholds["high_risk_min"]:
+            risk_level = "high"
+        else:
+            risk_level = "critical"
+
     return {
         "model_id": target_model_id,
+        "artifact_version": target_bundle.get("artifact_version"),
         "model_name": target_bundle["name"],
         "algorithm": target_bundle["algorithm_key"],
         "problem_type": target_bundle["problem_type"],
         "prediction": raw_pred if isinstance(raw_pred, (str, int, float)) else str(raw_pred),
+        "feasibility_score": numeric_score,
+        "risk_level": risk_level,
         "confidence_score": confidence,
         "class_probabilities": prob_map,
         "local_explanation_factors": local_factors,
-        "top_global_drivers": target_bundle.get("global_importances", [])[:5]
+        "top_global_drivers": target_bundle.get("global_importances", [])[:5],
+        "threshold_version": applied_thresholds["version"],
+        "artifact_threshold_version": target_bundle.get(
+            "risk_threshold_version", SCORING_CONFIG["version"]
+        ),
+        "label_approval_status": target_bundle.get("label_approval_status", "BLOCKED"),
+        "serving_ready": True,
+        "sandbox_only": True,
+        "project_report_persisted": False,
+        "disclaimer": SCORING_CONFIG["limited_data_disclaimer"],
     }
 
 # ----------------- MARKET INTELLIGENCE & GOOGLE TRENDS -----------------

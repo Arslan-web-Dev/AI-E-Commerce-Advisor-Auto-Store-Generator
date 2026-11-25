@@ -86,6 +86,16 @@ export interface StoreCategoryOption {
 // Five approved priority categories (Task 3 §3). These identifiers are the
 // single source of truth shared by the wizard, the API validation layer, the
 // database `projects.category` value and downstream provider payloads.
+// `APPROVED_CATEGORIES` is the canonical display-name list consumed by ML
+// validation so the Python sandbox and the UI cannot drift apart.
+export const APPROVED_CATEGORIES: string[] = [
+  'Grocery / General Stores',
+  'Clothing / Footwear',
+  'Mobile Phones / Accessories',
+  'Restaurants / Cafes',
+  'Pharmacies / Medical Stores',
+];
+
 export const PREDEFINED_CATEGORIES: StoreCategoryOption[] = [
   {
     id: 'grocery-general-stores',

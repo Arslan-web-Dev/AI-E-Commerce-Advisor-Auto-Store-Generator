@@ -334,7 +334,7 @@ Scheduled job that upserts aggregated Punjab commercial rent **estimates** into 
 ## 4. Feature Processing & Engineering API (`/api/projects/[id]`)
 
 ### `POST /api/projects/[id]/process`
-Triggers deterministic feature engineering, deduplication, imputation, and quality scoring on collected project records.
+Triggers deterministic feature engineering, deduplication, unavailable-field accounting and quality scoring on collected project records.
 
 - **Authentication**: Required (Owner or Admin)
 - **Response `200 OK`**:
@@ -360,6 +360,14 @@ Triggers deterministic feature engineering, deduplication, imputation, and quali
       "id": "b1a7d83f-...",
       "competitors_count": 13,
       "category_saturation": 0.00000100,
+      "competitor_density_per_km2": 0.0414,
+      "avg_competitor_rating": 4.10,
+      "rent_per_sqft": 180.00,
+      "estimated_monthly_rent": 210000.00,
+      "rent_to_budget_ratio": 0.6043,
+      "budget_to_setup_cost_ratio": 1.1914,
+      "demand_score": 74.20,
+      "saturation_index": 0.1000,
       "budget_ratio": 1.4200,
       "avg_demand_index": 74.20,
       "trend_slope": "stable",
@@ -379,7 +387,7 @@ Triggers deterministic feature engineering, deduplication, imputation, and quali
         "footprint_scale": 2,
         "channel_type": 1
       },
-      "feature_version": "v1.0"
+      "feature_version": "v1.1-fr4"
     }
   }
   ```
@@ -397,11 +405,19 @@ Retrieves the most recent engineered feature record and processing run metadata.
       "id": "b1a7d83f-...",
       "competitors_count": 13,
       "category_saturation": 0.00000100,
+      "competitor_density_per_km2": 0.0414,
+      "avg_competitor_rating": 4.10,
+      "rent_per_sqft": 180.00,
+      "estimated_monthly_rent": 210000.00,
+      "rent_to_budget_ratio": 0.6043,
+      "budget_to_setup_cost_ratio": 1.1914,
+      "demand_score": 74.20,
+      "saturation_index": 0.1000,
       "budget_ratio": 1.4200,
       "avg_demand_index": 74.20,
       "trend_slope": "stable",
       "engineered_vector": { ... },
-      "feature_version": "v1.0"
+      "feature_version": "v1.1-fr4"
     },
     "latest_run": {
       "id": "e4f81c9a-...",
@@ -435,6 +451,72 @@ Retrieves the execution history of all feature engineering runs for auditability
     "total": 1
   }
   ```
+
+---
+
+## 4A. Module 4 Scoring, Threshold and ML Sandbox API
+
+### `POST /api/projects/[id]/feasibility`
+Creates a **project-scoped** scoring report from a completed/partial processing run.
+
+- **Authentication**: Required (project owner or admin); report ownership is also enforced by RLS.
+- **Request Body**: `{ "processing_run_id": "e4f81c9a-..." }`
+- **Validation**: the run must belong to `projectId`; otherwise `403`. Invalid or missing run data returns `400`/`404`. Invalid threshold configuration fails closed with `422`.
+- **Current scoring mode**: `provisional_mcda`. OI-6 keeps supervised feasibility inference disabled.
+- **Response `200 OK`** (abridged):
+  ```json
+  {
+    "data": {
+      "project_id": "c1f7a0e2-...",
+      "processing_run_id": "e4f81c9a-...",
+      "scoring_mode": "provisional_mcda",
+      "score_value": 0.63,
+      "classification": "Medium Feasibility",
+      "risk_level": "moderate",
+      "model_version": "provisional_mcda:v1.0-mcda",
+      "threshold_version": "v1.0-srs-fr4.4",
+      "evaluation_metrics": {
+        "status": "not_applicable",
+        "reason": "Provisional MCDA index; no supervised model was trained or evaluated."
+      },
+      "training_provenance": {
+        "label_approval_status": "BLOCKED",
+        "oi_id": "OI-6",
+        "artifact": null
+      },
+      "disclaimer": "Estimate based on a model trained on limited data Provisional MCDA index, not a calibrated probability from a supervised model."
+    }
+  }
+  ```
+- When essential budget or in-scope demand inputs are absent, the same endpoint stores and returns `scoring_mode: "unavailable"`, `score_value: null`, `risk_level: null`, `model_version: "unavailable"`, `evaluation_metrics.status: "not_applicable"`, the blocked OI-6 provenance and the disclaimer—never a neutral numeric score.
+- `GET /api/projects/[id]/feasibility` returns the newest report for the project, or `{ "data": null }`.
+
+### `GET /api/admin/scoring-thresholds`
+Admin-only view of the live `system_config.scoring_thresholds` payload and immutable version history.
+
+### `POST /api/admin/scoring-thresholds`
+Admin-only versioned threshold change.
+
+- **Request Body**: `{ "version": "v1.1-review", "low_risk_min": 0.75, "moderate_risk_min": 0.55, "high_risk_min": 0.35 }`
+- **Validation**: version matches `^[A-Za-z0-9._:-]{1,80}$`; boundaries are finite numbers in `[0,1]` and strictly ordered. Duplicate versions return `409`; invalid values return `422`.
+- **Behaviour**: appends an immutable audit row first, then updates live config. If the live update fails, the attempted version remains auditable and the endpoint returns `500`.
+- **Consumers**: project scoring, customer UI, admin UI and the Python service use the same contract version.
+
+### `GET /api/ml/policy`
+Admin-only view of the server-side OI-6 label gate, approved categories, risk thresholds and exact disclaimer. If the Python service is unavailable, returns `502`.
+
+### `GET /api/ml/train?job_id=...`, `POST /api/ml/train`
+Admin-only ML training job status/start. `POST` pre-checks OI-6 and rejects `feasibility_class` / `feasibility_score` with `422` while blocked. Generic sandbox targets may train but are registered as inactive candidates with real artifact metadata; no auto-promotion occurs.
+
+### `GET /api/ml/models`, `POST /api/ml/models`
+Admin-only model listing/details and explicit activation. Before calling Python, the route requires a versioned Supabase registry row with `label_approval_status = APPROVED` (`404`/`422` otherwise). Python also refuses unversioned, leaky or unapproved feasibility bundles. The registry state is reconciled after activation and inconsistency returns `409`.
+
+### `POST /api/ml/predict`
+Admin-only sandbox inference. Request body is `{ "input_features": { ... }, "model_id"?: "...", "risk_thresholds"?: { "version": "...", "low_risk_min": 0.75, "moderate_risk_min": 0.55, "high_risk_min": 0.35 } }`; the Next.js route supplies validated live thresholds automatically. Numeric inputs must be finite and within documented bounds and `business_category` must be one of the five approved values (invalid values return `422`). Non-serving-ready artifacts are rejected even when `model_id` is explicit.
+
+Response includes `feasibility_score`, `risk_level`, `artifact_version`, applied `threshold_version`, `artifact_threshold_version`, `label_approval_status`, `disclaimer`, local context factors and global drivers when available. The outer `context` object returns `sandbox_only: true`, `project_report_persisted: false` and the applied threshold version.
+
+**This endpoint does not persist a project report.** Project reports are written only by `POST /api/projects/[id]/feasibility`.
 
 ---
 

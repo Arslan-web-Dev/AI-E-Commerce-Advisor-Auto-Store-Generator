@@ -11,6 +11,8 @@ const DISALLOWED_DEFAULT_SECRETS = new Set([
   'secret',
   'placeholder',
   'your-ml-api-key-here',
+  'your-secure-ml-service-api-key-here',
+  '123456',
 ]);
 
 function getMlApiKey(): string {
@@ -22,8 +24,9 @@ function getMlApiKey(): string {
     );
   }
   if (DISALLOWED_DEFAULT_SECRETS.has(key.toLowerCase())) {
+    // Never echo the configured value back into logs or client-visible errors.
     throw new Error(
-      `FAIL-CLOSED SECURITY ERROR: ML_SERVICE_API_KEY cannot use known default placeholder '${key}'. ` +
+      'FAIL-CLOSED SECURITY ERROR: ML_SERVICE_API_KEY uses a known default placeholder. ' +
       'Please configure a secure, unique key in your environment.'
     );
   }
@@ -115,9 +118,11 @@ export interface RegisteredModelSummary {
 
 export interface PredictionFactor {
   factor: string;
-  impact: 'positive' | 'negative';
+  impact: 'positive' | 'negative' | 'neutral';
   strength: 'high' | 'medium' | 'low';
   explanation: string;
+  method?: 'documented_rule_context' | 'disclosure';
+  global_importance?: number;
 }
 
 export interface PredictionResponse {
@@ -126,10 +131,37 @@ export interface PredictionResponse {
   algorithm: string;
   problem_type: string;
   prediction: string | number;
+  feasibility_score?: number | null;
+  risk_level?: 'low' | 'moderate' | 'high' | 'critical' | null;
   confidence_score: number | null;
   class_probabilities: Record<string, number>;
   local_explanation_factors: PredictionFactor[];
   top_global_drivers: Array<{ feature: string; importance: number; raw_weight: number }>;
+  artifact_version?: string | null;
+  threshold_version?: string;
+  label_approval_status?: 'BLOCKED' | 'APPROVED';
+  artifact_threshold_version?: string;
+  serving_ready?: boolean;
+  sandbox_only?: boolean;
+  project_report_persisted?: boolean;
+  disclaimer?: string;
+}
+
+export interface TrainingPolicyResponse {
+  label_policy: {
+    status: 'BLOCKED' | 'APPROVED';
+    oi_id: string;
+    reason: string;
+    documented_proposal: string;
+  };
+  approved_categories: string[];
+  risk_thresholds: {
+    version: string;
+    low_risk_min: number;
+    moderate_risk_min: number;
+    high_risk_min: number;
+  };
+  limited_data_disclaimer: string;
 }
 
 export interface GoogleTrendsResult {
@@ -179,8 +211,9 @@ async function requestML<T>(endpoint: string, options: RequestInit = {}): Promis
     const res = await fetch(url, {
       ...options,
       headers: {
-        'x-api-key': getMlApiKey(),
         ...options.headers,
+        // The trusted key is applied last so a caller cannot override it.
+        'x-api-key': getMlApiKey(),
       },
       cache: 'no-store',
     });
@@ -210,7 +243,17 @@ async function requestML<T>(endpoint: string, options: RequestInit = {}): Promis
 
 export const mlClient = {
   async getHealth() {
-    return requestML<{ status: string; active_model_id: string | null; datasets_count: number; artifacts_count: number }>('/');
+    return requestML<{
+      status: string;
+      active_model_id: string | null;
+      datasets_count: number;
+      artifact_count: number;
+      label_approval_status: 'BLOCKED' | 'APPROVED';
+    }>('/');
+  },
+
+  async getTrainingPolicy(): Promise<TrainingPolicyResponse> {
+    return requestML<TrainingPolicyResponse>('/training-policy');
   },
 
   async listDatasets(): Promise<DatasetInfo[]> {
@@ -267,13 +310,25 @@ export const mlClient = {
     });
   },
 
-  async predict(inputFeatures: Record<string, unknown>, modelId?: string): Promise<PredictionResponse> {
+  async predict(
+    inputFeatures: Record<string, unknown>,
+    modelId?: string,
+    thresholds?: {
+      version: string;
+      low_risk_min: number;
+      moderate_risk_min: number;
+      high_risk_min: number;
+    }
+  ): Promise<PredictionResponse> {
     return requestML<PredictionResponse>('/predict', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model_id: modelId,
         input_features: inputFeatures,
+        // The Next.js route passes the live, admin-versioned contract so the
+        // Python scorer applies the same bands as project reports.
+        risk_thresholds: thresholds,
       }),
     });
   },

@@ -8,13 +8,35 @@ import SaturationMeter from '@/components/feasibility/SaturationMeter';
 import TrendChart from '@/components/feasibility/TrendChart';
 import CompetitorTable from '@/components/feasibility/CompetitorTable';
 import { Project } from '@/types/project';
-import { DemandTrendPoint } from '@/types/data-collection';
+import { DemandTrendPoint, DemandTrendRecord } from '@/types/data-collection';
 import { getRegion } from '@/lib/geo/pakistan-geography';
+import { isUsableDemandTrend } from '@/lib/data-processing/trend-validity';
 
 interface FeasibilityRun {
-  score_value?: number;
+  id?: string;
+  score_value?: number | null;
   classification?: string;
+  risk_level?: 'low' | 'moderate' | 'high' | 'critical' | null;
   scoring_mode?: string;
+  model_version?: string | null;
+  threshold_version?: string | null;
+  disclaimer?: string | null;
+  evaluation_metrics?: { status?: string; reason?: string } | null;
+  training_provenance?: Record<string, unknown> | null;
+}
+
+interface ProjectFeatures {
+  competitor_density_per_km2?: number | null;
+  competitors_count?: number | null;
+  avg_competitor_rating?: number | null;
+  rent_per_sqft?: number | null;
+  estimated_monthly_rent?: number | null;
+  rent_to_budget_ratio?: number | null;
+  saturation_index?: number | null;
+  demand_score?: number | null;
+  user_budget?: number | null;
+  currency?: 'PKR' | 'USD' | string;
+  total_estimated_monthly_cost?: number | null;
 }
 
 interface FeasibilityCompetitor {
@@ -29,12 +51,24 @@ interface FeasibilityCompetitor {
   address?: string;
 }
 
+const LIMITED_DATA_DISCLAIMER = 'Estimate based on a model trained on limited data';
+
+/** Formats a nullable metric without ever substituting a synthetic value. */
+function displayMetric(value: number | null | undefined, digits = 2, prefix = ''): string {
+  if (value == null || !Number.isFinite(Number(value))) return 'N/A';
+  return `${prefix}${Number(value).toFixed(digits)}`;
+}
+
 export default function FeasibilityPage({ params }: { params: Promise<{ id: string }> }) {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [run, setRun] = useState<FeasibilityRun | null>(null);
+  const [features, setFeatures] = useState<ProjectFeatures | null>(null);
+  const [latestProcessingRunId, setLatestProcessingRunId] = useState<string | null>(null);
   const [competitors, setCompetitors] = useState<FeasibilityCompetitor[]>([]);
   const [trendSeries, setTrendSeries] = useState<DemandTrendPoint[]>([]);
+  const [trendProvenance, setTrendProvenance] = useState<string | null>(null);
+  const [demandTrend, setDemandTrend] = useState<DemandTrendRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [scoring, setScoring] = useState(false);
@@ -51,7 +85,7 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
     async function loadFeasibilityData() {
       try {
         setLoading(true);
-        // 1. Fetch project info
+        // 1. Fetch project info through the ownership-checked project API.
         let resolvedProject: Project | null = null;
         const projRes = await fetch(`/api/projects/${projectId}`);
         if (projRes.ok) {
@@ -60,43 +94,51 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
           setProject(resolvedProject);
         }
 
-        // 2. Fetch latest feasibility run
+        // 2. Fetch latest feasibility run (null when the project has not been scored).
         const res = await fetch(`/api/projects/${projectId}/feasibility`);
         if (res.ok) {
           const data = await res.json();
-          setRun(data.data);
+          setRun(data.data || null);
         }
 
-        // 3. Fetch competitors if any. When no live data exists we render nothing
-        // rather than fabricating a Punjab/Lahore competitor sample.
+        // 3. Fetch engineered features and the processing run they came from.
+        //    These are real stored values; unavailable sources remain N/A.
+        const featRes = await fetch(`/api/projects/${projectId}/features`);
+        if (featRes.ok) {
+          const featData = await featRes.json();
+          setFeatures(featData.features || null);
+          setLatestProcessingRunId(featData.latest_run?.id ?? null);
+        }
+
+        // 4. Fetch real demand trend observations when present. No embedded
+        //    Lahore/Punjab sample is ever used as a stand-in for project data.
+        const marketRes = await fetch(`/api/projects/${projectId}/market-data`);
+        if (marketRes.ok) {
+          const marketData = await marketRes.json();
+          const trend: DemandTrendRecord | null = marketData.demand_trend ?? null;
+          setDemandTrend(trend);
+          // Stale or cross-region observations are kept in storage for audit,
+          // but are never displayed as project-local demand evidence.
+          const usable = isUsableDemandTrend(trend, resolvedProject);
+          setTrendSeries(usable && Array.isArray(trend?.trend_series) ? trend!.trend_series : []);
+          setTrendProvenance(
+            usable && trend
+              ? `${trend.provider ?? 'unknown'} · ${trend.actual_geo_scope ?? 'scope unknown'}`
+              : null
+          );
+        } else {
+          setDemandTrend(null);
+          setTrendSeries([]);
+          setTrendProvenance(null);
+        }
+
+        // 5. Fetch live competitor observations only; never fabricate a sample.
         const compRes = await fetch(`/api/projects/${projectId}/competitors`);
         if (compRes.ok) {
           const compData = await compRes.json();
           setCompetitors(compData.competitors || []);
         } else {
           setCompetitors([]);
-        }
-
-        // 4. Bundled seasonal search-interest series is Punjab coverage data and
-        // is only surfaced for a region with verified coverage.
-        const coverage = getRegion(resolvedProject?.region ?? null);
-        if (coverage?.analysis_enabled) {
-          setTrendSeries([
-            { month: '2026-01', index: 58 },
-            { month: '2026-02', index: 62 },
-            { month: '2026-03', index: 75 },
-            { month: '2026-04', index: 88 },
-            { month: '2026-05', index: 70 },
-            { month: '2026-06', index: 65 },
-            { month: '2026-07', index: 82 },
-            { month: '2026-08', index: 91 },
-            { month: '2026-09', index: 76 },
-            { month: '2026-10', index: 80 },
-            { month: '2026-11', index: 89 },
-            { month: '2026-12', index: 94 },
-          ]);
-        } else {
-          setTrendSeries([]);
         }
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Failed to load feasibility details.');
@@ -109,19 +151,23 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
   }, [projectId]);
 
   const handleScore = async () => {
-    const processingRunId = prompt('Enter a valid processing_run_id (or press OK to run default analysis):', 'default_run') || 'default_run';
+    if (!latestProcessingRunId) {
+      setError('No completed processing run is available. Process this project’s data before scoring.');
+      return;
+    }
     setScoring(true);
+    setError('');
     try {
       const res = await fetch(`/api/projects/${projectId}/feasibility`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ processing_run_id: processingRunId }),
+        body: JSON.stringify({ processing_run_id: latestProcessingRunId }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || 'Scoring failed');
       setRun(data.data);
     } catch (err: unknown) {
-      alert(`Scoring Notice: ${err instanceof Error ? err.message : String(err)}`);
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setScoring(false);
     }
@@ -139,7 +185,12 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
   const centerLat = hasCoordinates && project ? Number(project.lat) : null;
   const centerLng = hasCoordinates && project ? Number(project.lng) : null;
   const radiusKm = Number(project?.radius_km) || 10;
-  const budgetPkr = Number(project?.budget_amount || project?.budget_pkr) || 250000;
+  const projectCurrency = project?.budget_currency ?? 'PKR';
+  const budgetAmount = Number(project?.budget_amount);
+  const budgetLabel =
+    Number.isFinite(budgetAmount) && budgetAmount > 0
+      ? `${projectCurrency} ${budgetAmount.toLocaleString('en-PK')}`
+      : 'N/A';
 
   if (loading) {
     return (
@@ -149,9 +200,31 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
     );
   }
 
-  const scoreVal = run?.score_value ?? 0.78;
-  const classification = run?.classification ?? (scoreVal >= 0.75 ? 'High Feasibility' : scoreVal >= 0.55 ? 'Medium Feasibility' : 'Low Feasibility');
-  const scoringMode = run?.scoring_mode ?? 'provisional_mcda';
+  // No synthetic fallback: an unscored project explicitly shows N/A.
+  const hasScore = run?.score_value != null && Number.isFinite(Number(run.score_value));
+  const scoreVal = hasScore ? Number(run!.score_value) : null;
+  const classification = run?.classification ?? (hasScore ? 'Classification unavailable' : 'Not scored');
+  const scoringMode = run?.scoring_mode ?? 'not_scored';
+  const modeLabel =
+    scoringMode === 'provisional_mcda'
+      ? 'Provisional MCDA'
+      : scoringMode === 'supervised_model'
+        ? 'Supervised ML'
+        : scoringMode === 'unavailable'
+          ? 'Unavailable'
+          : 'Not scored';
+  const saturation = features?.saturation_index;
+  const saturationPer100k =
+    saturation != null && Number.isFinite(Number(saturation)) ? Number(saturation) : null;
+  // Documented meter normalisation: 10 competitors per 100k residents = 100.
+  // The raw unit is always shown beside the normalised index.
+  const saturationDisplay =
+    saturationPer100k !== null ? Math.min(100, Math.max(0, saturationPer100k * 10)) : null;
+  const monthlyRent =
+    features?.estimated_monthly_rent != null && Number.isFinite(Number(features.estimated_monthly_rent))
+      ? Number(features.estimated_monthly_rent)
+      : null;
+  const featureCurrency = features?.currency ?? projectCurrency;
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0b1326', color: '#dae2fd', padding: '2rem 1.5rem' }}>
@@ -169,16 +242,18 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button
               onClick={handleScore}
-              disabled={scoring}
+              disabled={scoring || !latestProcessingRunId}
+              title={latestProcessingRunId ? undefined : 'Process the project data first'}
               style={{
                 backgroundColor: '#171f33',
                 border: '1px solid #2d3449',
                 color: '#dae2fd',
                 padding: '0.5rem 1rem',
                 borderRadius: '0.5rem',
-                cursor: scoring ? 'not-allowed' : 'pointer',
+                cursor: scoring || !latestProcessingRunId ? 'not-allowed' : 'pointer',
                 fontSize: '0.875rem',
                 fontWeight: 600,
+                opacity: latestProcessingRunId ? 1 : 0.5,
               }}
             >
               {scoring ? 'Recalculating...' : 'Recalculate Score'}
@@ -223,15 +298,18 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
           <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
             <div style={{ textAlign: 'center', padding: '1rem 1.5rem', backgroundColor: '#0d1829', borderRadius: '0.75rem', border: '1px solid #2d3449' }}>
               <span style={{ fontSize: '0.7rem', opacity: 0.6, textTransform: 'uppercase' }}>Feasibility Index</span>
-              <div style={{ fontSize: '2.25rem', fontWeight: 900, color: '#4edea3', lineHeight: 1.2 }}>
-                {Math.round(scoreVal * 100)}%
+              <div style={{ fontSize: '2.25rem', fontWeight: 900, color: hasScore ? '#4edea3' : '#94a3b8', lineHeight: 1.2 }}>
+                {hasScore ? `${Math.round(scoreVal! * 100)}%` : 'N/A'}
               </div>
-              <span style={{ fontSize: '0.75rem', color: '#4edea3', fontWeight: 700 }}>{classification}</span>
+              <span style={{ fontSize: '0.75rem', color: hasScore ? '#4edea3' : '#94a3b8', fontWeight: 700 }}>{classification}</span>
             </div>
 
             <div style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', opacity: 0.85 }}>
-              <div>Mode: <strong style={{ color: '#4cd7f6' }}>{scoringMode === 'provisional_mcda' ? 'Provisional MCDA' : 'Supervised ML'}</strong></div>
-              <div>Budget: <strong>PKR {budgetPkr.toLocaleString('en-PK')}</strong></div>
+              <div>Mode: <strong style={{ color: '#4cd7f6' }}>{modeLabel}</strong></div>
+              <div>Risk band: <strong>{run?.risk_level ?? 'N/A'}</strong></div>
+              <div>Model: <strong>{run?.model_version ?? 'N/A'}</strong></div>
+              <div>Thresholds: <strong>{run?.threshold_version ?? 'N/A'}</strong></div>
+              <div>Budget: <strong>{budgetLabel}</strong></div>
               <div>Geography: <strong>{regionLabel ? `${regionLabel}, Pakistan` : 'Pakistan'}</strong></div>
             </div>
           </div>
@@ -240,9 +318,11 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
         {/* Limited Data Disclaimer */}
         <div style={{ padding: '0.875rem 1.25rem', backgroundColor: '#f59e0b15', border: '1px solid #f59e0b44', borderRadius: '0.5rem', fontSize: '0.8rem', color: '#f59e0b', lineHeight: 1.5 }}>
           ⚠️ <strong>Limited Data Advisory:</strong>{' '}
+          <strong>{LIMITED_DATA_DISCLAIMER}</strong>.{' '}
+          {run?.disclaimer ?? ''}{' '}
           {regionInfo?.analysis_enabled
-            ? 'Feasibility projections combine verified Punjab seasonal retail benchmarks with nationwide OpenStreetMap competition indicators and heuristic MCDA multi-criteria models.'
-            : `${regionLabel ? regionLabel : 'This region'} is recognised nationally, but verified local benchmarks are not yet available. Projections use nationwide OpenStreetMap indicators and heuristic MCDA models only; Punjab benchmarks are never substituted as local evidence.`}{' '}
+            ? 'Punjab is the verified coverage region. Nationwide OpenStreetMap competition indicators are shown with their own scope and are never relabelled as local observations. The score is a provisional MCDA index, not a calibrated supervised-model probability.'
+            : `${regionLabel ? regionLabel : 'This region'} is recognised nationally, but verified local benchmarks are not yet available. Punjab benchmarks are never substituted as local evidence.`}{' '}
           Always verify on-ground lease terms before committing capital.
         </div>
 
@@ -255,7 +335,7 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
               <CompetitorMap centerLat={centerLat} centerLng={centerLng} radiusKm={radiusKm} competitors={competitors} height="360px" />
             ) : (
               <div style={{ padding: '2rem', textAlign: 'center', border: '1px solid #2d3449', borderRadius: '0.5rem', backgroundColor: '#171f33', fontSize: '0.8rem', opacity: 0.75, lineHeight: 1.6 }}>
-                Coordinates are not available for this project, so the nationwide OpenStreetMap competitor radar cannot be centred. No other region&rsquo;s coordinates are substituted.
+                Coordinates are not available for this project, so the competitor radar cannot be centred. No other region’s coordinates are substituted.
               </div>
             )}
           </div>
@@ -263,33 +343,80 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
           {/* Gauges & Meters */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <h2 style={{ fontSize: '1.125rem', fontWeight: 700, margin: 0 }}>Market Signals & Economics</h2>
-            {regionInfo?.analysis_enabled ? (
-              <RentBudgetGauge rentMin={60000} rentMax={180000} budget={budgetPkr} area={project?.target_location || project?.city || undefined} />
+            {monthlyRent != null && features?.user_budget != null && Number.isFinite(Number(features.user_budget)) && Number(features.user_budget) > 0 ? (
+              <RentBudgetGauge
+                rentMin={monthlyRent}
+                rentMax={monthlyRent}
+                budget={Number(features.user_budget)}
+                currency={featureCurrency === 'USD' ? 'USD' : 'PKR'}
+                area={project?.target_location || project?.city || undefined}
+              />
             ) : (
               <div style={{ padding: '1rem', border: '1px solid #f59e0b44', borderRadius: '0.5rem', backgroundColor: '#f59e0b15', fontSize: '0.78rem', color: '#f59e0b', lineHeight: 1.5 }}>
-                Rent-vs-budget benchmark unavailable for this region. Verified commercial-rent benchmarks are currently Punjab-first and are not substituted for other regions.
+                Sourced rent / budget data unavailable for this project. No regional benchmark is substituted as a local observation.
               </div>
             )}
-            <SaturationMeter score={58} competitorCount={competitors.length} radiusKm={radiusKm} />
+            {saturationDisplay !== null ? (
+              <SaturationMeter
+                score={saturationDisplay}
+                saturationPer100k={saturationPer100k ?? undefined}
+                competitorDensityPerKm2={
+                  features?.competitor_density_per_km2 != null &&
+                  Number.isFinite(Number(features.competitor_density_per_km2))
+                    ? Number(features.competitor_density_per_km2)
+                    : undefined
+                }
+                competitorCount={
+                  features?.competitors_count != null && Number.isFinite(Number(features.competitors_count))
+                    ? Number(features.competitors_count)
+                    : undefined
+                }
+                radiusKm={radiusKm}
+              />
+            ) : (
+              <div style={{ padding: '1rem', border: '1px solid #2d3449', borderRadius: '0.5rem', backgroundColor: '#171f33', fontSize: '0.78rem', opacity: 0.75, lineHeight: 1.5 }}>
+                Saturation index: N/A (competitors per 100,000 residents cannot be computed without in-scope population data).
+              </div>
+            )}
           </div>
         </div>
 
         {/* Trend Analysis Chart */}
         <div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
-            <h2 style={{ fontSize: '1.125rem', fontWeight: 700, margin: 0 }}>12-Month Search Interest</h2>
+            <h2 style={{ fontSize: '1.125rem', fontWeight: 700, margin: 0 }}>Search Interest Trend</h2>
             <span style={{ fontSize: '0.72rem', opacity: 0.65 }}>
-              {regionInfo?.analysis_enabled
-                ? 'Source: bundled Punjab seasonal benchmark (coverage-limited, synthetic).'
-                : 'No verified search-trend coverage for this region.'}
+              {trendProvenance
+                ? `Source: ${trendProvenance}`
+                : demandTrend
+                  ? 'A stored demand trend is stale or out of scope; it is not used as local evidence.'
+                  : 'No in-scope demand trend observations are stored for this project.'}
             </span>
           </div>
-          <TrendChart trendSeries={trendSeries} category={project?.category || 'Retail'} slope="growing" />
+          <TrendChart trendSeries={trendSeries} category={project?.category || 'Retail'} />
         </div>
 
         {/* Competitor Breakdown Table */}
         <div>
           <CompetitorTable competitors={competitors} projectName={project?.title ?? undefined} />
+        </div>
+
+        {/* FR-4.1 engineered feature provenance */}
+        <div style={{ border: '1px solid #2d3449', borderRadius: '0.5rem', backgroundColor: '#171f33', padding: '1.25rem' }}>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: 700, margin: '0 0 0.75rem 0' }}>Engineered Features (FR-4.1)</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem', fontSize: '0.78rem' }}>
+            <div>Competitor density: <strong>{displayMetric(features?.competitor_density_per_km2, 4)} / km²</strong></div>
+            <div>Avg competitor rating: <strong>{displayMetric(features?.avg_competitor_rating, 2)} / 5</strong></div>
+            <div>Rent rate: <strong>{displayMetric(features?.rent_per_sqft, 2, `${featureCurrency} `)} / ft²</strong></div>
+            <div>Est. monthly rent: <strong>{displayMetric(features?.estimated_monthly_rent, 2, `${featureCurrency} `)}</strong></div>
+            <div>Feature budget: <strong>{displayMetric(features?.user_budget, 2, `${featureCurrency} `)}</strong></div>
+            <div>Rent / budget: <strong>{displayMetric(features?.rent_to_budget_ratio, 4)}</strong></div>
+            <div>Demand score: <strong>{displayMetric(features?.demand_score, 2)} / 100</strong></div>
+            <div>Saturation index: <strong>{displayMetric(features?.saturation_index, 2)} / 100k residents</strong></div>
+          </div>
+          <p style={{ fontSize: '0.72rem', opacity: 0.65, margin: '0.75rem 0 0 0' }}>
+            N/A means the source was unavailable or out of scope; no value was imputed for display.
+          </p>
         </div>
       </div>
     </div>

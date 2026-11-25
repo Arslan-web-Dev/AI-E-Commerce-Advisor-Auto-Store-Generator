@@ -74,7 +74,8 @@ export async function processProjectFeatures(
     observationList,
     demandTrendRecord,
     costList,
-    (project.budget_currency as 'USD' | 'PKR') || 'PKR'
+    (project.budget_currency as 'USD' | 'PKR') || 'PKR',
+    project
   );
 
   // 5. Create initial processing run record in database
@@ -111,6 +112,14 @@ export async function processProjectFeatures(
         processing_run_id: runRecord.id,
         competitors_count: engineeredFeatures.competitors_count,
         category_saturation: engineeredFeatures.category_saturation,
+        competitor_density_per_km2: engineeredFeatures.competitor_density_per_km2,
+        avg_competitor_rating: engineeredFeatures.avg_competitor_rating,
+        rent_per_sqft: engineeredFeatures.rent_per_sqft,
+        estimated_monthly_rent: engineeredFeatures.estimated_monthly_rent,
+        rent_to_budget_ratio: engineeredFeatures.rent_to_budget_ratio,
+        budget_to_setup_cost_ratio: engineeredFeatures.budget_to_setup_cost_ratio,
+        demand_score: engineeredFeatures.demand_score,
+        saturation_index: engineeredFeatures.saturation_index,
         budget_ratio: engineeredFeatures.budget_ratio,
         avg_demand_index: engineeredFeatures.avg_demand_index,
         trend_slope: engineeredFeatures.trend_slope,
