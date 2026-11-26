@@ -56,6 +56,19 @@
 - Validated configurations are written to `stores.theme_config` with `theme_config_version` and `theme_updated_at`. Previous draft configurations are copied into `store_draft_versions` with a stable version number before replacement; published stores are rejected. All reads and writes are scoped to the authenticated project owner, with database RLS remaining authoritative.
 - Additive migration `supabase/migrations/20261126160000_module7_theme_configurator.sql` adds the project link, version metadata, history index, owner-consistency trigger and append-only history trigger. It is checked in only; execution in Supabase is not claimed. See `docs/module-7-theme-configurator.md`.
 
+### H. Module 8 multi-tenant storefront and deployment
+- A single Next.js deployment serves every tenant. `src/proxy.ts` rewrites only hosts whose `custom_domain` is present with `domain_status='verified'`, `status='published'` and `is_banned=false`; path and wildcard tenants are resolved by `src/lib/store-management/tenant.ts`. A host header alone never proves domain ownership.
+- `src/lib/store-management/project-store.ts` resolves exactly one store by `project_id` (never by `owner_id` alone), checks owner/admin against the project, and provisions new stores as `draft` with the project owner. Additive `20261127000000_module8_publication_domain_lifecycle.sql` adds a partial unique index on non-null `project_id` and fails closed on pre-existing duplicates instead of deleting or reassigning rows.
+- Custom-domain attachment uses the real Vercel Domains API (`v10` add, `v9` get/verify/remove) through server-only `VERCEL_TOKEN`/`VERCEL_PROJECT_ID` credentials. DNS records and tokens come from the provider response; `verified` is stored only when the provider confirms `verified: true`. Payment for this upgrade remains manual/out of band.
+- Publication, ban/unban, checkout, order transitions and inventory adjustments go through narrowly granted `SECURITY DEFINER` RPCs in `20261127020000_module8_secure_order_rpcs.sql`. Authorization is derived from `auth.uid()`, `public.is_admin()` and `public.can_manage_store()`; client-supplied actor IDs are audit labels only. Idempotency, hashed-IP rate limiting, row locks, DB-derived prices, conditional stock updates and append-only history are enforced in the database.
+- Public reads use canonical `stores`, `products`, `orders` and `order_items` rows. The removed `store_products`, `store_orders`, `store_order_items`, `stock_quantity`, `delivery_address` and `is_published` names are not queried anywhere in the new Module 8 path.
+- All four `20261127*.sql` migrations are forward-only and additive; rollback comments remove only newly introduced objects. The fourth creates the `product-images` bucket with owner-scoped insert/update/delete policies and public read for published storefront images. Migrations are checked in but have **not** been executed against a live Supabase project in this task.
+- Owner product images can be uploaded through `POST /api/stores/[id]/products/images` to the `product-images` bucket; file type, size and store ownership are enforced server-side. The owner UI still permits reviewed external HTTPS URLs.
+- The governed AI description route accepts tone, language (English/Roman Urdu), keywords and target length, returns keyword/length checks, and never saves the suggestion; the owner must review and save explicitly.
+- SEO metadata is normalized on write and on render; all eight public routes set validated metadata and their own canonical URL. Server-computed SEO readiness is exposed in owner and admin dashboards. `GET /api/admin/usage` provides aggregated counts and sanitized AI call telemetry only.
+- The SEO score is on-page readiness, not a search-ranking prediction.
+- Tests in `tests/module8-*.test.mjs` inject mocked Supabase/fetch clients. No live Vercel, DNS, Supabase, Groq or deployed-runtime call was made. See `docs/module-8-implementation-gap-report.md` and the Task 9 implementation report for the honest limitation list.
+
 ---
 
 ## 2. Environment Variables
@@ -79,6 +92,13 @@ GROQ_MODEL=llama-3.3-70b-versatile
 AI_PROMPT_VERSION=v1
 AI_USER_HOURLY_QUOTA=20
 AI_ADVISORY_PROVIDERS=openai,gemini,groq
+
+# Module 8 (server-only; never prefix with NEXT_PUBLIC_)
+STORE_ROOT_DOMAIN=stores.example.com
+APP_HOSTNAMES=preview.example.com
+VERCEL_TOKEN=
+VERCEL_PROJECT_ID=
+VERCEL_TEAM_ID=
 ```
 
 ---

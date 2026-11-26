@@ -160,6 +160,7 @@ export interface StoreOverviewKPIs {
   active_products: number;
   low_stock_count: number;
   unfulfilled_orders_count: number;
+  seo_score?: { score: number; issues: string[] };
   recent_orders: Order[];
   low_stock_products: Product[];
   is_sandbox: boolean;

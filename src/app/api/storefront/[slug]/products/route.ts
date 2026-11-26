@@ -1,32 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getPublicStore, listPublicProducts } from '@/lib/store-management/public-store';
+import { tenantConfigFromEnv } from '@/lib/store-management/tenant';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
+  const store = await getPublicStore(slug, { host, config: tenantConfigFromEnv() });
+  if (!store) return NextResponse.json({ error: 'Store not found' }, { status: 404 });
 
-  const { data: store } = await supabase
-    .from('stores')
-    .select('id, slug, is_published, is_banned')
-    .eq('slug', slug)
-    .maybeSingle();
+  const url = new URL(req.url);
+  const category = url.searchParams.get('category');
+  const search = url.searchParams.get('search')?.trim().toLowerCase();
+  const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit')) || 24));
 
-  if (!store || !store.is_published || store.is_banned) {
-    return NextResponse.json({ error: 'Store not found' }, { status: 404 });
+  let products = await listPublicProducts(store.id, limit);
+  if (category) products = products.filter((p) => p.category === category);
+  if (search) {
+    products = products.filter((p) =>
+      `${p.name} ${p.description ?? ''} ${p.sku ?? ''}`.toLowerCase().includes(search),
+    );
   }
 
-  const { data: products } = await supabase
-    .from('store_products')
-    .select('id, name, slug, price_pkr, compare_at_price_pkr, images, category, description, is_active, stock_quantity, sku')
-    .eq('store_id', store.id)
-    .eq('is_active', true)
-    .gt('stock_quantity', 0)
-    .order('created_at', { ascending: false });
-
-  return NextResponse.json({ products: products || [] });
+  return NextResponse.json({
+    store: { id: store.id, slug: store.slug, name: store.name, base_url: store.baseUrl },
+    products,
+  });
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { calculateStockAdjustment, isLowStock } from '@/lib/store-management/inventory';
-import { InventoryAdjustmentReason } from '@/types/store-management';
+import { isLowStock } from '@/lib/store-management/inventory';
+import { adjustStoreInventory } from '@/lib/store-management/order-operations';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -78,58 +78,30 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   try {
-    const body = await request.json();
+    const body = await request.json() as {
+      product_id?: string;
+      new_stock?: number | string;
+      reason?: 'manual_adjustment' | 'restock' | 'damage';
+    };
     const { product_id, new_stock, reason = 'manual_adjustment' } = body;
 
     if (!product_id) {
       return NextResponse.json({ error: 'product_id is required' }, { status: 400 });
     }
-
-    const { data: product, error: fetchErr } = await supabase
-      .from('products')
-      .select('id, stock, name')
-      .eq('id', product_id)
-      .eq('store_id', storeId)
-      .single();
-
-    if (fetchErr || !product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    if (!['manual_adjustment', 'restock', 'damage'].includes(reason)) {
+      return NextResponse.json({ error: 'Invalid adjustment reason.' }, { status: 400 });
     }
 
-    const adjustment = calculateStockAdjustment({
-      productId: product_id,
+    // Atomic stock update + append-only log inside the database RPC.
+    const outcome = await adjustStoreInventory(supabase, {
       storeId,
-      currentStock: product.stock,
+      productId: product_id,
       newStock: Number(new_stock),
-      reason: reason as InventoryAdjustmentReason,
+      reason,
       actorId: user.id,
     });
-
-    if (!adjustment.valid) {
-      return NextResponse.json({ error: adjustment.error }, { status: 400 });
-    }
-
-    // 1. Update product stock
-    const { data: updatedProduct, error: updateErr } = await supabase
-      .from('products')
-      .update({ stock: adjustment.newStock })
-      .eq('id', product_id)
-      .eq('store_id', storeId)
-      .select()
-      .single();
-
-    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
-
-    // 2. Insert audit log
-    if (adjustment.log) {
-      await supabase.from('inventory_logs').insert(adjustment.log);
-    }
-
-    return NextResponse.json({
-      product: updatedProduct,
-      delta: adjustment.delta,
-      message: `Stock updated from ${adjustment.previousStock} to ${adjustment.newStock} units.`,
-    });
+    if (!outcome.ok) return NextResponse.json({ error: outcome.error }, { status: outcome.status });
+    return NextResponse.json({ product: outcome.data, message: 'Stock updated.' });
   } catch (e: unknown) {
     const message = e instanceof Error && e.message ? e.message : 'Malformed stock adjustment request';
     return NextResponse.json({ error: message }, { status: 400 });

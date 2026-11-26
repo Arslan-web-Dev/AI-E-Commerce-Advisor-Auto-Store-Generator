@@ -1,55 +1,48 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { headers } from 'next/headers';
 import type { Metadata } from 'next';
+import { getPublicStore } from '@/lib/store-management/public-store';
+import { buildCanonicalUrl, resolveSeoMetadata } from '@/lib/store-management/seo';
+import { tenantConfigFromEnv } from '@/lib/store-management/tenant';
 
-interface StoreProject {
-  title?: string;
-  description?: string;
-}
-
-function pickProject(projects: unknown): StoreProject | undefined {
-  const proj = Array.isArray(projects) ? projects[0] : projects;
-  return proj as StoreProject | undefined;
-}
-
-async function getStore(slug: string) {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('stores')
-    .select('id, slug, is_published, is_banned, theme_config, projects(title, description)')
-    .eq('slug', slug)
-    .maybeSingle();
-  if (!data || !data.is_published || data.is_banned) return null;
-  return data;
+async function loadStore(slug: string) {
+  const headerList = await headers();
+  const host = headerList.get('x-forwarded-host') || headerList.get('host');
+  return getPublicStore(slug, { host, config: tenantConfigFromEnv() });
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const store = await getStore(slug);
-  if (!store) return { title: 'Not Found' };
-  const theme = (store.theme_config as Record<string, string>) || {};
-  const name = theme.store_name || pickProject(store.projects)?.title || slug;
-  return { title: `About — ${name}` };
+  const store = await loadStore(slug);
+  if (!store) return { title: 'Store Not Found', robots: { index: false } };
+  const { title, description } = resolveSeoMetadata({
+    title: `About ${store.name}`,
+    description: store.description,
+    fallbackTitle: `About ${store.name} — Cash on Delivery in Pakistan`,
+    fallbackDescription: `Learn about ${store.name} and shop with cash on delivery across Punjab, Pakistan.`,
+  });
+  const canonical = buildCanonicalUrl({ slug, host: store.verifiedHost, path: 'about', config: tenantConfigFromEnv() });
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { title, description, url: canonical, type: 'website', siteName: store.name },
+  };
 }
 
 export default async function AboutPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const store = await getStore(slug);
+  const store = await loadStore(slug);
   if (!store) notFound();
-
-  const theme = (store.theme_config as Record<string, string>) || {};
-  const primary = theme.primary_color || '#4edea3';
-  const radius = theme.border_radius || '0.5rem';
-  const proj = pickProject(store.projects);
-  const storeName = theme.store_name || proj?.title || slug;
-  const description = proj?.description || `Welcome to ${storeName}. We offer quality products with Cash on Delivery across Punjab, Pakistan.`;
+  const t = store.theme;
+  const description = store.description || `Welcome to ${t.storeName}. We offer quality products with Cash on Delivery across Punjab, Pakistan.`;
 
   return (
     <div style={{ maxWidth: '800px' }}>
-      <nav style={{ fontSize: '0.8rem', marginBottom: '1.5rem', opacity: 0.7 }}>
-        <a href={`/${slug}`} style={{ color: primary }}>Home</a> › About
+      <nav aria-label="Breadcrumb" style={{ fontSize: '0.8rem', marginBottom: '1.5rem', opacity: 0.7 }}>
+        <a href={`/${slug}`} style={{ color: t.primary }}>Home</a> › About
       </nav>
-      <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1.5rem', color: primary }}>About {storeName}</h1>
+      <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1.5rem', color: t.primary }}>About {t.storeName}</h1>
       <div style={{ lineHeight: 1.8, opacity: 0.85, marginBottom: '2rem', fontSize: '1.0625rem' }}>
         {description}
       </div>
@@ -59,14 +52,14 @@ export default async function AboutPage({ params }: { params: Promise<{ slug: st
           { icon: '🏪', title: 'Quality Products', desc: 'Carefully selected items for you.' },
           { icon: '🚚', title: 'Punjab Delivery', desc: 'Delivering across all districts of Punjab.' },
         ].map((f) => (
-          <div key={f.title} style={{ padding: '1.25rem', border: `1px solid ${primary}22`, borderRadius: radius, backgroundColor: '#171f33' }}>
+          <div key={f.title} style={{ padding: '1.25rem', border: `1px solid ${t.primary}22`, borderRadius: t.radius, backgroundColor: t.surface }}>
             <div style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>{f.icon}</div>
-            <h3 style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{f.title}</h3>
+            <h2 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.25rem' }}>{f.title}</h2>
             <p style={{ fontSize: '0.875rem', opacity: 0.75 }}>{f.desc}</p>
           </div>
         ))}
       </div>
-      <a href={`/${slug}/catalogue`} style={{ display: 'inline-block', padding: '0.75rem 2rem', backgroundColor: primary, color: '#0b1326', borderRadius: radius, textDecoration: 'none', fontWeight: 700 }}>
+      <a href={`/${slug}/catalogue`} style={{ display: 'inline-block', padding: '0.75rem 2rem', backgroundColor: t.primary, color: t.onPrimary, borderRadius: t.radius, textDecoration: 'none', fontWeight: 700 }}>
         Shop Now
       </a>
     </div>

@@ -27,7 +27,7 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({
     customer_name: '',
     phone: '',
-    delivery_address: '',
+    shipping_address: '',
     city: '',
     notes: '',
   });
@@ -126,7 +126,7 @@ export default function CheckoutPage() {
             </div>
             <div>
               <label style={labelStyle}>Delivery Address *</label>
-              <textarea required rows={3} style={{ ...inputStyle, resize: 'vertical' }} value={form.delivery_address} onChange={(e) => setForm((f) => ({ ...f, delivery_address: e.target.value }))} placeholder="House #, Street, Area" />
+              <textarea required rows={3} style={{ ...inputStyle, resize: 'vertical' }} value={form.shipping_address} onChange={(e) => setForm((f) => ({ ...f, shipping_address: e.target.value }))} placeholder="House #, Street, Area" />
             </div>
             <div>
               <label style={labelStyle}>City *</label>

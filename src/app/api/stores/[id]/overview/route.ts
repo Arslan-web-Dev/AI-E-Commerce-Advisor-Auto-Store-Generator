@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { filterLowStockProducts } from '@/lib/store-management/inventory';
+import { computeStoreSeoScore, safeSeoKeywords } from '@/lib/store-management/seo';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -22,7 +23,7 @@ export async function GET(request: Request, context: RouteContext) {
   // 1. Fetch store and check ownership
   const { data: store, error: storeErr } = await supabase
     .from('stores')
-    .select('id, owner_id, name, slug, status, currency, custom_domain')
+    .select('id, owner_id, name, slug, status, currency, custom_domain, seo_config')
     .eq('id', storeId)
     .single();
 
@@ -38,7 +39,7 @@ export async function GET(request: Request, context: RouteContext) {
   }
 
   // 2. Fetch products statistics
-  const { data: products, error: prodErr } = await supabase
+  const { data: products } = await supabase
     .from('products')
     .select('*')
     .eq('store_id', storeId)
@@ -49,7 +50,7 @@ export async function GET(request: Request, context: RouteContext) {
   const lowStockProducts = filterLowStockProducts(productList);
 
   // 3. Fetch orders statistics
-  const { data: orders, error: ordersErr } = await supabase
+  const { data: orders } = await supabase
     .from('orders')
     .select('*')
     .eq('store_id', storeId)
@@ -64,6 +65,19 @@ export async function GET(request: Request, context: RouteContext) {
   const unfulfilledOrdersCount = orderList.filter(
     (o) => o.status === 'pending' || o.status === 'confirmed' || o.status === 'packed'
   ).length;
+
+  const storeSeo = (store.seo_config && typeof store.seo_config === 'object'
+    ? store.seo_config
+    : {}) as Record<string, unknown>;
+  const seoScore = computeStoreSeoScore({
+    title: typeof storeSeo.meta_title === 'string' ? storeSeo.meta_title : null,
+    description: typeof storeSeo.meta_description === 'string' ? storeSeo.meta_description : null,
+    keywords: safeSeoKeywords(storeSeo.keywords),
+    hasImage: productList.some((product) => Array.isArray(product.images) && product.images.length > 0),
+    hasCanonical: true,
+    hasJsonLd: true,
+    hasBreadcrumbs: true,
+  });
 
   return NextResponse.json({
     kpis: {
@@ -80,6 +94,7 @@ export async function GET(request: Request, context: RouteContext) {
       active_products: activeProducts.length,
       low_stock_count: lowStockProducts.length,
       unfulfilled_orders_count: unfulfilledOrdersCount,
+      seo_score: seoScore,
       recent_orders: orderList.slice(0, 5),
       low_stock_products: lowStockProducts.slice(0, 5),
       is_sandbox: store.status === 'draft',

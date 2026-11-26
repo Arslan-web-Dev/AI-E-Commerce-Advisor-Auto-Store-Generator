@@ -1,44 +1,44 @@
-import { MetadataRoute } from 'next';
+import { headers } from 'next/headers';
+import type { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { getPublicStore } from '@/lib/store-management/public-store';
+import { buildStorePath } from '@/lib/store-management/tenant';
+import { tenantConfigFromEnv } from '@/lib/store-management/tenant';
 
-// Store sitemaps are tenant-specific and depend on request-time params (`slug`).
-// Prevent static prerendering, which would invoke this handler without params.
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap({ params }: { params: Promise<{ slug: string }> }): Promise<MetadataRoute.Sitemap> {
   const { slug } = await params;
-  const supabase = await createClient();
-
-  const { data: store } = await supabase
-    .from('stores')
-    .select('id, slug, updated_at')
-    .eq('slug', slug)
-    .eq('is_published', true)
-    .eq('is_banned', false)
-    .maybeSingle();
-
+  const headerList = await headers();
+  const host = headerList.get('x-forwarded-host') || headerList.get('host');
+  const store = await getPublicStore(slug, { host, config: tenantConfigFromEnv() });
   if (!store) return [];
 
-  const baseUrl = `https://${slug}.platform.pk`;
-  const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}`, lastModified: store.updated_at || new Date().toISOString(), changeFrequency: 'daily', priority: 1.0 },
-    { url: `${baseUrl}/catalogue`, lastModified: new Date().toISOString(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/about`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${baseUrl}/contact`, lastModified: new Date().toISOString(), changeFrequency: 'monthly', priority: 0.5 },
+  const now = new Date().toISOString();
+  const routes: MetadataRoute.Sitemap = [
+    { url: store.baseUrl, lastModified: now, changeFrequency: 'daily', priority: 1 },
+    { url: buildStorePath(store.baseUrl, 'catalogue'), lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: buildStorePath(store.baseUrl, 'about'), lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    { url: buildStorePath(store.baseUrl, 'contact'), lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
   ];
 
+  const supabase = await createClient();
   const { data: products } = await supabase
-    .from('store_products')
+    .from('products')
     .select('id, updated_at')
     .eq('store_id', store.id)
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .eq('is_archived', false)
+    .order('created_at', { ascending: false })
+    .limit(1000);
 
-  const productRoutes: MetadataRoute.Sitemap = (products || []).map((p) => ({
-    url: `${baseUrl}/products/${p.id}`,
-    lastModified: p.updated_at || new Date().toISOString(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }));
-
-  return [...staticRoutes, ...productRoutes];
+  for (const product of products ?? []) {
+    routes.push({
+      url: buildStorePath(store.baseUrl, `products/${product.id}`),
+      lastModified: product.updated_at || now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    });
+  }
+  return routes;
 }

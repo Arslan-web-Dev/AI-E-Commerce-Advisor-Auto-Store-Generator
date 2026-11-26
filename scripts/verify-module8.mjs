@@ -17,12 +17,6 @@ function check(label, result) {
   }
 }
 
-function fileContains(path, ...terms) {
-  if (!existsSync(path)) return false;
-  const content = readFileSync(path, 'utf-8');
-  return terms.every((t) => content.includes(t));
-}
-
 console.log('====================================================');
 console.log('Module 8 Verification: Store Management System');
 console.log('====================================================\n');
@@ -97,7 +91,7 @@ check('getOrderStatusMeta function exported', ordersModule.includes('getOrderSta
 check('pending → confirmed transition', ordersModule.includes("pending: ['confirmed', 'cancelled']"));
 check('confirmed → packed transition', ordersModule.includes("confirmed: ['packed', 'cancelled']"));
 check('packed → shipped transition', ordersModule.includes("packed: ['shipped', 'cancelled']"));
-check('shipped → delivered transition', ordersModule.includes("shipped: ['delivered', 'returned']"));
+check('shipped → delivered/cancelled/returned transitions', ordersModule.includes("shipped: ['delivered', 'cancelled', 'returned']"));
 check('delivered → returned terminal', ordersModule.includes("delivered: ['returned']"));
 check('cancelled is terminal', ordersModule.includes('cancelled: []'));
 check('Stock decrement on confirmation', ordersModule.includes("currentStatus === 'pending' && targetStatus === 'confirmed'"));
@@ -167,9 +161,9 @@ const orderDetailRoute = existsSync('src/app/api/stores/[id]/orders/[orderId]/ro
   ? readFileSync('src/app/api/stores/[id]/orders/[orderId]/route.ts', 'utf-8')
   : '';
 check('Order detail route: validates status transition', orderDetailRoute.includes('canTransitionOrder'));
-check('Order detail route: stock decrement on confirm', orderDetailRoute.includes('shouldDecrementStockOnTransition'));
-check('Order detail route: stock restore on cancel', orderDetailRoute.includes('shouldRestoreStockOnTransition'));
-check('Order detail route: inserts inventory audit log', orderDetailRoute.includes('inventory_logs'));
+check('Order detail route: uses transactional transition RPC', orderDetailRoute.includes("rpc('transition_store_order_status'") || orderDetailRoute.includes('transitionStoreOrder'));
+check('Order route: transactional status RPC exists', existsSync('supabase/migrations/20261127020000_module8_secure_order_rpcs.sql'));
+check('Order route: no client-side stock writes', !orderDetailRoute.includes("from('products')"));
 
 const invoiceRoute = existsSync('src/app/api/stores/[id]/orders/[orderId]/invoice/route.ts')
   ? readFileSync('src/app/api/stores/[id]/orders/[orderId]/invoice/route.ts', 'utf-8')
@@ -200,12 +194,80 @@ check('Low stock alert banner', uiPage.includes('Low Stock Alert'));
 check('KPI cards rendered', uiPage.includes('Total Revenue'));
 check('Sample sandbox order creation', uiPage.includes('handleCreateSampleOrder'));
 
-// ── 9. Middleware ─────────────────────────────────────────────────────────
-console.log('\n9. Validating Middleware Route Protection...');
+// ── 9. Proxy/session route protection ────────────────────────────────────
+console.log('\n9. Validating Proxy Route Protection...');
 const middleware = existsSync('src/lib/supabase/middleware.ts')
   ? readFileSync('src/lib/supabase/middleware.ts', 'utf-8')
   : '';
 check('Middleware protects /stores paths', middleware.includes("pathname.startsWith('/stores')"));
+
+// ── 10. Task 9 deployment, checkout and SEO deliverables ─────────────────
+console.log('\n10. Validating Task 9 Multi-Tenant Deployment Deliverables...');
+const task9Files = [
+  'docs/module-8-implementation-gap-report.md',
+  'supabase/migrations/20261127000000_module8_publication_domain_lifecycle.sql',
+  'supabase/migrations/20261127010000_module8_order_integrity.sql',
+  'supabase/migrations/20261127020000_module8_secure_order_rpcs.sql',
+  'supabase/migrations/20261127030000_module8_product_image_storage.sql',
+  'src/lib/store-management/tenant.ts',
+  'src/lib/store-management/public-store.ts',
+  'src/lib/store-management/domains.ts',
+  'src/lib/store-management/guest-checkout.ts',
+  'src/lib/store-management/seo.ts',
+  'src/app/api/stores/[id]/domain/route.ts',
+  'src/app/api/stores/[id]/publish/route.ts',
+  'src/app/api/storefront/[slug]/orders/route.ts',
+  'src/app/api/storefront/[slug]/products/route.ts',
+  'src/app/api/stores/[id]/products/images/route.ts',
+  'src/app/api/admin/usage/route.ts',
+  'src/app/[slug]/catalogue/layout.tsx',
+  'src/app/[slug]/cart/layout.tsx',
+  'src/app/[slug]/checkout/layout.tsx',
+  'src/app/[slug]/checkout/confirmation/layout.tsx',
+  'tests/module8-storefront-deployment.test.mjs',
+  'tests/module8-guest-checkout.test.mjs',
+  'tests/module8-order-fulfilment.test.mjs',
+  'tests/module8-seo.test.mjs',
+];
+for (const file of task9Files) check(`Found ${file}`, existsSync(file));
+
+const domainRoute = existsSync('src/app/api/stores/[id]/domain/route.ts')
+  ? readFileSync('src/app/api/stores/[id]/domain/route.ts', 'utf-8') : '';
+check('Domain route calls real Vercel API', domainRoute.includes('addProjectDomain') && domainRoute.includes('verifyProjectDomain'));
+check('Domain route requires owner/admin', domainRoute.includes('canManageStore'));
+const secureRpcs = existsSync('supabase/migrations/20261127020000_module8_secure_order_rpcs.sql')
+  ? readFileSync('supabase/migrations/20261127020000_module8_secure_order_rpcs.sql', 'utf-8') : '';
+check('Anonymous checkout is limited to one RPC', secureRpcs.includes('grant execute on function public.place_store_order'));
+check('Order transition RPC is transactional', secureRpcs.includes('security definer') && secureRpcs.includes('for update'));
+check('Idempotency unique index exists', existsSync('supabase/migrations/20261127010000_module8_order_integrity.sql'));
+const proxyCode = existsSync('src/proxy.ts') ? readFileSync('src/proxy.ts', 'utf-8') : '';
+check('Deprecated middleware file convention removed', !existsSync('src/middleware.ts'));
+check('Proxy exports the Next.js 16 proxy function', proxyCode.includes('export async function proxy('));
+check('Proxy rewrites only verified published domains',
+  proxyCode.includes("'domain_status', 'verified'") &&
+  proxyCode.includes("'status', 'published'") &&
+  proxyCode.includes("'is_banned', false"));
+
+const seoLib = existsSync('src/lib/store-management/seo.ts') ? readFileSync('src/lib/store-management/seo.ts', 'utf-8') : '';
+check('Stored SEO metadata is normalized before rendering', seoLib.includes('export function normalizeStoredSeo'));
+check('Owner SEO score is computed server-side',
+  existsSync('src/app/api/stores/[id]/overview/route.ts') &&
+  readFileSync('src/app/api/stores/[id]/overview/route.ts', 'utf-8').includes('computeStoreSeoScore'));
+const descriptionRoute = existsSync('src/app/api/stores/[id]/products/[productId]/description/route.ts')
+  ? readFileSync('src/app/api/stores/[id]/products/[productId]/description/route.ts', 'utf-8') : '';
+check('AI description writer supports tone, language and keyword checks',
+  descriptionRoute.includes('body.tone') && descriptionRoute.includes("body.language === 'ur_roman'") && descriptionRoute.includes('missingKeywords'));
+const storageMigration = existsSync('supabase/migrations/20261127030000_module8_product_image_storage.sql')
+  ? readFileSync('supabase/migrations/20261127030000_module8_product_image_storage.sql', 'utf-8') : '';
+check('Product images use an owner-controlled Storage bucket',
+  storageMigration.includes("'product-images'") && storageMigration.includes('public.can_manage_store'));
+const usageRoute = existsSync('src/app/api/admin/usage/route.ts')
+  ? readFileSync('src/app/api/admin/usage/route.ts', 'utf-8') : '';
+check('Admin usage and sanitized AI log are available',
+  usageRoute.includes("from('ai_call_log')") && usageRoute.includes('ai_calls_by_purpose'));
+const ownerPage = existsSync('src/app/projects/[id]/store/page.tsx')
+  ? readFileSync('src/app/projects/[id]/store/page.tsx', 'utf-8') : '';
+check('Owner publish toggle sends an explicit action', ownerPage.includes("body: JSON.stringify({ action })"));
 
 // ── Summary ──────────────────────────────────────────────────────────────
 console.log('\n====================================================');

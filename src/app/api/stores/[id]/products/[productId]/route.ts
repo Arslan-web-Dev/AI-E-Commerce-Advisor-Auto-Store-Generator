@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { validateProductImages } from '@/lib/store-management/product-images';
+import { normalizeStoredSeo } from '@/lib/store-management/seo';
 
 interface RouteContext {
   params: Promise<{ id: string; productId: string }>;
@@ -116,10 +118,20 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (body.sku !== undefined) updateData.sku = body.sku ? String(body.sku).trim() : null;
     if (body.description !== undefined) updateData.description = body.description ? String(body.description).trim() : null;
     if (body.category !== undefined) updateData.category = body.category ? String(body.category).trim() : null;
-    if (body.images !== undefined && Array.isArray(body.images)) updateData.images = body.images;
+    if (body.images !== undefined) {
+      const imageCheck = validateProductImages(body.images);
+      if (!imageCheck.ok) return NextResponse.json({ error: imageCheck.error }, { status: 400 });
+      updateData.images = imageCheck.images;
+    }
     if (body.is_active !== undefined) updateData.is_active = Boolean(body.is_active);
     if (body.is_archived !== undefined) updateData.is_archived = Boolean(body.is_archived);
-    if (body.seo !== undefined && typeof body.seo === 'object') updateData.seo = body.seo;
+    if (body.seo !== undefined && typeof body.seo === 'object') {
+      updateData.seo = normalizeStoredSeo(
+        body.seo,
+        `${updateData.name || 'Product'} — Online Store in Pakistan`,
+        `${updateData.name || 'Product'} is available with cash on delivery across Punjab, Pakistan.`,
+      );
+    }
 
     const { data: updatedProduct, error: updateErr } = await supabase
       .from('products')

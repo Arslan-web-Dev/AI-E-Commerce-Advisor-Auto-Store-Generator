@@ -1,4 +1,4 @@
-import { Product, InventoryAdjustmentReason, InventoryLog } from '@/types/store-management';
+import type { Product, InventoryAdjustmentReason, InventoryLog } from '@/types/store-management';
 
 /**
  * Checks if a product has fallen below or reached its low-stock threshold.

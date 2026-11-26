@@ -1,4 +1,4 @@
-import { OrderStatus, OrderStatusHistoryItem } from '@/types/store-management';
+import type { OrderStatus, OrderStatusHistoryItem } from '@/types/store-management';
 
 /**
  * Valid state transitions for the SRS FR-8.10 order fulfillment pipeline:
@@ -9,7 +9,7 @@ export const ALLOWED_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending: ['confirmed', 'cancelled'],
   confirmed: ['packed', 'cancelled'],
   packed: ['shipped', 'cancelled'],
-  shipped: ['delivered', 'returned'],
+  shipped: ['delivered', 'cancelled', 'returned'],
   delivered: ['returned'],
   cancelled: [],
   returned: [],
@@ -33,11 +33,17 @@ export function shouldDecrementStockOnTransition(currentStatus: OrderStatus, tar
 }
 
 /**
- * Determines whether a status transition requires restoring inventory stock.
- * Restores stock if an already confirmed or packed order is cancelled.
+ * Stock is applied exactly once: on confirmation. It is returned when a
+ * stock-applied order is cancelled or returned.
  */
 export function shouldRestoreStockOnTransition(currentStatus: OrderStatus, targetStatus: OrderStatus): boolean {
-  return (currentStatus === 'confirmed' || currentStatus === 'packed') && targetStatus === 'cancelled';
+  if (targetStatus === 'cancelled') {
+    return currentStatus === 'confirmed' || currentStatus === 'packed' || currentStatus === 'shipped';
+  }
+  if (targetStatus === 'returned') {
+    return currentStatus === 'shipped' || currentStatus === 'delivered';
+  }
+  return false;
 }
 
 /**

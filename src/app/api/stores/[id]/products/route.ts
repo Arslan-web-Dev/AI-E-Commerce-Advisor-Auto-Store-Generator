@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { validateProductImages } from '@/lib/store-management/product-images';
+import { normalizeStoredSeo } from '@/lib/store-management/seo';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -129,6 +131,11 @@ export async function POST(request: Request, context: RouteContext) {
       );
     }
 
+    const imageCheck = validateProductImages(images);
+    if (!imageCheck.ok) {
+      return NextResponse.json({ error: imageCheck.error }, { status: 400 });
+    }
+
     // Generate clean slug
     const generatedSlug = (customSlug || name)
       .toLowerCase()
@@ -150,9 +157,13 @@ export async function POST(request: Request, context: RouteContext) {
         stock: Math.round(stockNum),
         low_stock_threshold: Math.round(thresholdNum),
         category: category?.trim() || null,
-        images: Array.isArray(images) ? images : [],
+        images: imageCheck.images,
         variants: Array.isArray(variants) ? variants : [],
-        seo: typeof seo === 'object' ? seo : {},
+        seo: normalizeStoredSeo(
+          seo,
+          `${name.trim()} — Online Store in Pakistan`,
+          `${name.trim()} is available with cash on delivery across Punjab, Pakistan.`,
+        ),
         is_active: Boolean(is_active),
         is_archived: false,
       })

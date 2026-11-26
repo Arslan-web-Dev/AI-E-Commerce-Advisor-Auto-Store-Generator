@@ -1,157 +1,122 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import AddToCartButton from './AddToCartButton';
+import { headers } from 'next/headers';
 import type { Metadata } from 'next';
+import AddToCartButton from './AddToCartButton';
+import { getPublicProduct, getPublicStore } from '@/lib/store-management/public-store';
+import { breadcrumbJsonLd, buildCanonicalUrl, productJsonLd, resolveSeoMetadata, safeSeoKeywords, serializeJsonLd } from '@/lib/store-management/seo';
+import { tenantConfigFromEnv } from '@/lib/store-management/tenant';
 
-async function getProduct(slug: string, productId: string) {
-  const supabase = await createClient();
-  const { data: store } = await supabase
-    .from('stores')
-    .select('id, slug, is_published, is_banned, theme_config')
-    .eq('slug', slug)
-    .maybeSingle();
+interface RouteParams { slug: string; id: string }
 
-  if (!store || !store.is_published || store.is_banned) return null;
-
-  const { data: product } = await supabase
-    .from('store_products')
-    .select('*')
-    .eq('id', productId)
-    .eq('store_id', store.id)
-    .eq('is_active', true)
-    .maybeSingle();
-
+async function loadData({ slug, id }: RouteParams) {
+  const headerList = await headers();
+  const host = headerList.get('x-forwarded-host') || headerList.get('host');
+  const store = await getPublicStore(slug, { host, config: tenantConfigFromEnv() });
+  if (!store) return null;
+  const product = await getPublicProduct(store.id, id);
   if (!product) return null;
-  return { product, store };
+  return { store, product };
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string; id: string }> }): Promise<Metadata> {
-  const { slug, id } = await params;
-  const data = await getProduct(slug, id);
-  if (!data) return { title: 'Product Not Found' };
-  const { product } = data;
+export async function generateMetadata({ params }: { params: Promise<RouteParams> }): Promise<Metadata> {
+  const data = await loadData(await params);
+  if (!data) return { title: 'Product Not Found', robots: { index: false } };
+  const { store, product } = data;
+  const { title, description } = resolveSeoMetadata({
+    title: product.seo.meta_title || product.name,
+    description: product.seo.meta_description || product.description,
+    fallbackTitle: `${product.name} — Buy Online in Pakistan`,
+    fallbackDescription: `${product.name} is available from ${store.name} with cash on delivery across Punjab, Pakistan.`,
+  });
+  const canonical = buildCanonicalUrl({ slug: store.slug, host: store.verifiedHost, path: `products/${product.id}` });
   return {
-    title: product.name,
-    description: product.description || `Buy ${product.name} — PKR ${product.price_pkr}`,
-    openGraph: { images: product.images?.[0] ? [product.images[0]] : [] },
+    title,
+    description,
+    keywords: safeSeoKeywords(product.seo.keywords),
+    alternates: { canonical },
+    openGraph: { title, description, url: canonical, images: product.images },
   };
 }
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string; id: string }> }) {
-  const { slug, id } = await params;
-  const data = await getProduct(slug, id);
+export default async function ProductDetailPage({ params }: { params: Promise<RouteParams> }) {
+  const routeParams = await params;
+  const data = await loadData(routeParams);
   if (!data) notFound();
-
-  const { product, store } = data;
-  const theme = (store.theme_config as Record<string, string>) || {};
-  const primary = theme.primary_color || '#4edea3';
-  const bg = theme.bg_color || '#0b1326';
-  const radius = theme.border_radius || '0.5rem';
-  const inStock = product.stock_quantity > 0;
+  const { store, product } = data;
+  const t = store.theme;
+  const inStock = product.stock > 0;
+  const canonical = buildCanonicalUrl({
+    slug: store.slug,
+    host: store.verifiedHost,
+    path: `products/${product.id}`,
+  });
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Product',
-            name: product.name,
-            description: product.description,
-            image: product.images || [],
-            offers: {
-              '@type': 'Offer',
-              priceCurrency: 'PKR',
-              price: product.price_pkr,
-              availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-            },
-          }),
-        }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(productJsonLd({
+          name: product.name,
+          description: product.description ?? '',
+          url: canonical,
+          images: product.images,
+          pricePkr: product.price_pkr,
+          inStock,
+          sku: product.sku,
+        })) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([
+          { name: t.storeName, url: store.baseUrl },
+          { name: 'Products', url: `${store.baseUrl}/catalogue` },
+          { name: product.name },
+        ])) }}
       />
 
-      {/* Breadcrumb */}
-      <nav style={{ fontSize: '0.8rem', marginBottom: '1.5rem', opacity: 0.7 }}>
-        <a href={`/${slug}`} style={{ color: primary }}>Home</a>
-        {' › '}
-        <a href={`/${slug}/catalogue`} style={{ color: primary }}>Products</a>
-        {' › '}
-        {product.name}
+      <nav aria-label="Breadcrumb" style={{ fontSize: '0.8rem', marginBottom: '1.5rem', opacity: 0.7 }}>
+        <a href={`/${store.slug}`} style={{ color: t.primary }}>Home</a> ›{' '}
+        <a href={`/${store.slug}/catalogue`} style={{ color: t.primary }}>Products</a> › {product.name}
       </nav>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-        {/* Images */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: '2rem' }}>
         <div>
-          <div style={{ aspectRatio: '1', borderRadius: radius, overflow: 'hidden', backgroundColor: '#0d1829', marginBottom: '1rem' }}>
-            {product.images?.[0] ? (
+          <div style={{ aspectRatio: '1', borderRadius: t.radius, overflow: 'hidden', backgroundColor: '#0d1829', marginBottom: '1rem' }}>
+            {product.images[0] ? (
               <img src={product.images[0]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3, fontSize: '5rem' }}>🛍️</div>
+              <div style={{ height: '100%', display: 'grid', placeItems: 'center', fontSize: '4rem', opacity: 0.3 }}>🛍️</div>
             )}
           </div>
-          {product.images?.length > 1 && (
+          {product.images.length > 1 && (
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              {product.images.slice(1).map((img: string, i: number) => (
-                <img key={i} src={img} alt={`${product.name} ${i + 2}`} style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '0.25rem', border: `1px solid ${primary}44` }} />
+              {product.images.slice(1).map((image, index) => (
+                <img key={image} src={image} alt={`${product.name} ${index + 2}`} style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '0.25rem' }} />
               ))}
             </div>
           )}
         </div>
 
-        {/* Details */}
         <div>
-          {product.category && (
-            <p style={{ fontSize: '0.8rem', color: primary, fontWeight: 600, marginBottom: '0.5rem' }}>{product.category}</p>
-          )}
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.75rem', lineHeight: 1.3 }}>{product.name}</h1>
-          <p style={{ fontSize: '1.75rem', fontWeight: 800, color: primary, marginBottom: '1rem' }}>
-            PKR {(product.price_pkr || 0).toLocaleString('en-PK')}
-          </p>
-
+          {product.category && <p style={{ fontSize: '0.8rem', color: t.primary }}>{product.category}</p>}
+          <h1 style={{ fontSize: '1.75rem', margin: '0.25rem 0 0.75rem' }}>{product.name}</h1>
+          <p style={{ fontSize: '1.75rem', fontWeight: 800, color: t.primary }}>PKR {product.price_pkr.toLocaleString('en-PK')}</p>
           {product.compare_at_price_pkr && product.compare_at_price_pkr > product.price_pkr && (
-            <p style={{ fontSize: '0.95rem', textDecoration: 'line-through', opacity: 0.5, marginBottom: '0.5rem' }}>
-              PKR {product.compare_at_price_pkr.toLocaleString('en-PK')}
-            </p>
+            <p style={{ textDecoration: 'line-through', opacity: 0.5 }}>PKR {product.compare_at_price_pkr.toLocaleString('en-PK')}</p>
           )}
-
-          <div style={{ marginBottom: '1.5rem' }}>
-            <span
-              style={{
-                display: 'inline-block',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '100px',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                backgroundColor: inStock ? `${primary}22` : '#ff444422',
-                color: inStock ? primary : '#ff4444',
-              }}
-            >
-              {inStock ? `In Stock (${product.stock_quantity} available)` : 'Out of Stock'}
-            </span>
-          </div>
-
-          {product.description && (
-            <div style={{ marginBottom: '1.5rem', lineHeight: 1.7, opacity: 0.85 }}>
-              {product.description}
-            </div>
-          )}
-
-          {product.sku && <p style={{ fontSize: '0.75rem', opacity: 0.5, marginBottom: '1rem' }}>SKU: {product.sku}</p>}
+          <p style={{ fontSize: '0.8rem', margin: '1rem 0' }}>{inStock ? `In Stock (${product.stock} available)` : 'Out of Stock'}</p>
+          {product.description && <div style={{ lineHeight: 1.7, opacity: 0.85, marginBottom: '1.5rem' }}>{product.description}</div>}
+          {product.sku && <p style={{ fontSize: '0.75rem', opacity: 0.5 }}>SKU: {product.sku}</p>}
 
           <AddToCartButton
             product={{ id: product.id, name: product.name, price_pkr: product.price_pkr, images: product.images }}
             storeId={store.id}
-            storeSlug={slug}
+            storeSlug={store.slug}
             inStock={inStock}
-            primary={primary}
-            bg={bg}
-            radius={radius}
+            primary={t.primary}
+            bg={t.surface}
+            radius={t.radius}
           />
-
-          <div style={{ marginTop: '1.5rem', padding: '1rem', borderRadius: radius, backgroundColor: `${primary}0d`, border: `1px solid ${primary}22`, fontSize: '0.875rem' }}>
-            <p>📦 <strong>Cash on Delivery</strong> — Pay when your order arrives</p>
-            <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>Delivery within Punjab, Pakistan</p>
-          </div>
         </div>
       </div>
     </>

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { compileManifest, WizardAnswers } from '@/lib/storefront/compiler';
 import { validateManifest, validateVariantId } from '@/lib/storefront/variant-catalog';
 import { createAIAttemptLogger, executeAIGateway } from '@/lib/ai/gateway';
+import { resolveProjectStore } from '@/lib/store-management/project-store';
 
 const ALLOWED_STYLE_PREFERENCES = ['elegant', 'modern', 'dense', 'brand'] as const;
 const ALLOWED_AUDIENCES = ['general', 'youth', 'professional', 'family'] as const;
@@ -269,52 +270,38 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }, { status: 422 });
     }
 
-    // Check if a draft store exists for this owner; create or use existing
-    let store;
-    const { data: existingStore } = await supabase
-      .from('stores')
-      .select('id, status')
-      .eq('owner_id', user.id)
-      .limit(1)
-      .single();
-
-    if (!existingStore) {
-      // Auto-generate a slug from project category + short UUID segment
-      const slugBase = (project.category ?? 'store').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 20);
-      const slugSuffix = Math.random().toString(36).slice(2, 7);
-      const slug = `${slugBase}-${slugSuffix}`;
-
-      const { data: newStore, error: storeErr } = await supabase
-        .from('stores')
-        .insert({
-          owner_id: user.id,
-          name: `${project.category ?? 'My Store'} Store`,
-          slug,
-          status: 'draft',
-          theme_config: manifest,
-          currency: project.budget_currency ?? 'PKR',
-        })
-        .select()
-        .single();
-
-      if (storeErr) return NextResponse.json({ error: storeErr.message }, { status: 500 });
-      store = newStore;
-    } else {
-      // Cannot update a published store's theme without owner action
-      if (existingStore.status === 'published') {
-        return NextResponse.json({
-          error: 'Cannot recompile theme for a published store without unpublishing first.',
-        }, { status: 409 });
-      }
-      const { data: updatedStore, error: updateErr } = await supabase
-        .from('stores')
-        .update({ theme_config: manifest })
-        .eq('id', existingStore.id)
-        .select()
-        .single();
-      if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
-      store = updatedStore;
+    // Approval gate: compilation never publishes. resolveProjectStore provisions
+    // a new tenant with status: 'draft', and publication remains an explicit
+    // owner/admin action enforced by the Module 8 set_store_publication RPC.
+    // Resolve the one store linked to this project (never by owner_id alone).
+    const resolved = await resolveProjectStore(supabase, projectId, user.id, false);
+    if (!resolved.ok) {
+      return NextResponse.json({ error: resolved.error }, { status: resolved.status });
     }
+    const existingStore = resolved.store as { id?: string; status?: string; theme_config_version?: number };
+    if (!existingStore?.id) {
+      return NextResponse.json({ error: 'Store resolution failed.' }, { status: 500 });
+    }
+    if (existingStore.status === 'published') {
+      return NextResponse.json({
+        error: 'Cannot recompile theme for a published store without unpublishing first.',
+      }, { status: 409 });
+    }
+
+    const nextVersion = Number(existingStore.theme_config_version ?? 0) + 1;
+    const { data: updatedStore, error: updateErr } = await supabase
+      .from('stores')
+      .update({
+        theme_config: manifest,
+        theme_config_version: nextVersion,
+        theme_updated_at: new Date().toISOString(),
+        currency: project.budget_currency ?? 'PKR',
+      })
+      .eq('id', existingStore.id)
+      .select()
+      .single();
+    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
+    const store = updatedStore;
 
     // Persist versioned draft record (immutable snapshot)
     const { data: draft, error: draftErr } = await supabase

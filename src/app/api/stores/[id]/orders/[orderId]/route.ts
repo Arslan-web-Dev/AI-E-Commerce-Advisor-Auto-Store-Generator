@@ -1,203 +1,89 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import {
-  ALLOWED_STATUS_TRANSITIONS,
-  canTransitionOrder,
-  shouldDecrementStockOnTransition,
-  shouldRestoreStockOnTransition,
-  appendStatusHistory,
-} from '@/lib/store-management/orders';
-import { OrderStatus, OrderStatusHistoryItem } from '@/types/store-management';
+import { authorizationFailure, canManageStore } from '@/lib/store-management/authorization';
+import { transitionStoreOrder } from '@/lib/store-management/order-operations';
+import { ALLOWED_STATUS_TRANSITIONS, canTransitionOrder } from '@/lib/store-management/orders';
+import type { OrderStatus } from '@/types/store-management';
 
 interface RouteContext {
   params: Promise<{ id: string; orderId: string }>;
 }
 
-interface OrderUpdateFields {
-  status: OrderStatus;
-  status_history: OrderStatusHistoryItem[];
-  fulfillment_status?: 'fulfilled' | 'cancelled' | 'returned';
-  payment_status?: string;
+async function authorizeStore(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  storeId: string,
+) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { failure: authorizationFailure('unauthorized') };
+  const { data: store } = await supabase.from('stores').select('id, owner_id').eq('id', storeId).maybeSingle();
+  if (!store) return { failure: authorizationFailure('not_found') };
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+  const ownership = store as unknown as { owner_id: string };
+  if (!canManageStore(user, ownership, profile as { role?: string | null } | null)) {
+    return { failure: authorizationFailure('forbidden') };
+  }
+  return { user };
 }
 
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   const { id: storeId, orderId } = await context.params;
   const supabase = await createClient();
+  const auth = await authorizeStore(supabase, storeId);
+  if (auth.failure) return NextResponse.json({ error: auth.failure.error }, { status: auth.failure.status });
 
-  const {
-    data: { user },
-    error: authErr,
-  } = await supabase.auth.getUser();
-
-  if (authErr || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const { data: store } = await supabase.from('stores').select('id, owner_id').eq('id', storeId).single();
-  if (!store) return NextResponse.json({ error: 'Store not found' }, { status: 404 });
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (store.owner_id !== user.id && profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  const { data: order, error: orderErr } = await supabase
+  const { data: order, error } = await supabase
     .from('orders')
     .select('*, items:order_items(*)')
     .eq('id', orderId)
     .eq('store_id', storeId)
-    .single();
+    .maybeSingle();
 
-  if (orderErr || !order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-
+  if (error || !order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
   return NextResponse.json({ order });
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
   const { id: storeId, orderId } = await context.params;
   const supabase = await createClient();
+  const auth = await authorizeStore(supabase, storeId);
+  if (auth.failure) return NextResponse.json({ error: auth.failure.error }, { status: auth.failure.status });
 
-  const {
-    data: { user },
-    error: authErr,
-  } = await supabase.auth.getUser();
-
-  if (authErr || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const { data: store } = await supabase.from('stores').select('id, owner_id').eq('id', storeId).single();
-  if (!store) return NextResponse.json({ error: 'Store not found' }, { status: 404 });
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (store.owner_id !== user.id && profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const body = await request.json().catch(() => null) as Record<string, unknown> | null;
+  const targetStatus = body?.status ?? body?.target_status;
+  if (typeof targetStatus !== 'string') {
+    return NextResponse.json({ error: 'status is required' }, { status: 400 });
   }
+  const notes = typeof body?.notes === 'string' ? body.notes.slice(0, 500) : null;
 
-  try {
-    const body = await request.json();
-    const { status: targetStatus, notes } = body;
+  const { data: order, error: fetchErr } = await supabase
+    .from('orders')
+    .select('id, status')
+    .eq('id', orderId)
+    .eq('store_id', storeId)
+    .maybeSingle();
+  if (fetchErr || !order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
 
-    if (!targetStatus) {
-      return NextResponse.json({ error: 'targetStatus is required' }, { status: 400 });
-    }
-
-    // 1. Fetch current order with items
-    const { data: order, error: fetchErr } = await supabase
-      .from('orders')
-      .select('*, items:order_items(*)')
-      .eq('id', orderId)
-      .eq('store_id', storeId)
-      .single();
-
-    if (fetchErr || !order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-
-    const currentStatus = order.status as OrderStatus;
-
-    // 2. Validate allowed status transition
-    if (!canTransitionOrder(currentStatus, targetStatus as OrderStatus)) {
-      return NextResponse.json(
-        {
-          error: `Invalid transition: cannot move order from '${currentStatus}' to '${targetStatus}'.`,
-          currentStatus,
-          allowedTransitions: ALLOWED_STATUS_TRANSITIONS[currentStatus] || [],
-        },
-        { status: 400 }
-      );
-    }
-
-    // 3. Handle stock synchronization
-    const items = order.items || [];
-
-    if (shouldDecrementStockOnTransition(currentStatus, targetStatus as OrderStatus)) {
-      // Decrement stock for each item with a product_id
-      for (const item of items) {
-        if (item.product_id) {
-          const { data: prod } = await supabase
-            .from('products')
-            .select('stock, name')
-            .eq('id', item.product_id)
-            .single();
-
-          if (prod) {
-            const newStock = Math.max(0, prod.stock - item.quantity);
-            await supabase.from('products').update({ stock: newStock }).eq('id', item.product_id);
-            await supabase.from('inventory_logs').insert({
-              store_id: storeId,
-              product_id: item.product_id,
-              delta: -item.quantity,
-              previous_stock: prod.stock,
-              new_stock: newStock,
-              reason: 'order_placed',
-              actor_id: user.id,
-            });
-          }
-        }
-      }
-    } else if (shouldRestoreStockOnTransition(currentStatus, targetStatus as OrderStatus)) {
-      // Restore stock for cancelled order
-      for (const item of items) {
-        if (item.product_id) {
-          const { data: prod } = await supabase
-            .from('products')
-            .select('stock, name')
-            .eq('id', item.product_id)
-            .single();
-
-          if (prod) {
-            const newStock = prod.stock + item.quantity;
-            await supabase.from('products').update({ stock: newStock }).eq('id', item.product_id);
-            await supabase.from('inventory_logs').insert({
-              store_id: storeId,
-              product_id: item.product_id,
-              delta: item.quantity,
-              previous_stock: prod.stock,
-              new_stock: newStock,
-              reason: 'order_cancelled',
-              actor_id: user.id,
-            });
-          }
-        }
-      }
-    }
-
-    // 4. Update status history & payment state
-    const updatedHistory = appendStatusHistory(
-      order.status_history || [],
-      targetStatus as OrderStatus,
-      user.email || 'Merchant',
-      notes
-    );
-
-    const updateFields: OrderUpdateFields = {
-      status: targetStatus,
-      status_history: updatedHistory,
-    };
-
-    if (targetStatus === 'delivered') {
-      updateFields.fulfillment_status = 'fulfilled';
-      if (order.payment_method === 'cod') {
-        updateFields.payment_status = 'paid';
-      }
-    } else if (targetStatus === 'cancelled') {
-      updateFields.fulfillment_status = 'cancelled';
-    } else if (targetStatus === 'returned') {
-      updateFields.fulfillment_status = 'returned';
-      updateFields.payment_status = 'refunded';
-    }
-
-    const { data: updatedOrder, error: updateErr } = await supabase
-      .from('orders')
-      .update(updateFields)
-      .eq('id', orderId)
-      .eq('store_id', storeId)
-      .select('*, items:order_items(*)')
-      .single();
-
-    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
-
+  const currentStatus = order.status as OrderStatus;
+  if (!canTransitionOrder(currentStatus, targetStatus as OrderStatus)) {
     return NextResponse.json({
-      order: updatedOrder,
-      message: `Order #${order.order_number} transitioned to '${targetStatus}'.`,
-    });
-  } catch (e: unknown) {
-    const message = e instanceof Error && e.message ? e.message : 'Malformed status update request';
-    return NextResponse.json({ error: message }, { status: 400 });
+      error: `Invalid transition: cannot move order from '${currentStatus}' to '${targetStatus}'.`,
+      currentStatus,
+      allowedTransitions: ALLOWED_STATUS_TRANSITIONS[currentStatus] ?? [],
+    }, { status: 400 });
   }
+
+  const outcome = await transitionStoreOrder(supabase, {
+    storeId,
+    orderId,
+    currentStatus,
+    targetStatus: targetStatus as OrderStatus,
+    actor: auth.user.email ?? auth.user.id,
+    notes,
+  });
+  if (!outcome.ok) return NextResponse.json({ error: outcome.error }, { status: outcome.status });
+
+  return NextResponse.json({
+    order: outcome.data,
+    message: `Order transitioned from '${currentStatus}' to '${targetStatus}'.`,
+  });
 }

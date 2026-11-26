@@ -25,13 +25,35 @@ interface AIProviderStatus {
   keyEnvName: string;
 }
 
+interface AdminUsage {
+  store_count: number;
+  active_product_count: number;
+  order_count: number;
+  customer_count: number;
+  ai_calls_in_sample: number;
+  ai_calls_by_purpose: Record<string, { total: number; success: number; failed: number }>;
+}
+
+interface AdminAiCall {
+  purpose: string;
+  provider: string;
+  success: boolean;
+  latency_ms: number | null;
+  error_code: string | null;
+  created_at: string;
+}
+
 interface AdminStore {
   id: string;
   slug: string;
+  status?: string;
   is_banned?: boolean;
   is_published?: boolean;
-  store_products?: { count: number }[];
-  store_orders?: { count: number }[];
+  product_count?: number;
+  order_count?: number;
+  seo_score?: { score: number; issues: string[] };
+  domain_status?: string;
+  custom_domain?: string | null;
 }
 
 export default function AdminCommandCenterPage() {
@@ -52,6 +74,8 @@ export default function AdminCommandCenterPage() {
   const [auditLogs, setAuditLogs] = useState<SyncAuditLog[]>([]);
   const [aiProviders, setAIProviders] = useState<AIProviderStatus[]>([]);
   const [stores, setStores] = useState<AdminStore[]>([]);
+  const [usage, setUsage] = useState<AdminUsage | null>(null);
+  const [recentAiCalls, setRecentAiCalls] = useState<AdminAiCall[]>([]);
 
   const loadStores = useCallback(async () => {
     try {
@@ -63,14 +87,22 @@ export default function AdminCommandCenterPage() {
     } catch {}
   }, []);
 
-  const toggleSuspendStore = async (storeId: string) => {
+  const setStoreState = async (storeId: string, action: 'suspend' | 'unsuspend' | 'publish' | 'unpublish') => {
     try {
-      const res = await fetch(`/api/admin/stores/${storeId}/suspend`, { method: 'POST' });
+      const endpoint = action === 'suspend' || action === 'unsuspend' ? 'suspend' : 'publish';
+      const res = await fetch(`/api/admin/stores/${storeId}/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
       if (res.ok) {
         loadStores();
+      } else {
+        const data = await res.json().catch(() => null);
+        alert(data?.error || `Store action failed (${res.status})`);
       }
     } catch (err: unknown) {
-      alert(`Suspend toggle failed: ${err instanceof Error ? err.message : String(err)}`);
+      alert(`Store action failed: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -144,6 +176,13 @@ export default function AdminCommandCenterPage() {
       setIsAdmin(true);
       loadAuditLogs();
       loadStores();
+      fetch('/api/admin/usage')
+        .then(async (response) => response.ok ? response.json() : null)
+        .then((data) => {
+          if (data?.usage) setUsage(data.usage);
+          if (Array.isArray(data?.recent_ai_calls)) setRecentAiCalls(data.recent_ai_calls);
+        })
+        .catch(() => { setUsage(null); setRecentAiCalls([]); });
       fetch('/api/admin/ai-providers')
         .then(async (response) => response.ok ? response.json() : null)
         .then((data) => { if (data?.providers) setAIProviders(data.providers); })
@@ -483,6 +522,7 @@ export default function AdminCommandCenterPage() {
                         <th className="pb-2">Status</th>
                         <th className="pb-2">Products</th>
                         <th className="pb-2">Orders</th>
+                        <th className="pb-2">SEO</th>
                         <th className="pb-2 text-right">Action</th>
                       </tr>
                     </thead>
@@ -509,19 +549,31 @@ export default function AdminCommandCenterPage() {
                               </span>
                             )}
                           </td>
-                          <td className="py-2.5 text-[#bbcabf]">{s.store_products?.[0]?.count ?? '—'}</td>
-                          <td className="py-2.5 text-[#bbcabf]">{s.store_orders?.[0]?.count ?? '—'}</td>
+                          <td className="py-2.5 text-[#bbcabf]">{s.product_count ?? '—'}</td>
+                          <td className="py-2.5 text-[#bbcabf]">{s.order_count ?? '–'}</td>
+                          <td className="py-2.5">
+                            <span className="font-mono text-[#4cd7f6]">{s.seo_score?.score ?? '–'}/100</span>
+                          </td>
                           <td className="py-2.5 text-right">
-                            <button
-                              onClick={() => toggleSuspendStore(s.id)}
-                              className={`px-2.5 py-1 rounded text-[11px] font-bold border transition-colors ${
-                                s.is_banned
-                                  ? 'bg-[#10b981]/20 text-[#4edea3] border-[#10b981]/40 hover:bg-[#10b981]/30'
-                                  : 'bg-[#ef4444]/20 text-[#ef4444] border-[#ef4444]/40 hover:bg-[#ef4444]/30'
-                              }`}
-                            >
-                              {s.is_banned ? 'Unsuspend' : 'Suspend'}
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                              <button
+                                onClick={() => setStoreState(s.id, s.is_published ? 'unpublish' : 'publish')}
+                                disabled={s.is_banned}
+                                className="px-2.5 py-1 rounded text-[11px] font-bold border border-[#4edea3]/40 text-[#4edea3] disabled:opacity-40"
+                              >
+                                {s.is_published ? 'Unpublish' : 'Publish'}
+                              </button>
+                              <button
+                                onClick={() => setStoreState(s.id, s.is_banned ? 'unsuspend' : 'suspend')}
+                                className={`px-2.5 py-1 rounded text-[11px] font-bold border transition-colors ${
+                                  s.is_banned
+                                    ? 'bg-[#10b981]/20 text-[#4edea3] border-[#10b981]/40 hover:bg-[#10b981]/30'
+                                    : 'bg-[#ef4444]/20 text-[#ef4444] border-[#ef4444]/40 hover:bg-[#ef4444]/30'
+                                }`}
+                              >
+                                {s.is_banned ? 'Unsuspend' : 'Suspend'}
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -551,6 +603,45 @@ export default function AdminCommandCenterPage() {
                 ))}
                 {aiProviders.length === 0 && <p className="text-[12px] text-[#bbcabf]">Provider status is unavailable.</p>}
               </div>
+            </div>
+
+            <div className="bg-[#171f33] border border-[#2d3449] rounded-2xl p-6 shadow-xl">
+              <h3 className="font-display text-[16px] font-bold text-[#dae2fd] mb-1">Platform Usage &amp; AI Call Log</h3>
+              <p className="text-[12px] text-[#bbcabf] mb-4">
+                Sanitized telemetry only. Prompts, owner identities, emails and tokens are never shown.
+              </p>
+              <div className="grid grid-cols-2 gap-2 mb-4 text-[12px]">
+                <div className="rounded-xl bg-[#131b2e] border border-[#2d3449] p-3">
+                  <div className="text-[#bbcabf]">Stores</div>
+                  <div className="font-bold text-[#dae2fd]">{usage?.store_count ?? '–'}</div>
+                </div>
+                <div className="rounded-xl bg-[#131b2e] border border-[#2d3449] p-3">
+                  <div className="text-[#bbcabf]">Orders</div>
+                  <div className="font-bold text-[#dae2fd]">{usage?.order_count ?? '–'}</div>
+                </div>
+                <div className="rounded-xl bg-[#131b2e] border border-[#2d3449] p-3">
+                  <div className="text-[#bbcabf]">Active products</div>
+                  <div className="font-bold text-[#dae2fd]">{usage?.active_product_count ?? '–'}</div>
+                </div>
+                <div className="rounded-xl bg-[#131b2e] border border-[#2d3449] p-3">
+                  <div className="text-[#bbcabf]">AI calls (sample)</div>
+                  <div className="font-bold text-[#dae2fd]">{usage?.ai_calls_in_sample ?? '–'}</div>
+                </div>
+              </div>
+              {recentAiCalls.length === 0 ? (
+                <p className="text-[12px] text-[#bbcabf]">No sanitized AI attempts recorded yet.</p>
+              ) : (
+                <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                  {recentAiCalls.map((call, index) => (
+                    <div key={`${call.created_at}-${index}`} className="rounded-xl bg-[#131b2e] border border-[#2d3449] px-3 py-2 text-[11px] font-mono flex items-center justify-between gap-2">
+                      <span className="text-[#dae2fd]">{call.purpose} · {call.provider}</span>
+                      <span className={call.success ? 'text-[#4edea3]' : 'text-[#ffb4ab]'}>
+                        {call.success ? 'ok' : call.error_code || 'failed'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Approved Non-PII Configuration Items Preview */}

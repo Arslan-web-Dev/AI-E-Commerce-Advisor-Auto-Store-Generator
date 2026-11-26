@@ -73,6 +73,11 @@ export default function StoreManagementPage() {
     reason: 'manual_adjustment',
   });
   const [transitionNotes, setTransitionNotes] = useState('');
+  const [aiTone, setAiTone] = useState('professional');
+  const [aiLanguage, setAiLanguage] = useState('en');
+  const [aiKeywords, setAiKeywords] = useState('');
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiChecks, setAiChecks] = useState<string[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
@@ -252,6 +257,60 @@ export default function StoreManagementPage() {
     }
   };
 
+  const handleUploadProductImage = async (file: File | undefined) => {
+    if (!file || !store?.id) return;
+    try {
+      setActionLoading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`/api/stores/${store.id}/products/images`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      const current = productForm.images ? productForm.images.split(',').map((s) => s.trim()).filter(Boolean) : [];
+      setProductForm({ ...productForm, images: [...current, data.url].join(', ') });
+      notifySuccess('Image uploaded to Supabase Storage.');
+    } catch (err: unknown) {
+      alert(`Image upload failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleGenerateDescription = async () => {
+    if (!store?.id || !editingProduct?.id) {
+      alert('Save the product first, then generate an AI description.');
+      return;
+    }
+    try {
+      setAiBusy(true);
+      setAiChecks([]);
+      const res = await fetch(`/api/stores/${store.id}/products/${editingProduct.id}/description`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tone: aiTone,
+          language: aiLanguage,
+          keywords: aiKeywords.split(',').map((k) => k.trim()).filter(Boolean),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      // Suggestion only: the owner reviews/edits the textarea before saving.
+      setProductForm((form) => ({ ...form, description: data.description }));
+      const issues = [
+        ...(data.checks?.length?.issues || []),
+        ...(data.checks?.keywords?.missing?.length
+          ? [`Missing keywords: ${data.checks.keywords.missing.join(', ')}`]
+          : []),
+      ];
+      setAiChecks(issues);
+    } catch (err: unknown) {
+      alert(`AI description failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setAiBusy(false);
+    }
+  };
+
   const handleArchiveProduct = async (productId: string, name: string) => {
     if (!confirm(`Are you sure you want to archive product "${name}"? It will be removed from your catalog.`)) return;
     if (!store?.id) return;
@@ -391,10 +450,15 @@ export default function StoreManagementPage() {
     if (!store?.id) return;
     try {
       setActionLoading(true);
-      const res = await fetch(`/api/stores/${store.id}/publish`, { method: 'POST' });
+      const action = store.status === 'published' ? 'unpublish' : 'publish';
+      const res = await fetch(`/api/stores/${store.id}/publish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      notifySuccess(data.is_published ? `Store published! Public URL: /${store.slug}` : 'Store unpublished (draft mode).');
+      notifySuccess(data.is_published ? `Store published! Public URL: ${data.public_url || `/${store.slug}`}` : 'Store unpublished (draft mode).');
       loadStoreData();
     } catch (e: unknown) {
       alert(`Publish error: ${e instanceof Error ? e.message : String(e)}`);
@@ -608,6 +672,22 @@ export default function StoreManagementPage() {
                 <span className="text-[11px] text-[#bbcabf]">Below restock limit</span>
               </div>
             </div>
+
+            {/* SEO readiness summary (on-page readiness, not a ranking claim) */}
+            {kpis?.seo_score && (
+              <div className="bg-[#131b2e] border border-[#2d3449] rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[#4cd7f6]">travel_explore</span>
+                  <div>
+                    <h4 className="text-[13px] font-bold text-[#dae2fd]">SEO Score Summary</h4>
+                    <p className="text-[11px] text-[#bbcabf]">
+                      {kpis.seo_score.issues[0] || 'On-page checks are complete.'}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-[24px] font-bold text-[#4cd7f6]">{kpis.seo_score.score}/100</div>
+              </div>
+            )}
 
             {/* Quick Actions & Sandbox Tools */}
             <div className="bg-[#131b2e] border border-[#2d3449] rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -1289,14 +1369,22 @@ export default function StoreManagementPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase font-bold text-[#bbcabf] mb-1">Image URL</label>
+                <label className="block text-[11px] uppercase font-bold text-[#bbcabf] mb-1">Product Images (URLs or upload)</label>
                 <input
                   type="url"
-                  placeholder="https://..."
+                  placeholder="https://... (comma-separated)"
                   value={productForm.images}
                   onChange={(e) => setProductForm({ ...productForm, images: e.target.value })}
                   className="w-full bg-[#171f33] border border-[#2d3449] rounded-xl px-3 py-2 text-[#dae2fd] focus:border-[#4edea3] focus:outline-none"
                 />
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  disabled={actionLoading}
+                  onChange={(e) => { void handleUploadProductImage(e.target.files?.[0]); e.target.value = ''; }}
+                  className="mt-2 w-full text-[11px] text-[#bbcabf] file:mr-2 file:px-2 file:py-1 file:rounded-lg file:bg-[#4edea3] file:text-[#003824] file:font-bold"
+                />
+                <p className="text-[10px] text-[#86948a] mt-1">Uploads use the owner-controlled Supabase Storage bucket; max 5 MB per image.</p>
               </div>
 
               <div>
@@ -1308,6 +1396,44 @@ export default function StoreManagementPage() {
                   onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                   className="w-full bg-[#171f33] border border-[#2d3449] rounded-xl px-3 py-2 text-[#dae2fd] focus:border-[#4edea3] focus:outline-none"
                 />
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <select
+                    value={aiTone}
+                    onChange={(e) => setAiTone(e.target.value)}
+                    className="bg-[#171f33] border border-[#2d3449] rounded-xl px-3 py-2 text-[12px] text-[#dae2fd]"
+                  >
+                    <option value="professional">Tone: Professional</option>
+                    <option value="friendly">Tone: Friendly</option>
+                    <option value="luxury">Tone: Luxury</option>
+                    <option value="casual">Tone: Casual</option>
+                  </select>
+                  <select
+                    value={aiLanguage}
+                    onChange={(e) => setAiLanguage(e.target.value)}
+                    className="bg-[#171f33] border border-[#2d3449] rounded-xl px-3 py-2 text-[12px] text-[#dae2fd]"
+                  >
+                    <option value="en">English</option>
+                    <option value="ur_roman">Roman Urdu</option>
+                  </select>
+                </div>
+                <input
+                  type="text"
+                  placeholder="SEO keywords (comma-separated)"
+                  value={aiKeywords}
+                  onChange={(e) => setAiKeywords(e.target.value)}
+                  className="mt-2 w-full bg-[#171f33] border border-[#2d3449] rounded-xl px-3 py-2 text-[12px] text-[#dae2fd]"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleGenerateDescription()}
+                  disabled={aiBusy || !editingProduct}
+                  className="mt-2 px-3 py-2 rounded-xl border border-[#4cd7f6]/40 text-[12px] font-bold text-[#4cd7f6] disabled:opacity-40"
+                >
+                  {aiBusy ? 'Generating...' : 'Generate AI description (review before saving)'}
+                </button>
+                {aiChecks.length > 0 && (
+                  <p className="mt-1 text-[11px] text-[#f59e0b]">{aiChecks.join(' · ')}</p>
+                )}
               </div>
 
               <div className="flex items-center gap-2 pt-2">

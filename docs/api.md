@@ -1372,3 +1372,53 @@ Executive analytics summary report for store owners.
 - **Response `200 OK` (`format=html`)**: Print-ready HTML document with `@media print` layout and print trigger.
 - **Response `200 OK` (`format=json`)**: Full JSON executive analytics report object.
 
+---
+
+## Task 9 / Module 8 — tenant storefront, publication and domain APIs
+
+All privileged routes derive authorization from the authenticated `auth.uid()`, `public.is_admin()` and `public.can_manage_store()`; no client-supplied owner, price, status or store ID is trusted. Requests are mocked in `tests/module8-*.test.mjs`; no live Supabase, Vercel, DNS or payment call is claimed.
+
+### `GET|POST /api/stores/[id]/publish`
+- **Authentication**: store owner or system admin.
+- **Contract**: explicit `action: 'publish' | 'unpublish'`; no accidental toggle. Calls the transactional `set_store_publication` RPC, which locks the store, rejects banned/reserved slugs and writes an append-only lifecycle event.
+- **Response**: `{ store, is_published, public_url }`. `public_url` uses `STORE_ROOT_DOMAIN` as `https://<slug>.<root-domain>`, or the configured app host path when no root domain is configured. A `published` database row alone is not proof of DNS/provider readiness.
+
+### `GET|POST /api/stores/[id]/domain`
+- **Authentication**: store owner or system admin; unauthenticated reads are rejected.
+- **Provider flow**: server-only `POST /v10/projects/{id}/domains`, `GET /v9/projects/{id}/domains/{domain}` and `POST /v9/projects/{id}/domains/{domain}/verify`, with `VERCEL_TOKEN`, `VERCEL_PROJECT_ID` and optional `VERCEL_TEAM_ID`/`VERCEL_TEAM_SLUG`.
+- **Actions**: `add`, `verify`, `status`, `remove`. DNS records and the verification token come only from the provider response; no hard-coded CNAME or client-declared `verified` value is accepted.
+- **States**: `not_configured`, `pending`, `verified`, `failed`, `provider_unavailable`. Only provider-confirmed `verified: true` permits `domain_status='verified'` and a verified-host rewrite in `src/proxy.ts`.
+
+### `GET /api/storefront/[slug]/products`
+Public catalogue read against canonical `products` rows (`is_active`, `is_archived=false`, `stock>0`), with optional `category`, `search` and `limit` filters. It rejects unpublished/banned stores and never touches the removed `store_products` model.
+
+### `POST /api/storefront/[slug]/orders`
+Anonymous COD checkout. The route validates only customer/cart shape and calls `place_store_order`. The RPC locks the store and products, derives all prices from `products.price_pkr`, upserts the customer, enforces idempotency and a hashed-IP per-store rate limit, and writes order/items/history atomically. Stock is **not** decremented at placement; it is decremented only on `pending → confirmed`.
+
+### `GET /api/storefront/[slug]/orders/[orderNumber]`
+Narrow guest lookup requiring order number plus phone. `lookup_store_order` returns status, timestamps and an estimated total only; no address, line items or unmasked customer phone is exposed.
+
+### `GET|PATCH /api/stores/[id]/orders/[orderId]`
+Owner/admin order detail and transition. `PATCH` validates the closed state machine locally, then calls `transition_store_order_status`, which revalidates under row locks, applies stock effects and appends timestamped history in one transaction. Allowed additions: `shipped → cancelled|returned`, `cancelled` cancellation restock from `confirmed|packed|shipped`, and `delivered → returned` restock.
+
+### `PATCH /api/stores/[id]/inventory`
+Owner/admin atomic stock adjustment through `adjust_store_inventory`. Only allowlisted reasons (`manual_adjustment`, `restock`, `damage`) are accepted; the RPC writes a signed delta and before/after stock to `inventory_logs`.
+
+### `GET /api/stores/[id]/overview`
+Owner/admin KPI payload: order count, revenue excluding cancelled/returned orders, unfulfilled count, active products, low-stock list and SEO summary.
+
+### `GET /api/admin/stores`, `POST /api/admin/stores/[id]/publish`, `POST /api/admin/stores/[id]/suspend`
+Admin-only tenant list (status, ban state, domain state and canonical product/order counts) plus explicit publish/unpublish and ban/unban RPC calls. Ban forces `status='draft'` and logs `suspend`; unban clears the ban flag but preserves the existing status.
+
+### `POST /api/stores/[id]/products/images`
+Owner/admin multipart upload (`file`, optional `productId`) to the additive `product-images` Supabase Storage bucket. Only JPEG/PNG/WebP up to 5 MB are accepted; the object path starts with the store UUID and Storage RLS requires `can_manage_store(store_id)`. Returns `{ path, url }`; the public URL is added to the product's `images` array only after owner review/save.
+
+### `POST /api/stores/[id]/products/[productId]/description`
+Governed product-description suggestion. Optional body: `{ tone, language: 'en'|'ur_roman', keywords: string[], length }`. Returns `{ description, provider, fallback, requiresReview: true, checks: { length, keywords } }`. It never writes the product; the owner reviews/edits before saving. No paid/live provider call is made by tests.
+
+### `GET /api/admin/usage`
+Admin-only aggregated platform counts (stores, active products, orders, customers), AI call counts by purpose, and the 20 most recent sanitized `ai_call_log` rows. No prompts, owner IDs, emails or tokens are returned.
+
+### `GET /[slug]/sitemap.xml`, `GET /[slug]/robots.txt`
+Per-tenant crawl files generated only for published, unbanned stores. Canonical URLs come from configured hosts; no hardcoded `platform.pk` value remains.
+

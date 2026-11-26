@@ -11,7 +11,7 @@ interface Product {
   images: string[];
   category: string;
   description?: string;
-  stock_quantity: number;
+  stock: number;
 }
 
 export default function CataloguePage() {
@@ -111,7 +111,7 @@ export default function CataloguePage() {
       ) : paginated.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '4rem', opacity: 0.6 }}>No products found.</div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'var(--store-grid-columns, repeat(auto-fill, minmax(220px, 1fr)))', gap: '1.25rem' }}>
           {paginated.map((p) => (
             <a key={p.id} href={`/${slug}/products/${p.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
               <div style={{ border: '1px solid var(--store-primary, #4edea3)22', borderRadius: radius, overflow: 'hidden', backgroundColor: '#171f33', height: '100%' }}>
@@ -126,8 +126,8 @@ export default function CataloguePage() {
                   <p style={{ fontSize: '0.7rem', color: primary, marginBottom: '0.25rem', fontWeight: 600 }}>{p.category}</p>
                   <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.3 }}>{p.name}</h3>
                   <p style={{ fontWeight: 800, color: primary }}>PKR {(p.price_pkr || 0).toLocaleString('en-PK')}</p>
-                  {p.stock_quantity < 5 && p.stock_quantity > 0 && (
-                    <p style={{ fontSize: '0.7rem', color: '#f59e0b', marginTop: '0.25rem' }}>Only {p.stock_quantity} left!</p>
+                  {p.stock < 5 && p.stock > 0 && (
+                    <p style={{ fontSize: '0.7rem', color: '#f59e0b', marginTop: '0.25rem' }}>Only {p.stock} left!</p>
                   )}
                 </div>
               </div>
