@@ -261,7 +261,7 @@ Retrieve paginated competitor POIs discovered for the project.
 ---
 
 ### `GET /api/projects/[id]/rent-map`
-Return the stored area-level rent overlay for an authenticated project. This is a read-only projection of `rent_cache`; it never invokes a rent provider, writes to the cache, substitutes another city/province, or fabricates boundary polygons.
+Return the stored area-level rent overlay for an authenticated project. This is a read-only projection of `rent_cache`; it never invokes a rent provider, writes to the cache, substitutes another city/province, or fabricates boundary polygons. Canonical province/city/district predicates are applied in the database query before its 500-row limit; overlapping scoped queries are deduplicated. There is no unfiltered global fallback, and a project without city/district identity returns unavailable coverage.
 
 - **Authentication**: Required (Owner or Admin)
 - **Response `200 OK`**:

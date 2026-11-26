@@ -5,7 +5,9 @@
 **Pre-edit repository sync:** local `HEAD`, `origin/main` and `FETCH_HEAD` matched the starting SHA; worktree was clean.  
 **Delivered implementation commit SHA:** `601c22b40b5649e10bcea516332024a4ef375056`.
 
-**Evidence-only documentation commit SHA:** recorded in the final delivery message; a commit cannot contain its own post-push hash.
+**Evidence-only documentation commit SHA:** `2399907a4a75e234fce7d154562f84a466d3b501`.
+
+**Remediation baseline SHA:** `2399907a4a75e234fce7d154562f84a466d3b501` (verified against latest remote `main`; clean worktree). The remediation commit SHA is recorded in the final delivery message; a commit cannot contain its own hash.
 
 **Status labels:** `PASS` (verified locally), `FAIL`, `BLOCKED` (external decision/data gate), `NOT RUN`, `PARTIAL` (static/mocked/local evidence only).
 
@@ -22,8 +24,9 @@
 | OI-6 supervised gate | BLOCKED | Unchanged. Provisional MCDA remains distinct from supervised ML; no model was trained, activated or approved here. |
 | Live Supabase/RLS, providers, browser, deployed runtime | NOT RUN | No live database, map provider, Pytrends/Overpass call, deployed URL, or real browser keyboard/responsive review was exercised. |
 | Final GitHub Actions run | PASS | CI #20 completed `success` for `601c22b`; URL and details are in §16. |
+| Post-delivery remediation | PASS | Original defects A and B were fixed against baseline `2399907`; new behavioral regression suites and the full local command set pass. Details in §19. |
 
-**Overall:** Task 6 implementation is complete and locally verified. Live tenant/browser/deployment acceptance remains `PARTIAL`/`NOT RUN`, and OI-6 remains `BLOCKED`. This report does not claim unexecuted runtime verification.
+**Overall:** Task 6 implementation and the later remediation are complete and locally verified. Live tenant/browser/deployment acceptance remains `PARTIAL`/`NOT RUN`, and OI-6 remains `BLOCKED`. This report does not claim unexecuted runtime verification.
 
 ## 2. Authority and scope decisions
 
@@ -191,3 +194,58 @@ The following live/environmental checks were **not** performed: Supabase sign-in
 ## 18. Delivery boundary and next steps
 
 The work stops at Task 6 / FR-5.1–FR-5.7. Before treating the source exit gate as closed, a subsequent authorized pass must exercise live owner/admin API access and RLS, verify populated `rent_cache`/competitor/trend rendering in a browser (including keyboard and 375 px layout), and confirm the deployed workflow/runtime. OI-6 still requires a genuine supervisor decision and outcome-labelled data before any production supervised serving can be considered. Module 6/Task 7 was not started.
+
+## 19. Post-delivery remediation (baseline `2399907`)
+
+This section records the independently identified Task 6 defects fixed after the original delivery. Starting SHA `2399907a4a75e234fce7d154562f84a466d3b501` was verified against the latest remote `main` with a clean worktree before edits. No force push, reset, history rewrite, schema change, auth/RLS change, ML/scoring change or Module 6 work was performed.
+
+### 19.1 Original defects and exact fixes
+
+| Defect | Root cause | Exact fix |
+| --- | --- | --- |
+| **A — rent cache coverage** | `GET /api/projects/[id]/rent-map` selected the first 500 global `rent_cache` rows, ordered by city/area, and only then applied geography guards in `buildRentMap`. Unrelated cities could occupy the entire snapshot and produce false `no_coverage`. | Added `src/lib/visualization/rent-cache-query.ts`. `resolveRentProvince` canonicalises a region name/code; `buildRentQuerySpecs` emits one narrow query per safe city/district predicate; `fetchScopedRentRows` applies province/city/district `eq()` filters **before** `order()` and `limit(500)`, deduplicates overlapping results by stable row id, sorts deterministically, and caps the merged result at 500. The route now calls this helper. Provenance rows are passed through unchanged and `buildRentMap` still performs its strict guard. |
+| **B — competitor pagination** | The feasibility page used `Promise.all(Array.from({ length: totalPages - 1 }, ...))`, firing every remaining page simultaneously. | Added `src/lib/visualization/competitor-pagination.ts`. It fetches page 1, validates `total_pages` (finite, non-negative integer, default cap 100), then loads later pages with a worker pool of at most **3** concurrent requests. Rows are deduplicated by OSM identity, then DB id, then provider/name/coordinate; names alone are never merged. Every page failure is captured, page order is preserved, and `loadedCount`, `loadedRowCount`, `serverTotal`, `successfulPages`, `failedPages`, `complete` and `partial` are returned separately. The page renders an explicit incomplete-data notice. |
+
+**No global fallback:** a project without city/district identity produces zero rent queries, and `buildRentMap([])` returns `unavailable`. Lahore, Punjab and all other locations are only ever matched by explicit project geography, never defaulted.
+
+**Partial data is never called complete:** `complete` requires no failed page, a valid uncapped page count, every expected page present, a valid server total, and at least that many fetched rows. A failed page, invalid/capped page count, missing server total, or a server total larger than fetched rows yields `partial: true` with an explanatory note.
+
+### 19.2 Files changed
+
+**Created:** `src/lib/visualization/rent-cache-query.ts`, `src/lib/visualization/competitor-pagination.ts`, `tests/module5-rent-query-regression.test.mjs`, `tests/module5-pagination-regression.test.mjs`.
+
+**Modified:** `src/app/api/projects/[id]/rent-map/route.ts`, `src/app/projects/[id]/feasibility/page.tsx`, `tests/module5-competition-visualization.test.mjs` (added wiring assertions; no existing assertion removed), `docs/module-5-competition-visualization.md`, `docs/task6-final-report.md`, `docs/api.md`, `docs/data-and-integrations.md`.
+
+**Unchanged:** SRS thresholds, MCDA formula, OI-6 gate, ML pipeline, auth/RLS/security policies, schema/migrations, environment variables, credentials, competitor/rent data and Module 6.
+
+### 19.3 Regression tests added
+
+- `tests/module5-rent-query-regression.test.mjs`: a mock Supabase builder records operation order and applies each `eq()` filter before `limit()`. Proves target-city rows survive 600 unrelated rows; province/city/district filters precede the limit; district-only and overlapping queries are scoped and deduplicated; ISO province codes resolve canonically; missing optional geography issues no global query; provenance labels, centroid markers and unavailable coverage remain unchanged.
+- `tests/module5-pagination-regression.test.mjs`: deterministic page mocks count simultaneous in-flight calls. Proves the limit of 3 is never exceeded, all pages load in order, OSM duplicates are removed, invalid/negative/fractional/capped `total_pages` are safe, one failed page or first-page failure does not crash the load, partial state is explicit, and server total is not confused with loaded count.
+- `tests/module5-competition-visualization.test.mjs`: added assertions for `fetchScopedRentRows`, `loadCompetitorPages` and removal of the unbounded `Promise.all(Array.from(...))` pattern. No existing assertion was weakened.
+
+### 19.4 Local verification executed
+
+| Check | Result |
+| --- | --- |
+| `node --test tests/module5-rent-query-regression.test.mjs` | PASS (`0`): 1 file, 1 pass, 0 fail; 6 behavioral sections. |
+| `node --test tests/module5-pagination-regression.test.mjs` | PASS (`0`): 1 file, 1 pass, 0 fail; 6 behavioral sections. |
+| `node --test tests/module5-competition-visualization.test.mjs` | PASS (`0`): 1 file, 1 pass, 0 fail; 14 behavioral sections plus new wiring checks. |
+| `node --test tests/*.mjs` | PASS (`0`): 10 files, 10 pass, 0 fail. |
+| `node scripts/verify-module3.mjs` | PASS (`0`): 52 Passed, 0 Failed. |
+| `python -B ml-service/test_pipeline.py` | PASS (`0`): `ALL MODULE 4 ML PIPELINE TESTS PASSED`. |
+| `python -B ml-service/test_auth_security.py` | PASS (`0`): `ALL ML AUTH TESTS PASSED (6/6)`. |
+| `npx tsc --noEmit` | PASS (`0`): no type errors. |
+| `npm run lint` | PASS (`0`): 0 errors; 29 pre-existing warnings. |
+| `npm run build` | PASS (`0`): Next.js production build completed; rent-map and feasibility routes present. |
+| `git diff --check` | PASS (`0`): no whitespace errors; Windows CRLF normalization warnings only. |
+
+Non-failing diagnostics remain the pre-existing Node `MODULE_TYPELESS_PACKAGE_JSON` notice, Next.js `middleware` deprecation notice and scikit-learn `SVC(probability=True)` `FutureWarning`.
+
+### 19.5 Remaining limitations and live checks not performed
+
+- **NOT RUN:** live Supabase authentication/RLS, a populated `rent_cache` in a deployed database, real PostgreSQL query-plan confirmation, live Overpass or Pytrends calls, Leaflet tile loading, browser keyboard/375 px review, deployed runtime smoke test, and external accessibility/security review.
+- The mock query builder proves the API issues scoped predicates before `limit`; it does not prove a live database returns them or that indexes are used.
+- The pagination mock proves the client-side concurrency contract; it does not exercise a live high-volume competitor table or provider failures.
+- OI-6 remains `BLOCKED`; no supervised model was trained, activated or claimed as calibrated.
+- The post-remediation CI URL, run number and conclusion are recorded in the final delivery message because a commit cannot contain its own post-push CI result. No live status is claimed here.

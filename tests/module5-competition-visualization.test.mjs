@@ -389,10 +389,13 @@ assert.equal(/<script/.test(mapSource), false);
 assert.match(rentRoute, /hasProjectAccess/);
 assert.match(rentRoute, /buildRentMap/);
 assert.match(rentRoute, /rent_cache/);
+assert.match(rentRoute, /fetchScopedRentRows/);
 assert.equal(/getCostEstimates|fetch\(/.test(rentRoute), false);
 assert.match(pageSource, /\/rent-map/);
 assert.match(pageSource, /totalCount=\{competitorTotal\}/);
 assert.match(pageSource, /rentAreas=\{rentMap\?\.areas \?\? \[\]\}/);
+assert.match(pageSource, /loadCompetitorPages/);
+assert.equal(/Promise\.all\(\s*Array\.from/.test(pageSource), false);
 console.log('PASS: one shared map loader, read-only rent route and complete page wiring are present.');
 
 // ---------------------------------------------------------------------------

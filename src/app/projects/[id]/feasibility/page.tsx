@@ -11,6 +11,8 @@ import { Project } from '@/types/project';
 import { DemandTrendPoint, DemandTrendRecord } from '@/types/data-collection';
 import { getRegion } from '@/lib/geo/pakistan-geography';
 import { isUsableDemandTrend } from '@/lib/data-processing/trend-validity';
+import { DEFAULT_COMPETITOR_CONCURRENCY, loadCompetitorPages } from '@/lib/visualization/competitor-pagination';
+import type { CompetitorLoadResult } from '@/lib/visualization/competitor-pagination';
 import type { RentMapPayload } from '@/lib/visualization/rent-map';
 
 interface FeasibilityRun {
@@ -68,6 +70,7 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
   const [latestProcessingRunId, setLatestProcessingRunId] = useState<string | null>(null);
   const [competitors, setCompetitors] = useState<FeasibilityCompetitor[]>([]);
   const [competitorTotal, setCompetitorTotal] = useState(0);
+  const [competitorLoad, setCompetitorLoad] = useState<CompetitorLoadResult<FeasibilityCompetitor> | null>(null);
   const [rentMap, setRentMap] = useState<RentMapPayload | null>(null);
   const [rentMapError, setRentMapError] = useState('');
   const [trendSeries, setTrendSeries] = useState<DemandTrendPoint[]>([]);
@@ -136,31 +139,21 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
           setTrendProvenance(null);
         }
 
-        // 5. Fetch every stored competitor page. Filtering, sorting and
-        //    pagination in the table must use the real stored set, not page 1.
+        // 5. Fetch every stored competitor page with bounded concurrency.
+        //    Filtering, sorting and table pagination use the real stored set,
+        //    and a failed page is reported instead of being called complete.
         const pageSize = 50;
-        const firstCompRes = await fetch(`/api/projects/${projectId}/competitors?page=1&limit=${pageSize}`);
-        if (firstCompRes.ok) {
-          const firstCompData = await firstCompRes.json();
-          const parsedPages = Number(firstCompData.pagination?.total_pages ?? 1);
-          const totalPages = Number.isFinite(parsedPages) ? Math.max(1, Math.floor(parsedPages)) : 1;
-          const remaining = await Promise.all(
-            Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) =>
-              fetch(`/api/projects/${projectId}/competitors?page=${index + 2}&limit=${pageSize}`).then(async (res) => {
-                if (!res.ok) throw new Error(`Competitor page ${index + 2} could not be loaded.`);
-                return res.json();
-              })
-            )
-          );
-          const allRows = [firstCompData, ...remaining].flatMap((payload) =>
-            Array.isArray(payload?.competitors) ? payload.competitors : []
-          );
-          setCompetitors(allRows);
-          setCompetitorTotal(Number(firstCompData.pagination?.total ?? allRows.length));
-        } else {
-          setCompetitors([]);
-          setCompetitorTotal(0);
-        }
+        const competitorResult = await loadCompetitorPages<FeasibilityCompetitor>(
+          async (page) => {
+            const res = await fetch(`/api/projects/${projectId}/competitors?page=${page}&limit=${pageSize}`);
+            if (!res.ok) throw new Error(`Competitor page ${page} could not be loaded.`);
+            return res.json();
+          },
+          { concurrency: DEFAULT_COMPETITOR_CONCURRENCY }
+        );
+        setCompetitors(competitorResult.competitors);
+        setCompetitorTotal(competitorResult.serverTotal ?? competitorResult.loadedCount);
+        setCompetitorLoad(competitorResult);
 
         // 6. Read the stored rent-cache overlay through the owner-protected
         //    route. No live rent provider is called from this page.
@@ -461,6 +454,18 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
 
         {/* Competitor Breakdown Table */}
         <div>
+          {competitorLoad?.partial && (
+            <p role="status" style={{ margin: '0 0 0.75rem 0', fontSize: '0.76rem', color: '#fca5a5', lineHeight: 1.5 }}>
+              Competitor data is incomplete: {competitorLoad.loadedCount} of{' '}
+              {competitorLoad.serverTotal ?? 'an unknown number of'} server-reported competitors were loaded.{' '}
+              {competitorLoad.failedPages.length > 0
+                ? `Failed page(s): ${competitorLoad.failedPages.map((failure) => failure.page).join(', ')}. `
+                : ''}
+              {competitorLoad.invalidTotalPages ? 'The server pagination value was invalid. ' : ''}
+              {competitorLoad.cappedTotalPages ? 'Pagination exceeded the safe page cap. ' : ''}
+              Earlier filters and the map use only the successfully loaded records.
+            </p>
+          )}
           <CompetitorTable competitors={competitors} projectName={project?.title ?? undefined} totalCount={competitorTotal} />
         </div>
 

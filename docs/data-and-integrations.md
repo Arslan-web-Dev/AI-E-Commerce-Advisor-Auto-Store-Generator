@@ -36,7 +36,7 @@
 
 ### E. Module 5 visualization consumers
 - The feasibility map reads competitors from the authenticated paginated competitor endpoint and reads rent areas from `GET /api/projects/[id]/rent-map` (owner/admin only). Neither UI path performs live scraping.
-- The rent-map route reads `rent_cache` and applies exact/nearby/city-or-district/province guards. Only same-geography area centroids inside a valid project radius are plotted; another city/province is never substituted.
+- The rent-map route applies canonical province/city/district predicates in the `rent_cache` query before its 500-row limit, deduplicates overlapping scoped reads, and then applies exact/nearby/city-or-district/province guards. Only same-geography area centroids inside a valid project radius are plotted; another city/province is never substituted and there is no unfiltered global fallback.
 - Area markers carry `provenance`, `confidence`, `freshness`, `isStale`, source, sample size and recorded timestamp. The cache freshness cutoff for display is 7 days; manual estimates and stale cached values remain labelled, not upgraded.
 - `geometry` is always `null` and `markerType` is `centroid` because no boundary polygons are stored. Relative colour intensity is computed from the currently displayed sourced values, not from an absolute market threshold.
 
