@@ -3,7 +3,10 @@
 **Scope:** checked-in SRS FR-5.1–FR-5.7 only. No Module 6/Task 7 work was started.  
 **Starting SHA:** `6175825a1e540ff8eac0b4fcd9e26f18c6c97301`  
 **Pre-edit repository sync:** local `HEAD`, `origin/main` and `FETCH_HEAD` matched the starting SHA; worktree was clean.  
-**Final commit SHA:** recorded in the final delivery message; a commit cannot contain its own hash.  
+**Delivered implementation commit SHA:** `601c22b40b5649e10bcea516332024a4ef375056`.
+
+**Evidence-only documentation commit SHA:** recorded in the final delivery message; a commit cannot contain its own post-push hash.
+
 **Status labels:** `PASS` (verified locally), `FAIL`, `BLOCKED` (external decision/data gate), `NOT RUN`, `PARTIAL` (static/mocked/local evidence only).
 
 ## 1. Executive result
@@ -18,7 +21,7 @@
 | Full local command set | PASS | All nine required commands exited `0` in the final code state; exact results in §14. |
 | OI-6 supervised gate | BLOCKED | Unchanged. Provisional MCDA remains distinct from supervised ML; no model was trained, activated or approved here. |
 | Live Supabase/RLS, providers, browser, deployed runtime | NOT RUN | No live database, map provider, Pytrends/Overpass call, deployed URL, or real browser keyboard/responsive review was exercised. |
-| Final GitHub Actions run | PASS / PARTIAL | Workflow wiring and local equivalents passed. Post-push run URL/conclusion is recorded in §16 after the push. |
+| Final GitHub Actions run | PASS | CI #20 completed `success` for `601c22b`; URL and details are in §16. |
 
 **Overall:** Task 6 implementation is complete and locally verified. Live tenant/browser/deployment acceptance remains `PARTIAL`/`NOT RUN`, and OI-6 remains `BLOCKED`. This report does not claim unexecuted runtime verification.
 
@@ -170,9 +173,11 @@ The following live/environmental checks were **not** performed: Supabase sign-in
 
 - Starting CI evidence from the Task 5 baseline: run `45742971588` (CI #19) completed `success` for `6175825a`.
 - `.github/workflows/ci.yml` was not changed; it already runs lint, typecheck, Node suites, Module 3 verification, Python ML/security suites, XGBoost import and Next.js build.
-- Post-push workflow: pending at report creation. The exact run URL, run number, conclusion and delivered commit SHA are inserted below after the push and GitHub API inspection.
+- Post-push workflow for the delivered implementation commit `601c22b40b5649e10bcea516332024a4ef375056`: CI **#20**, run ID `45753498911`, status `completed`, conclusion `success`.
+- Run URL: https://github.com/Arslan-web-Dev/AI-E-Commerce-Advisor-Auto-Store-Generator/actions/runs/45753498911
+- A subsequent evidence-only documentation commit changes no code and cannot contain its own post-push run result; its SHA and workflow outcome are reported in the final delivery message.
 
-**Final workflow:** `PENDING_POST_PUSH`
+**Final workflow for delivered Task 6 code:** PASS (`success`) — CI #20, https://github.com/Arslan-web-Dev/AI-E-Commerce-Advisor-Auto-Store-Generator/actions/runs/45753498911
 
 ## 17. Limitations, blockers and explicit non-claims
 
