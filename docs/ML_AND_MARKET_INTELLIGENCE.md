@@ -30,7 +30,7 @@ The pipeline evaluates multiple algorithms simultaneously on the same hold-out a
   - Categorical columns: `SimpleImputer(strategy='most_frequent')` followed by `OneHotEncoder(handle_unknown='ignore')`.
 - Only the requested target and its explicitly mapped companion target are removed. Unrelated columns whose names contain `score` remain features.
 - A legacy committed bundle that exposed `feasibility_score` at 100% importance is not trusted; activation now rejects leaky, unversioned or unapproved feasibility artifacts.
-- Historical rule-generated labels are unapproved (OI-6). See `docs/module-4-label-approval-proposal.md`.
+- Historical rule-generated labels are unapproved (OI-6). Experimental sandbox training is permitted, but production activation and customer-facing scoring remain blocked. See `docs/module-4-label-approval-proposal.md`.
 
 ### Model Comparison & Leaderboard
 - Evaluates candidate algorithms using **Stratified K-Fold Cross-Validation** (Classification) or **K-Fold** (Regression).
@@ -38,8 +38,9 @@ The pipeline evaluates multiple algorithms simultaneously on the same hold-out a
   - Classification: Test F1, Precision, Recall, Accuracy, ROC-AUC, Confusion Matrix, and CV Mean & Std Dev.
   - Regression: $R^2$, MAE, MSE, RMSE, Explained Variance.
 - Serializes the best-performing candidate pipeline with an artifact version, dataset fingerprint, CV/holdout metrics and provenance into `ml-service/artifacts/`.
-- Candidate selection does **not** auto-promote. Activation is an explicit admin action and is refused for unversioned, leaky or OI-6-unapproved feasibility bundles.
-- `feasibility_class` / `feasibility_score` training fails closed while OI-6 is blocked; generic sandbox targets may validate the pipeline only.
+- Candidate selection does **not** auto-promote. Activation is an explicit admin action and is refused for unversioned, leaky, experimental or OI-6-unapproved feasibility bundles.
+- `feasibility_class` / `feasibility_score` training is allowed as an experimental sandbox run while OI-6 is blocked; its artifact is stamped `experimental_sandbox` and can never serve customer requests. Eight classifiers and eight regressors, including XGBoost, are attempted as separate problem-type pipelines.
+- `POST /train` returns a job id immediately; the Python service runs the work in a FastAPI background task and exposes real queued/running/completed/failed states. Jobs are in-memory and non-durable by design.
 
 ### Feature attribution and explainability
 - **Global feature importance:** normalized model-derived importances are returned only when an artifact provides them.
@@ -84,7 +85,7 @@ Synthesizes:
 
 1. **ML Pipeline Studio (`/admin/ml`)**:
    - Dataset Manager: CSV/XLSX upload, synthetic Punjab sandbox sample, data quality health score, missing values and column distribution stats. It is not a verified outcome dataset.
-   - Training Studio: target selection, candidate selector, K-Fold CV controls and training progress. OI-6 status is displayed; feasibility targets are rejected by the server while blocked.
+   - Training Studio: target selection, live 8/8 candidate catalog, K-Fold CV controls and real background-job polling. OI-6 status and the sandbox warning are displayed; feasibility targets train experimentally but cannot be activated while blocked.
    - Model Leaderboard: candidate ranking by held-out and CV metrics with explicit “candidate only — activation is explicit” status. No automatic production promotion.
    - Predictor Sandbox: admin-only model audit with score/risk/artifact version, reported confidence where available, exact limited-data disclaimer, label-approval status and non-SHAP local context factors. It does not write project reports.
 2. **Market Intelligence Explorer (`/market-intelligence`)**:

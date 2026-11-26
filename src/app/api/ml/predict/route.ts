@@ -98,10 +98,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Forward the live feature-schema contract so the Python scorer rejects a
+    // stale payload even when an artifact's columns happen to match.
+    const policy = await mlClient.getTrainingPolicy();
     const prediction = await mlClient.predict(
       input_features,
       typeof model_id === 'string' ? model_id : undefined,
-      thresholdResult.thresholds as RiskThresholds
+      thresholdResult.thresholds as RiskThresholds,
+      policy.feature_schema_version
     );
 
     return NextResponse.json({

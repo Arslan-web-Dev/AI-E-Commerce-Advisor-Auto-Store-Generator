@@ -59,8 +59,31 @@ export interface DatasetInfo {
     warnings: string[];
     health_score: number;
     target_analysis?: Record<string, unknown>;
+    schema_validation?: Record<string, unknown> | null;
   };
   is_sample: boolean;
+  data_source?: string;
+  dataset_fingerprint?: string | null;
+  dataset_version?: string | null;
+  schema_version?: string | null;
+  dataset_provenance?: Record<string, unknown>;
+}
+
+export interface CandidateSpec {
+  name: string;
+  description: string;
+  family: string;
+  library: string;
+  library_version: string | null;
+  hyperparameter_summary?: Record<string, unknown>;
+  params: Record<string, unknown>;
+  supports_class_weight: boolean;
+  needs_sample_weight: boolean;
+  uses_scale_pos_weight?: boolean;
+  needs_label_encoding?: boolean;
+  random_state: number;
+  eligible: boolean;
+  ineligibility_reason: string | null;
 }
 
 export interface TrainingJobRequest {
@@ -78,17 +101,27 @@ export interface TrainingJobResponse {
   dataset_id: string;
   target_column: string;
   problem_type: string;
-  status: 'pending' | 'training' | 'completed' | 'failed';
+  status: 'queued' | 'running' | 'completed' | 'failed';
   progress_pct: number;
   current_step: string;
-  best_model_id?: string;
-  error_message?: string;
+  best_model_id?: string | null;
+  error_message?: string | null;
+  storage_note?: string;
   results?: {
     best_model_id?: string;
     best_model_name?: string;
     best_algorithm?: string;
-    best_score?: number;
-    leaderboard?: Array<{ algorithm_key: string; cv_score: number; [key: string]: unknown }>;
+    artifact_version?: string;
+    artifact_path?: string;
+    comparison_report_path?: string;
+    feature_columns?: string[];
+    feature_schema_version?: string;
+    training_mode?: 'production' | 'experimental_sandbox';
+    approved_for_production?: boolean;
+    label_approval_status?: 'BLOCKED' | 'APPROVED';
+    leaderboard?: Array<{ algorithm_key: string; cv_score: number; rank_score: number; [key: string]: unknown }>;
+    test_metrics?: Record<string, unknown>;
+    cv_metrics?: Record<string, unknown>;
     [key: string]: unknown;
   };
   [key: string]: unknown;
@@ -114,6 +147,17 @@ export interface RegisteredModelSummary {
   is_active: boolean;
   file_size_bytes: number;
   file_name: string;
+  artifact_version?: string | null;
+  artifact_schema_version?: string | null;
+  feature_schema_version?: string | null;
+  cv_metrics?: Record<string, unknown>;
+  label_approval_status?: 'BLOCKED' | 'APPROVED';
+  training_mode?: 'production' | 'experimental_sandbox';
+  approved_for_production?: boolean;
+  dataset_fingerprint?: string | null;
+  dataset_ref?: string | null;
+  comparison_report_path?: string | null;
+  serving_ready?: boolean;
 }
 
 export interface PredictionFactor {
@@ -138,6 +182,7 @@ export interface PredictionResponse {
   local_explanation_factors: PredictionFactor[];
   top_global_drivers: Array<{ feature: string; importance: number; raw_weight: number }>;
   artifact_version?: string | null;
+  feature_schema_version?: string | null;
   threshold_version?: string;
   label_approval_status?: 'BLOCKED' | 'APPROVED';
   artifact_threshold_version?: string;
@@ -153,8 +198,24 @@ export interface TrainingPolicyResponse {
     oi_id: string;
     reason: string;
     documented_proposal: string;
+    oi6_validation?: {
+      approved: boolean;
+      reasons: string[];
+      approved_by: string | null;
+      approved_at: string | null;
+      evidence_reference: string | null;
+    };
   };
   approved_categories: string[];
+  candidates: {
+    classification: Record<string, CandidateSpec>;
+    regression: Record<string, CandidateSpec>;
+  };
+  ineligible_candidates: Record<string, { problem_type: string; reason: string }>;
+  xgboost: { available: boolean; version: string | null; required_by: string };
+  feature_schema_version: string;
+  random_seed: number;
+  job_storage: string;
   risk_thresholds: {
     version: string;
     low_risk_min: number;
@@ -264,8 +325,16 @@ export const mlClient = {
     return requestML<DatasetInfo>(`/datasets/${id}`);
   },
 
-  async generateSampleDataset(): Promise<DatasetInfo> {
-    return requestML<DatasetInfo>('/datasets/generate-sample', { method: 'POST' });
+  async generateSampleDataset(options: {
+    num_samples?: number;
+    random_seed?: number;
+    missing_rate?: number;
+  } = {}): Promise<DatasetInfo> {
+    const form = new FormData();
+    form.append('num_samples', String(options.num_samples ?? 5000));
+    form.append('random_seed', String(options.random_seed ?? 42));
+    form.append('missing_rate', String(options.missing_rate ?? 0.01));
+    return requestML<DatasetInfo>('/datasets/generate-sample', { method: 'POST', body: form });
   },
 
   async uploadDataset(formData: FormData): Promise<DatasetInfo> {
@@ -296,6 +365,10 @@ export const mlClient = {
     return requestML<TrainingJobResponse>(`/train/${jobId}`);
   },
 
+  async listTrainingJobs(): Promise<{ jobs: TrainingJobResponse[]; storage_note: string }> {
+    return requestML<{ jobs: TrainingJobResponse[]; storage_note: string }>('/jobs');
+  },
+
   async listModels(): Promise<RegisteredModelSummary[]> {
     return requestML<RegisteredModelSummary[]>('/models');
   },
@@ -318,7 +391,8 @@ export const mlClient = {
       low_risk_min: number;
       moderate_risk_min: number;
       high_risk_min: number;
-    }
+    },
+    featureSchemaVersion?: string
   ): Promise<PredictionResponse> {
     return requestML<PredictionResponse>('/predict', {
       method: 'POST',
@@ -329,6 +403,7 @@ export const mlClient = {
         // The Next.js route passes the live, admin-versioned contract so the
         // Python scorer applies the same bands as project reports.
         risk_thresholds: thresholds,
+        feature_schema_version: featureSchemaVersion,
       }),
     });
   },

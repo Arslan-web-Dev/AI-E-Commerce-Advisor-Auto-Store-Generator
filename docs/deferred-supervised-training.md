@@ -4,7 +4,7 @@
 
 ## Overview
 
-The system currently uses an explicitly labelled **Provisional MCDA index** (`provisional_mcda:v1.0-mcda`) for project feasibility reports. Task 5 delivered the FR-4 feature/training/versioning infrastructure, but supervised feasibility training and serving are still blocked.
+The system currently uses an explicitly labelled **Provisional MCDA index** (`provisional_mcda:v1.0-mcda`) for project feasibility reports. Task 5 delivered the FR-4 feature/training/versioning infrastructure. Experimental sandbox training on rule-generated labels is permitted; supervised feasibility **serving** and production activation remain blocked.
 
 Two separate gates apply:
 
@@ -14,7 +14,7 @@ Two separate gates apply:
 ## What exists now
 
 - `ml-service/models/trainer.py` supports classification/regression candidate comparison, deterministic holdout splits and cross-validation with preprocessing fitted inside each fold. Per-fold and aggregate CV metrics plus held-out metrics are persisted on versioned artifacts.
-- `ml-service/models/label_policy.py` fails closed for `feasibility_class` and `feasibility_score` while OI-6 is blocked. Generic sandbox targets are allowed to validate the pipeline, but their artifacts are not production feasibility models.
+- `ml-service/models/label_policy.py` validates `status`, `approved_by`, `approved_at` and `evidence_reference` independently. `assert_training_allowed()` permits rule-label runs only as experimental sandbox; `assert_production_approval()` fails closed while OI-6 is blocked.
 - `artifact_ready_for_serving()` re-reads the live policy and rejects unversioned artifacts, artifacts without CV metrics, artifacts with target-leak features, feasibility-label artifacts without approval, and any rule-label bundle derived from the synthetic sandbox. Training no longer auto-promotes a candidate.
 - `src/app/api/ml/predict` is an admin sandbox only and does not write project reports. It rejects non-serving-ready artifacts even with an explicit `model_id` and applies the live admin threshold contract. Customer reports continue to be written by `/api/projects/[id]/feasibility`.
 - FR-4.4 risk bands are shared by TypeScript, Python and both UIs; local explanations are documented rule context, not SHAP.

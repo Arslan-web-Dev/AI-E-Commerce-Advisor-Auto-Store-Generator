@@ -18,6 +18,14 @@ CACHE_DIR = BASE_DIR / "data" / "cache"
 SCORING_CONFIG_PATH = REPO_ROOT / "config" / "module4-scoring.json"
 LABEL_POLICY_PATH = BASE_DIR / "config" / "label_approval.json"
 
+# FR-4 schema/version contract. These are incremented only when the feature,
+# artifact or synthetic-dataset contract changes incompatibly.
+FEATURE_SCHEMA_VERSION = "v2.0-fr4"
+ARTIFACT_SCHEMA_VERSION = "v2.0-fr4"
+DATASET_SCHEMA_VERSION = "v2.0-fr4-synthetic"
+SYNTHETIC_DATA_SOURCE = "synthetic"
+TRAINING_RANDOM_SEED = 42
+
 with open(SCORING_CONFIG_PATH, "r", encoding="utf-8") as _scoring_file:
     SCORING_CONFIG = json.load(_scoring_file)
 

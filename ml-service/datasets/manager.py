@@ -5,6 +5,8 @@ from typing import Dict, Any, List, Optional
 import numpy as np
 import pandas as pd
 
+from datasets.sample_dataset_generator import load_dataset_metadata, validate_dataset
+
 def inspect_dataset(file_path: Path, target_col: Optional[str] = None) -> Dict[str, Any]:
     """
     Reads a CSV or Excel dataset and performs a comprehensive quality inspection,
@@ -108,8 +110,17 @@ def inspect_dataset(file_path: Path, target_col: Optional[str] = None) -> Dict[s
         "duplicate_rows": duplicates,
         "warnings": warnings,
         "health_score": max(20, 100 - (len(warnings) * 15)),
-        "target_analysis": target_analysis
+        "target_analysis": target_analysis,
+        "schema_validation": None,
     }
+
+    provenance = load_dataset_metadata(file_path)
+    if provenance.get("data_source") == "synthetic":
+        validation = validate_dataset(df)
+        quality_report["schema_validation"] = validation
+        if not validation["valid"]:
+            warnings.append("Synthetic dataset schema validation failed.")
+            quality_report["warnings"] = warnings
 
     return {
         "row_count": row_count,
@@ -117,5 +128,10 @@ def inspect_dataset(file_path: Path, target_col: Optional[str] = None) -> Dict[s
         "target_column": inferred_target,
         "problem_type": problem_type,
         "columns_metadata": columns_metadata,
-        "data_quality_report": quality_report
+        "data_quality_report": quality_report,
+        "data_source": provenance["data_source"],
+        "dataset_fingerprint": provenance.get("dataset_fingerprint"),
+        "dataset_version": provenance.get("dataset_version"),
+        "schema_version": provenance.get("schema_version"),
+        "dataset_provenance": provenance.get("dataset_provenance", {}),
     }

@@ -64,11 +64,30 @@ export async function POST(request: Request) {
     }
 
     // Registry gating happens before the Python activation. A candidate with an
-    // unapproved or missing label policy must never become the active model,
+    // unapproved or incomplete label policy must never become the active model,
     // even if a stale bundle still passes the Python-side shape checks.
+    const policy = await mlClient.getTrainingPolicy();
+    const validation = policy.label_policy.oi6_validation;
+    const approvalComplete = policy.label_policy.status === 'APPROVED'
+      && validation?.approved === true
+      && Boolean(validation.approved_by)
+      && Boolean(validation.approved_at)
+      && Boolean(validation.evidence_reference);
+    if (!approvalComplete) {
+      return NextResponse.json(
+        {
+          error:
+            'Activation blocked (OI-6): status, approved_by, approved_at and evidence_reference '
+            + 'must all contain genuine values. Experimental sandbox models are never production-ready.',
+          oi6_validation: validation || null,
+        },
+        { status: 422 }
+      );
+    }
+
     const { data: candidate, error: candidateError } = await supabase
       .from('model_registry')
-      .select('id, version, label_approval_status, is_active')
+      .select('id, version, label_approval_status, is_active, training_mode')
       .eq('configuration->>python_model_id', model_id)
       .maybeSingle();
 
@@ -84,12 +103,16 @@ export async function POST(request: Request) {
         { status: 404 }
       );
     }
-    if (!candidate.version || candidate.label_approval_status !== 'APPROVED') {
+    if (
+      !candidate.version
+      || candidate.label_approval_status !== 'APPROVED'
+      || candidate.training_mode !== 'production'
+    ) {
       return NextResponse.json(
         {
           error:
-            'Activation is blocked: the registry row must be versioned and carry OI-6 approval. ' +
-            'No candidate is auto-promoted.',
+            'Activation is blocked: the registry row must be versioned, production-mode and carry '
+            + 'complete OI-6 approval. No experimental candidate is auto-promoted.',
         },
         { status: 422 }
       );

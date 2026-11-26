@@ -44,7 +44,17 @@ export async function POST(request: Request) {
     const action = formData.get('action');
 
     if (action === 'generate_sample') {
-      const sample = await mlClient.generateSampleDataset();
+      const parseNumber = (key: string, fallback: number) => {
+        const raw = formData.get(key);
+        if (raw === null || String(raw).trim() === '') return fallback;
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      };
+      const sample = await mlClient.generateSampleDataset({
+        num_samples: parseNumber('num_samples', 5000),
+        random_seed: parseNumber('random_seed', 42),
+        missing_rate: parseNumber('missing_rate', 0.01),
+      });
       return NextResponse.json({ dataset: sample });
     }
 
@@ -65,6 +75,9 @@ export async function POST(request: Request) {
         columns_metadata: uploaded.columns_metadata,
         data_quality_report: uploaded.data_quality_report,
         is_sample: uploaded.is_sample,
+        data_source: uploaded.data_source || 'uploaded_unverified',
+        dataset_fingerprint: uploaded.dataset_fingerprint || null,
+        schema_version: uploaded.schema_version || null,
       });
     } catch (dbErr) {
       console.warn('Note: ml_datasets table insert:', dbErr);

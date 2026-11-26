@@ -45,6 +45,6 @@ next-env.d.ts
 __pycache__/
 *.py[cod]
 
-# generated ML sandbox artifacts and datasets (never commit models or fixtures)
-/ml-service/artifacts/*.joblib
-/ml-service/data/datasets/*.csv
+# generated ML sandbox artifacts and datasets (never commit models, reports or fixtures)
+/ml-service/artifacts/
+/ml-service/data/datasets/

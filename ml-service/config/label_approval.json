@@ -5,7 +5,7 @@
     "feasibility_class",
     "feasibility_score"
   ],
-  "rule_formula_status": "UNDOCUMENTED_APPROVAL",
+  "rule_formula_status": "UNAPPROVED",
   "documented_proposal": "docs/module-4-label-approval-proposal.md",
   "reason": "No supervisor-approved rule-generated label formula and weights are recorded in the repository. Training a production feasibility model on these labels is prohibited until this file records an approval decision with evidence.",
   "approved_at": null,

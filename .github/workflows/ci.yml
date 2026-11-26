@@ -35,6 +35,24 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+  node-tests:
+    name: TypeScript and Feature Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Module 4 feature engineering tests
+        run: node --test tests/module4-feature-engineering.test.mjs
+      - name: Full Node test suite
+        run: node --test tests/*.mjs
+      - name: Module 3 verification
+        run: node scripts/verify-module3.mjs
+
   build:
     name: Next.js Build
     runs-on: ubuntu-latest
@@ -74,5 +92,9 @@ jobs:
           python-version: '3.11'
       - name: Install ML dependencies
         run: pip install -r ml-service/requirements.txt
+      - name: Verify XGBoost dependency
+        run: python -c "import xgboost; print(f'xgboost {xgboost.__version__}')"
       - name: Run ML pipeline tests
         run: python ml-service/test_pipeline.py
+      - name: Run ML authentication and security tests
+        run: python ml-service/test_auth_security.py

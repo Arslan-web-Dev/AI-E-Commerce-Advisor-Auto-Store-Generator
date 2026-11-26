@@ -503,13 +503,19 @@ Admin-only versioned threshold change.
 - **Consumers**: project scoring, customer UI, admin UI and the Python service use the same contract version.
 
 ### `GET /api/ml/policy`
-Admin-only view of the server-side OI-6 label gate, approved categories, risk thresholds and exact disclaimer. If the Python service is unavailable, returns `502`.
+Admin-only view of the server-side OI-6 label gate, approved categories, exact 8-classifier/8-regressor candidate catalog (including ineligible candidates and XGBoost version), feature schema version, risk thresholds, in-memory job-storage limits and exact disclaimer. If the Python service is unavailable, returns `502`.
+
+### `GET /api/ml/datasets`, `POST /api/ml/datasets`
+Admin-only list and synthetic-fixture generation. Generated datasets are labelled `data_source: synthetic`, validated, fingerprinted and never presented as verified market observations. `num_samples`, `random_seed` and `missing_rate` are server-validated; duplicate fingerprints are rejected.
 
 ### `GET /api/ml/train?job_id=...`, `POST /api/ml/train`
-Admin-only ML training job status/start. `POST` pre-checks OI-6 and rejects `feasibility_class` / `feasibility_score` with `422` while blocked. Generic sandbox targets may train but are registered as inactive candidates with real artifact metadata; no auto-promotion occurs.
+Admin-only ML training job status/start. `POST` returns HTTP `202` with a job id immediately; the Python service executes training through FastAPI `BackgroundTasks`. Job states are `queued`, `running`, `completed` and `failed`; duplicate active jobs for the same dataset/target/problem return `409`. OI-6 is reported as an `oi6_warning` for rule-generated targets, not a training rejection: experimental sandbox training is allowed, but the artifact is ineligible for production activation or customer scoring. Jobs are in-memory only and are lost on restart.
+
+### `POST /api/ml/train/sync`
+Admin-only, idempotent registry synchronisation for a **completed** job. It re-reads the job from the Python service, so the client cannot forge results or approval, and only then inserts an inactive `model_registry` row with artifact/CV metadata and provenance. Reconciliation also re-checks the live OI-6 state.
 
 ### `GET /api/ml/models`, `POST /api/ml/models`
-Admin-only model listing/details and explicit activation. Before calling Python, the route requires a versioned Supabase registry row with `label_approval_status = APPROVED` (`404`/`422` otherwise). Python also refuses unversioned, leaky or unapproved feasibility bundles. The registry state is reconciled after activation and inconsistency returns `409`.
+Admin-only model listing/details and explicit activation. Before calling Python, the route requires complete live OI-6 approval plus a versioned, production-mode Supabase registry row with `label_approval_status = APPROVED` (`404`/`422` otherwise). Python also refuses unversioned, leaky, experimental or unapproved feasibility bundles. The registry state is reconciled after activation and inconsistency returns `409`.
 
 ### `POST /api/ml/predict`
 Admin-only sandbox inference. Request body is `{ "input_features": { ... }, "model_id"?: "...", "risk_thresholds"?: { "version": "...", "low_risk_min": 0.75, "moderate_risk_min": 0.55, "high_risk_min": 0.35 } }`; the Next.js route supplies validated live thresholds automatically. Numeric inputs must be finite and within documented bounds and `business_category` must be one of the five approved values (invalid values return `422`). Non-serving-ready artifacts are rejected even when `model_id` is explicit.

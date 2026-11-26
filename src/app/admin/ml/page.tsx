@@ -34,8 +34,13 @@ interface DatasetItem {
     warnings: string[];
     health_score: number;
     target_analysis?: unknown;
+    schema_validation?: Record<string, unknown> | null;
   };
   is_sample: boolean;
+  data_source?: string;
+  dataset_fingerprint?: string | null;
+  dataset_version?: string | null;
+  schema_version?: string | null;
 }
 
 interface LeaderboardItem {
@@ -44,6 +49,9 @@ interface LeaderboardItem {
   description: string;
   rank_score: number;
   cv_score: number;
+  cv_std?: number;
+  primary_metric?: string;
+  library?: string;
   test_metrics: Record<string, number>;
   hyperparameters: Record<string, unknown>;
 }
@@ -62,6 +70,56 @@ interface LabelPolicy {
   oi_id: string;
   reason: string;
   documented_proposal: string;
+  oi6_validation?: {
+    approved: boolean;
+    reasons: string[];
+    approved_by: string | null;
+    approved_at: string | null;
+    evidence_reference: string | null;
+  };
+}
+
+interface CandidateSpec {
+  name: string;
+  description: string;
+  library: string;
+  library_version: string | null;
+  params: Record<string, unknown>;
+  eligible: boolean;
+  ineligibility_reason?: string | null;
+}
+
+interface TrainingPolicy {
+  label_policy?: LabelPolicy;
+  candidates?: {
+    classification: Record<string, CandidateSpec>;
+    regression: Record<string, CandidateSpec>;
+  };
+  xgboost?: { available: boolean; version: string | null };
+  feature_schema_version?: string;
+  job_storage?: string;
+  limited_data_disclaimer?: string;
+}
+
+interface TrainingJob {
+  job_id: string;
+  status: 'queued' | 'running' | 'completed' | 'failed';
+  progress_pct: number;
+  current_step: string;
+  error_message?: string | null;
+  storage_note?: string;
+  results?: {
+    best_model_id?: string;
+    best_model_name?: string;
+    best_algorithm?: string;
+    leaderboard?: LeaderboardItem[];
+    global_importances?: Array<{ feature: string; importance: number }>;
+    cv_metrics?: CvSummary;
+    label_approval_status?: string;
+    training_mode?: string;
+    comparison_report_path?: string;
+    [key: string]: unknown;
+  } | null;
 }
 
 interface ModelItem {
@@ -74,6 +132,13 @@ interface ModelItem {
   is_active: boolean;
   file_name: string;
   file_size_bytes?: number;
+  artifact_version?: string | null;
+  feature_schema_version?: string | null;
+  label_approval_status?: string;
+  training_mode?: string;
+  approved_for_production?: boolean;
+  serving_ready?: boolean;
+  comparison_report_path?: string | null;
 }
 
 interface PredictionFactor {
@@ -121,6 +186,7 @@ export default function MLPipelineAdminPage() {
   const [selectedDataset, setSelectedDataset] = useState<DatasetItem | null>(null);
   const [uploading, setUploading] = useState(false);
   const [generatingSample, setGeneratingSample] = useState(false);
+  const [sampleSize, setSampleSize] = useState(5000);
 
   // Training state
   const [targetColumn, setTargetColumn] = useState('feasibility_class');
@@ -136,6 +202,9 @@ export default function MLPipelineAdminPage() {
   const [trainingInProgress, setTrainingInProgress] = useState(false);
   const [trainingStep, setTrainingStep] = useState('');
   const [trainingProgress, setTrainingProgress] = useState(0);
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [trainingJob, setTrainingJob] = useState<TrainingJob | null>(null);
+  const [trainingPolicy, setTrainingPolicy] = useState<TrainingPolicy | null>(null);
   const [lastResults, setLastResults] = useState<{
     best_model_id: string;
     best_model_name: string;
@@ -169,6 +238,25 @@ export default function MLPipelineAdminPage() {
   const [predicting, setPredicting] = useState(false);
   const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
   const [predictionContext, setPredictionContext] = useState<PredictionContext | null>(null);
+
+  const candidateList = useMemo(() => {
+    const catalog = trainingPolicy?.candidates?.[problemType] || {};
+    return Object.entries(catalog).map(([key, spec]) => ({
+      key,
+      name: spec.name,
+      desc: `${spec.library}${spec.library_version ? ` ${spec.library_version}` : ''} · ${spec.description}`,
+      eligible: spec.eligible,
+    }));
+  }, [trainingPolicy, problemType]);
+
+  // Derive the effective selection instead of writing state from an effect: a
+  // candidate can only be sent to the service when the live catalog marks it
+  // eligible for the currently selected problem type.
+  const effectiveAlgorithms = useMemo(() => {
+    const catalog = trainingPolicy?.candidates?.[problemType];
+    if (!catalog) return selectedAlgorithms;
+    return selectedAlgorithms.filter((key) => catalog[key]?.eligible === true);
+  }, [trainingPolicy, problemType, selectedAlgorithms]);
 
   // Check auth
   useEffect(() => {
@@ -213,6 +301,7 @@ export default function MLPipelineAdminPage() {
       const policyRes = await fetch('/api/ml/policy');
       if (policyRes.ok) {
         const policyData = await policyRes.json();
+        setTrainingPolicy(policyData.policy ?? null);
         setLabelPolicy(policyData.policy?.label_policy ?? null);
       }
     } catch {
@@ -237,6 +326,7 @@ export default function MLPipelineAdminPage() {
     try {
       const form = new FormData();
       form.append('action', 'generate_sample');
+      form.append('num_samples', String(sampleSize));
       const res = await fetch('/api/ml/datasets', { method: 'POST', body: form });
       if (res.ok) {
         await loadData();
@@ -268,12 +358,13 @@ export default function MLPipelineAdminPage() {
     }
   };
 
-  // Handle training
+  // Handle training: the API returns a job immediately; the UI polls real state.
   const handleStartTraining = async () => {
     if (!selectedDataset) return;
     setTrainingInProgress(true);
-    setTrainingProgress(15);
-    setTrainingStep('Partitioning dataset and initializing cross-validation splits...');
+    setTrainingJob(null);
+    setTrainingStep('Queuing background training job...');
+    setTrainingProgress(0);
 
     try {
       const res = await fetch('/api/ml/train', {
@@ -283,32 +374,66 @@ export default function MLPipelineAdminPage() {
           dataset_id: selectedDataset.id,
           target_column: targetColumn,
           problem_type: problemType,
-          candidate_algorithms: selectedAlgorithms,
+          candidate_algorithms: effectiveAlgorithms,
           cv_folds: cvFolds,
           test_size: testSplit
         })
       });
 
-      setTrainingProgress(80);
-      setTrainingStep('Evaluating candidate models and calculating test holdout metrics...');
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.job?.results) {
-          setLastResults(data.job.results);
-          setActiveTab('leaderboard');
-        }
-        await loadData();
-      } else {
-        const err = await res.json();
-        alert(`Training failed: ${err.error}`);
+      const data = await res.json();
+      if (!res.ok) {
+        alert(`Training could not start: ${data.error || 'unknown error'}`);
+        return;
       }
+
+      if (data.oi6_warning) {
+        alert(data.oi6_warning.error);
+      }
+
+      const jobId = data.job?.job_id;
+      if (!jobId) {
+        alert('The ML service did not return a job id.');
+        return;
+      }
+      setActiveJobId(jobId);
+      setTrainingJob(data.job as TrainingJob);
+
+      // Poll the real background job state. No simulated progress is displayed.
+      for (let attempt = 0; attempt < 300; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        const statusRes = await fetch(`/api/ml/train?job_id=${encodeURIComponent(jobId)}`);
+        if (!statusRes.ok) break;
+        const statusData = await statusRes.json();
+        const job = statusData.job as TrainingJob;
+        setTrainingJob(job);
+        setTrainingProgress(job.progress_pct || 0);
+        setTrainingStep(job.current_step || '');
+
+        if (job.status === 'completed' || job.status === 'failed') {
+          if (job.status === 'failed') {
+            alert(`Training failed: ${job.error_message || 'Unknown failure'}`);
+          } else if (job.results) {
+            setLastResults(job.results as typeof lastResults);
+            const syncRes = await fetch('/api/ml/train/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ job_id: jobId }),
+            });
+            if (!syncRes.ok) {
+              const syncError = await syncRes.json().catch(() => ({}));
+              console.warn('Registry sync did not complete:', syncError.error);
+            }
+            setActiveTab('leaderboard');
+          }
+          await loadData();
+          return;
+        }
+      }
+      setTrainingStep('Job is still running; check the Jobs panel for the latest state.');
     } catch (err: unknown) {
       alert(`Error starting training: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
-      setTrainingProgress(100);
       setTrainingInProgress(false);
-      setTrainingStep('');
     }
   };
 
@@ -491,6 +616,17 @@ export default function MLPipelineAdminPage() {
               </div>
 
               <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-[11px] font-mono text-[#bbcabf]">
+                  Rows
+                  <input
+                    type="number"
+                    min={1}
+                    max={200000}
+                    value={sampleSize}
+                    onChange={(e) => setSampleSize(Number(e.target.value))}
+                    className="w-24 bg-[#131b2e] border border-[#2d3449] rounded-lg px-2 py-1.5 text-[12px] text-[#dae2fd]"
+                  />
+                </label>
                 <button
                   type="button"
                   onClick={handleGenerateSample}
@@ -568,6 +704,19 @@ export default function MLPipelineAdminPage() {
                         <p className="text-[12px] text-[#bbcabf] font-mono">
                           Target column: <span className="text-[#4edea3] font-semibold">{selectedDataset.target_column || 'None selected'}</span> &bull; Problem type: <span className="text-[#4cd7f6] font-semibold uppercase">{selectedDataset.problem_type || 'Unknown'}</span>
                         </p>
+                        <p className="text-[11px] text-[#bbcabf] font-mono mt-1">
+                          Source: {selectedDataset.data_source || 'uploaded_unverified'} &bull; Schema:{' '}
+                          {selectedDataset.schema_version || 'unversioned'} &bull; Fingerprint:{' '}
+                          {selectedDataset.dataset_fingerprint?.slice(0, 16) || 'none'}
+                        </p>
+                        {selectedDataset.data_quality_report.schema_validation && (
+                          <p className="text-[11px] text-[#f59e0b] font-mono mt-1">
+                            Schema validation:{' '}
+                            {(selectedDataset.data_quality_report.schema_validation as { valid?: boolean }).valid
+                              ? 'PASS'
+                              : 'FAIL (synthetic contract violation)'}
+                          </p>
+                        )}
                       </div>
 
                       <button
@@ -673,10 +822,11 @@ export default function MLPipelineAdminPage() {
           <div className="space-y-6">
             {labelPolicy?.status === 'BLOCKED' && (
               <div className="p-4 rounded-xl bg-[#f59e0b15] border border-[#f59e0b44] text-[12px] text-[#f59e0b] leading-relaxed">
-                <strong>OI-6 BLOCKED:</strong> {labelPolicy.reason}{' '}
+                <strong>OI-6 BLOCKED FOR PRODUCTION:</strong> {labelPolicy.reason}{' '}
                 Review the documented proposal at <code>{labelPolicy.documented_proposal}</code>.
-                Training <code>feasibility_class</code> or <code>feasibility_score</code> is rejected server-side.
-                Generic sandbox targets may be used to validate the pipeline but must not be deployed as production feasibility models.
+                Experimental sandbox training on rule-generated labels is permitted, but the resulting artifact is
+                ineligible for activation and cannot score customer-facing requests. Missing or placeholder
+                <code> approved_by / approved_at / evidence_reference</code> values can never constitute approval.
               </div>
             )}
             <div className="bg-[#171f33] border border-[#2d3449] rounded-2xl p-6 space-y-6">
@@ -703,6 +853,18 @@ export default function MLPipelineAdminPage() {
                       style={{ width: `${trainingProgress}%` }}
                     ></div>
                   </div>
+                  {activeJobId && (
+                    <p className="text-[11px] text-[#bbcabf] font-mono">
+                      Job <span className="text-[#4edea3]">{activeJobId}</span> ·{' '}
+                      status {trainingJob?.status ?? 'queued'} · {trainingJob?.storage_note || 'In-memory only'}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {trainingJob?.status === 'failed' && (
+                <div className="p-3 rounded-xl bg-[#ef444415] border border-[#ef444455] text-[12px] text-[#ef4444]">
+                  Last job failed: {trainingJob.error_message}
                 </div>
               )}
 
@@ -776,16 +938,8 @@ export default function MLPipelineAdminPage() {
                   Candidate Algorithms to Train &amp; Compare
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {[
-                    { key: 'random_forest', name: 'Random Forest', desc: 'Ensemble bagging trees' },
-                    { key: 'gradient_boosting', name: 'Gradient Boosting', desc: 'Sequential gradient trees' },
-                    { key: 'extra_trees', name: 'Extra Trees', desc: 'Extremely randomized trees' },
-                    { key: 'logistic_regression', name: 'Logistic Regression', desc: 'Linear regularized baseline' },
-                    { key: 'decision_tree', name: 'Decision Tree', desc: 'Interpretable single tree' },
-                    { key: 'svm', name: 'Support Vector (SVC)', desc: 'Margin boundary separator' },
-                    { key: 'knn', name: 'K-Nearest Neighbors', desc: 'Instance-based clustering' }
-                  ].map((alg) => {
-                    const checked = selectedAlgorithms.includes(alg.key);
+                  {candidateList.map((alg) => {
+                    const checked = effectiveAlgorithms.includes(alg.key);
                     return (
                       <div
                         key={alg.key}
@@ -793,7 +947,7 @@ export default function MLPipelineAdminPage() {
                           if (checked) {
                             setSelectedAlgorithms(selectedAlgorithms.filter((k) => k !== alg.key));
                           } else {
-                            setSelectedAlgorithms([...selectedAlgorithms, alg.key]);
+                            setSelectedAlgorithms([...effectiveAlgorithms, alg.key]);
                           }
                         }}
                         className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
@@ -817,6 +971,14 @@ export default function MLPipelineAdminPage() {
                     );
                   })}
                 </div>
+                <p className="text-[11px] text-[#bbcabf] font-mono mt-3 leading-relaxed">
+                  Registered: {candidateList.length}/8 {problemType} candidates · XGBoost:{' '}
+                  {trainingPolicy?.xgboost?.available
+                    ? `available (${trainingPolicy.xgboost.version})`
+                    : 'unavailable (ineligibility reason recorded server-side)'}
+                  {' · '}Input schema {trainingPolicy?.feature_schema_version || 'unknown'}. Metrics below are
+                  synthetic-sandbox selection metrics, not real market evidence.
+                </p>
               </div>
 
               {/* Start Training Button */}
@@ -824,7 +986,7 @@ export default function MLPipelineAdminPage() {
                 <button
                   type="button"
                   onClick={handleStartTraining}
-                  disabled={trainingInProgress || selectedAlgorithms.length === 0}
+                  disabled={trainingInProgress || effectiveAlgorithms.length === 0}
                   className="px-6 py-2.5 rounded-xl bg-[#10b981] hover:bg-[#4edea3] text-[#003824] font-bold text-[14px] flex items-center gap-2 transition-all shadow-lg shadow-[#10b981]/20 disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-[20px]">bolt</span>
@@ -868,7 +1030,7 @@ export default function MLPipelineAdminPage() {
                       <tr>
                         <th className="py-2.5 px-3">Rank</th>
                         <th className="py-2.5 px-3">Algorithm</th>
-                        <th className="py-2.5 px-3">Test F1 Score</th>
+                        <th className="py-2.5 px-3">Selection Score</th>
                         <th className="py-2.5 px-3">CV Mean Score</th>
                         <th className="py-2.5 px-3">Accuracy</th>
                         <th className="py-2.5 px-3">Precision</th>
@@ -886,7 +1048,7 @@ export default function MLPipelineAdminPage() {
                           </td>
                           <td className="py-2.5 px-3 text-[#dae2fd]">{item.name}</td>
                           <td className="py-2.5 px-3 font-mono text-[#4edea3]">
-                            {formatMetric(item.test_metrics.f1)}
+                            {typeof item.rank_score === 'number' ? item.rank_score.toFixed(4) : 'N/A'}
                           </td>
                           <td className="py-2.5 px-3 font-mono text-[#bbcabf]">
                             {formatMetric(item.cv_score)}
@@ -975,12 +1137,19 @@ export default function MLPipelineAdminPage() {
                       </div>
                     </div>
 
+                    <div className="text-[10px] font-mono text-[#bbcabf] space-y-0.5">
+                      <p>Mode: {mod.training_mode || 'experimental_sandbox'} · OI-6: {mod.label_approval_status || 'BLOCKED'}</p>
+                      <p>Schema: {mod.feature_schema_version || 'unversioned'} · Artifact: {mod.artifact_version || 'unversioned'}</p>
+                      <p>Serving ready: {mod.serving_ready ? 'yes' : 'no (blocked)'}</p>
+                    </div>
+
                     {!mod.is_active && (
                       <button
                         type="button"
                         onClick={() => handleActivateModel(mod.model_id)}
-                        disabled={activatingId === mod.model_id}
-                        className="w-full py-1.5 rounded-lg bg-[#222a3d] hover:bg-[#4edea3] hover:text-[#003824] border border-[#2d3449] text-[12px] font-semibold text-[#dae2fd] transition-all"
+                        disabled={activatingId === mod.model_id || !mod.serving_ready}
+                        title={mod.serving_ready ? undefined : 'Blocked: experimental artifact or incomplete OI-6 approval'}
+                        className="w-full py-1.5 rounded-lg bg-[#222a3d] hover:bg-[#4edea3] hover:text-[#003824] border border-[#2d3449] text-[12px] font-semibold text-[#dae2fd] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         {activatingId === mod.model_id ? 'Activating...' : 'Activate for Inference'}
                       </button>
