@@ -28,12 +28,22 @@ console.log('1. Checking Module 7 File Deliverables...');
 
 const requiredFiles = [
   'supabase/migrations/20261006050000_module7_storefront_configurator_schema.sql',
+  'supabase/migrations/20261126160000_module7_theme_configurator.sql',
   'src/lib/storefront/variant-catalog.ts',
   'src/lib/storefront/compiler.ts',
+  'src/lib/theme/options.ts',
+  'src/lib/theme/schema.ts',
+  'src/lib/theme/contrast.ts',
+  'src/lib/theme/generator.ts',
+  'src/lib/theme/persistence.ts',
   'src/app/api/storefront/variants/route.ts',
   'src/app/api/projects/[id]/storefront-wizard/route.ts',
+  'src/app/api/projects/[id]/theme-configurator/route.ts',
+  'src/components/theme-configurator/ThemeConfigurator.tsx',
   'src/app/projects/[id]/storefront-wizard/page.tsx',
   'docs/module-7-storefront-compiler.md',
+  'docs/module-7-theme-configurator.md',
+  'tests/module7-theme-configurator.test.mjs',
 ];
 
 for (const file of requiredFiles) {
@@ -106,15 +116,51 @@ assert(apiWizardTs.includes('ALLOWED_STYLE_PREFERENCES'), 'Strict MCQ answer all
 assert(apiWizardTs.includes('validateVariantId'), 'Variant ID allowlist check on save/compile');
 assert(apiWizardTs.includes("status: 'draft'"), 'Approval gate: drafts always saved in draft status');
 
+// SRS-aligned configurator route. The legacy compiler route above stays intact.
+const themeApiTs = fs.readFileSync(
+  path.join(rootDir, 'src/app/api/projects/[id]/theme-configurator/route.ts'),
+  'utf8'
+);
+assert(themeApiTs.includes('export async function GET'), 'GET handler defined in theme configurator route');
+assert(themeApiTs.includes('export async function POST'), 'POST handler defined in theme configurator route');
+assert(themeApiTs.includes('supabase.auth.getUser()'), 'Theme route authenticates the caller');
+assert(themeApiTs.includes("action === 'save_draft'"), 'Theme route persists partial MCQ drafts');
+assert(themeApiTs.includes("action === 'generate'"), 'Theme route triggers server-side generation');
+assert(themeApiTs.includes("action === 'save'"), 'Theme route saves a validated configuration');
+assert(!/body\.(model|provider|apiKey)/.test(themeApiTs), 'Theme route rejects client provider/model overrides');
+
 const pageTsx = fs.readFileSync(
   path.join(rootDir, 'src/app/projects/[id]/storefront-wizard/page.tsx'),
   'utf8'
 );
+assert(pageTsx.includes("import ThemeConfigurator"), 'Wizard page renders the Module 7 configurator');
+assert(pageTsx.includes('<ThemeConfigurator projectId={id} />'), 'Wizard page passes the owner project id');
 
-assert(pageTsx.includes("'use client'"), 'Client component directive present');
-assert(pageTsx.includes('STEP_1_OPTIONS'), 'Multi-step wizard steps configured');
-assert(pageTsx.includes('handleCompile'), 'Compile draft action implemented');
-assert(pageTsx.includes('WireframePreview'), 'Live schematic preview component implemented');
+const componentTsx = fs.readFileSync(
+  path.join(rootDir, 'src/components/theme-configurator/ThemeConfigurator.tsx'),
+  'utf8'
+);
+assert(componentTsx.includes("'use client'"), 'Client component directive present');
+for (const label of ['Colour palette', 'Navbar style', 'Hero section', 'Product grid layout']) {
+  assert(componentTsx.includes(label), `Four-step question present: ${label}`);
+}
+assert(componentTsx.includes('LivePreview'), 'Live visual preview implemented');
+assert(componentTsx.includes('aria-live="polite"'), 'Polite status announcements implemented');
+assert(componentTsx.includes('aria-current'), 'Current step announced to assistive technology');
+assert(componentTsx.includes('Deterministic preset fallback'), 'Fallback is visibly disclosed');
+assert(componentTsx.includes('WCAG AA contrast'), 'WCAG AA contrast report is displayed');
+assert(componentTsx.includes('Saved history'), 'Owner configuration history is displayed');
+assert(componentTsx.includes('Run again'), 'Owner can re-run the configurator');
+
+const themeMigrationSql = fs.readFileSync(
+  path.join(rootDir, 'supabase/migrations/20261126160000_module7_theme_configurator.sql'),
+  'utf8'
+);
+assert(themeMigrationSql.includes('add column if not exists project_id'), 'Store/project link added additively');
+assert(themeMigrationSql.includes('add column if not exists theme_config_version'), 'Theme version metadata added additively');
+assert(themeMigrationSql.includes('add column if not exists version_number'), 'History version counter added additively');
+assert(themeMigrationSql.includes('theme history snapshots are append-only'), 'History snapshots protected from mutation');
+assert(themeMigrationSql.includes('Manual rollback'), 'Migration rollback documented');
 
 // Summary
 console.log('\n====================================================');

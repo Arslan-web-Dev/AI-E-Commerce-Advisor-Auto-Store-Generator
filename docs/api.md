@@ -830,6 +830,112 @@ Saves MCQ wizard step answers, updates recommendations, and compiles immutable d
 
 ---
 
+## 5B. Theme Configurator API (`/api/projects/[id]/theme-configurator`)
+
+These endpoints back the SRS FR-7.1–FR-7.6 wizard. Authentication and project ownership are checked on the server; request bodies reject additional properties, and no client-supplied provider, model, API key or owner ID is accepted.
+
+### `GET /api/projects/[id]/theme-configurator`
+Retrieves the owner's saved wizard draft, current validated configuration, store version and recent theme history.
+
+- **Authentication**: Required (Project Owner or Admin session resolving to the owning user)
+- **Response `200 OK`**:
+  ```json
+  {
+    "data": {
+      "project": { "id": "c1f7a0e2-...", "name": "Lahore Studio", "category": "fashion" },
+      "draft": { "answers": { "paletteId": "emerald_night" }, "step": 2 },
+      "configuration": null,
+      "store": { "id": "s823a-...", "name": "Lahore Studio", "status": "draft", "version": 1 },
+      "history": [
+        {
+          "id": "d918c-...",
+          "version": 1,
+          "label": "v1",
+          "createdAt": "2026-11-26T10:00:00.000Z",
+          "valid": true,
+          "configuration": { "...": "validated theme.v1 object" }
+        }
+      ]
+    }
+  }
+  ```
+- Invalid legacy or tampered `theme_config` values are returned as `configuration: null` rather than being trusted. History is limited to the latest 20 entries.
+
+### `POST /api/projects/[id]/theme-configurator`
+Accepts exactly one of three actions.
+
+#### Action `save_draft`
+```json
+{
+  "action": "save_draft",
+  "answers": { "paletteId": "emerald_night", "navbarStyle": "split" },
+  "step": 2
+}
+```
+Answers must be a partial object containing only the four approved MCQ keys and valid enum IDs; `step` must be an integer from 1 to 4. The response is `{ "data": { "answers": { "...": "..." }, "step": 2 } }`.
+
+#### Action `generate`
+```json
+{
+  "action": "generate",
+  "answers": {
+    "paletteId": "emerald_night",
+    "navbarStyle": "split",
+    "heroStyle": "split_focus",
+    "productGrid": "three_column"
+  }
+}
+```
+The server reads the sanitized project name/category, calls the Groq-only `theme` task policy (at most two attempts), validates strict JSON and WCAG AA contrast, and returns the full configuration:
+```json
+{
+  "data": {
+    "schemaVersion": "theme.v1",
+    "storeName": "Lahore Studio",
+    "storeCategory": "fashion",
+    "answers": { "...": "unchanged approved IDs" },
+    "colors": {
+      "primary": "#34D399",
+      "secondary": "#38BDF8",
+      "surface": "#07130F",
+      "onPrimary": "#07130F",
+      "onSurface": "#FFFFFF"
+    },
+    "generation": {
+      "provider": "groq",
+      "model": "server-configured-model",
+      "fallback": false,
+      "promptVersion": "theme-prompt-v1",
+      "generatedAt": "2026-11-26T10:00:00.000Z",
+      "attempts": 1,
+      "adjustedColors": [],
+      "contrast": {
+        "primaryOnSurface": 9.2,
+        "secondaryOnSurface": 8.1,
+        "onPrimaryOnPrimary": 9.2,
+        "onSurfaceOnSurface": 17.4
+      },
+      "originalColors": { "...": "pre-adjustment colours" }
+    }
+  }
+}
+```
+When Groq is unavailable, invalid or unconfigured, `provider` is `rule_fallback`, `model` is `deterministic`, `fallback` is `true` and `attempts` records only provider attempts.
+
+#### Action `save`
+```json
+{
+  "action": "save",
+  "answers": { "...": "same four approved IDs" },
+  "configuration": { "...": "valid theme.v1 configuration from generate" }
+}
+```
+The submitted configuration and answers are revalidated and must agree. The response is `{ "data": { "storeId": "s823a-...", "version": 2, "previousPreserved": true, "configuration": { "...": "..." } } }`. A prior draft configuration is archived in `store_draft_versions` before replacement.
+
+- **Errors**: `400` validation, `401` unauthenticated, `403` foreign project, `404` missing project/store, `409` published-store or unique-version conflict, `500` sanitized database failure.
+
+---
+
 ## 8. Store Management API (`/api/stores`)
 
 All store management endpoints require authentication and verify store ownership (`owner_id = auth.uid()`). Returns `403 Forbidden` for unauthorized access.

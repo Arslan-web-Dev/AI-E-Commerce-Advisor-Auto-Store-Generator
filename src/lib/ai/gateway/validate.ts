@@ -9,6 +9,7 @@ type JSONSchema = {
   additionalProperties?: boolean;
   minLength?: number;
   maxLength?: number;
+  pattern?: string;
   minimum?: number;
   maximum?: number;
   minItems?: number;
@@ -65,6 +66,13 @@ function matchesSchema(value: unknown, schema: JSONSchema): boolean {
       if (typeof value !== 'string') return false;
       if (schema.minLength !== undefined && value.length < schema.minLength) return false;
       if (schema.maxLength !== undefined && value.length > schema.maxLength) return false;
+      if (schema.pattern !== undefined) {
+        try {
+          if (!new RegExp(schema.pattern).test(value)) return false;
+        } catch {
+          return false;
+        }
+      }
       return true;
     }
     case 'integer': {

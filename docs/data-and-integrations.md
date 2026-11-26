@@ -48,6 +48,14 @@
 - `POST /api/projects/[id]/advisory/simulation` reads only stored collection/feature rows and recomputes provisional MCDA. It performs no provider call, external fetch, new run or report mutation. OI-6 remains open; no supervised model is activated.
 - Advisory checklist ticks are stored in `advisory_action_states`, with RLS restricting rows to `auth.uid()` and to reports whose project the caller may access.
 
+### G. Module 7 theme generation and persistence
+- The theme configurator uses the shared server-only AI gateway with the `theme` task policy: **Groq only**, 20-second timeout and at most two provider attempts. `GROQ_API_KEY` and `GROQ_MODEL` are both required; `AI_ADVISORY_PROVIDERS` does not alter theme routing. No provider, model or credential is accepted from the browser.
+- Model output must be strict JSON with exactly seven properties, enum-validated MCQ IDs and six-digit hex colours. The server additionally requires the model to return the owner's selected IDs unchanged and rejects HTML, scripts, executable code, CSS strings, unsafe labels and extra properties.
+- Invalid, unavailable, timed-out or unconfigured Groq responses fall back to a deterministic palette derived from the approved MCQ answers. The fallback is disclosed in `generation.fallback`, `generation.provider` and `generation.model`; no live provider call is claimed by the mocked test suite.
+- WCAG relative luminance and contrast ratios are computed locally: 3:1 for accent-on-surface and 4.5:1 for normal text. Failing colours are deterministically adjusted, with final ratios, original colours and changed tokens recorded in the saved configuration.
+- Validated configurations are written to `stores.theme_config` with `theme_config_version` and `theme_updated_at`. Previous draft configurations are copied into `store_draft_versions` with a stable version number before replacement; published stores are rejected. All reads and writes are scoped to the authenticated project owner, with database RLS remaining authoritative.
+- Additive migration `supabase/migrations/20261126160000_module7_theme_configurator.sql` adds the project link, version metadata, history index, owner-consistency trigger and append-only history trigger. It is checked in only; execution in Supabase is not claimed. See `docs/module-7-theme-configurator.md`.
+
 ---
 
 ## 2. Environment Variables
@@ -60,13 +68,14 @@ CRON_SECRET=change-me-to-a-long-random-cron-secret
 ML_SERVICE_URL=http://127.0.0.1:8000
 ML_SERVICE_API_KEY=your-secure-ml-service-api-key-here
 
-# Module 6 (server-only; never prefix with NEXT_PUBLIC_)
+# Modules 6 and 7 (server-only; never prefix with NEXT_PUBLIC_)
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4o-mini
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-2.5-flash
 GROQ_API_KEY=
 GROQ_MODEL=llama-3.3-70b-versatile
+# Module 7 requires both Groq values and has no client provider/model override.
 AI_PROMPT_VERSION=v1
 AI_USER_HOURLY_QUOTA=20
 AI_ADVISORY_PROVIDERS=openai,gemini,groq
