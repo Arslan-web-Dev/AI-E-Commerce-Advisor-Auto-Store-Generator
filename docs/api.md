@@ -260,6 +260,72 @@ Retrieve paginated competitor POIs discovered for the project.
 
 ---
 
+### `GET /api/projects/[id]/rent-map`
+Return the stored area-level rent overlay for an authenticated project. This is a read-only projection of `rent_cache`; it never invokes a rent provider, writes to the cache, substitutes another city/province, or fabricates boundary polygons.
+
+- **Authentication**: Required (Owner or Admin)
+- **Response `200 OK`**:
+  ```json
+  {
+    "projectGeography": {
+      "city": "Lahore",
+      "district": "Lahore",
+      "province": "Punjab",
+      "lat": 31.55,
+      "lng": 74.5,
+      "radiusKm": 10
+    },
+    "status": "coverage",
+    "areas": [
+      {
+        "area": "Model Town",
+        "city": "Lahore",
+        "lat": 31.56,
+        "lng": 74.54,
+        "rentMin": 120,
+        "rentMax": 180,
+        "rentAvg": 150,
+        "currency": "PKR",
+        "sampleSize": 12,
+        "source": "manual survey",
+        "provenance": "manual_estimate",
+        "freshness": "manual_estimate",
+        "confidence": "medium",
+        "retrievedAt": "2026-11-25T00:00:00Z",
+        "isStale": false,
+        "distanceKm": 1.2,
+        "intensityBand": { "key": "moderate", "label": "Moderate" },
+        "geometry": null,
+        "markerType": "centroid"
+      }
+    ],
+    "aggregate": null,
+    "matchedRent": { "status": "found", "match_level": "exact" },
+    "summary": {
+      "status": "coverage",
+      "areaCount": 1,
+      "invalidCoordinateCount": 0,
+      "invalidValueCount": 0,
+      "manualEstimateCount": 1,
+      "cachedCount": 0,
+      "licensedCount": 0,
+      "staleCount": 0,
+      "unavailableCount": 0,
+      "cityAggregateAvailable": false,
+      "hasProjectCoordinates": true,
+      "hasValidRadius": true,
+      "radiusKm": 10,
+      "newestRetrievedAt": "2026-11-25T00:00:00Z",
+      "source": "rent_cache"
+    },
+    "sourceNote": "Stored rent_cache area estimates only. Centroid markers indicate sourced areas; no boundary polygons are stored or inferred."
+  }
+  ```
+- **States**: `status` is `coverage`, `no_coverage` (same geography checked, no usable area point) or `unavailable` (no cache rows). Area freshness may be `manual_estimate`, `cached`, `stale_cache`, `verified_benchmark`, `synthetic_demo` or `unavailable`; stale/manual values remain visible and labelled.
+- **Errors**: `401 Unauthorized`, `403 Access denied`, `404 Project not found`, `500` with a bounded message.
+
+---
+
 ### `GET /api/projects/[id]/market-data`
 Retrieve regional census demographics and 12-month demand trend observations.
 

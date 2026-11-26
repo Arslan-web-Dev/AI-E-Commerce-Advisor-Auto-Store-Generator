@@ -1,90 +1,89 @@
+import { calculateSaturation } from '@/lib/visualization/saturation';
+import { SATURATION_BANDS } from '@/lib/visualization/module5-config';
+import { formatMapNumber } from '@/lib/visualization/map-validation';
+
 interface Props {
-  /** Normalised 0-100 display index derived from competitors per 100k residents. */
-  score: number;
-  /** Raw documented unit: competitors per 100,000 residents. */
-  saturationPer100k?: number;
+  /** Raw stored unit: competitors per 100,000 residents. */
+  saturationPer100k?: number | null;
   /** Raw documented unit: competitors per square kilometre. */
-  competitorDensityPerKm2?: number;
-  competitorCount?: number;
-  radiusKm?: number;
+  competitorDensityPerKm2?: number | null;
+  competitorCount?: number | null;
+  population?: number | null;
+  radiusKm?: number | null;
 }
 
-type Band = { label: string; color: string; bg: string; range: string };
-
-const BANDS: Band[] = [
-  { label: 'Low Saturation', color: '#4edea3', bg: '#4edea322', range: '0–25' },
-  { label: 'Moderate', color: '#4cd7f6', bg: '#4cd7f622', range: '26–50' },
-  { label: 'High Saturation', color: '#f59e0b', bg: '#f59e0b22', range: '51–75' },
-  { label: 'Saturated', color: '#ef4444', bg: '#ef444422', range: '76–100' },
-];
-
-function getBand(score: number): Band {
-  if (score <= 25) return BANDS[0];
-  if (score <= 50) return BANDS[1];
-  if (score <= 75) return BANDS[2];
-  return BANDS[3];
+function bandRange(min: number, max: number | null): string {
+  return max === null ? `${min}+` : `${min}–${max}`;
 }
 
 export default function SaturationMeter({
-  score,
   saturationPer100k,
   competitorDensityPerKm2,
   competitorCount,
-  radiusKm = 10,
+  population,
+  radiusKm,
 }: Props) {
-  const clamped = Math.max(0, Math.min(100, score));
-  const band = getBand(clamped);
-  const pct = clamped;
+  const calculation = calculateSaturation({
+    saturationPer100k,
+    competitorCount,
+    population,
+  });
+  const index = calculation.normalizedIndex;
+  const band = calculation.band;
+  const color = band?.color ?? '#94a3b8';
+  const fill = index ?? 0;
 
   return (
-    <div style={{ padding: '1.25rem', border: '1px solid #2d3449', borderRadius: '0.5rem', backgroundColor: '#171f33' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-        <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#dae2fd' }}>Market Saturation</h3>
-        <span style={{ padding: '0.2rem 0.6rem', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 700, backgroundColor: band.bg, color: band.color }}>
-          {band.label}
+    <section
+      aria-label="Market saturation"
+      style={{ padding: '1.25rem', border: '1px solid #2d3449', borderRadius: '0.5rem', backgroundColor: '#171f33' }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#dae2fd', margin: 0 }}>Market Saturation</h3>
+        <span style={{ padding: '0.2rem 0.6rem', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 700, backgroundColor: band ? band.bg : '#94a3b822', color }}>
+          {band?.label ?? 'N/A'}
         </span>
       </div>
 
-      {/* Arc-style meter using a simple div track */}
-      <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
-        <div style={{ height: '14px', backgroundColor: '#2d3449', borderRadius: '100px', overflow: 'hidden' }}>
-          {/* Band colors */}
-          <div style={{ position: 'absolute', left: '0%', width: '25%', height: '14px', backgroundColor: '#4edea333' }} />
-          <div style={{ position: 'absolute', left: '25%', width: '25%', height: '14px', backgroundColor: '#4cd7f633' }} />
-          <div style={{ position: 'absolute', left: '50%', width: '25%', height: '14px', backgroundColor: '#f59e0b33' }} />
-          <div style={{ position: 'absolute', left: '75%', width: '25%', height: '14px', backgroundColor: '#ef444433' }} />
+      <div
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={index == null ? undefined : Math.round(index)}
+        aria-label="Normalized saturation index from 0 to 100"
+        style={{ position: 'relative', height: '14px', backgroundColor: '#2d3449', borderRadius: '100px', overflow: 'hidden' }}
+      >
+        {SATURATION_BANDS.map((segment) => (
+          <div
+            key={segment.label}
+            style={{
+              position: 'absolute',
+              left: `${segment.minInclusive}%`,
+              width: `${segment.maxExclusive === null ? 100 - segment.minInclusive : segment.maxExclusive - segment.minInclusive}%`,
+              height: '100%',
+              backgroundColor: segment.bg,
+            }}
+          />
+        ))}
+        {index !== null && (
           <div
             style={{
               position: 'absolute',
               left: 0,
-              width: `${pct}%`,
-              height: '14px',
-              backgroundColor: band.color,
+              width: `${fill}%`,
+              height: '100%',
+              backgroundColor: color,
               borderRadius: '100px',
               transition: 'width 0.6s ease',
             }}
           />
-        </div>
-        {/* Needle indicator */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '-4px',
-            left: `calc(${pct}% - 3px)`,
-            width: '6px',
-            height: '22px',
-            backgroundColor: '#fff',
-            borderRadius: '3px',
-            boxShadow: `0 0 6px ${band.color}`,
-            transition: 'left 0.6s ease',
-          }}
-        />
+        )}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', opacity: 0.6, marginBottom: '0.875rem' }}>
-        {BANDS.map((b) => (
-          <span key={b.label} style={{ color: b.color }}>
-            {b.range}
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', opacity: 0.65, marginBottom: '0.875rem', gap: '0.25rem', flexWrap: 'wrap' }}>
+        {SATURATION_BANDS.map((segment) => (
+          <span key={segment.label} style={{ color: segment.color }}>
+            {bandRange(segment.minInclusive, segment.maxExclusive)}
           </span>
         ))}
       </div>
@@ -92,30 +91,31 @@ export default function SaturationMeter({
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', fontSize: '0.8rem' }}>
         <div style={{ textAlign: 'center', padding: '0.5rem', backgroundColor: '#0d1829', borderRadius: '0.375rem' }}>
           <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Normalised index</p>
-          <p style={{ fontWeight: 800, fontSize: '1.25rem', color: band.color }}>{clamped}</p>
+          <p style={{ fontWeight: 800, fontSize: '1.25rem', color }}>{index === null ? 'N/A' : index.toFixed(1)}</p>
         </div>
-        {saturationPer100k != null && (
-          <div style={{ textAlign: 'center', padding: '0.5rem', backgroundColor: '#0d1829', borderRadius: '0.375rem' }}>
-            <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Competitors / 100k residents</p>
-            <p style={{ fontWeight: 800, fontSize: '1.25rem', color: '#dae2fd' }}>{saturationPer100k.toFixed(2)}</p>
-          </div>
-        )}
-        {competitorDensityPerKm2 != null && (
+        <div style={{ textAlign: 'center', padding: '0.5rem', backgroundColor: '#0d1829', borderRadius: '0.375rem' }}>
+          <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Competitors / 100k residents</p>
+          <p style={{ fontWeight: 800, fontSize: '1.25rem', color: '#dae2fd' }}>{formatMapNumber(calculation.competitorsPer100k, 2)}</p>
+        </div>
+        {competitorDensityPerKm2 != null && Number.isFinite(Number(competitorDensityPerKm2)) && (
           <div style={{ textAlign: 'center', padding: '0.5rem', backgroundColor: '#0d1829', borderRadius: '0.375rem' }}>
             <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Competitors / km²</p>
-            <p style={{ fontWeight: 800, fontSize: '1.25rem', color: '#dae2fd' }}>{competitorDensityPerKm2.toFixed(4)}</p>
+            <p style={{ fontWeight: 800, fontSize: '1.25rem', color: '#dae2fd' }}>{Number(competitorDensityPerKm2).toFixed(4)}</p>
           </div>
         )}
-        {competitorCount != null && (
+        {competitorCount != null && Number.isFinite(Number(competitorCount)) && (
           <div style={{ textAlign: 'center', padding: '0.5rem', backgroundColor: '#0d1829', borderRadius: '0.375rem' }}>
-            <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Observed competitors ({radiusKm}km)</p>
-            <p style={{ fontWeight: 800, fontSize: '1.25rem', color: '#dae2fd' }}>{competitorCount}</p>
+            <p style={{ opacity: 0.6, marginBottom: '0.1rem', fontSize: '0.7rem' }}>Observed competitors ({radiusKm ?? 'N/A'} km)</p>
+            <p style={{ fontWeight: 800, fontSize: '1.25rem', color: '#dae2fd' }}>{Number(competitorCount)}</p>
           </div>
         )}
       </div>
-      <p style={{ fontSize: '0.68rem', opacity: 0.6, margin: '0.6rem 0 0 0' }}>
-        Normalised index = min(100, competitors per 100k residents × 10), displayed for the meter only.
+
+      <p style={{ fontSize: '0.68rem', opacity: 0.6, margin: '0.6rem 0 0 0', lineHeight: 1.5 }}>
+        Raw competitors per 100,000 residents is the stored measure; the 0–100 index is presentation-only
+        (`min(100, raw × 10)`). Labels are Underserved / Balanced / Crowded / Saturated.
+        {!calculation.hasPopulationDenominator && ' No valid population denominator or stored raw value is available, so the index is N/A.'}
       </p>
-    </div>
+    </section>
   );
 }

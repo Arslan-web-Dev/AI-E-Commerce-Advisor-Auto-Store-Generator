@@ -1,6 +1,8 @@
 # Module 5 Completion Audit
 
 > **Historical status note (19 November 2026):** This completion record is not current runtime evidence. The supervised model remains deferred and current scoring uses provisional MCDA. See [the current delivery baseline](FINAL_DELIVERY_BASELINE.md).
+>
+> **Numbering note:** this audit uses the legacy “Module 5 = feasibility scoring” alias. The checked-in SRS competition/location/rent visualization module is FR-5.1–FR-5.7, documented after Task 6 in [the competition visualization module record](module-5-competition-visualization.md).
 
 ## Scope
 Audit of Module 5 (Feasibility Prediction and Score Classification) per the defined non-training completion criteria.

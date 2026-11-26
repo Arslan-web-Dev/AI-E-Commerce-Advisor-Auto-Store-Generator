@@ -34,6 +34,12 @@
 - **Cost categories**: `setup`, `rent_monthly`, `marketing_initial`, `logistics_per_order`.
 - **Missing rent**: `rent_monthly` is returned as unavailable (`0`–`0`) rather than a borrowed city rate.
 
+### E. Module 5 visualization consumers
+- The feasibility map reads competitors from the authenticated paginated competitor endpoint and reads rent areas from `GET /api/projects/[id]/rent-map` (owner/admin only). Neither UI path performs live scraping.
+- The rent-map route reads `rent_cache` and applies exact/nearby/city-or-district/province guards. Only same-geography area centroids inside a valid project radius are plotted; another city/province is never substituted.
+- Area markers carry `provenance`, `confidence`, `freshness`, `isStale`, source, sample size and recorded timestamp. The cache freshness cutoff for display is 7 days; manual estimates and stale cached values remain labelled, not upgraded.
+- `geometry` is always `null` and `markerType` is `centroid` because no boundary polygons are stored. Relative colour intensity is computed from the currently displayed sourced values, not from an absolute market threshold.
+
 ---
 
 ## 2. Environment Variables

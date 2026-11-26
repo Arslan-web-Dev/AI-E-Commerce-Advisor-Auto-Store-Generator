@@ -1,0 +1,89 @@
+{
+  "version": "v1.0-existing-ui-bands",
+  "authorityNote": "The checked-in SRS defines green/amber/red rent bands and the four saturation labels but not numeric rent cutoffs or saturation boundaries. These numeric values are the pre-Task-6 UI cutoffs, retained and centralized here; no new market thresholds are claimed.",
+  "rentBands": [
+    {
+      "label": "Well within budget",
+      "semanticColor": "green",
+      "color": "#4edea3",
+      "bg": "#4edea322",
+      "minInclusive": 0,
+      "maxExclusive": 30
+    },
+    {
+      "label": "Comfortable",
+      "semanticColor": "amber",
+      "color": "#4cd7f6",
+      "bg": "#4cd7f622",
+      "minInclusive": 30,
+      "maxExclusive": 60
+    },
+    {
+      "label": "Tight — consider negotiating",
+      "semanticColor": "amber",
+      "color": "#f59e0b",
+      "bg": "#f59e0b22",
+      "minInclusive": 60,
+      "maxExclusive": 85
+    },
+    {
+      "label": "Over budget",
+      "semanticColor": "red",
+      "color": "#ef4444",
+      "bg": "#ef444422",
+      "minInclusive": 85,
+      "maxExclusive": null
+    }
+  ],
+  "saturationBands": [
+    {
+      "label": "Underserved",
+      "color": "#4edea3",
+      "bg": "#4edea322",
+      "minInclusive": 0,
+      "maxExclusive": 25
+    },
+    {
+      "label": "Balanced",
+      "color": "#4cd7f6",
+      "bg": "#4cd7f622",
+      "minInclusive": 25,
+      "maxExclusive": 50
+    },
+    {
+      "label": "Crowded",
+      "color": "#f59e0b",
+      "bg": "#f59e0b22",
+      "minInclusive": 50,
+      "maxExclusive": 75
+    },
+    {
+      "label": "Saturated",
+      "color": "#ef4444",
+      "bg": "#ef444422",
+      "minInclusive": 75,
+      "maxExclusive": null
+    }
+  ],
+  "rentIntensityBands": [
+    { "key": "low", "label": "Low", "color": "#4edea3", "maxRatioExclusive": 0.25 },
+    { "key": "moderate", "label": "Moderate", "color": "#4cd7f6", "maxRatioExclusive": 0.5 },
+    { "key": "high", "label": "High", "color": "#f59e0b", "maxRatioExclusive": 0.75 },
+    { "key": "veryHigh", "label": "Very high", "color": "#ef4444", "maxRatioExclusive": null }
+  ],
+  "rentIntensityNote": "Rent overlay bands are relative to the minimum and maximum of the currently displayed sourced area values; they are not absolute market thresholds.",
+  "saturationNormalization": {
+    "formula": "min(100, competitorsPer100kResidents * 10)",
+    "assumption": "10 competitors per 100,000 residents maps to the top display band. This is a presentation normalization only; the raw unit remains visible.",
+    "validity": "null when population or competitor data is unavailable or non-positive"
+  },
+  "map": {
+    "provider": "Leaflet with OpenStreetMap raster tiles",
+    "tileUrl": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    "attributionText": "© OpenStreetMap contributors",
+    "attributionUrl": "https://www.openstreetmap.org/copyright",
+    "maxRadiusKm": 15,
+    "scriptTimeoutMs": 8000
+  },
+  "rentCacheFreshnessDays": 7
+}

@@ -11,6 +11,7 @@ import { Project } from '@/types/project';
 import { DemandTrendPoint, DemandTrendRecord } from '@/types/data-collection';
 import { getRegion } from '@/lib/geo/pakistan-geography';
 import { isUsableDemandTrend } from '@/lib/data-processing/trend-validity';
+import type { RentMapPayload } from '@/lib/visualization/rent-map';
 
 interface FeasibilityRun {
   id?: string;
@@ -66,6 +67,9 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
   const [features, setFeatures] = useState<ProjectFeatures | null>(null);
   const [latestProcessingRunId, setLatestProcessingRunId] = useState<string | null>(null);
   const [competitors, setCompetitors] = useState<FeasibilityCompetitor[]>([]);
+  const [competitorTotal, setCompetitorTotal] = useState(0);
+  const [rentMap, setRentMap] = useState<RentMapPayload | null>(null);
+  const [rentMapError, setRentMapError] = useState('');
   const [trendSeries, setTrendSeries] = useState<DemandTrendPoint[]>([]);
   const [trendProvenance, setTrendProvenance] = useState<string | null>(null);
   const [demandTrend, setDemandTrend] = useState<DemandTrendRecord | null>(null);
@@ -132,13 +136,42 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
           setTrendProvenance(null);
         }
 
-        // 5. Fetch live competitor observations only; never fabricate a sample.
-        const compRes = await fetch(`/api/projects/${projectId}/competitors`);
-        if (compRes.ok) {
-          const compData = await compRes.json();
-          setCompetitors(compData.competitors || []);
+        // 5. Fetch every stored competitor page. Filtering, sorting and
+        //    pagination in the table must use the real stored set, not page 1.
+        const pageSize = 50;
+        const firstCompRes = await fetch(`/api/projects/${projectId}/competitors?page=1&limit=${pageSize}`);
+        if (firstCompRes.ok) {
+          const firstCompData = await firstCompRes.json();
+          const parsedPages = Number(firstCompData.pagination?.total_pages ?? 1);
+          const totalPages = Number.isFinite(parsedPages) ? Math.max(1, Math.floor(parsedPages)) : 1;
+          const remaining = await Promise.all(
+            Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) =>
+              fetch(`/api/projects/${projectId}/competitors?page=${index + 2}&limit=${pageSize}`).then(async (res) => {
+                if (!res.ok) throw new Error(`Competitor page ${index + 2} could not be loaded.`);
+                return res.json();
+              })
+            )
+          );
+          const allRows = [firstCompData, ...remaining].flatMap((payload) =>
+            Array.isArray(payload?.competitors) ? payload.competitors : []
+          );
+          setCompetitors(allRows);
+          setCompetitorTotal(Number(firstCompData.pagination?.total ?? allRows.length));
         } else {
           setCompetitors([]);
+          setCompetitorTotal(0);
+        }
+
+        // 6. Read the stored rent-cache overlay through the owner-protected
+        //    route. No live rent provider is called from this page.
+        const rentRes = await fetch(`/api/projects/${projectId}/rent-map`);
+        if (rentRes.ok) {
+          setRentMap(await rentRes.json());
+          setRentMapError('');
+        } else {
+          const rentError = await rentRes.json().catch(() => ({}));
+          setRentMap(null);
+          setRentMapError(rentError.error || 'Stored rent overlay could not be loaded.');
         }
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Failed to load feasibility details.');
@@ -177,14 +210,13 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
   const regionLabel = regionInfo?.name ?? project?.region ?? null;
   // Coordinates are only used when the project actually has them. No Lahore
   // fallback: an unknown location must not be mapped as another region.
-  const hasCoordinates =
-    project?.lat != null &&
-    project?.lng != null &&
-    Number.isFinite(Number(project.lat)) &&
-    Number.isFinite(Number(project.lng));
-  const centerLat = hasCoordinates && project ? Number(project.lat) : null;
-  const centerLng = hasCoordinates && project ? Number(project.lng) : null;
-  const radiusKm = Number(project?.radius_km) || 10;
+  const centerLat =
+    project?.lat != null && Number.isFinite(Number(project.lat)) ? Number(project.lat) : null;
+  const centerLng =
+    project?.lng != null && Number.isFinite(Number(project.lng)) ? Number(project.lng) : null;
+  const parsedRadius = project?.radius_km == null ? null : Number(project.radius_km);
+  const radiusKm =
+    parsedRadius != null && Number.isFinite(parsedRadius) && parsedRadius > 0 ? parsedRadius : null;
   const projectCurrency = project?.budget_currency ?? 'PKR';
   const budgetAmount = Number(project?.budget_amount);
   const budgetLabel =
@@ -213,18 +245,25 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
         : scoringMode === 'unavailable'
           ? 'Unavailable'
           : 'Not scored';
-  const saturation = features?.saturation_index;
   const saturationPer100k =
-    saturation != null && Number.isFinite(Number(saturation)) ? Number(saturation) : null;
-  // Documented meter normalisation: 10 competitors per 100k residents = 100.
-  // The raw unit is always shown beside the normalised index.
-  const saturationDisplay =
-    saturationPer100k !== null ? Math.min(100, Math.max(0, saturationPer100k * 10)) : null;
+    features?.saturation_index != null &&
+    Number.isFinite(Number(features.saturation_index)) &&
+    Number(features.saturation_index) >= 0
+      ? Number(features.saturation_index)
+      : null;
   const monthlyRent =
     features?.estimated_monthly_rent != null && Number.isFinite(Number(features.estimated_monthly_rent))
       ? Number(features.estimated_monthly_rent)
       : null;
+  const featureBudget =
+    features?.user_budget != null &&
+    Number.isFinite(Number(features.user_budget)) &&
+    Number(features.user_budget) > 0
+      ? Number(features.user_budget)
+      : null;
   const featureCurrency = features?.currency ?? projectCurrency;
+  const gaugeCurrency: 'PKR' | 'USD' = featureCurrency === 'USD' ? 'USD' : 'PKR';
+  const matchedRent = rentMap?.matchedRent?.status === 'found' ? rentMap.matchedRent : null;
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0b1326', color: '#dae2fd', padding: '2rem 1.5rem' }}>
@@ -291,7 +330,7 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
               {project?.title || 'Retail Venture'}
             </h1>
             <p style={{ opacity: 0.7, fontSize: '0.875rem', margin: 0 }}>
-              Target Area: <strong>{project?.target_location || project?.city || 'Not specified'}</strong> · Radius: {radiusKm} km
+              Target Area: <strong>{project?.target_location || project?.city || 'Not specified'}</strong> · Radius: {radiusKm ?? 'N/A'} km
             </p>
           </div>
 
@@ -331,53 +370,64 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
           {/* Map */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <h2 style={{ fontSize: '1.125rem', fontWeight: 700, margin: 0 }}>Location & Competitor Radar</h2>
-            {hasCoordinates && centerLat != null && centerLng != null ? (
-              <CompetitorMap centerLat={centerLat} centerLng={centerLng} radiusKm={radiusKm} competitors={competitors} height="360px" />
-            ) : (
-              <div style={{ padding: '2rem', textAlign: 'center', border: '1px solid #2d3449', borderRadius: '0.5rem', backgroundColor: '#171f33', fontSize: '0.8rem', opacity: 0.75, lineHeight: 1.6 }}>
-                Coordinates are not available for this project, so the competitor radar cannot be centred. No other region’s coordinates are substituted.
-              </div>
+            <CompetitorMap
+              centerLat={centerLat}
+              centerLng={centerLng}
+              radiusKm={radiusKm}
+              competitors={competitors}
+              rentAreas={rentMap?.areas ?? []}
+              height="360px"
+            />
+            {rentMapError && (
+              <p role="status" style={{ fontSize: '0.74rem', color: '#fca5a5', margin: 0, lineHeight: 1.5 }}>
+                Stored rent overlay unavailable: {rentMapError}
+              </p>
+            )}
+            {rentMap && rentMap.status !== 'coverage' && (
+              <p style={{ fontSize: '0.74rem', opacity: 0.75, margin: 0, lineHeight: 1.5 }}>
+                Rent overlay: no in-scope stored area points ({rentMap.summary.status}). {rentMap.matchedRent.notes || 'No unrelated city or province was substituted.'}
+              </p>
+            )}
+            {rentMap && rentMap.summary.staleCount > 0 && (
+              <p style={{ fontSize: '0.72rem', color: '#f59e0b', margin: 0 }}>
+                {rentMap.summary.staleCount} stored rent area(s) are stale; {rentMap.summary.manualEstimateCount} are manual estimates.
+              </p>
             )}
           </div>
 
           {/* Gauges & Meters */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <h2 style={{ fontSize: '1.125rem', fontWeight: 700, margin: 0 }}>Market Signals & Economics</h2>
-            {monthlyRent != null && features?.user_budget != null && Number.isFinite(Number(features.user_budget)) && Number(features.user_budget) > 0 ? (
-              <RentBudgetGauge
-                rentMin={monthlyRent}
-                rentMax={monthlyRent}
-                budget={Number(features.user_budget)}
-                currency={featureCurrency === 'USD' ? 'USD' : 'PKR'}
-                area={project?.target_location || project?.city || undefined}
-              />
-            ) : (
-              <div style={{ padding: '1rem', border: '1px solid #f59e0b44', borderRadius: '0.5rem', backgroundColor: '#f59e0b15', fontSize: '0.78rem', color: '#f59e0b', lineHeight: 1.5 }}>
-                Sourced rent / budget data unavailable for this project. No regional benchmark is substituted as a local observation.
-              </div>
-            )}
-            {saturationDisplay !== null ? (
-              <SaturationMeter
-                score={saturationDisplay}
-                saturationPer100k={saturationPer100k ?? undefined}
-                competitorDensityPerKm2={
-                  features?.competitor_density_per_km2 != null &&
-                  Number.isFinite(Number(features.competitor_density_per_km2))
-                    ? Number(features.competitor_density_per_km2)
-                    : undefined
-                }
-                competitorCount={
-                  features?.competitors_count != null && Number.isFinite(Number(features.competitors_count))
-                    ? Number(features.competitors_count)
-                    : undefined
-                }
-                radiusKm={radiusKm}
-              />
-            ) : (
-              <div style={{ padding: '1rem', border: '1px solid #2d3449', borderRadius: '0.5rem', backgroundColor: '#171f33', fontSize: '0.78rem', opacity: 0.75, lineHeight: 1.5 }}>
-                Saturation index: N/A (competitors per 100,000 residents cannot be computed without in-scope population data).
-              </div>
-            )}
+            <RentBudgetGauge
+              monthlyRent={monthlyRent}
+              budget={featureBudget}
+              rentMin={matchedRent?.rent_min_pkr ?? null}
+              rentMax={matchedRent?.rent_max_pkr ?? null}
+              rentAvg={matchedRent?.rent_avg_pkr ?? null}
+              area={project?.target_location || project?.city || undefined}
+              currency={gaugeCurrency}
+              rentCurrency={gaugeCurrency}
+              budgetCurrency={gaugeCurrency}
+              confidence={matchedRent?.confidence ?? null}
+              provenance={matchedRent ? String(matchedRent.provenance) : null}
+              freshness={matchedRent?.freshness ?? null}
+              retrievedAt={matchedRent?.retrieved_at ?? null}
+            />
+            <SaturationMeter
+              saturationPer100k={saturationPer100k}
+              competitorDensityPerKm2={
+                features?.competitor_density_per_km2 != null &&
+                Number.isFinite(Number(features.competitor_density_per_km2))
+                  ? Number(features.competitor_density_per_km2)
+                  : null
+              }
+              competitorCount={
+                features?.competitors_count != null && Number.isFinite(Number(features.competitors_count))
+                  ? Number(features.competitors_count)
+                  : null
+              }
+              radiusKm={radiusKm}
+            />
           </div>
         </div>
 
@@ -393,12 +443,25 @@ export default function FeasibilityPage({ params }: { params: Promise<{ id: stri
                   : 'No in-scope demand trend observations are stored for this project.'}
             </span>
           </div>
-          <TrendChart trendSeries={trendSeries} category={project?.category || 'Retail'} />
+          <TrendChart
+            trendSeries={trendSeries}
+            category={project?.category || 'Retail'}
+            slope={demandTrend?.trend_slope ?? null}
+            sourceIsUsable={isUsableDemandTrend(demandTrend, project)}
+            isCached={demandTrend?.freshness === 'cached'}
+            isStale={demandTrend?.is_stale === true}
+            cachedAt={demandTrend?.cache_retrieved_at}
+            retrievedAt={demandTrend?.retrieved_at}
+            provider={demandTrend?.provider}
+            scope={demandTrend?.actual_geo_scope}
+            provenance={demandTrend ? String(demandTrend.provenance) : null}
+            freshness={demandTrend?.freshness ?? null}
+          />
         </div>
 
         {/* Competitor Breakdown Table */}
         <div>
-          <CompetitorTable competitors={competitors} projectName={project?.title ?? undefined} />
+          <CompetitorTable competitors={competitors} projectName={project?.title ?? undefined} totalCount={competitorTotal} />
         </div>
 
         {/* FR-4.1 engineered feature provenance */}

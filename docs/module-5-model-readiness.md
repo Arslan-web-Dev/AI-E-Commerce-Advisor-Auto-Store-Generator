@@ -1,5 +1,7 @@
 # Module 5: Model Readiness Assessment
 
+> **Legacy numbering note:** this readiness assessment uses the older scoring alias. Task 6 / checked-in SRS FR-5.1–FR-5.7 covers competition and visualization, not model training; see [module-5-competition-visualization.md](module-5-competition-visualization.md). OI-6 remains `BLOCKED`.
+
 ## 1. Objective
 Assess the availability, quality, and suitability of data for training a supervised Machine Learning (ML) model to predict e-commerce feasibility success, as required by FR-5.1.
 
