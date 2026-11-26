@@ -4,6 +4,7 @@ export { getConfiguredProviderNames, getProviderChain, getTaskPolicy } from './r
 export { executeAIGateway, getProviderOrderForTask } from './execute';
 export { InvalidAIOutputError, validateAIOutput } from './validate';
 export { createAIAttemptLogger } from '../monitoring/log-attempt';
+export { clearAIResponseCache } from '../cache/response-cache';
 export {
   AICircuitOpenError,
   AIQuotaExceededError,

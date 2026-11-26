@@ -10,6 +10,12 @@ const PROVIDERS: Record<AIProviderName, AIProvider> = {
   groq: groqProvider,
 };
 
+const PROVIDER_NAMES: readonly AIProviderName[] = ['openai', 'gemini', 'groq'];
+
+/**
+ * Server-owned defaults. A client can never pass a provider, task policy or
+ * owner id through the advisory API; only this module resolves routing.
+ */
 const TASK_POLICIES: Record<AITask, AITaskPolicy> = {
   advisory: {
     providers: ['openai', 'gemini', 'groq'],
@@ -28,29 +34,48 @@ const TASK_POLICIES: Record<AITask, AITaskPolicy> = {
   },
 };
 
-function isProviderConfigured(name: AIProviderName): boolean {
-  switch (name) {
-    case 'openai':
-      return Boolean(process.env.OPENAI_API_KEY?.trim());
-    case 'gemini':
-      return Boolean(process.env.GEMINI_API_KEY?.trim());
-    case 'groq':
-      return Boolean(process.env.GROQ_API_KEY?.trim() && process.env.GROQ_MODEL?.trim());
-  }
+const PROVIDER_ORDER_ENV: Partial<Record<AITask, string>> = {
+  advisory: 'AI_ADVISORY_PROVIDERS',
+};
+
+function parseProviderOverride(task: AITask): readonly AIProviderName[] | null {
+  const envName = PROVIDER_ORDER_ENV[task];
+  if (!envName) return null;
+  const raw = process.env[envName]?.trim();
+  if (!raw) return null;
+
+  const requested = raw.split(',').map((name) => name.trim().toLowerCase());
+  const valid = requested.every((name) =>
+    PROVIDER_NAMES.includes(name as AIProviderName),
+  );
+  if (!valid || requested.length === 0) return null;
+
+  return [...new Set(requested)] as AIProviderName[];
 }
 
-/** Returns only configured providers, retaining the task's required order. */
+function isProviderConfigured(name: AIProviderName): boolean {
+  const hasApiKey = Boolean(process.env[`${name.toUpperCase()}_API_KEY`]?.trim());
+  const hasModel = Boolean(process.env[`${name.toUpperCase()}_MODEL`]?.trim());
+  return hasApiKey && hasModel;
+}
+
+/** Returns a server-resolved copy of a task policy; never exposes credentials. */
+export function getTaskPolicy(task: AITask): AITaskPolicy {
+  const fallback = TASK_POLICIES[task];
+  const override = parseProviderOverride(task);
+  return {
+    providers: override ? [...override] : [...fallback.providers],
+    timeoutMs: fallback.timeoutMs,
+    maxAttemptsPerProvider: fallback.maxAttemptsPerProvider,
+  };
+}
+
 export function getProviderChain(task: AITask): AIProvider[] {
-  return TASK_POLICIES[task].providers
-    .filter(isProviderConfigured)
+  return getTaskPolicy(task)
+    .providers.filter(isProviderConfigured)
     .map((name) => PROVIDERS[name]);
 }
 
-export function getTaskPolicy(task: AITask): AITaskPolicy {
-  return TASK_POLICIES[task];
-}
-
-/** Exposes provider names only; never returns credential values. */
 export function getConfiguredProviderNames(task: AITask): AIProviderName[] {
-  return TASK_POLICIES[task].providers.filter(isProviderConfigured);
+  return getProviderChain(task).map((provider) => provider.name);
 }

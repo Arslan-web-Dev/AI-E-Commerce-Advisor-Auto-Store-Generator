@@ -13,14 +13,21 @@ type GroqCompletion = {
 };
 
 export class GroqProviderError extends Error {
+  readonly code: 'not_configured' | 'rate_limited' | 'server_error' | 'request_rejected' | 'invalid_response';
+  readonly retryable: boolean;
+  readonly status?: number;
+
   constructor(
     message: string,
-    readonly code: 'not_configured' | 'rate_limited' | 'server_error' | 'request_rejected' | 'invalid_response',
-    readonly retryable: boolean,
-    readonly status?: number,
+    code: 'not_configured' | 'rate_limited' | 'server_error' | 'request_rejected' | 'invalid_response',
+    retryable: boolean,
+    status?: number,
   ) {
     super(message);
     this.name = 'GroqProviderError';
+    this.code = code;
+    this.retryable = retryable;
+    this.status = status;
   }
 }
 
@@ -65,10 +72,9 @@ export const groqProvider: AIProvider = {
         signal,
         cache: 'no-store',
       });
-    } catch {
-      if (signal.aborted) {
-        throw new GroqProviderError('Groq request timed out or was cancelled.', 'server_error', true);
-      }
+    } catch (error) {
+      // Preserve the gateway's abort reason so timeouts are logged as `timeout`.
+      if (signal.aborted) throw error;
       throw new GroqProviderError('Groq network request failed.', 'server_error', true);
     }
 

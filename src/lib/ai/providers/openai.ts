@@ -2,7 +2,6 @@ import '../gateway/server-only';
 import type { AIProvider, AIProviderResult, AIRequest } from '../gateway/types';
 
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
-const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini';
 
 type OpenAIResponse = {
   status?: string;
@@ -18,27 +17,32 @@ type OpenAIResponse = {
 };
 
 export class OpenAIProviderError extends Error {
+  readonly code: 'not_configured' | 'rate_limited' | 'server_error' | 'request_rejected' | 'invalid_response';
+  readonly retryable: boolean;
+  readonly status?: number;
+
   constructor(
     message: string,
-    readonly code: 'not_configured' | 'rate_limited' | 'server_error' | 'request_rejected' | 'invalid_response',
-    readonly retryable: boolean,
-    readonly status?: number,
+    code: 'not_configured' | 'rate_limited' | 'server_error' | 'request_rejected' | 'invalid_response',
+    retryable: boolean,
+    status?: number,
   ) {
     super(message);
     this.name = 'OpenAIProviderError';
+    this.code = code;
+    this.retryable = retryable;
+    this.status = status;
   }
 }
 
 function getOpenAIConfig() {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) {
+  const model = process.env.OPENAI_MODEL?.trim();
+  if (!apiKey || !model) {
     throw new OpenAIProviderError('OpenAI provider is not configured.', 'not_configured', false);
   }
 
-  return {
-    apiKey,
-    model: process.env.OPENAI_MODEL?.trim() || DEFAULT_OPENAI_MODEL,
-  };
+  return { apiKey, model };
 }
 
 function extractOutputText(response: OpenAIResponse): string {
@@ -77,10 +81,9 @@ export const openAIProvider: AIProvider = {
         signal,
         cache: 'no-store',
       });
-    } catch {
-      if (signal.aborted) {
-        throw new OpenAIProviderError('OpenAI request timed out or was cancelled.', 'server_error', true);
-      }
+    } catch (error) {
+      // Preserve the gateway's abort reason so timeouts are logged as `timeout`.
+      if (signal.aborted) throw error;
       throw new OpenAIProviderError('OpenAI network request failed.', 'server_error', true);
     }
 

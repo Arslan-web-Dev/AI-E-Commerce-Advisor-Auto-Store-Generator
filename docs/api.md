@@ -592,6 +592,131 @@ Response includes `feasibility_score`, `risk_level`, `artifact_version`, applied
 
 ---
 
+## 4B. Module 6 Advisory API (`/api/projects/[id]/advisory`)
+
+All Module 6 endpoints require an authenticated session. The project owner is resolved from the session; a client cannot supply `owner_id`, a provider name, a model, or a feasibility run ID. Project/row access remains enforced by Supabase RLS.
+
+### `GET /api/projects/[id]/advisory`
+Returns the newest advisory report for the project. Owner-scoped checklist ticks are merged into `metadata.action_matrix` from `advisory_action_states`.
+
+- **Authentication**: Required
+- **Response `200 OK`**:
+  ```json
+  {
+    "data": {
+      "id": "advisory-uuid",
+      "project_id": "project-uuid",
+      "feasibility_run_id": "feasibility-uuid",
+      "status": "completed",
+      "budget_currency": "PKR",
+      "budget_total": 12000000,
+      "budget_allocations": {
+        "inventory": 4800000,
+        "marketing": 3000000,
+        "operations": 2400000,
+        "contingency": 1800000
+      },
+      "insights": { "strengths": [], "risks": [], "immediate_actions": [] },
+      "location_recommendations": {
+        "status": "unavailable",
+        "reason": { "en": "No verified comparable spatial dataset is available.", "ur_roman": "..." }
+      },
+      "metadata": {
+        "language_supported": ["en", "ur_roman"],
+        "generated_from_mode": "provisional_mcda",
+        "ai_summary": { "en": "...", "ur_roman": "..." },
+        "ai_provider": { "en": "gemini", "ur_roman": "rule_fallback" },
+        "ai_fallback": { "en": false, "ur_roman": true },
+        "risk_engine": {
+          "baselineRiskLevel": "moderate",
+          "combinedRiskLevel": "high",
+          "status": "partial",
+          "flags": [],
+          "triggeredFlags": [],
+          "unknownFlags": ["low_budget_ratio"],
+          "escalationScore": 1,
+          "disclaimer": "Transparent rule aggregation for planning only..."
+        },
+        "action_matrix": []
+      }
+    }
+  }
+  ```
+- `data: null` means no advisory report has been generated yet.
+
+### `POST /api/projects/[id]/advisory`
+Generates and saves an advisory report. The server resolves the latest **completed** `provisional_mcda` feasibility run with a numeric score and processing-run link. No request body is required or read.
+
+- **Authentication**: Required
+- **Request Body**: none; any client-supplied run ID/provider/owner is ignored.
+- **Response `200 OK`**: `{ "data": { ...report... } }`
+- **Response `404 Not Found`**: project not accessible, or no eligible completed feasibility run.
+- **Response `403 Forbidden`**: resolved run does not belong to the project.
+- **Response `500`**: report persistence failed. Provider exhaustion is not a 500; it produces bilingual deterministic fallback with `ai_fallback` set to `true`.
+
+### `PATCH /api/projects/[id]/advisory/actions/[actionId]`
+Saves the caller's action-matrix checklist state. `actionId` must be one of the stable IDs in the newest report's `metadata.action_matrix`.
+
+- **Authentication**: Required
+- **Request Body** (exactly one field):
+  ```json
+  { "completed": true }
+  ```
+- **Response `200 OK`**:
+  ```json
+  {
+    "data": {
+      "item_key": "reduce-rent-commitment",
+      "is_completed": true,
+      "completed_at": "2026-11-26T01:00:00Z",
+      "updated_at": "2026-11-26T01:00:00Z"
+    }
+  }
+  ```
+- **Response `400`**: invalid ID or body; extra fields are rejected.
+- **Response `404`**: no report or no such action in the report.
+
+### `POST /api/projects/[id]/advisory/simulation`
+Read-only budget re-simulation. It reuses stored Module 3 data, Module 4 feature engineering and provisional MCDA. It performs no external fetch, creates no run and does not modify the original report.
+
+- **Authentication**: Required
+- **Request Body**:
+  ```json
+  {
+    "budget_amount": 15000000,
+    "budget_currency": "PKR"
+  }
+  ```
+  `budget_currency` is optional and defaults to the project currency. Only these two fields are accepted.
+- **Validation**: PKR `10,000–50,000,000`; USD `50–200,000`; finite numeric amount or numeric string only (`422` otherwise).
+- **Response `200 OK`**:
+  ```json
+  {
+    "data": {
+      "scoringMode": "provisional_mcda",
+      "score": 0.68,
+      "riskLevel": "moderate",
+      "classification": "Medium Feasibility",
+      "budgetRatio": 1.25,
+      "rentToBudgetRatio": 0.2,
+      "engineeredVectorBudgetRatio": 0.625,
+      "budgetAmount": 15000000,
+      "budgetCurrency": "PKR",
+      "modelVersion": "provisional_mcda:v1.0-mcda",
+      "thresholdVersion": "v1.0-srs-fr4.4",
+      "deltas": { "score": 0.03, "riskLevel": null },
+      "disclaimers": [
+        "Estimate based on a model trained on limited data",
+        "Provisional MCDA index, not a calibrated probability from a supervised model."
+      ],
+      "persisted": false,
+      "externalFetch": false
+    }
+  }
+  ```
+
+---
+
 ## 5. Storefront Configurator & Compiler API (`/api/storefront` & `/api/projects/[id]/storefront-wizard`)
 
 ### `GET /api/storefront/variants`

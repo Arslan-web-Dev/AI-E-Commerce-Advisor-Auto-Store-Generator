@@ -14,6 +14,13 @@ registerHooks({
   resolve(specifier, context, nextResolve) {
     let target = null;
 
+    if (specifier === 'server-only') {
+      return {
+        url: pathToFileURL(path.join(projectRoot, 'tests/helpers/server-only-stub.mjs')).href,
+        shortCircuit: true,
+      };
+    }
+
     if (specifier.startsWith('@/')) {
       target = path.join(projectRoot, 'src', specifier.slice(2));
     } else if (specifier.startsWith('.') && context.parentURL) {

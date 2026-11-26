@@ -2,7 +2,6 @@ import '../gateway/server-only';
 import type { AIProvider, AIProviderResult, AIRequest } from '../gateway/types';
 
 const GEMINI_INTERACTIONS_URL = 'https://generativelanguage.googleapis.com/v1beta/interactions';
-const DEFAULT_GEMINI_MODEL = 'gemini-3.8-flash';
 
 type GeminiInteraction = {
   status?: string;
@@ -18,27 +17,32 @@ type GeminiInteraction = {
 };
 
 export class GeminiProviderError extends Error {
+  readonly code: 'not_configured' | 'rate_limited' | 'server_error' | 'request_rejected' | 'invalid_response';
+  readonly retryable: boolean;
+  readonly status?: number;
+
   constructor(
     message: string,
-    readonly code: 'not_configured' | 'rate_limited' | 'server_error' | 'request_rejected' | 'invalid_response',
-    readonly retryable: boolean,
-    readonly status?: number,
+    code: 'not_configured' | 'rate_limited' | 'server_error' | 'request_rejected' | 'invalid_response',
+    retryable: boolean,
+    status?: number,
   ) {
     super(message);
     this.name = 'GeminiProviderError';
+    this.code = code;
+    this.retryable = retryable;
+    this.status = status;
   }
 }
 
 function getGeminiConfig() {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
-  if (!apiKey) {
+  const model = process.env.GEMINI_MODEL?.trim();
+  if (!apiKey || !model) {
     throw new GeminiProviderError('Gemini provider is not configured.', 'not_configured', false);
   }
 
-  return {
-    apiKey,
-    model: process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
-  };
+  return { apiKey, model };
 }
 
 function extractOutputText(interaction: GeminiInteraction): string {
@@ -81,9 +85,8 @@ export const geminiProvider: AIProvider = {
       });
     } catch (error) {
       if (error instanceof GeminiProviderError) throw error;
-      if (signal.aborted) {
-        throw new GeminiProviderError('Gemini request timed out or was cancelled.', 'server_error', true);
-      }
+      // Preserve the gateway's abort reason so timeouts are logged as `timeout`.
+      if (signal.aborted) throw error;
       throw new GeminiProviderError('Gemini network request failed.', 'server_error', true);
     }
 

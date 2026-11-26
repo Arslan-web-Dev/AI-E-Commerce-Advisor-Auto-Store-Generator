@@ -1,5 +1,6 @@
 import '../gateway/server-only';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { sanitizeErrorCode } from '../prompt-hygiene';
 import type { AIAttemptLog } from '../gateway/types';
 
 /**
@@ -16,7 +17,7 @@ export function createAIAttemptLogger(ownerId: string | null) {
         provider: attempt.provider,
         success: attempt.success,
         latency_ms: attempt.latencyMs,
-        error_code: attempt.errorCode ?? null,
+        error_code: attempt.errorCode ? sanitizeErrorCode(attempt.errorCode) : null,
       });
 
       if (error) {

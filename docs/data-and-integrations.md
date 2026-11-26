@@ -40,6 +40,14 @@
 - Area markers carry `provenance`, `confidence`, `freshness`, `isStale`, source, sample size and recorded timestamp. The cache freshness cutoff for display is 7 days; manual estimates and stale cached values remain labelled, not upgraded.
 - `geometry` is always `null` and `markerType` is `centroid` because no boundary polygons are stored. Relative colour intensity is computed from the currently displayed sourced values, not from an absolute market threshold.
 
+### F. Module 6 advisory providers and stored-data simulation
+- Provider order is server-owned: advisory uses OpenAI → Gemini → Groq by default; `AI_ADVISORY_PROVIDERS` may override the order with validated names only.
+- A provider is eligible only when **both** its `*_API_KEY` and `*_MODEL` are configured. No runtime model-ID fallback exists. Unconfigured providers are skipped, and exhausted/failed providers return deterministic stored-facts advice.
+- Requests carry no tools and only a trusted computed-facts JSON block plus a delimited, sanitized project description. Model output must be strict JSON matching the server schema; invented numbers and Urdu script are rejected.
+- Every attempt is written to `ai_call_log` with sanitized telemetry only. The 3-failure/5-minute circuit, 20-call/hour user quota and 10-minute language cache are **process-local**; a shared store is needed for serverless-wide guarantees.
+- `POST /api/projects/[id]/advisory/simulation` reads only stored collection/feature rows and recomputes provisional MCDA. It performs no provider call, external fetch, new run or report mutation. OI-6 remains open; no supervised model is activated.
+- Advisory checklist ticks are stored in `advisory_action_states`, with RLS restricting rows to `auth.uid()` and to reports whose project the caller may access.
+
 ---
 
 ## 2. Environment Variables
@@ -51,6 +59,17 @@ FORCE_DEMO_DATA=false
 CRON_SECRET=change-me-to-a-long-random-cron-secret
 ML_SERVICE_URL=http://127.0.0.1:8000
 ML_SERVICE_API_KEY=your-secure-ml-service-api-key-here
+
+# Module 6 (server-only; never prefix with NEXT_PUBLIC_)
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4o-mini
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
+GROQ_API_KEY=
+GROQ_MODEL=llama-3.3-70b-versatile
+AI_PROMPT_VERSION=v1
+AI_USER_HOURLY_QUOTA=20
+AI_ADVISORY_PROVIDERS=openai,gemini,groq
 ```
 
 ---

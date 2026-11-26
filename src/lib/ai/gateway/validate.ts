@@ -25,51 +25,74 @@ export class InvalidAIOutputError extends Error {
   }
 }
 
+const ALLOWED_TYPES = new Set(['object', 'array', 'string', 'number', 'integer', 'boolean', 'null']);
+
 function matchesSchema(value: unknown, schema: JSONSchema): boolean {
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return false;
+
+  if (schema.type !== undefined && !ALLOWED_TYPES.has(schema.type)) return false;
   if (schema.enum && !schema.enum.some((entry) => Object.is(entry, value))) return false;
+
+  if (schema.type === undefined && !schema.enum) return false;
 
   switch (schema.type) {
     case 'object': {
       if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
       const record = value as Record<string, unknown>;
-      if (schema.required?.some((key) => !(key in record))) return false;
+      if (schema.required) {
+        for (const key of schema.required) {
+          if (!(key in record)) return false;
+        }
+      }
       if (schema.additionalProperties === false && schema.properties) {
         if (Object.keys(record).some((key) => !(key in schema.properties!))) return false;
       }
-      return Object.entries(schema.properties ?? {}).every(([key, propertySchema]) =>
-        !(key in record) || matchesSchema(record[key], propertySchema),
-      );
+      if (schema.properties) {
+        for (const [key, childSchema] of Object.entries(schema.properties)) {
+          if (key in record && !matchesSchema(record[key], childSchema)) return false;
+        }
+      }
+      return true;
     }
-    case 'array':
-      return Array.isArray(value) &&
-        (schema.minItems === undefined || value.length >= schema.minItems) &&
-        (schema.maxItems === undefined || value.length <= schema.maxItems) &&
-        (!schema.items || value.every((item) => matchesSchema(item, schema.items!)));
-    case 'string':
-      return typeof value === 'string' &&
-        (schema.minLength === undefined || value.length >= schema.minLength) &&
-        (schema.maxLength === undefined || value.length <= schema.maxLength);
-    case 'integer':
-      return typeof value === 'number' && Number.isInteger(value) &&
-        (schema.minimum === undefined || value >= schema.minimum) &&
-        (schema.maximum === undefined || value <= schema.maximum);
-    case 'number':
-      return typeof value === 'number' && Number.isFinite(value) &&
-        (schema.minimum === undefined || value >= schema.minimum) &&
-        (schema.maximum === undefined || value <= schema.maximum);
+    case 'array': {
+      if (!Array.isArray(value)) return false;
+      if (schema.minItems !== undefined && value.length < schema.minItems) return false;
+      if (schema.maxItems !== undefined && value.length > schema.maxItems) return false;
+      if (schema.items && value.some((entry) => !matchesSchema(entry, schema.items!))) return false;
+      return true;
+    }
+    case 'string': {
+      if (typeof value !== 'string') return false;
+      if (schema.minLength !== undefined && value.length < schema.minLength) return false;
+      if (schema.maxLength !== undefined && value.length > schema.maxLength) return false;
+      return true;
+    }
+    case 'integer': {
+      if (typeof value !== 'number' || !Number.isInteger(value)) return false;
+      if (schema.minimum !== undefined && value < schema.minimum) return false;
+      if (schema.maximum !== undefined && value > schema.maximum) return false;
+      return true;
+    }
+    case 'number': {
+      if (typeof value !== 'number' || !Number.isFinite(value)) return false;
+      if (schema.minimum !== undefined && value < schema.minimum) return false;
+      if (schema.maximum !== undefined && value > schema.maximum) return false;
+      return true;
+    }
     case 'boolean':
       return typeof value === 'boolean';
     case 'null':
       return value === null;
     default:
-      return true;
+      return schema.enum ? true : false;
   }
 }
 
-/** Validates only the JSON Schema subset used by server-owned task contracts. */
+/** Requires strict JSON for structured tasks; unshaped text tasks stay trimmed-only. */
 export function validateAIOutput(content: string, schema?: Record<string, unknown>): string {
+  if (typeof content !== 'string') throw new InvalidAIOutputError();
   const trimmed = content.trim();
-  if (!trimmed) throw new InvalidAIOutputError();
+  if (!trimmed || trimmed.length > 100_000) throw new InvalidAIOutputError();
   if (!schema) return trimmed;
 
   let parsed: unknown;

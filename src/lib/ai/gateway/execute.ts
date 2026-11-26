@@ -2,12 +2,14 @@ import './server-only';
 import { getProviderChain, getTaskPolicy } from './router';
 import { validateAIOutput } from './validate';
 import {
+  AIQuotaExceededError,
   isProviderCircuitOpen,
   recordProviderFailure,
   recordProviderSuccess,
   reserveUserRequest,
 } from './resilience';
 import { cacheAIResponse, getCachedAIResponse } from '../cache/response-cache';
+import { sanitizeErrorCode, sanitizeRequestId } from '../prompt-hygiene';
 import type {
   AIAttemptLog,
   AIGatewayResult,
@@ -29,12 +31,14 @@ export interface ExecuteAIGatewayOptions {
   ownerId?: string | null;
   /** Receives sanitized telemetry only. Logger failures never prevent fallback or routing. */
   onAttempt?: (attempt: AIAttemptLog) => void | Promise<void>;
+  /** Optional semantic check after schema validation; throwing counts as provider failure. */
+  validateOutput?: (content: string) => void;
 }
 
 function safeErrorCode(error: unknown): string {
   if (error && typeof error === 'object' && 'code' in error) {
     const code = (error as ProviderFailure).code;
-    if (typeof code === 'string' && /^[a-z0-9_]{1,40}$/i.test(code)) return code;
+    if (typeof code === 'string' && sanitizeErrorCode(code) === code) return code;
   }
   if (error instanceof Error && /abort|timeout/i.test(error.name + error.message)) return 'timeout';
   return 'provider_error';
@@ -44,17 +48,47 @@ function isRetryable(error: unknown): boolean {
   return Boolean(error && typeof error === 'object' && 'retryable' in error && (error as ProviderFailure).retryable);
 }
 
+function normalizeTimeoutMs(value: number | undefined, fallbackMs: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return fallbackMs;
+  return Math.min(120_000, Math.max(1, Math.floor(value)));
+}
+
+/** Module 6 accepts exactly two languages; a runtime guard covers untyped callers. */
+function assertSupportedRequest(request: AIRequest): void {
+  if (request.language !== undefined && !['en', 'ur_roman'].includes(request.language)) {
+    throw new Error('Unsupported AI language.');
+  }
+  if (!request.systemPrompt?.trim() || !request.prompt?.trim()) {
+    throw new Error('AI prompt must not be empty.');
+  }
+}
+
 function createAttemptSignal(parent: AbortSignal | undefined, timeoutMs: number) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(new Error('timeout')), timeoutMs);
+  const timeoutError: ProviderFailure = new Error('AI attempt timed out.');
+  timeoutError.code = 'timeout';
+  timeoutError.retryable = true;
+  let timedOut = false;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    const timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort(timeoutError);
+      reject(timeoutError);
+    }, timeoutMs);
+    controller.signal.addEventListener('abort', () => clearTimeout(timer), { once: true });
+  });
+
   const abortParent = () => controller.abort(parent?.reason);
   if (parent?.aborted) abortParent();
   else parent?.addEventListener('abort', abortParent, { once: true });
 
   return {
     signal: controller.signal,
+    timeoutPromise,
+    isTimedOut: () => timedOut,
     cleanup() {
-      clearTimeout(timer);
+      controller.abort();
       parent?.removeEventListener('abort', abortParent);
     },
   };
@@ -73,23 +107,65 @@ async function reportAttempt(
   }
 }
 
+async function deterministicResult(
+  request: AIRequest,
+  options: ExecuteAIGatewayOptions,
+  attempts: AIAttemptLog[],
+  requestId: string,
+  fallbackErrorCode?: string,
+): Promise<AIGatewayResult> {
+  const content = (await options.fallback()).trim();
+  await reportAttempt({
+    requestId,
+    task: request.task,
+    provider: 'rule_fallback',
+    success: true,
+    latencyMs: 0,
+    ...(fallbackErrorCode ? { errorCode: sanitizeErrorCode(fallbackErrorCode) } : {}),
+  }, attempts, options.onAttempt);
+
+  return {
+    content,
+    provider: 'rule_fallback',
+    model: 'deterministic',
+    fallback: true,
+    attempts,
+  };
+}
+
 /** Runs providers in task policy order and returns deterministic fallback after exhaustion. */
 export async function executeAIGateway(
   request: AIRequest,
   options: ExecuteAIGatewayOptions,
 ): Promise<AIGatewayResult> {
+  assertSupportedRequest(request);
   const policy = getTaskPolicy(request.task);
   const providers = getProviderChain(request.task);
   const attempts: AIAttemptLog[] = [];
-  const timeoutMs = request.timeoutMs ?? policy.timeoutMs;
+  const requestId = sanitizeRequestId(request.requestId);
+  const timeoutMs = normalizeTimeoutMs(request.timeoutMs ?? policy.timeoutMs, policy.timeoutMs);
+
   const cached = getCachedAIResponse(request, options.ownerId ?? null);
   if (cached) return cached;
-  reserveUserRequest(options.ownerId ?? null);
+
+  try {
+    reserveUserRequest(options.ownerId ?? null);
+  } catch (error) {
+    if (error instanceof AIQuotaExceededError) {
+      // A quota limit must degrade to deterministic advice, never an error page.
+      return deterministicResult(request, options, attempts, requestId, error.code);
+    }
+    throw error;
+  }
+
+  if (options.signal?.aborted) {
+    throw new Error('AI request was cancelled before provider selection.');
+  }
 
   for (const provider of providers) {
     if (isProviderCircuitOpen(provider.name)) {
       await reportAttempt({
-        requestId: request.requestId,
+        requestId,
         task: request.task,
         provider: provider.name,
         success: false,
@@ -105,55 +181,56 @@ export async function executeAIGateway(
       const startedAt = Date.now();
       const timed = createAttemptSignal(options.signal, timeoutMs);
       try {
-        const result = await provider.generate(request, timed.signal);
+        const result = await Promise.race([
+          provider.generate(request, timed.signal),
+          timed.timeoutPromise,
+        ]);
         const validatedContent = validateAIOutput(result.content, request.outputSchema);
+        options.validateOutput?.(validatedContent);
         recordProviderSuccess(provider.name);
         await reportAttempt({
-          requestId: request.requestId,
+          requestId,
           task: request.task,
           provider: provider.name,
           success: true,
           latencyMs: Math.max(0, Date.now() - startedAt),
         }, attempts, options.onAttempt);
 
-        const gatewayResult = { ...result, content: validatedContent, fallback: false, attempts };
+        const gatewayResult: AIGatewayResult = {
+          ...result,
+          content: validatedContent,
+          fallback: false,
+          attempts,
+        };
         cacheAIResponse(request, options.ownerId ?? null, gatewayResult);
         return gatewayResult;
       } catch (error) {
+        const effectiveError = timed.isTimedOut()
+          ? Object.assign(new Error('AI attempt timed out.'), { code: 'timeout', retryable: true })
+          : error;
         recordProviderFailure(provider.name);
         await reportAttempt({
-          requestId: request.requestId,
+          requestId,
           task: request.task,
           provider: provider.name,
           success: false,
           latencyMs: Math.max(0, Date.now() - startedAt),
-          errorCode: safeErrorCode(error),
+          errorCode: safeErrorCode(effectiveError),
         }, attempts, options.onAttempt);
 
         if (options.signal?.aborted) break;
-        if (attemptNumber >= policy.maxAttemptsPerProvider || !isRetryable(error)) break;
+        if (attemptNumber >= policy.maxAttemptsPerProvider || !isRetryable(effectiveError)) break;
       } finally {
         timed.cleanup();
       }
     }
   }
 
-  const content = (await options.fallback()).trim();
-  await reportAttempt({
-    requestId: request.requestId,
-    task: request.task,
-    provider: 'rule_fallback',
-    success: true,
-    latencyMs: 0,
-  }, attempts, options.onAttempt);
+  if (options.signal?.aborted) {
+    throw new Error('AI request was cancelled before fallback.');
+  }
 
-  return {
-    content,
-    provider: 'rule_fallback',
-    model: 'deterministic',
-    fallback: true,
-    attempts,
-  };
+  return deterministicResult(request, options, attempts, requestId);
 }
 
 /** Exposes the actual order for diagnostics without exposing provider configuration values. */
