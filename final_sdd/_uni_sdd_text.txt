@@ -1,0 +1,640 @@
+
+===== PAGE 1 =====
+COMSATS University Islamabad, Vehari Campus,
+Pakistan
+Department of Computer Science
+AI-Powered E-Commerce Feasibility Advisor
+& Auto Store Generator
+A Software Design Document (SDD) Submitted in Partial Fulfillment of the
+Requirements
+for the Degree of
+Bachelor of Science in Computer Science
+Submitted By
+Muhammad Arslan (FAL-23-BCS-030)
+Muhammad Asif (FAL-23-BCS-041)
+Supervisor
+Dr. Muhammad Tausif
+Session: Fall 2023–2027
+
+===== PAGE 2 =====
+Dedication
+We dedicate this work to our parents, whose unwavering support, sacrifices, and prayers have
+been the foundation of our academic journey. Their encouragement, patience, and belief in our
+abilities have guided us throughout this project.
+We also dedicate this work to our teachers and mentors who inspired us to pursue knowledge
+with dedication, curiosity, and integrity.
+
+===== PAGE 3 =====
+Acknowledgement
+All praise and gratitude are due for the successful completion of this work. We sincerely
+thank our project supervisor, Dr. Muhammad Tausif, for his guidance, valuable suggestions, and
+constructive feedback throughout the development and documentation of this project.
+Special thanks are extended to the faculty members of the Department of Computer Science,
+COMSATS University Islamabad, Vehari Campus, for their academic support and encouragement.
+We are deeply grateful to our parents and families for their unwavering support, motivation,
+and prayers. Finally, we appreciate everyone who directly or indirectly contributed to this project.
+
+===== PAGE 4 =====
+Certificate of Approval
+This is to certify that the Final Year Project titled “AI-Powered E-Commerce Feasibility
+Advisor & Auto Store Generator” has been developed by Muhammad Arslan (FAL-23-
+BCS-030) and Muhammad Asif (FAL-23-BCS-041) under the supervision of Dr. Muham-
+mad Tausif and that, in his opinion, the project is adequate in scope and quality for the award
+of the degree of Bachelor of Science in Computer Science.
+Supervisor
+External Examiner
+Head of Department
+Department of Computer Science
+
+===== PAGE 5 =====
+Contents
+List of Figures . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . v
+List of Tables . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . vi
+1 Software Design 1
+1.1 Introduction to Software Design . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+1.2 Design Methodology and Software Process Model . . . . . . . . . . . . . . . . . . 1
+1.2.1 Design Methodology . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+1.2.2 Software Process Model . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+1.3 System Overview . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+1.4 Architectural Design . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+1.5 Design Models . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+1.5.1 Activity Diagrams . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+1.5.1.1 Module 1: Authentication and Role-Based Access Control . . . . 6
+1.5.1.2 Modules 2–6: Feasibility Analysis and AI Advisory . . . . . . . . 8
+1.5.1.3 Module 7: Interactive Theme Configurator . . . . . . . . . . . . . 10
+1.5.1.4 Module 8: Storefront and Cash-on-Delivery Order Processing . . 12
+1.5.1.5 Administrator Operations . . . . . . . . . . . . . . . . . . . . . . 14
+1.5.2 Class Diagram . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+1.5.3 Sequence Diagrams . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+1.5.3.1 Feasibility Analysis and AI Advice . . . . . . . . . . . . . . . . . 19
+1.5.3.2 COD Checkout and Order Processing . . . . . . . . . . . . . . . . 22
+1.5.4 State Transition Diagram . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+1.6 Data Flow Diagrams . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+1.6.1 Level 1 Data Flow Diagram . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+1.6.2 Level 2 Data Flow Diagram: Feasibility Analysis . . . . . . . . . . . . . . . 30
+1.7 Data Design . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+1.7.1 Database Architecture . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+1.7.2 Entity Relationship Diagram . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+1.7.3 Database Schema Diagram . . . . . . . . . . . . . . . . . . . . . . . . . . . 35
+1.7.4 Database Tables and Data Dictionary . . . . . . . . . . . . . . . . . . . . . 35
+1.7.5 Relationships, Integrity and Indexing . . . . . . . . . . . . . . . . . . . . . 37
+1.7.6 Security and Tenant Isolation . . . . . . . . . . . . . . . . . . . . . . . . . 37
+1.7.7 Scalability and Reliability . . . . . . . . . . . . . . . . . . . . . . . . . . . 37
+1.8 Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+2 Implementation 40
+2.1 Introduction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 40
+2.2 Development Environment . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 40
+2.2.1 Development Tools and Operating Environment . . . . . . . . . . . . . . . 41
+iv
+
+===== PAGE 6 =====
+2.3 Implementation Progress and Module Status . . . . . . . . . . . . . . . . . . . . . 41
+2.3.1 How to Demonstrate the 40% Minimum . . . . . . . . . . . . . . . . . . . 41
+2.4 Core Module Implementation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 42
+2.4.1 Module 1: User Authentication and RBAC Engine . . . . . . . . . . . . . 42
+2.4.2 Module 2: Business Idea Input and Location Wizard . . . . . . . . . . . . 42
+2.4.3 Module 3: Smart Data Aggregation . . . . . . . . . . . . . . . . . . . . . . 43
+2.4.4 Module 4: Feature Engineering and XGBoost Scoring . . . . . . . . . . . . 43
+2.4.5 Module 5: Competition, Location and Interactive Rent Map . . . . . . . . 43
+2.4.6 Module 6: Multi-AI Advisory, Risk Engine and Action Matrix . . . . . . . 43
+2.4.7 Module 7: Interactive MCQ Theme Configurator . . . . . . . . . . . . . . 44
+2.4.8 Module 8: Multi-Tenant Deployment, Automated SEO and Admin Dashboard 44
+2.5 Algorithm Implementation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+2.5.1 Algorithm 1: Feasibility Analysis Pipeline . . . . . . . . . . . . . . . . . . 44
+2.5.2 Algorithm 2: Multi-Provider AI Routing . . . . . . . . . . . . . . . . . . . 45
+2.5.3 Algorithm 3: Atomic COD Order Placement . . . . . . . . . . . . . . . . . 46
+2.5.4 Algorithm 4: Order Status Advancement . . . . . . . . . . . . . . . . . . . 46
+2.6 External APIs, Libraries and SDKs . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+2.6.1 Integration and Error Handling . . . . . . . . . . . . . . . . . . . . . . . . 47
+2.7 User Interface Implementation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+2.7.1 UI Design Approach . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+2.7.2 Screen-wise Implementation and Screenshot Evidence . . . . . . . . . . . . 48
+2.7.2.1 Screen 1: Registration and Login . . . . . . . . . . . . . . . . . . 48
+2.7.2.2 Screen 2: Business Idea and Location Wizard . . . . . . . . . . . 48
+2.7.2.3 Screen 3: Feasibility Dashboard . . . . . . . . . . . . . . . . . . . 49
+2.7.2.4 Screen 4: Competition and Rent Map . . . . . . . . . . . . . . . 49
+2.7.2.5 Screen 5: AI Advisory and Action Matrix . . . . . . . . . . . . . 49
+2.7.2.6 Screen 6: Theme Configurator . . . . . . . . . . . . . . . . . . . . 50
+2.7.2.7 Screen 7: Published Tenant Storefront . . . . . . . . . . . . . . . 50
+2.7.2.8 Screen 8: COD Checkout and Confirmation . . . . . . . . . . . . 51
+2.7.2.9 Screen 9: Owner Product and Order Dashboard . . . . . . . . . . 51
+2.7.2.10 Screen 10: System Administrator Dashboard . . . . . . . . . . . . 51
+2.7.3 Navigation Flow . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 52
+2.7.4 Responsiveness and Performance . . . . . . . . . . . . . . . . . . . . . . . 52
+2.8 Deployment . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+2.9 Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+v
+
+===== PAGE 7 =====
+List of Figures
+1.1 System context diagram of the AI-Powered E-Commerce Feasibility Advisor and
+Auto Store Generator. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+1.2 Logical system architecture and interactions between the web, analytics, data and
+external-service tiers. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+1.3 Activity diagram for user authentication and role-based access. . . . . . . . . . . . 7
+1.4 Activity diagram for business feasibility analysis and advisory generation. . . . . . 9
+1.5 Activity diagram for the four-step MCQ theme configurator. . . . . . . . . . . . . 11
+1.6 Activity diagram for guest browsing and Cash-on-Delivery order processing. . . . 13
+1.7 Activity diagram for system administrator operations. . . . . . . . . . . . . . . . . 15
+1.8 Class diagram of the Next.js application and FastAPI analytics service. . . . . . . 17
+1.9 Sequence diagram for feasibility analysis and AI advice generation. . . . . . . . . 20
+1.10 Sequence diagram for tenant storefront COD checkout and order processing. . . . 23
+1.11 State transition diagram for the order fulfilment lifecycle. . . . . . . . . . . . . . . 26
+1.12 Level 1 data flow diagram of the complete platform. . . . . . . . . . . . . . . . . . 28
+1.13 Level 2 data flow diagram for the feasibility analysis pipeline. . . . . . . . . . . . . 31
+1.14 Entity relationship diagram of the shared PostgreSQL data model. . . . . . . . . . 34
+1.15 Database schema diagram showing principal columns, data types and key references. 36
+2.1 Registration and login interface for owner and administrator access. . . . . . . . . 48
+2.2 Wizard interface for entering business idea, location and budget. . . . . . . . . . . 49
+2.3 Dashboard showing the feasibility score, risk level and supporting analysis. . . . . 49
+2.4 Interactive location map with competitor and rent indicators. . . . . . . . . . . . 50
+2.5 AI-generated or fallback advice with prioritised business actions. . . . . . . . . . . 50
+2.6 Theme configurator showing the design choices and preview. . . . . . . . . . . . . 51
+2.7 Public tenant storefront rendered from its saved store configuration. . . . . . . . . 51
+2.8 Guest checkout form and confirmation for a Cash-on-Delivery order. . . . . . . . . 52
+2.9 Owner interface for product management and order fulfilment. . . . . . . . . . . . 52
+2.10 Administrative interface for monitoring and platform maintenance. . . . . . . . . 53
+vi
+
+===== PAGE 8 =====
+List of Tables
+1.1 Profiles table data dictionary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35
+1.2 Feasibility reports table data dictionary . . . . . . . . . . . . . . . . . . . . . . . . 35
+1.3 Stores and products data dictionary . . . . . . . . . . . . . . . . . . . . . . . . . . 37
+1.4 Orders, order items and AI call log data dictionary . . . . . . . . . . . . . . . . . 38
+1.5 Rent cache data dictionary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39
+2.1 Specified development environment and technology stack . . . . . . . . . . . . . . 40
+2.2 Module implementation and evidence checklist . . . . . . . . . . . . . . . . . . . . 41
+2.3 Evidence-based implementation progress worksheet . . . . . . . . . . . . . . . . . 42
+2.4 External APIs and service integrations specified by the SRS . . . . . . . . . . . . 47
+2.5 Specified deployment components and verification evidence . . . . . . . . . . . . . 53
+vii
+
+===== PAGE 10 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.1: System context diagram of the AI-Powered E-Commerce Feasibility Advisor and Auto Store Generator.
+2
+
+===== PAGE 11 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.1 defines the system boundary and its external interactions. The entrepreneur and
+administrator exchange requests and results with the platform. Guest customers interact with
+published tenant storefronts. The platform communicates with Overpass, Google Trends, rent
+data sources, AI providers, the Vercel Domains API and the GitHub REST API. The diagram
+distinguishes human actors from external services and shows the principal information exchanged.
+3
+
+===== PAGE 12 =====
+COMSATS University Islamabad Final Year Project
+1.4 Architectural Design
+The system follows the decoupled, multi-tier architecture described in the SRS. The browser
+communicates with the Next.js application hosted on Vercel. Tenant middleware resolves the
+hostname to a store slug and applies route guards. Next.js communicates with Supabase for
+authentication and persistent data. It calls the FastAPI analytics service for feasibility analysis.
+The analytics service retrieves external data, engineers features and runs the versioned XGBoost
+model. The application uses a multi-provider AI router to generate structured advice. Store
+assets are held in Supabase Storage. Domain provisioning is delegated to the Vercel Domains
+API.
+Figure 1.2 presents the main runtime components and their connections. The web tier owns
+user-facing workflows and tenant resolution. The analytics tier owns data aggregation, feature
+engineering, scoring and risk calculation. The data tier stores profiles, reports, stores, products
+and orders under RLS. External services are isolated behind API clients or provider adapters.
+This arrangement keeps machine-learning processing separate from request handling in the web
+tier.
+4
+
+===== PAGE 13 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.2: Logical system architecture and interactions between the web, analytics, data and
+external-service tiers.
+5
+
+===== PAGE 14 =====
+COMSATS University Islamabad Final Year Project
+1.5 Design Models
+This section presents the behavioral and structural models required to implement the platform.
+Each diagram uses standard UML or DFD conventions. Activity diagrams use rounded action
+nodes, decision diamonds and initial/final nodes. Sequence diagrams show time-ordered mes-
+sages. The state model shows valid order-status transitions. DFDs distinguish external entities,
+processes, data stores and data flows.
+1.5.1 Activity Diagrams
+1.5.1.1 Module 1: Authentication and Role-Based Access Control
+Figure 1.3 describes the sign-up and sign-in workflow. A user submits credentials. The application
+validates the input and delegates identity verification to Supabase Auth. It then loads the user’s
+profile and role. Access is granted only when the account is valid and the requested route permits
+that role. Invalid input or failed authentication returns the user to the sign-in flow with an error.
+6
+
+===== PAGE 15 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.3: Activity diagram for user authentication and role-based access.
+7
+
+===== PAGE 16 =====
+COMSATS University Islamabad Final Year Project
+1.5.1.2 Modules 2–6: Feasibility Analysis and AI Advisory
+Figure 1.4 covers the main decision-engine workflow. The owner submits an idea, category, Pak-
+istani location and budget. The system validates the input and creates a pending report. The
+analytics service retrieves competitor, rent and trend information. If a source is unavailable, it
+uses the defined cache, retry or nearest-area fallback. The service builds model features, calculates
+the feasibility score and risk level, and returns contributing factors. The AI router then requests
+advice. Provider failure activates another provider or the rule-based fallback. The completed
+report is saved and displayed.
+8
+
+===== PAGE 17 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.4: Activity diagram for business feasibility analysis and advisory generation.
+9
+
+===== PAGE 18 =====
+COMSATS University Islamabad Final Year Project
+1.5.1.3 Module 7: Interactive Theme Configurator
+Figure 1.5 shows how an owner creates a store theme without writing code. The owner selects a
+palette, navigation style, hero layout and product-grid style. The application compiles the answers
+into a theme configuration and validates it against the configuration schema. Invalid values or
+contrast problems return the owner to the relevant selection step. A valid configuration is saved
+and used to render the storefront preview.
+10
+
+===== PAGE 19 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.5: Activity diagram for the four-step MCQ theme configurator.
+11
+
+===== PAGE 20 =====
+COMSATS University Islamabad Final Year Project
+1.5.1.4 Module 8: Storefront and Cash-on-Delivery Order Processing
+Figure 1.6 describes the customer order workflow. A guest opens a published tenant store, selects
+active products and submits contact and shipping information. The server validates the store,
+product identifiers, stock and database prices. The validated order and its items are inserted in
+one database transaction through the order function. The customer receives a confirmation. The
+owner then views the order and advances its status through the permitted order workflow.
+12
+
+===== PAGE 21 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.6: Activity diagram for guest browsing and Cash-on-Delivery order processing.
+13
+
+===== PAGE 22 =====
+COMSATS University Islamabad Final Year Project
+1.5.1.5 Administrator Operations
+Figure 1.7 presents the administrator workflow. After authentication, the system checks the
+administrator role and opens the administration console. The administrator can moderate stores,
+maintain rent data and commercial hubs, inspect model versions and metrics, review AI provider
+health and quotas, or trigger a configuration export through GitHub. The selected operation is
+recorded with its outcome.
+14
+
+===== PAGE 23 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.7: Activity diagram for system administrator operations.
+15
+
+===== PAGE 25 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.8: Class diagram of the Next.js application and FastAPI analytics service.
+17
+
+===== PAGE 26 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.8 presents the main design classes and their dependencies. The Next.js side contains
+authentication, tenant resolution, analysis, order, theme, schema-validation, SEO and AI-routing
+services. The FastAPI side contains data clients, feature engineering, the scoring model and risk
+engine. The AI provider adapter is an interface so that OpenAI, Gemini and Groq can be selected
+without changing the advisory workflow. The circuit breaker tracks provider failures and supports
+fault-tolerant routing.
+18
+
+===== PAGE 28 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.9: Sequence diagram for feasibility analysis and AI advice generation.
+20
+
+===== PAGE 29 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.9 shows the time-ordered interaction among the entrepreneur, Next.js application,
+Supabase, FastAPI, external data sources, scoring components and AI router. The application
+first creates a pending report and sends an authenticated analysis request. FastAPI obtains POIs,
+trend data and rent estimates, builds features and calculates the score and risk. The application
+requests advice using the computed facts and selected language. The result is validated, stored
+with the AI call log and displayed on the feasibility dashboard.
+21
+
+===== PAGE 31 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.10: Sequence diagram for tenant storefront COD checkout and order processing.
+23
+
+===== PAGE 32 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.10 describes the guest checkout sequence. The storefront loads a published store and
+its active products. The customer submits cart items and delivery details. The server-side order
+function validates stock and database prices, then inserts the order and order items atomically.
+The owner reads the order under RLS and advances its status. The order-advance operation
+validates the transition, updates stock where required and appends status history.
+24
+
+===== PAGE 33 =====
+COMSATS University Islamabad Final Year Project
+1.5.4 State Transition Diagram
+Figure 1.11 models the order lifecycle defined for the storefront. A new order enters the Created
+state. The owner may confirm it or cancel it where cancellation is permitted. A confirmed order
+moves to Processing, then Shipped, and finally Delivered. Each transition is initiated by an owner
+action and must be validated by the order service. The status history is retained for traceability.
+25
+
+===== PAGE 34 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.11: State transition diagram for the order fulfilment lifecycle.
+26
+
+===== PAGE 36 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.12: Level 1 data flow diagram of the complete platform.
+28
+
+===== PAGE 37 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.12 decomposes the platform into identity and tenant access, idea capture, data aggre-
+gation and scoring, AI advisory, store configuration and publishing, storefront order processing,
+and administration. The external entities are the owner, guest customer and administrator. The
+data stores represent profiles, feasibility reports, rent cache, stores and products, and orders. The
+flows show how information moves between actors, processes and persistent stores.
+29
+
+===== PAGE 39 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.13: Level 2 data flow diagram for the feasibility analysis pipeline.
+31
+
+===== PAGE 40 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.13 expands the feasibility process into input validation, pending-report creation,
+competitor retrieval, trend retrieval, rent lookup, feature engineering, model prediction, risk cal-
+culation and advisory generation. Overpass and Pytrends supply external data. The rent cache
+supplies location-based estimates. The scoring process writes its output to the feasibility report.
+The AI process validates provider output and uses a rule-based fallback when providers fail.
+32
+
+===== PAGE 41 =====
+COMSATS University Islamabad Final Year Project
+1.7 Data Design
+1.7.1 Database Architecture
+The system uses one shared PostgreSQL database through Supabase. Tenant records are associ-
+ated with an owner or store identifier. Row-Level Security is enabled with default-deny access and
+is forced on tenant tables. Administrative checks use a security-definer helper to avoid recursive
+profile-policy evaluation. Guest orders are accepted only through a validated server-side function;
+anonymous users do not receive a direct insert policy on order tables. Money values are stored as
+integer PKR using BIGINT, as specified in the SRS.
+1.7.2 Entity Relationship Diagram
+Figure 1.14 shows the logical entities and their relationships. Supabase Auth users map one-to-
+one to profiles. A profile can own multiple feasibility reports and stores. A feasibility report may
+form the basis of a store. A store contains multiple products and receives multiple orders. Each
+order contains one or more order items. AI calls are logged against an owner when applicable.
+The rent cache is keyed by a unique city and area pair and is consulted by the analysis service.
+33
+
+===== PAGE 42 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.14: Entity relationship diagram of the shared PostgreSQL data model.
+34
+
+===== PAGE 43 =====
+COMSATS University Islamabad Final Year Project
+1.7.3 Database Schema Diagram
+Figure 1.15 gives a physical-oriented view of the principal PostgreSQL tables. It identifies primary
+keys, foreign keys, important attributes and JSONB fields used for variable report, theme, SEO
+and status-history data. The schema supports relational integrity while allowing structured ana-
+lytical payloads to evolve. Unique constraints on store slugs, custom domains and the rent-cache
+city/area pair prevent duplicate identifiers.
+1.7.4 Database Tables and Data Dictionary
+The following tables summarise the principal entities shown in the SRS logical data model. Exact
+migration constraints and any additional columns must be checked against the final Supabase
+migration before implementation sign-off.
+Table 1.1: Profiles table data dictionary
+Field Type Key /
+Rule
+Description
+id UUID PK, FK to
+auth.users.id
+Authenticated user identifier.
+full name TEXT – Owner or administrator display name.
+role TEXT owner or
+admin
+Role used by authorization checks.
+must change passwordBOOLEAN – Indicates whether password change is re-
+quired.
+Table 1.2: Feasibility reports table data dictionary
+Field Type Key /
+Rule
+Description
+id UUID PK Unique report identifier.
+owner id UUID FK Owner who submitted the analysis.
+category,
+idea text
+TEXT – Business category and description.
+city, area TEXT – Pakistani analysis location.
+lat, lng Numeric – Geographic coordinates.
+radius km Numeric – Competitor search radius.
+budget pkr BIGINT – Submitted budget in PKR.
+features JSONB – Engineered model features.
+competitors JSONB – Retrieved competitor information.
+trend series JSONB – Historical trend series.
+feasibility score Numeric 0.00–1.00 Model score.
+risk level TEXT – Risk category assigned by the risk engine.
+model version TEXT – Version of the scoring model.
+data quality JSONB – Data availability and quality indicators.
+advisory JSONB – Validated AI or fallback advice.
+status TEXT – Report processing status.
+35
+
+===== PAGE 44 =====
+COMSATS University Islamabad Final Year Project
+Figure 1.15: Database schema diagram showing principal columns, data types and key references.
+36
+
+===== PAGE 56 =====
+COMSATS University Islamabad Final Year Project
+tenant-specific content from the database configuration. The owner dashboard provides product
+and order management. The administration interface is separated by role guards.
+The interface should maintain consistent navigation, typography, spacing and feedback pat-
+terns. Forms should show field-level validation. Loading states should distinguish analysis in
+progress from a failed request. Data visualisations should identify their source and show warn-
+ings when data is incomplete. Responsive layouts should keep forms and dashboards usable on
+desktop and mobile browsers. The exact colours, typography, wireframing tool and accessibility
+audit results should be documented from the actual implementation rather than assumed.
+2.7.2 Screen-wise Implementation and Screenshot Evidence
+The following screen records are required for the major workflows. The supplied materials did
+not include actual screenshots from the running project. Each figure area is therefore a clearly
+marked evidence placeholder. Replace it with a direct screenshot from the current application
+before presenting the final Chapter 5 to the supervisor. Do not use sample-project screenshots or
+generated mock-ups as implementation evidence.
+2.7.2.1 Screen 1: Registration and Login
+Purpose: Provides access to the platform for entrepreneurs and administrators.
+Components: Email field, password field, Google sign-in option, registration link and validation
+messages.
+Functional flow: The user submits credentials. Supabase Auth verifies identity and the appli-
+cation loads the profile role.
+Validation and security: Required fields are checked. Protected pages require an authenticated
+session and permitted role.
+ACTUAL PROJECT SCREENSHOT REQUIRED
+Registration / Login Screen
+Insert a direct screenshot from the running project here.
+Figure 2.1: Registration and login interface for owner and administrator access.
+2.7.2.2 Screen 2: Business Idea and Location Wizard
+Purpose: Collects the inputs required for feasibility analysis.
+Components: Business category, idea description, location autocomplete, commercial hub se-
+lection, budget and currency toggle.
+Functional flow: The owner completes the wizard steps. The draft is saved after each step.
+Validation: Required fields, supported Pakistani locations and valid budget values are checked.
+48
+
+===== PAGE 57 =====
+COMSATS University Islamabad Final Year Project
+ACTUAL PROJECT SCREENSHOT REQUIRED
+Business Idea and Location Wizard
+Insert a direct screenshot from the running project here.
+Figure 2.2: Wizard interface for entering business idea, location and budget.
+2.7.2.3 Screen 3: Feasibility Dashboard
+Purpose: Presents the result of the analysis.
+Components: Feasibility score, risk level, model factors, data-quality indicators and summary
+cards.
+Functional flow: The dashboard loads the completed report and displays the analysis output.
+Backend integration: Report data is retrieved from the application API and Supabase.
+ACTUAL PROJECT SCREENSHOT REQUIRED
+Feasibility Dashboard
+Insert a direct screenshot from the running project here.
+Figure 2.3: Dashboard showing the feasibility score, risk level and supporting analysis.
+2.7.2.4 Screen 4: Competition and Rent Map
+Purpose: Helps the owner inspect local competition and rent context.
+Components: Leaflet map, competitor markers, radius, rent-to-budget gauge and saturation
+meter.
+Functional flow: The screen renders geographic and rent information associated with the se-
+lected report.
+Error handling: Missing source data should be identified rather than represented as a confirmed
+zero.
+2.7.2.5 Screen 5: AI Advisory and Action Matrix
+Purpose: Explains the analysis and suggests prioritised actions.
+Components: Advice text, English/Roman Urdu selection, risk flags and prioritised actions.
+49
+
+===== PAGE 58 =====
+COMSATS University Islamabad Final Year Project
+ACTUAL PROJECT SCREENSHOT REQUIRED
+Competition and Rent Map
+Insert a direct screenshot from the running project here.
+Figure 2.4: Interactive location map with competitor and rent indicators.
+Functional flow: The application displays schema-validated advice or the rule-based fallback.
+Error handling: Provider failure should not block the report display.
+ACTUAL PROJECT SCREENSHOT REQUIRED
+AI Advisory and Action Matrix
+Insert a direct screenshot from the running project here.
+Figure 2.5: AI-generated or fallback advice with prioritised business actions.
+2.7.2.6 Screen 6: Theme Configurator
+Purpose: Lets an owner customise a storefront without coding.
+Components: Palette, navigation style, hero layout and product-grid choices.
+Functional flow: Four answers are compiled, validated and saved as the store theme configura-
+tion.
+Validation: Invalid configuration values and contrast issues are flagged.
+2.7.2.7 Screen 7: Published Tenant Storefront
+Purpose: Displays the public online store for guest shoppers.
+Components: Store navigation, hero section, product grid, product detail and cart.
+Functional flow: Tenant middleware resolves the URL slug and the shared application renders
+the store configuration.
+Security: Only published stores and active products are publicly visible.
+50
+
+===== PAGE 59 =====
+COMSATS University Islamabad Final Year Project
+ACTUAL PROJECT SCREENSHOT REQUIRED
+Four-Step Theme Configurator
+Insert a direct screenshot from the running project here.
+Figure 2.6: Theme configurator showing the design choices and preview.
+ACTUAL PROJECT SCREENSHOT REQUIRED
+Published Tenant Storefront
+Insert a direct screenshot from the running project here.
+Figure 2.7: Public tenant storefront rendered from its saved store configuration.
+2.7.2.8 Screen 8: COD Checkout and Confirmation
+Purpose: Allows a guest shopper to place a Cash-on-Delivery order.
+Components: Cart summary, customer name, phone, shipping address and order confirmation.
+Functional flow: The server validates product stock and current database prices, then creates
+the order transactionally.
+Validation: Invalid contact details, unavailable stock or unpublished stores are rejected.
+2.7.2.9 Screen 9: Owner Product and Order Dashboard
+Purpose: Allows the owner to manage store products and fulfil orders.
+Components: Product list, product editor, AI description writer, order list and status controls.
+Functional flow: The owner manages only records associated with their store. Order status
+changes are validated and recorded.
+2.7.2.10 Screen 10: System Administrator Dashboard
+Purpose: Provides platform-level oversight.
+Components: Store moderation, AI provider health and quota indicators, rent cache and com-
+mercial hub maintenance, model-version information and configuration export.
+Functional flow: The administrator accesses guarded controls and records maintenance actions.
+Security: Administrative operations require the admin role.
+51
+
+===== PAGE 60 =====
+COMSATS University Islamabad Final Year Project
+ACTUAL PROJECT SCREENSHOT REQUIRED
+COD Checkout and Order Confirmation
+Insert a direct screenshot from the running project here.
+Figure 2.8: Guest checkout form and confirmation for a Cash-on-Delivery order.
+ACTUAL PROJECT SCREENSHOT REQUIRED
+Owner Product and Order Dashboard
+Insert a direct screenshot from the running project here.
+Figure 2.9: Owner interface for product management and order fulfilment.
+2.7.3 Navigation Flow
+The navigation follows the actor journeys described in the SRS. An owner signs in, completes
+the idea wizard, reviews the feasibility dashboard and advisory, then proceeds to the theme
+configurator and store publishing. The owner dashboard provides product and order management.
+A guest enters a tenant URL, browses products, checks out using COD and receives confirmation.
+An administrator enters the separate administration area after role verification.
+2.7.4 Responsiveness and Performance
+The frontend is specified as a responsive web application for modern desktop and mobile browsers.
+Analysis is performed by a separate FastAPI service so that model inference does not need to
+run in the browser. Cache-first data retrieval reduces repeated external requests. The SRS sets
+a target of a feasibility result within 15 seconds at the 90th percentile for typical warm-cache
+requests. It also sets a target of publishing a store within three minutes after the theme wizard
+is completed. These are acceptance targets; measured results must be collected during testing
+before they are reported as achieved.
+52
+
+===== PAGE 61 =====
+COMSATS University Islamabad Final Year Project
+ACTUAL PROJECT SCREENSHOT REQUIRED
+System Administrator Dashboard
+Insert a direct screenshot from the running project here.
+Figure 2.10: Administrative interface for monitoring and platform maintenance.
+2.8 Deployment
+The SRS specifies Vercel for the Next.js application and a free-tier Python host for the FastAPI
+analytics service. Supabase hosts PostgreSQL, Auth and Storage. GitHub Actions is identified
+for CI. The Vercel Domains API is used for tenant subdomain or custom-domain provisioning.
+The exact production URLs, deployment status, environment configuration and CI run results
+were not present in the supplied documents. They should be inserted after checking the actual
+project.
+Table 2.5: Specified deployment components and verification evidence
+Component Specified plat-
+form
+Evidence to attach
+Web application Vercel Live URL, deployment log and tenant-domain test.
+Analytics API Free-tier Python
+host
+Live API URL, health response and analysis request.
+Database, Auth
+and Storage
+Supabase Project schema, RLS policies and storage path test.
+CI workflow GitHub Actions Successful workflow run and repository configuration.
+Tenant domains Vercel Domains
+API
+Domain provisioning result and DNS verification.
+2.9 Chapter Summary
+This chapter documented the specified implementation environment, the eight project modules,
+the major processing algorithms, external integrations, user-interface evidence requirements and
+deployment plan. The pseudocode describes feasibility analysis, AI provider fallback, transactional
+COD order placement and order-state advancement. The module progress table and screenshot
+records provide a structure for the Evaluation 2 demonstration. Actual completion percentages,
+screenshots, measured performance and deployment claims must be updated from the running
+project and verified source code.
+53

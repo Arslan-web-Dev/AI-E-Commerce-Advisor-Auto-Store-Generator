@@ -1,0 +1,404 @@
+================================================================================
+Sample 1.pdf pages=250
+OUTLINE_COUNT 293
+Executive Summary
+List of Tables
+List of Figures
+Introduction
+  Introduction
+  Vision Statement
+  Tools and Technologies
+    Programming Fundamentals
+    Data Structures and Algorithms
+    Database Management Systems
+    Software Engineering
+    Other Relevant Courses
+Problem Definition
+  Problem Statement
+  Proposed Solution Overview
+  Objectives of the Proposed System
+  Scope of the System
+  System Architecture and Modules
+    Module 1: Profile Management (Registration & Verification)
+    Module 2: Communication Module (Chat & Notifications)
+    Module 3: Core Functional Module (Ride Management & Booking)
+    Module 4: Management / Admin Module
+    Module 5: Advanced / Additional Features (ML & Chatbot)
+  Assumptions and Dependencies
+  Chapter Summary
+Requirement Analysis
+  Introduction to Requirement Analysis
+  Requirement Elicitation Techniques
+  User Classes and Characteristics
+  System Overview
+  Use Case Model
+    Use Case Diagram
+    Use Case Descriptions
+      Registration & Verification (UC-1 to UC-4)
+      Vehicle Management (UC-5 to UC-6)
+      Ride Management (UC-7 to UC-9)
+  Functional Requirements
+    FR-1: User Registration & Authentication
+      FR-1.1: Registration Fields
+      FR-1.2: Document/Image Uploads
+      FR-1.3: OTP Verification
+      FR-1.4: Post-OTP State and Login
+    FR-2: Admin Verification & Management
+      FR-2.1: Admin User List & Details
+      FR-2.2: Verify/Reject/Ban/Create
+      FR-2.3: Verification SLA
+    FR-3: Vehicle Management (Drivers)
+      FR-3.1: Vehicle Creation
+      FR-3.2: Multiple Vehicles & Edit/Delete
+    FR-4: Ride Creation (Driver)
+      FR-4.1: Map-based Route Editor
+      FR-4.2: Ride Parameters
+      FR-4.3: Ride Editing/Cancel Rules
+    FR-5: Ride Browsing & Booking (Passengers)
+      FR-5.1: Browse & Ride Card
+      FR-5.2: Booking Flow
+    FR-6: Fare Negotiation
+      FR-6.1: Negotiation Messaging & Recording
+    FR-7: Booking Confirmation & Notifications
+      FR-7.1: Notifications for Booking Events
+      FR-7.2: Booking Summaries
+    FR-8: Profile Management
+      FR-8.1: Profile CRUD
+    FR-9: Admin & System Notifications
+    FR-10: Dispute Management
+    FR-11: Machine Learning Recommendation Module
+    FR-12: Chatbot Support
+    FR-13: Payment System
+      FR-13.1: Payment Methods & Validation Rules
+      FR-13.2: Manual Payment Confirmation
+    FR-14: Safety & Verification
+    FR-15: Scalability & Modular Architecture
+    FR-16: Post-Booking, Live-Tracking, Pickup Verification
+      FR-16.1: Post-booking Chat (1:1 & Broadcast)
+      FR-16.2: Pre-Ride Reminder & Location Permission
+      FR-16.3: Live Map & SOS UI
+      FR-16.4: Pickup Code Generation & Verification
+      FR-16.5: Mark as Reached, Payment & Ratings
+      FR-16.6: Ride Completion Rules & Driver Constraint
+      FR-16.7: SOS & Emergency Workflows
+      FR-16.8: Escalation Timers & Notifications
+      FR-16.9: Audit, Logging & Anti-Fraud
+      FR-16.10: UX & Accessibility Requirements
+  Non-Functional Requirements
+    Performance Requirements
+    Security Requirements
+    Reliability Requirements
+    Usability Requirements
+    Scalability Requirements
+    Maintainability Requirements
+  External Interface Requirements
+    User Interface Requirements
+    Hardware Interface Requirements
+    Software Interface Requirements
+    Communication Interface Requirements
+  Assumptions and Dependencies
+  Requirement Traceability Matrix
+Software Design
+  Introduction to Software Design
+  Design Methodology and Software Process Model
+    Design Methodology
+      Reasons behind the use of Object-Oriented Design (OOD)
+    Software Process Model
+      Justification for Using Agile/Scrum
+  System Overview
+    External Actors
+    External Services
+    Backend (Django MVC + JSON APIs)
+    Database (PostgreSQL)
+    Context Diagram
+  Architectural Design
+    Architecture Style (MVC + Multi-tier)
+      MVC Architecture (within Django backend servers)
+    High-Level System Components
+    Multi-Tier Deployment Architecture
+      Tier 1 - Client Layer
+      Tier 2 - Application Layer
+      Tier 3 - External Services Layer
+      Tier 4 - Data Layer
+    External Services Integration
+--- PAGE1 ---
+COMSATS University Islamabad, Vehari Campus,
+Pakistan
+Department of Computer Science
+Lets Go Ride Sharing App
+A Thesis Submitted in Partial Fulfillment of the Requirements for the Degree of
+Bachelor of Science in Software Engineering
+Submitted By
+ALI RAZA (FA22-BSE-116)
+M.FAWAD SAQLAIN (FA22-BSE-031)
+Supervisor
+DR Syeda Zoupash Zahra
+Session: Fall 2022-2026
+================================================================================
+Sample 2.pdf pages=190
+OUTLINE_COUNT 0
+--- PAGE1 ---
+COMSATS University Islamabad, Vehari Campus,
+Pakistan
+Department of Computer Science
+DINEMATE – Restaurant Finder
+A Thesis Submitted in Partial Fulfillment of the Requirements
+for the Degree of
+Bachelor of Science in Software Engineering
+Submitted By
+Faran Ahmad Shehzad (CIIT/FA22-BSE-016/VHR)
+Aiman Aslam (CIIT/FA22-BSE-071/VHR)
+Supervisor
+Dr.Syeda Zoupash Zahra
+Session: Spring 2022–2026
+================================================================================
+SDD_Evaluation2_Full_With_University_Format.pdf pages=61
+OUTLINE_COUNT 72
+List of Figures
+List of Tables
+Software Design
+  Introduction to Software Design
+  Design Methodology and Software Process Model
+    Design Methodology
+    Software Process Model
+  System Overview
+  Architectural Design
+  Design Models
+    Activity Diagrams
+      Module 1: Authentication and Role-Based Access Control
+      Modules 2–6: Feasibility Analysis and AI Advisory
+      Module 7: Interactive Theme Configurator
+      Module 8: Storefront and Cash-on-Delivery Order Processing
+      Administrator Operations
+    Class Diagram
+    Sequence Diagrams
+      Feasibility Analysis and AI Advice
+      COD Checkout and Order Processing
+    State Transition Diagram
+  Data Flow Diagrams
+    Level 1 Data Flow Diagram
+    Level 2 Data Flow Diagram: Feasibility Analysis
+  Data Design
+    Database Architecture
+    Entity Relationship Diagram
+    Database Schema Diagram
+    Database Tables and Data Dictionary
+    Relationships, Integrity and Indexing
+    Security and Tenant Isolation
+    Scalability and Reliability
+  Chapter Summary
+Implementation
+  Introduction
+  Development Environment
+    Development Tools and Operating Environment
+  Implementation Progress and Module Status
+    How to Demonstrate the 40% Minimum
+  Core Module Implementation
+    Module 1: User Authentication and RBAC Engine
+    Module 2: Business Idea Input and Location Wizard
+    Module 3: Smart Data Aggregation
+    Module 4: Feature Engineering and XGBoost Scoring
+    Module 5: Competition, Location and Interactive Rent Map
+    Module 6: Multi-AI Advisory, Risk Engine and Action Matrix
+    Module 7: Interactive MCQ Theme Configurator
+    Module 8: Multi-Tenant Deployment, Automated SEO and Admin Dashboard
+  Algorithm Implementation
+    Algorithm 1: Feasibility Analysis Pipeline
+    Algorithm 2: Multi-Provider AI Routing
+    Algorithm 3: Atomic COD Order Placement
+    Algorithm 4: Order Status Advancement
+  External APIs, Libraries and SDKs
+    Integration and Error Handling
+  User Interface Implementation
+    UI Design Approach
+    Screen-wise Implementation and Screenshot Evidence
+      Screen 1: Registration and Login
+      Screen 2: Business Idea and Location Wizard
+      Screen 3: Feasibility Dashboard
+      Screen 4: Competition and Rent Map
+      Screen 5: AI Advisory and Action Matrix
+      Screen 6: Theme Configurator
+      Screen 7: Published Tenant Storefront
+      Screen 8: COD Checkout and Confirmation
+      Screen 9: Owner Product and Order Dashboard
+      Screen 10: System Administrator Dashboard
+    Navigation Flow
+    Responsiveness and Performance
+  Deployment
+  Chapter Summary
+--- PAGE1 ---
+COMSATS University Islamabad, Vehari Campus,
+Pakistan
+Department of Computer Science
+AI-Powered E-Commerce Feasibility Advisor
+& Auto Store Generator
+A Software Design Document (SDD) Submitted in Partial Fulfillment of the
+Requirements
+for the Degree of
+Bachelor of Science in Computer Science
+Submitted By
+Muhammad Arslan (FAL-23-BCS-030)
+Muhammad Asif (FAL-23-BCS-041)
+Supervisor
+Dr. Muhammad Tausif
+Session: Fall 2023–2027
+================================================================================
+UML Diagrams chapter 4 sample.pdf pages=47
+OUTLINE_COUNT 0
+--- PAGE1 ---
+
+================================================================================
+Evaluation 2 - SDD Rubrics for Evaluators (Semester 7th).pdf pages=1
+OUTLINE_COUNT 0
+--- PAGE1 ---
+COMSATS University Islamabad, Vehari Campus  
+Examination Department 
+ 
+Evaluation 2: SDD Rubrics for Evaluators (Semester 7th) 
+ 
+Project Details: 
+ 
+Evaluation Criteria: 
+Total 
+(25) Criteria  
+Marginal  Adequate  Good  Excellent  
+10%-20% 
+Marks  
+30%-50% 
+Marks  
+60%-80% 
+Marks  
+90%-100% 
+Marks  
+ 
+ 
+ 
+ 
+SDD (11) 
+Data representation diagram (ERD, XML 
+schema, JSON schema, etc.) with 
+description (2)  
+    
+Process flow (Activity Diagram) (2)      
+Design Models, the applicable models may 
+include: Class Diagram, Sequence 
+Diagram, State Transition Diagram, and 
+Data Flow Diagram (5)  
+    
+Define Algorithm / pseudo-code for major 
+processes including external libraries / 
+APIs. (2)  
+  
+ 
+ 
+40% Implementation 
+(5) 40% Modules Completion status (5)      
+ 
+SDD Document 
+(5) 
+ Is SDD Document Template followed?  
+(2)      
+Is technical write-up correct? (3)       
+ 
+ 
+Presentation 
+(4) 
+Project Domain Knowledge (1)          
+Q/A Ability (2)      
+Is the student wearing proper attire?  
+(1)  
+    
+ 
+Comments on students with different grades: 
+ 
+ 
+ 
+Evaluator 1: 
+(Name and Signature) 
+ 
+ 
+Evaluator 2: 
+(Name and Signature) 
+ 
+ 
+ 
+Sr # Registration No. Name of Student Total Marks Project Title 
+1     2    
+================================================================================
+Revised_SRS_AI_Ecommerce_Feasibility_Advisor.pdf pages=40
+OUTLINE_COUNT 59
+Introduction
+  Introduction
+  Vision Statement
+  Related System Analysis
+  Project Deliverables
+  System Limitations / Constraints
+  Tools and Technologies
+  Relevance to Course Modules
+    Programming Fundamentals
+    Data Structures and Algorithms
+    Database Management Systems
+    Software Engineering
+    Other Relevant Courses
+  Chapter Summary
+Problem Definition
+  Problem Statement
+  Proposed Solution Overview
+  Objectives of the Proposed System
+  Scope of the System
+  System Architecture and Modules
+    Module 1: User Authentication and RBAC Engine
+    Module 2: Business Idea Input and Location Wizard
+    Module 3: Smart Data Aggregation
+    Module 4: Feature Engineering and XGBoost Scoring
+    Module 5: Competition, Location and Interactive Rent Map Engine
+    Module 6: Multi-AI Advisory, Risk Engine and Action Matrix
+    Module 7: Interactive MCQ Theme Configurator
+    Module 8: Multi-Tenant Deployment, Automated SEO and Admin Dashboard
+  Assumptions and Dependencies
+  Chapter Summary
+Requirement Analysis
+  Introduction to Requirement Analysis
+  Requirement Elicitation Techniques
+  User Classes and Characteristics
+  System Overview
+  Use Case Model
+    Use Case Descriptions
+    Event-Response Table
+  Functional Requirements
+    Module 1: User Management
+    Module 2: Core Processing / ML / Business Logic
+    Module 3: Reporting and Analytics
+    Module 4: Management / Admin Module
+    Module 5: Advanced / Additional Features
+  Non-Functional Requirements
+    Performance Requirements
+    Security Requirements
+    Reliability Requirements
+    Usability Requirements
+    Scalability Requirements
+    Maintainability Requirements
+  External Interface Requirements
+    User Interface Requirements
+    Hardware Interface Requirements
+    Software Interface Requirements
+    Communication Interface Requirements
+  Assumptions and Dependencies
+  Requirement Traceability Matrix
+  Glossary
+--- PAGE1 ---
+COMSATS University Islamabad, Vehari Campus,
+Pakistan
+Department of Computer Science
+AI-Powered E-Commerce Feasibility Advisor & Auto
+Store Generator
+Software Requirements Specification (SRS) Submitted
+in Partial Fulfillment of the Requirements
+for the Degree of
+Bachelor of Science in Computer Science
+Submitted By
+Muhammad Arslan (FAL-23-BCS-030)
+Muhammad Asif (FAL-23-BCS-041)
+Supervisor
+Dr. Muhammad Tausif
+Session: Fall 2023–2027
