@@ -41,6 +41,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
   const [savingDraft, setSavingDraft] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
+  const [autosaveError, setAutosaveError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -79,6 +80,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
 
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialMount = useRef(true);
+  const autosaveErrorShownRef = useRef(false);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -144,6 +146,8 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
         if (p.current_step && p.current_step >= 1 && p.current_step <= 3) {
           setCurrentStep(p.current_step);
         }
+        setAutosaveError(null);
+        autosaveErrorShownRef.current = false;
         setLastSavedTime(new Date(p.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
       } catch {
         showToast('Error connecting to project service', 'error');
@@ -156,10 +160,12 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
   }, [initialProjectId, router]);
 
   // 2. Save Draft Action (Local & Server-persisted)
+  // `silent` suppresses only the success toast: every failure is persisted in the
+  // status strip and notified once, including debounced autosave failures.
   const saveDraft = useCallback(
-    async (stepToSave?: number, silent = false) => {
+    async (stepToSave?: number, silent = false): Promise<boolean> => {
       try {
-        if (!silent) setSavingDraft(true);
+        setSavingDraft(true);
 
         const targetStep = stepToSave || currentStep;
         const payload = {
@@ -170,9 +176,13 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
             (formData.category
               ? `${formData.category} - ${formData.city || formData.target_location.split(',')[0] || formData.region || 'Pakistan'} Venture`
               : 'New Business Concept'),
+          // Explicit nulls allow PATCH to clear an attachment the user removed.
+          product_file_url: formData.product_file_url ?? null,
+          product_file_name: formData.product_file_name ?? null,
+          product_file_size: formData.product_file_size ?? null,
         };
 
-        let res;
+        let res: Response;
         if (projectId) {
           res = await fetch(`/api/projects/${projectId}`, {
             method: 'PATCH',
@@ -193,18 +203,33 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
             setProjectId(data.project.id);
             window.history.replaceState(null, '', `/wizard/${data.project.id}`);
           }
+          setAutosaveError(null);
+          autosaveErrorShownRef.current = false;
           setLastSavedTime(
             new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
           );
           if (!silent) showToast('Draft saved successfully', 'success');
-        } else {
-          const err = await res.json();
-          if (!silent) showToast(err.error || 'Failed to save draft', 'error');
+          return true;
         }
+
+        const err = await res.json().catch(() => ({}));
+        const message = err.error || 'Failed to save draft';
+        setAutosaveError(message);
+        if (!autosaveErrorShownRef.current) {
+          showToast(message, 'error');
+          autosaveErrorShownRef.current = true;
+        }
+        return false;
       } catch {
-        if (!silent) showToast('Network error while saving draft', 'error');
+        const message = 'Network error while saving draft';
+        setAutosaveError(message);
+        if (!autosaveErrorShownRef.current) {
+          showToast(message, 'error');
+          autosaveErrorShownRef.current = true;
+        }
+        return false;
       } finally {
-        if (!silent) setSavingDraft(false);
+        setSavingDraft(false);
       }
     },
     [currentStep, formData, projectId]
@@ -283,16 +308,24 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
     try {
       setSubmitting(true);
 
-      // Ensure draft exists and has latest edits
+      // Ensure draft exists and contains the latest form state before submitting.
+      const draftPayload = {
+        ...formData,
+        current_step: 3,
+        product_file_url: formData.product_file_url ?? null,
+        product_file_name: formData.product_file_name ?? null,
+        product_file_size: formData.product_file_size ?? null,
+      };
+
       let currentProjId = projectId;
       if (!currentProjId) {
         const createRes = await fetch('/api/projects', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...formData, current_step: 3 }),
+          body: JSON.stringify(draftPayload),
         });
         if (!createRes.ok) {
-          const err = await createRes.json();
+          const err = await createRes.json().catch(() => ({}));
           showToast(err.error || 'Failed to initialize project record', 'error');
           setSubmitting(false);
           return;
@@ -301,12 +334,23 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
         currentProjId = createData.project.id;
         setProjectId(currentProjId);
       } else {
-        await fetch(`/api/projects/${currentProjId}`, {
+        // Never submit stale database state: a failed final save blocks submission.
+        const saveRes = await fetch(`/api/projects/${currentProjId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...formData, current_step: 3 }),
+          body: JSON.stringify(draftPayload),
         });
+        if (!saveRes.ok) {
+          const err = await saveRes.json().catch(() => ({}));
+          const message = err.error || 'Failed to save the latest draft before submission';
+          setAutosaveError(message);
+          showToast(message, 'error');
+          setSubmitting(false);
+          return;
+        }
       }
+      setAutosaveError(null);
+      autosaveErrorShownRef.current = false;
 
       // Execute atomic submission
       const submitRes = await fetch(`/api/projects/${currentProjId}/submit`, {
@@ -522,8 +566,8 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
               href="/projects"
               onClick={async (e) => {
                 e.preventDefault();
-                await saveDraft(currentStep, false);
-                router.push('/projects');
+                const saved = await saveDraft(currentStep, false);
+                if (saved) router.push('/projects');
               }}
               className="text-[#bbcabf] hover:text-[#dae2fd] text-[13px] font-medium px-3 py-1.5 rounded-lg hover:bg-[#171f33] transition-all flex items-center gap-1.5 border border-transparent hover:border-[#2d3449]"
             >
@@ -564,9 +608,37 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 bg-[#171f33] px-3 py-1.5 rounded-full text-[#bbcabf] text-[12px] border border-[#2d3449]">
-                  <span className="w-2 h-2 rounded-full bg-[#4cd7f6] animate-pulse"></span>
-                  <span>{savingDraft ? 'Autosaving...' : lastSavedTime ? `Draft saved ${lastSavedTime}` : 'Cloud Autosave Active'}</span>
+                <div
+                  className={`flex items-center gap-2 bg-[#171f33] px-3 py-1.5 rounded-full text-[12px] border ${
+                    autosaveError ? 'border-[#ffb4ab] text-[#ffb4ab]' : 'border-[#2d3449] text-[#bbcabf]'
+                  }`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      autosaveError ? 'bg-[#ffb4ab]' : 'bg-[#4cd7f6] animate-pulse'
+                    }`}
+                  ></span>
+                  <span>
+                    {autosaveError
+                      ? 'Draft not saved — latest edits are still in this browser'
+                      : savingDraft
+                        ? 'Autosaving...'
+                        : lastSavedTime
+                          ? `Draft saved ${lastSavedTime}`
+                          : 'Cloud Autosave Active'}
+                  </span>
+                  {autosaveError && (
+                    <button
+                      type="button"
+                      onClick={() => void saveDraft(currentStep, false)}
+                      className="underline hover:text-[#ffcfc9] font-medium"
+                      title={autosaveError}
+                    >
+                      Retry
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -1006,7 +1078,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                 {selectedRegion && regionHubs.length === 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label htmlFor="wizard-lat" className="text-[12px] text-[#bbcabf] font-medium">Latitude (optional)</label>
+                      <label htmlFor="wizard-lat" className="text-[12px] text-[#bbcabf] font-medium">Latitude *</label>
                       <input
                         id="wizard-lat"
                         type="number"
@@ -1020,7 +1092,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label htmlFor="wizard-lng" className="text-[12px] text-[#bbcabf] font-medium">Longitude (optional)</label>
+                      <label htmlFor="wizard-lng" className="text-[12px] text-[#bbcabf] font-medium">Longitude *</label>
                       <input
                         id="wizard-lng"
                         type="number"
@@ -1079,7 +1151,7 @@ export default function BusinessIdeaWizard({ initialProjectId }: BusinessIdeaWiz
                   <div className="p-3 bg-[#222a3d] border border-[#2d3449] rounded-xl text-[12px] text-[#bbcabf] flex items-center gap-2">
                     <span className="material-symbols-outlined text-[18px]">public</span>
                     <span>
-                      No verified coordinates are bundled for this region. Coordinates are optional; providing them enables the nationwide OpenStreetMap competitor scan. Verified local feasibility data is not yet available for this region.
+                      No verified hubs are bundled for this region. Enter latitude and longitude manually to continue; they are required for submission. Verified local feasibility data is not yet available for this region.
                     </span>
                   </div>
                 )}

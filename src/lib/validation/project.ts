@@ -226,11 +226,10 @@ export function validateProjectFields(
  * Step 2 — Financial & Operational Information
  * Step 3 (and 5, legacy alias) — complete review before submission
  *
- * Geographic completeness is national: a region and a district/city are required,
- * but coordinates are only mandatory for regions that carry verified coverage
- * (Punjab). For recognised regions without verified local data the project may
- * still be submitted; analysis providers report "coverage unavailable" instead of
- * substituting Punjab observations.
+ * Geographic completeness is national: a region and a district/city are required
+ * for every recognised region. Coordinates are also required for every submission
+ * because the linked feasibility report and collection providers are spatial;
+ * coverage still only controls which data source is used, never geographic identity.
  */
 export function validateProjectStep(
   step: number,
@@ -262,14 +261,13 @@ export function validateProjectStep(
       errors.city = 'Please select or enter a city / tehsil.';
     }
 
-    // Coordinates are required only where verified coverage exists (Punjab hubs).
-    // Uncovered recognised regions may be submitted without coordinates.
-    const region = getRegion(regionName);
-    const regionHasCoverage = region?.analysis_enabled === true;
+    // All submissions need coordinates: the submit RPC, feasibility_reports and
+    // spatial data providers require them. Verified hubs supply them automatically;
+    // uncovered regions accept manual coordinates.
     const hasCoordinates = isProvided(data.lat) && isProvided(data.lng);
-    if (regionHasCoverage && !hasCoordinates && !errors.coordinates) {
+    if (!hasCoordinates && !errors.coordinates) {
       errors.coordinates =
-        'Please select a verified commercial hub, or provide coordinates, for this region.';
+        'Please select a verified commercial hub, or provide latitude and longitude, for this location.';
     }
   }
 

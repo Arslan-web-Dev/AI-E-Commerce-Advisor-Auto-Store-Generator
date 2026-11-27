@@ -1,5 +1,7 @@
 -- ==============================================================================
 -- MIGRATION FILE: 20261004000000_module1_auth_rbac_schema.sql
+-- NOTE: This combined artifact is a historical snapshot. The authoritative schema
+-- is supabase/migrations/ (including 20261127040000_batch1_project_currency_provenance_sync.sql).
 -- ==============================================================================
 -- ====================================================================
 -- Module 1: User Authentication, RBAC Engine & System Configuration Sync
@@ -353,8 +355,11 @@ create table if not exists public.projects (
   lng                  double precision,
   radius_km            numeric(4,1) not null default 10.0 check (radius_km between 1.0 and 50.0),
   budget_amount        numeric(12,2) not null check (budget_amount > 0),
-  budget_currency      text not null default 'USD' check (budget_currency in ('USD', 'PKR')),
+  budget_currency      text not null default 'PKR' check (budget_currency in ('USD', 'PKR')),
   budget_pkr           bigint,
+  exchange_rate        numeric(10,4) default 1.0000,
+  exchange_rate_source text default 'Canonical PKR',
+  exchange_rate_timestamp timestamptz default now(),
   
   -- FR-2.2 Advanced Input Options
   target_audience      jsonb not null default '{}'::jsonb, -- { age_group, gender, income_level }

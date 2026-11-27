@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { validateCompleteProject } from '@/lib/validation/project';
 import { convertUsdToPkr } from '@/lib/currency/exchange-rate';
 import { runDataCollection } from '@/lib/data-collection/orchestrator';
+import { PAKISTAN_BOUNDS } from '@/lib/geo/pakistan-geography';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -68,11 +69,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
     if (
       !Number.isFinite(lat) ||
       !Number.isFinite(lng) ||
-      lat < 23.5 || lat > 37.2 ||
-      lng < 60.8 || lng > 77.9
+      lat < PAKISTAN_BOUNDS.minLat || lat > PAKISTAN_BOUNDS.maxLat ||
+      lng < PAKISTAN_BOUNDS.minLng || lng > PAKISTAN_BOUNDS.maxLng
     ) {
       return NextResponse.json(
-        { error: 'Coordinates must be valid numbers within Pakistan geographic bounds (Lat: 23.5–37.2, Lng: 60.8–77.9).' },
+        {
+          error:
+            'Valid Pakistan coordinates are required for feasibility submission ' +
+            `(Lat: ${PAKISTAN_BOUNDS.minLat}–${PAKISTAN_BOUNDS.maxLat}, Lng: ${PAKISTAN_BOUNDS.minLng}–${PAKISTAN_BOUNDS.maxLng}).`,
+        },
         { status: 400 }
       );
     }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { validateProjectFields } from '@/lib/validation/project';
-import { convertUsdToPkr } from '@/lib/currency/exchange-rate';
+import { BENCHMARK_EXCHANGE_RATE, convertUsdToPkr } from '@/lib/currency/exchange-rate';
 import {
   buildCoverageSnapshot,
   canonicalRegionName,
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       ? (budgetCurrency === 'USD' ? convertUsdToPkr(budgetAmount) : Math.round(budgetAmount))
       : 0;
 
-    const exchangeRate = budgetCurrency === 'USD' ? 278.0 : 1.0;
+    const exchangeRate = budgetCurrency === 'USD' ? BENCHMARK_EXCHANGE_RATE : 1.0;
     const exchangeRateSource = budgetCurrency === 'USD' ? 'State Bank of Pakistan Benchmark' : 'Canonical PKR';
     const exchangeRateTimestamp = new Date().toISOString();
 
@@ -158,6 +158,13 @@ export async function POST(request: NextRequest) {
       storefront_footprint: body.storefront_footprint || 'boutique',
       product_description: body.product_description || '',
       product_types: Array.isArray(body.product_types) ? body.product_types : [],
+      // Persist attachment metadata for files uploaded before the draft exists.
+      product_file_url: body.product_file_url || null,
+      product_file_name: body.product_file_name || null,
+      product_file_size:
+        body.product_file_size !== undefined && body.product_file_size !== null
+          ? Number(body.product_file_size)
+          : null,
       current_step: body.current_step ? Number(body.current_step) : 1,
       metadata,
       status: 'draft',
