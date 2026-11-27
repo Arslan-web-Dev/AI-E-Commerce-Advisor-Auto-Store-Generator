@@ -28,6 +28,11 @@ export interface Project {
   budget_amount: number;
   budget_currency: BudgetCurrency;
   budget_pkr: number | null;
+  // FR-2.4 currency provenance. May be null on legacy rows created before the
+  // forward-only schema-sync migration was applied.
+  exchange_rate: number | null;
+  exchange_rate_source: string | null;
+  exchange_rate_timestamp: string | null;
   target_audience: TargetAudience;
   business_scale: BusinessScale;
   business_model: BusinessModel;
