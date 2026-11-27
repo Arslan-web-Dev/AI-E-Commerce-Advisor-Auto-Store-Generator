@@ -39,6 +39,13 @@ assert.ok(
   originalMigration.includes('add column if not exists exchange_rate'),
   'The original migration intent must remain unchanged (forward-only repair)'
 );
+const manualSql = read('supabase/manual/batch1_project_currency_provenance.sql');
+assert.ok(
+  manualSql.includes('Supabase Dashboard -> SQL Editor') &&
+    manualSql.includes('add column if not exists exchange_rate') &&
+    manualSql.includes("notify pgrst, 'reload schema'"),
+  'A standalone SQL-editor script must be available for manual application'
+);
 
 console.log('\n[2/7] Verifying schema artifacts and TypeScript types are in sync...');
 const combinedSchema = read('supabase/combined_schema.sql');
