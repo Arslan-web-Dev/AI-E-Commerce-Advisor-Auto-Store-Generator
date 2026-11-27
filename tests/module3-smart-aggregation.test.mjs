@@ -80,7 +80,8 @@ const COMPETITOR_INPUT = {
   radiusKm: 10,
   city: 'Lahore',
 };
-const RETRIEVED_AT = '2026-11-20T00:00:00.000Z';
+// Keep the fixture inside the 7-day cache TTL so this assertion cannot expire.
+const RETRIEVED_AT = new Date(Date.now() - 60_000).toISOString();
 
 function makeCompetitor(overrides = {}) {
   return {
