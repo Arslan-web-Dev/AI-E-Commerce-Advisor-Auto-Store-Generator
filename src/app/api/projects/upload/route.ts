@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+const ATTACHMENT_BUCKET = 'project-attachments';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_MIME_TYPES = [
   'application/pdf',
@@ -66,11 +67,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If projectId is provided, strictly verify project ownership
+    // If projectId is provided, strictly verify project ownership and draft state.
+    let isAdmin = false;
     if (projectId && projectId !== 'draft') {
       const { data: project, error: projErr } = await supabase
         .from('projects')
-        .select('id, owner_id')
+        .select('id, owner_id, status')
         .eq('id', projectId)
         .maybeSingle();
 
@@ -79,10 +81,14 @@ export async function POST(request: NextRequest) {
       }
 
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
-      const isAdmin = profile?.role === 'admin';
+      isAdmin = profile?.role === 'admin';
 
       if (project.owner_id !== user.id && !isAdmin) {
         return NextResponse.json({ error: 'Access denied: You do not own this project' }, { status: 403 });
+      }
+
+      if (project.status !== 'draft' && !isAdmin) {
+        return NextResponse.json({ error: 'Attachments cannot be changed after submission' }, { status: 400 });
       }
     }
 
@@ -99,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const { error: uploadError } = await supabase.storage
-      .from('project-attachments')
+      .from(ATTACHMENT_BUCKET)
       .upload(storagePath, buffer, {
         contentType: file.type,
         upsert: false,
@@ -116,24 +122,37 @@ export async function POST(request: NextRequest) {
     // Generate short-lived signed URL (3600 seconds = 1 hour)
     let signedUrl = '';
     const { data: signedData, error: signError } = await supabase.storage
-      .from('project-attachments')
+      .from(ATTACHMENT_BUCKET)
       .createSignedUrl(storagePath, 3600);
 
     if (!signError && signedData?.signedUrl) {
       signedUrl = signedData.signedUrl;
     }
 
-    // Update project record if an existing project ID was provided
+    // Update project record if an existing project ID was provided. A metadata
+    // write failure must never be silent: remove the orphaned object and fail.
     if (projectId && projectId !== 'draft') {
-      await supabase
+      let metadataQuery = supabase
         .from('projects')
         .update({
           product_file_url: storagePath, // Store storage path canonically, not public URL
           product_file_name: file.name,
           product_file_size: file.size,
         })
-        .eq('id', projectId)
-        .eq('owner_id', user.id);
+        .eq('id', projectId);
+
+      // Admins may manage another owner's project deliberately; regular users
+      // remain strictly scoped to their own rows.
+      if (!isAdmin) metadataQuery = metadataQuery.eq('owner_id', user.id);
+
+      const { error: metadataError } = await metadataQuery;
+      if (metadataError) {
+        await supabase.storage.from(ATTACHMENT_BUCKET).remove([storagePath]);
+        return NextResponse.json(
+          { error: `File uploaded but attachment metadata could not be saved: ${metadataError.message}` },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({

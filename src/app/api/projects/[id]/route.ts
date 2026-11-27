@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { validateProjectFields } from '@/lib/validation/project';
-import { convertUsdToPkr } from '@/lib/currency/exchange-rate';
+import { BENCHMARK_EXCHANGE_RATE, convertUsdToPkr } from '@/lib/currency/exchange-rate';
 import {
   buildCoverageSnapshot,
   canonicalRegionName,
@@ -116,6 +116,17 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // Field-level validation: any supplied value is validated server-side. Drafts
     // may be partial, but no draft write may persist an invalid field value
     // (Task 3 §6, §8).
+    // A partial geographic update must be validated in the context of the saved
+    // region/district; otherwise updating only `city` would fail as "unrecognised"
+    // even though the project already has a valid region.
+    const geoFields = ['region', 'district', 'city'] as const;
+    const hasGeoUpdate = geoFields.some((field) => body[field] !== undefined);
+    if (hasGeoUpdate) {
+      if (body.region === undefined) body.region = existingProject.region;
+      if (body.district === undefined) body.district = existingProject.district;
+      if (body.city === undefined) body.city = existingProject.city;
+    }
+
     const fieldValidation = validateProjectFields(body);
     if (!fieldValidation.valid) {
       return NextResponse.json({ error: 'Validation failed', details: fieldValidation.errors }, { status: 400 });
@@ -174,7 +185,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       updates.budget_amount = amt;
       const curr = (body.budget_currency || existingProject.budget_currency) as 'USD' | 'PKR';
       updates.budget_pkr = curr === 'PKR' ? Math.round(amt) : convertUsdToPkr(amt);
-      updates.exchange_rate = curr === 'USD' ? 278.0 : 1.0;
+      updates.exchange_rate = curr === 'USD' ? BENCHMARK_EXCHANGE_RATE : 1.0;
       updates.exchange_rate_source = curr === 'USD' ? 'State Bank of Pakistan Benchmark' : 'Canonical PKR';
       updates.exchange_rate_timestamp = new Date().toISOString();
     }
@@ -182,7 +193,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       updates.budget_currency = body.budget_currency;
       const amt = updates.budget_amount !== undefined ? Number(updates.budget_amount) : Number(existingProject.budget_amount);
       updates.budget_pkr = body.budget_currency === 'PKR' ? Math.round(amt) : convertUsdToPkr(amt);
-      updates.exchange_rate = body.budget_currency === 'USD' ? 278.0 : 1.0;
+      updates.exchange_rate = body.budget_currency === 'USD' ? BENCHMARK_EXCHANGE_RATE : 1.0;
       updates.exchange_rate_source = body.budget_currency === 'USD' ? 'State Bank of Pakistan Benchmark' : 'Canonical PKR';
       updates.exchange_rate_timestamp = new Date().toISOString();
     }
